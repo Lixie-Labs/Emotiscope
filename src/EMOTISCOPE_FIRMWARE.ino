@@ -60,7 +60,7 @@
 // Not for you, you don't get to have my WiFi, SORRY
 #include "secrets.h"
 
-# TODO: Make CI work
+// TODO: Make CI work better
 
 // ############################################################################
 // ## CODE ####################################################################
