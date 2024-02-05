@@ -60,9 +60,7 @@
 // Not for you, you don't get to have my WiFi, SORRY
 #include "secrets.h"
 
-// TODO: See if my TODO CI is working
-
-// TODO: See if my TODO CI is working again
+// TODO: See if my TODO CI is finally working
 
 // ############################################################################
 // ## CODE ####################################################################
