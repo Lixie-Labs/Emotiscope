@@ -1,0 +1,91 @@
+#define MAX_COMMAND_LENGTH (64)
+
+struct command {
+	char command[MAX_COMMAND_LENGTH];
+	uint8_t origin_client_slot;
+};
+
+struct freq {
+	float target_freq;
+
+	uint16_t block_size;
+	float coeff;
+
+	float window_step;
+
+	float magnitude;
+	float magnitude_full_scale;
+	float magnitude_last;
+	float novelty;
+};
+
+struct CRGBF {	// A bit like FastLED with floating point color channels that
+				// get quantized to 8 bits with dithering later
+	float r;
+	float g;
+	float b;
+};
+
+struct fx_dot {	 // Used to draw dots with subpixel precision and motion blur
+	float position;
+	float position_past;
+};
+
+struct lightshow_mode {
+	char name[32];
+	void (*draw)();
+};
+
+struct slider {
+	char name[32];
+	float slider_min;
+	float slider_max;
+	float slider_step;
+};
+
+struct toggle {
+	char name[32];
+};
+
+struct profiler_function {
+	char name[32];
+	uint32_t time_start;
+	uint32_t time_end;
+	uint32_t time_total;
+	uint32_t hits;
+};
+
+struct tempo {
+	float target_tempo_hz;
+	float coeff;
+	float sine;
+	float cosine;
+
+	uint32_t block_size;
+
+	float window_step;
+
+	float phase;
+	float phase_target;
+	float phase_radians_per_reference_frame;
+
+	float beat;
+
+	float magnitude;
+	float magnitude_full_scale;
+};
+
+struct websocket_client {
+	int socket;
+	uint32_t last_ping;
+};
+
+struct config {
+	float brightness;
+	float speed;
+	float hue;
+	int32_t current_mode;
+	bool mirror_mode;
+	float incandescent_filter;
+	float hue_range;
+};

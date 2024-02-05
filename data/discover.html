@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lixie Labs</title>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;700&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="css/discover.css">
+</head>
+<body>
+	<div id="app_container">
+		<!-- APP CONTENT GETS LOADED INTO THIS DIV -->
+	</div>
+
+	<div id="shim_container">
+		<div id="question">?</div>
+		<div id="spinner">
+			<div class="lds-ellipsis">
+				<div></div><div></div><div></div><div></div>
+			</div>
+		</div>
+		<div id="title">CONNECTING</div>
+		<div id="controls">
+			<div id="message"></div>
+			<div id="auto_ip_form">
+				<button id="retry_button" onclick="location.reload();">RETRY</button>
+				<button id="manual_ip" class="button_gray" onclick="show_manual_ip_form();">Manually Enter IP</button>
+			</div>
+			<div id="manual_ip_form">
+				<input type="text" id="ip_address" placeholder="Device IP Address"></input>
+				<button id="submit_ip" onclick="save_manual_ip();">CONNECT</button>
+				<button class="button_gray" onclick="show_auto_ip_form();">BACK</button>
+			</div>
+		</div>
+
+		<iframe id="app_frame" frameborder="0" allowfullscreen></iframe>
+	</div>
+
+	<script>
+		function save_manual_ip(){
+
+		}
+
+		function show_manual_ip_form(){
+			document.getElementById("title").innerHTML = "MANUAL IP ENTRY";
+			document.getElementById("message").innerHTML = "Manually enter the local IP<br>address of your Emotiscope below";
+			document.getElementById("auto_ip_form").style.display = "none";
+			document.getElementById("manual_ip_form").style.display = "block";
+		}
+
+		function show_auto_ip_form(){
+			show_connection_error();
+			document.getElementById("auto_ip_form").style.display = "block";
+			document.getElementById("manual_ip_form").style.display = "none";
+		}
+
+		function show_connection_error(){
+			document.getElementById("title").innerHTML = "NOT FOUND";
+			document.getElementById("message").innerHTML = "Emotiscope wasn't found<br>on your WiFi network";
+			document.getElementById("spinner").style.display = "none";
+			document.getElementById("question").style.display = "block";
+			document.getElementById("controls").style.display = "block";
+		}
+
+        function output(message) {
+            //document.body.innerHTML += message + "<br>";
+			console.log(message);
+        }
+
+        function test_device_connection(local_ip) {
+			output("Testing local connection to "+local_ip+"...");
+            return new Promise((resolve, reject) => {
+                let img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => reject(new Error('Failed to load image from device'));
+                img.src = `http://${local_ip}/test`;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const max_retry_attempts = 3;
+            let retry_count = 0;
+            const base_delay = 250;
+
+            function fetch_and_redirect() {
+                const target_url = 'https://discovery.lixielabs.com/';
+
+                fetch(target_url)
+                    .then(response => {
+                        if (!response.ok) {
+                            output("Network response was not ok");
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.length > 0 && data[0].local_ip) {
+							retry_count = 0;
+							output("Device seen on network @ "+data[0].local_ip+"! Redirecting...");
+                            //window.location.href = `http://${data[0].local_ip}`;
+							document.getElementById("app_frame").src = `http://${data[0].local_ip}`;
+                        } else {
+							if (retry_count < max_retry_attempts) {
+								let delay = base_delay * Math.pow(2, retry_count);
+								output(`No devices seen on network, re-checking in ${delay}ms...`);
+								setTimeout(fetch_and_redirect, delay);
+								retry_count++;
+							} else {
+								output('Failed to fetch local IP after ' + max_retry_attempts + '!');
+								show_connection_error();
+							}
+                        }
+                    })
+                    .catch(error => {
+                        if (retry_count < max_retry_attempts) {
+                            let delay = base_delay * Math.pow(2, retry_count);
+                            setTimeout(fetch_and_redirect, delay);
+                            retry_count++;
+                        } else {
+                            output('Failed to reach discovery server after ' + max_retry_attempts + ' attempts: ' + error.message);
+                        }
+                    });
+            }
+
+            fetch_and_redirect();
+        });
+    </script>
+</body>
+</html>

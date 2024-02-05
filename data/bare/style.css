@@ -1,0 +1,37 @@
+body{
+	background-color: #242424;
+	color:#ccc;
+	font-family: 'Lato', sans-serif;
+}
+
+button{
+	font-family: 'Lato', sans-serif;
+}
+
+.json_object {
+	font-family: monospace;
+	white-space: pre-wrap; /* Since we're using <br> and &nbsp;, this might not be necessary, but it's useful if you opt for a more direct approach */
+	padding: 10px;
+	background-color: #424242;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+}
+
+.horizontal_separator{
+	border-bottom: 1px solid #484848;
+	width:100%;
+	height:1px;
+	margin-top:20px;
+	margin-bottom: 20px;
+}
+
+#dimmer{
+	background-color: rgba(0, 0, 0, 0.75);
+	width:100%;
+	height:100%;
+	position: absolute;
+	top:0px;
+	left:0px;
+	display: none;
+	pointer-events: none;
+}

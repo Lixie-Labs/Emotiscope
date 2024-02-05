@@ -1,0 +1,50 @@
+name: "TODO Generator" 
+on:
+  push: # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request 
+    paths:
+    - '**.ino'
+    - '**.cpp'
+    - '**.h'
+    - '**.sh'
+    - '**.py'
+    - '**.html'
+    - '**.js'
+    - '**.css'
+    - '**Doxyfile'
+    - '**doxyignore'
+    - 'keywords.txt'
+    - '**reports.yml'
+  pull_request:
+    paths:
+    - '**.ino'
+    - '**.cpp'
+    - '**.h'
+    - '**.sh'
+    - '**.py'
+    - '**.html'
+    - '**.js'
+    - '**.css'
+    - '**Doxyfile'
+    - '**doxyignore'
+    - 'keywords.txt'
+    - '**reports.yml'
+jobs:
+  build:
+    name: "Generate TODO Issues"
+    runs-on: ubuntu-latest
+    
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Work around GitHub permission issue
+        run: "sudo git config --global --add safe.directory /github/workspace"
+        
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+          
+      - name: Generate Issues From TODOs
+        uses: alstr/todo-to-issue-action@v4.12.2
+        id: todo
+        with:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}

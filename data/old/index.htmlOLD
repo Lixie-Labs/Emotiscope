@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ESP WebSocket Test</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h2>Emotiscope</h2>
+    <p>Status: <span id="websocket_status">Disconnected</span></p>
+	<div id="slider_bin"></div>
+	<!--
+	<div class="slider_label">BRIGHTNESS</div>
+	<input type="range" class="slider" id="brightness" min="0.000" max="1.000" step="0.001" value="1.000">
+	<div class="slider_label">SPEED</div>
+    <input type="range" class="slider" id="speed" min="0.500" max="10.000" step="0.001" value="8.000">
+	-->
+	<br><br>
+	<div id="mode_bin"></div>
+	<br>
+    <input type="text" id="custom_command" placeholder="Enter a custom command">
+	<button onclick="send_custom_command();">SEND</button>
+	<br><br>
+	<button onclick="reset_device();">RESET</button>
+	<br><br>
+	<div id="messages_bin"></div>
+
+    <script src="websockets_connection.js"></script>
+</body>
+</html>

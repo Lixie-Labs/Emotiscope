@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Client</title>
+</head>
+<body>
+    <h1>WebSocket Test Client</h1>
+    <div id="status">Status: Disconnected</div>
+    <div id="messages"></div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const messagesDiv = document.getElementById('messages');
+
+        let socket = new WebSocket('ws://192.168.1.44:8080/');
+
+        socket.onopen = function(e) {
+            statusDiv.innerHTML = 'Connection established';
+            setInterval(() => {
+                socket.send('Hello, Server!');
+            }, 100);
+        };
+
+        socket.onmessage = function(event) {
+            messagesDiv.innerHTML += `<p>${event.data}</p>`;
+        };
+
+        socket.onclose = function(event) {
+            if (event.wasClean) {
+                statusDiv.innerHTML = 'Connection closed cleanly';
+            } else {
+                statusDiv.innerHTML = 'Connection died';
+            }
+        };
+
+        socket.onerror = function(error) {
+            statusDiv.innerHTML = `Error: ${error.message}`;
+        };
+    </script>
+</body>
+</html>

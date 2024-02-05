@@ -1,0 +1,45 @@
+<html>
+<head>
+	<title>Emotiscope</title>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap" rel="stylesheet">
+	
+	<link rel="stylesheet" href="style.css">
+	
+</head>
+<body>
+	EMOTISCOPE | <span id="lock_status">UNLOCKED</span><br><br>
+
+	<strong>MODES:</strong><br>
+	<br>
+	<div id="mode_bin"></div>
+	<br>
+
+	<strong>SLIDERS:</strong><br>
+	<br>
+	<div id="slider_bin"></div>
+	<br>
+
+	<strong>TOGGLES:</strong><br>
+	<br>
+	<div id="toggle_bin"></div>
+	<br>
+
+	<div class="horizontal_separator"></div>
+
+	<button onclick="sync_data_from_device()">SYNC DATA</button><br>
+	<br>
+	<div class="json_object" id="config_json"></div>
+	<div class="json_object" id="mode_json"></div>
+	<div class="json_object" id="slider_json"></div>
+	<div class="json_object" id="toggle_json"></div>
+
+	<div id="dimmer"></div>
+
+	<script src="utilities.js"></script>
+	<script src="render_controls.js"></script>
+	<script src="websockets_connection.js"></script>
+</body>
+</html>

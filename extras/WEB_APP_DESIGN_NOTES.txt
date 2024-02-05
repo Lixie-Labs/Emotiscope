@@ -1,0 +1,135 @@
+
+	EMOTISCOPE WEB APP UI / UX NOTES
+	--------------------------------------------------------------------
+	
+	# DONE! ####################################################################### CONFIGURABLE SETTINGS ARE PUBLISHED BY HARDWARE
+		
+		- The web app should be completely unaware of the latest features,
+		  instead pulling all configuration data and layouts from Emotiscope
+		  and displaying them to the screen
+		 
+		- For example, The web app should not be programmed to have three
+		  sliders for Brightness, Hue and Speed. Instead, it should only know
+		  how to render a slider to the screen, and Emotiscope itself will
+		  instruct the web-app which sliders to show and what their names are
+		  
+		- This way, the app doesn't need to be updated to include new settings,
+		  instead Emotiscope will broadcast all of it's settings that are
+		  available to be modified and the app will blindly show them
+		 
+		- When a new setting is added via an Emotiscope firmware update, the
+		  app automatically gains a new slider in the UI next time it connects
+		  
+	# DONE! ###################################################################### LOW-LATENCY CONTROL
+	
+		- Since Sensory Bridge allowed you to instantly change settings via the
+		  knobs on the front, and those changes were immediately reflected on
+		  the display, Emotiscope should be no different. Nobody likes lag.
+		 
+		- Using a 60Hz websockets loop, all current settings are compared to
+		  those stored in a JSON sent by Emotiscope
+		
+		- Any discrepancies found between the UI and the current values are then
+		  sent on the next websockets frame to the hardware
+	
+	# DONE! ####################################################################### SLIDERS
+	
+		- The primary interaction method for controlling Emotiscope are vertical
+		  HTML5/JS sliders that act like knobs with an analog range
+		
+		- Users can swipe up and down to control sliders, and swipe left/right to
+		  reveal more via scrolling
+		  
+		- There are three sliders (green) that always persist no matter what state
+		  Emotiscope is in: "Brightness", "Hue", "Speed"
+		
+		- However, infinitely more sliders can be accessed by scrolling right
+		  through a list of them
+		
+		- All other sliders (blue) are individually exposed by the current lightshow
+		  mode enabled. This way, only relevant settings are shown
+		  
+	# SWITCHES
+	
+		- Settings that require a boolean value instead of a floating point range
+		  (Such as "Auto Color Enabled") are shown with sliders (red) which snap
+		  to the nearest extreme like a toggle light switch
+	
+	# MODES
+	
+		- Users can browse modes by swiping left/right on a strip below the sliders
+		
+		- After the swipe is complete, the transition to the new mode begins
+		
+		- The slider/switch area is scrolled back to the far left
+		
+		- All custom sliders/switches are removed and new ones relevant to the
+		  current mode are populated off-screen
+		
+	# CALIBRATION
+	
+		- In the top right of the screen is the noise calibration button which opens
+		  a dialog asking the user if they want to calibrate noise or the frequency
+		  response curve
+		
+		- This is used the least often, so it gets the worst spot on the screen to
+		  reach for with your finger
+	
+	# ADVANCED SETTINGS
+	
+		- In the top left is a hamburger menu for accessing things like device info
+		  and advanced settings like firmware updates and factory resets.
+	
+	# DEVICE INFO
+	
+		- The top section of the display shows a thumbnail of the product you can
+		  tap to flash Emotiscope's display if you're identifying it out of a group
+		  of them, and lets you swipe left/right between all units found on your
+		  network right now
+		
+		- You can nickname each unit, e.g. if two kids each have one on the same WiFi
+		
+		- The current unit selected is remembered on the next time you open the app
+	
+	# PRESETS
+	
+		- You can create and name your own custom presets which capture every single
+		  setting currently active on the unit and can be recalled later
+		  
+		- These are accessed with a wand icon in the bottom left of the app
+		
+		- The presets screen can be pre-populated from a gallery of cool ones hosted
+		  on a GitHub page that I can remotely update at any time
+	
+	# FIRMWARE UPDATES
+	
+		- Similar to settings.sensorybridge.rocks, the app will check the latest
+		  version of the firmware available on GitHub and display a notice to the user
+		  that an update is available.
+		
+		- If chosen, the app sends the URL of the latest .BIN firmware on GitHub to
+		  Emotiscope, and it begins flashing the update to the opposite partition
+		  in flash memory with a progress bar on the display and app.
+		  
+		- If an update fails to boot, Emotiscope falls back to the other flash memory
+		  partition the user was last on and resumes working after presenting an error
+		  inside the app
+		  
+		- Since the web-app is a PWA that can install a background service, once per week
+		  it can passively check for a firmware update in the background and deliver
+		  a push notification to the user about it
+	
+	# DONE! ####################################################################### OFFLINE FEATURES
+	
+		- The web app interface is actually loaded from the Emotiscope itself on your
+		  WiFi network to your phone, and app.emotiscope.rocks is just a bridge to
+		  automate that process.
+		  
+		- If the emotiscope.rocks website doesn't work in 20 years, you can still
+		  access the web app via the IP address of Emotiscope instead:
+		  
+		     https://app.emotiscope.rocks/
+			             or
+			 http://192.168.1.44/
+		
+		- This provides longevity in case Lixie Labs ceases to exist
