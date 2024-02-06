@@ -196,6 +196,9 @@ void parse_command(command com) {
 	else if (fastcmp(substring, "noise_cal")) {
 		start_noise_calibration();
 	}
+	else if (fastcmp(substring, "ping")) {
+		transmit_to_client_in_slot("pong", com.origin_client_slot);
+	}
 	else{
 		unrecognized_command_error(substring);
 	}

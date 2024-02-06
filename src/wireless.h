@@ -10,10 +10,6 @@ websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
 
 volatile bool web_server_ready = false;
 
-void run_ping_pong(){
-	// TODO: Implement server-side ping-pong communication test
-}
-
 void discovery_check_in() {
     static uint32_t next_discovery_check_in_time = 0;
     static uint8_t attempt_count = 0;  // Keep track of the current attempt count
@@ -226,13 +222,8 @@ void init_web_server() {
 
 		// If it's text, it might be a command
 		if (frame_type == HTTPD_WS_TYPE_TEXT) {
-			if (strcmp((char *)frame->payload, "ping") == 0) {
-				// TODO: pong back
-			}
-			else {
-				queue_command((char *)frame->payload, frame->len, get_slot_of_client(request->client()));
-				// broadcast((char *)frame->payload);
-			}
+			//printf("RX: %s\n", (char *)frame->payload);
+			queue_command((char *)frame->payload, frame->len, get_slot_of_client(request->client()));
 		}
 		else {
 			printf("UNSUPPORTED WS FRAME TYPE: %d\n", (uint8_t)frame->type);
