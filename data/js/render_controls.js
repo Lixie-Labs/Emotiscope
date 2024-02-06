@@ -10,18 +10,6 @@ let toggles = [];
 //   and the "hue range" slider should show a relevant gradient based on the position of
 //   the "hue" slider.
 
-// TODO: Setting information display needs a UI overlay with a close button
-function show_setting_information(setting_name){
-	setting_name = setting_name.toLowerCase();
-	setting_name = setting_name.replace(" ", "_");
-	
-	console.log(information[setting_name]);
-}
-
-function hide_setting_information(){
-	// Closes the setting info screen
-}
-
 function render_modes(){
 	let mode_bin = document.getElementById("mode_bin");
 	mode_bin.innerHTML = "";

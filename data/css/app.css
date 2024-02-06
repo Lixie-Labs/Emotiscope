@@ -249,6 +249,34 @@ button{
 	font-weight: bold;
 }
 
+#info_panel {
+	width: calc(90% - 20px);
+	padding:10px;
+	background-color: rgba(var(--background), 0.5);
+	position: absolute;
+	top:30%;
+	left:5%;
+	border-radius: 10px;
+	border:2px solid var(--accent);
+	z-index:50;
+	backdrop-filter: blur(10px);
+	text-align: center;
+	pointer-events: none;
+	opacity:0.0;
+	transition: opacity 0.25s ease-in-out;
+}
+
+#info_panel_title{
+	color: var(--primary);
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#info_panel_description{
+	font-size: 14px;
+    margin: 20px 0px;
+}
+
 #header_logo {
     font-size:24px;
 	font-weight: bold;
