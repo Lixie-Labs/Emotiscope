@@ -193,6 +193,9 @@ void parse_command(command com) {
 		delay(100);
 		ESP.restart();
 	}
+	else if (fastcmp(substring, "noise_cal")) {
+		start_noise_calibration();
+	}
 	else{
 		unrecognized_command_error(substring);
 	}

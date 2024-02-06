@@ -232,6 +232,23 @@ a{
     /* Additional styles for left and right items, if necessary */
 }
 
+button{
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    text-transform: uppercase;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    color: var(--primary);
+    background-color: rgb(var(--background));
+    font-family: unset;
+    width: 100%;
+	font-weight: bold;
+}
+
 #header_logo {
     font-size:24px;
 	font-weight: bold;

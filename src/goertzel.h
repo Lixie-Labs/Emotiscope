@@ -17,13 +17,11 @@
 #define FOURPI 12.56637061
 #define SIXPI  18.84955593
 
-#define NOISE_CALIBRATION_FRAMES 128
-#define NOISE_CALIBRATION_FRAME_DELAY 64
+#define NOISE_CALIBRATION_FRAMES 512
 
 #define BOTTOM_NOTE 24	// THESE ARE IN QUARTER-STEPS, NOT HALF-STEPS! That's 24 notes to an octave
 #define NOTE_STEP 2 // Use half-steps anyways
 
-uint32_t noise_calibration_delay_frames_remaining = 0;
 uint32_t noise_calibration_active_frames_remaining = 0;
 float noise_spectrum[NUM_FREQS];
 
@@ -232,6 +230,7 @@ void calculate_magnitudes() {
 			if (interlace_line == interlacing_frame_field) {
 				// Get raw magnitude of frequency
 				magnitudes_raw[i] = calculate_magnitude_of_bin(i);  // fast_mode enabled (downsampled audio)
+				magnitudes_raw[i] = collect_and_filter_noise(magnitudes_raw[i], i);
 			}
 
 			// Store raw magnitude
@@ -253,6 +252,14 @@ void calculate_magnitudes() {
 			// Accumulate maximum magnitude of all bins
 			if (magnitudes_smooth[i] > max_val) {
 				max_val = magnitudes_smooth[i];
+			}
+		}
+
+		if(noise_calibration_active_frames_remaining > 0){
+			noise_calibration_active_frames_remaining -= 1;
+			if(noise_calibration_active_frames_remaining == 0){
+				printf("NOISE CAL COMPLETE\n");
+				// TODO: Finished noise cal should report back to the UI to unlock it
 			}
 		}
 
@@ -285,8 +292,7 @@ void calculate_magnitudes() {
 }
 
 void start_noise_calibration() {
-	Serial.println("NOISE CAL DELAY");
+	Serial.println("Starting noise cal...");
 	memset(noise_spectrum, 0, sizeof(float) * NUM_FREQS);
-	noise_calibration_delay_frames_remaining = NOISE_CALIBRATION_FRAME_DELAY;
 	noise_calibration_active_frames_remaining = NOISE_CALIBRATION_FRAMES;
 }

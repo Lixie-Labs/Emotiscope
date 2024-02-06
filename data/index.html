@@ -97,7 +97,8 @@
 
 			<div class="page_title">CALIBRATION</div>
 			<div class="page_paragraph">
-				THIS IS UNFINISHED CONTENT
+				<!-- TODO: Starting noise cal should lock the UI until Emotiscope reports back as finished -->
+				<button onclick="transmit('noise_cal');">REMOVE BACKGROUND NOISE</button>
 			</div>
 		</div>
 
@@ -114,10 +115,9 @@
 
 		<div id="page_modes">
 			<div class="page_title">LIGHT MODE</div>
-			<div id="mode_bin">
-				<div class="mode_button" onclick="set_mode('Spectrum'); hide_page('page_modes');">Spectrum</div>
-				<div class="mode_button" onclick="set_mode('Clap'); hide_page('page_modes');">Clap</div>
-			</div>
+			
+			<div id="mode_bin"></div>
+			
 			<span onclick="hide_page('page_modes');" class="icon_bottom_center">
 				<img src="svg/close.svg" class="footer_icon tint_accent"/>
 			</span>
