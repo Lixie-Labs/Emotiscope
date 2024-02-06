@@ -22,7 +22,7 @@
 #include <FastLED.h> // ........... Blasting data to the LEDs
 #include <PsychicHttp.h> // ....... Handling the web-app HTTP and WS
 #include <HTTPClient.h> // ........ Used to make POST requests to the discovery server
-#include <ESPmDNS.h>
+#include <ESPmDNS.h> // ........... Used for "emotiscope.local" domain name
 #include <Ticker.h> // ............ For timing functions
 #include <WiFi.h> // .............. WiFi connection library
 #include <driver/i2s.h> // ........ I2S microphone driver
@@ -76,9 +76,9 @@ void loop_gpu(void *param) {
 
 // EVERYTHING BEGINS HERE ON BOOT ---------------------------------------------
 void setup() {
-	// (system.h) Initialize all peripherals, GPIO and constants.
+	// (system.h) Initialize all peripherals
 	init_system();
 
 	// Start the second core as a dedicated GPU for the LEDs/color math
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 16384, NULL, 0, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 0, NULL, 0);
 }

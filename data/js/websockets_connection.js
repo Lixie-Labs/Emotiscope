@@ -115,7 +115,7 @@ function parse_message(message){
 			console.log("DATA SYNC COMPLETE!");
 
 			render_controls();
-			tint_svg_images();
+			//tint_svg_images();
 			set_locked_state(false);
 		}
 		else{
