@@ -26,6 +26,7 @@ const float recip_scale = 1.0 / 80000000.0;
 volatile bool waveform_locked = false;
 volatile bool waveform_sync_flag = false;
 
+// TODO: Get SPH0645 microphone tested/working
 void init_i2s_microphone() {
 	uint16_t profiler_index = start_function_timing(__func__);
 

@@ -3,6 +3,10 @@ let modes = [];
 let sliders = [];
 let toggles = [];
 
+// TODO: Add UI for toggles to setting gallery
+
+// TODO: "Help" screens for each slider/toggle can be stored in a JSON served by Emotiscope
+
 function render_modes(){
 	let mode_bin = document.getElementById("mode_bin");
 	mode_bin.innerHTML = "";

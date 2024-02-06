@@ -6,7 +6,9 @@
 // | | | | | (_) | | |_  |  __/ \__ \  _  | | | |
 // |_| |_|  \___/   \__|  \___| |___/ (_) |_| |_|
 //                                               
-// Notes for development purposes, shared with you because I love you                                               
+// Notes for development purposes, shared with you because I love you
+
+// TODO: Remove FastLED Dependency
 
 // ##################################################################################################################################################
 // HOW TO GET JTAG WORKING ON PLATFORMIO WITH ESP32S3 DEV BOARD WITH TWO USB PORTS:

@@ -19,7 +19,7 @@ void init_serial(uint32_t baud_rate) {
 	Serial.begin(baud_rate);
 	Serial.println('\n');
 	Serial.println("######################");
-	Serial.println("SENSORY OVERLOAD REDUX");
+	Serial.printf( "EMOTISCOPE v%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 	Serial.println("######################");
 
 	end_function_timing(profiler_index);

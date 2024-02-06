@@ -1,3 +1,5 @@
+// TODO: Don't tint SVGs with JS, pre-tint the assets themselves
+
 function tint_svg_images() {
     // Select all <img> elements
     const images = document.querySelectorAll('img');
