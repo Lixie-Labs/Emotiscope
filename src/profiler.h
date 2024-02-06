@@ -110,10 +110,11 @@ void profile_function(ProfileFunc func, const char* func_name) {
 }
 
 void print_profiled_function_hits() {
+	// TODO: Clean up printing so that FPS, connected clients, CPU usage, etc. all print at once
 	printf("--------------------------------\n");
 	printf("CPU: %f GPU: %f (FPS)\n", FPS_CPU, FPS_GPU);
-	printf("FUNCS: %i\n\n", num_profiled_functions);
 
+	#ifdef PROFILER_ENABLED
 	for (uint16_t i = 0; i < num_profiled_functions; i++) {
 		if (PROFILER_HITS == true) {
 			printf("HITS: %lu \t %s\n", profiler_functions[i].hits, profiler_functions[i].name);
@@ -126,6 +127,7 @@ void print_profiled_function_hits() {
 		profiler_functions[i].cycles_total = 0;
 		profiler_functions[i].hits = 0;
 	}
+	#endif
 }
 
 void watch_cpu_fps(uint32_t t_now_us) {
