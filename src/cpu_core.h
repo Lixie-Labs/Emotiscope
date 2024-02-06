@@ -43,10 +43,7 @@ void run_cpu() {
 		watch_cpu_fps(t_now_us);  // (system.h)
 
 		// Occasionally print the average frame rate
-		print_fps_values(t_now_ms);
-
-		// Occasionally print connected WS clients
-		print_websocket_clients(t_now_ms);
+		print_system_info(t_now_ms);
 
 		// Write pending changes to LittleFS
 		sync_configuration_to_file_system(t_now_ms);
@@ -76,10 +73,7 @@ void run_cpu() {
 		uint32_t processing_us_spent = processing_end_us - processing_start_us;
 		uint32_t audio_core_us_per_loop = 1000000.0 / FPS_CPU;
 		float audio_frame_to_processing_ratio = processing_us_spent / float(audio_core_us_per_loop);
-		if (iter % 500 == 0) {
-			printf("MAIN CPU CORE USAGE: %.4f\n", audio_frame_to_processing_ratio);
-			print_memory_info();
-		}
+		CPU_CORE_USAGE = audio_frame_to_processing_ratio;
 
 		//------------------------------------------------------------------------------------------
 		yield();  // Keep CPU watchdog happy

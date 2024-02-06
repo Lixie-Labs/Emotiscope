@@ -24,6 +24,8 @@ float FPS_GPU_SAMPLES[16];
 float FPS_CPU = 0.0;
 float FPS_GPU = 0.0;
 
+float CPU_CORE_USAGE = 0.0;
+
 inline bool fastcmp_func_name(const char* input_a, const char* input_b){
 	// Is first char different? DISQUALIFIED!
 	if(input_a[0] != input_b[0]){ return false; }
@@ -110,10 +112,6 @@ void profile_function(ProfileFunc func, const char* func_name) {
 }
 
 void print_profiled_function_hits() {
-	// TODO: Clean up printing so that FPS, connected clients, CPU usage, etc. all print at once
-	printf("--------------------------------\n");
-	printf("CPU: %f GPU: %f (FPS)\n", FPS_CPU, FPS_GPU);
-
 	#ifdef PROFILER_ENABLED
 	for (uint16_t i = 0; i < num_profiled_functions; i++) {
 		if (PROFILER_HITS == true) {
@@ -151,7 +149,7 @@ void watch_gpu_fps(uint32_t t_now_us) {
 	last_call = t_now_us;
 }
 
-void print_fps_values(uint32_t t_now_ms) {
+void print_system_info(uint32_t t_now_ms) {
 	static uint32_t next_print_ms = 0;
 	const uint16_t print_interval_ms = 1000;
 
@@ -167,11 +165,33 @@ void print_fps_values(uint32_t t_now_ms) {
 		FPS_CPU /= 16.0;
 		FPS_GPU /= 16.0;
 
-		char output[64];
-		snprintf(output, 64, "FPS | CPU: %.2f | GPU: %.2f\n", FPS_CPU, FPS_GPU);
-		printf(output);
-		// printf("I love Julie and Sage!\n");
+	    uint32_t free_heap = esp_get_free_heap_size();
+		UBaseType_t free_stack_cpu = uxTaskGetStackHighWaterMark(NULL); // CPU core (this one)
+		UBaseType_t free_stack_gpu = uxTaskGetStackHighWaterMark(xTaskGetHandle("loop_gpu")); // GPU core
 
-		print_profiled_function_hits();
+		extern bool web_server_ready;
+		extern PsychicWebSocketClient *get_client_in_slot(uint8_t slot);
+
+		printf("# SYSTEM INFO ####################\n");
+		printf("CPU CORE USAGE: %.2f%%\n", CPU_CORE_USAGE*100);
+		printf("CPU FPS: %.3f\n", FPS_CPU);
+		printf("GPU FPS: %.3f\n", FPS_GPU);
+		printf("Free Heap:      %lu\n", (uint32_t)free_heap);
+		printf("Free Stack CPU: %lu\n", (uint32_t)free_stack_cpu);
+		printf("Free Stack GPU: %lu\n", (uint32_t)free_stack_gpu);
+		printf("\n");
+		printf("- WS CLIENTS -----------------\n");
+		if(web_server_ready == true){
+			for(uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++){
+				PsychicWebSocketClient *client = get_client_in_slot(i);
+				if (client != NULL) {
+					printf("%s\n", client->remoteIP().toString().c_str());
+				}
+			}
+		}
+		printf("------------------------------\n");
+
+		//print_profiled_function_hits();	
+		printf("##################################\n\n");
 	}
 }

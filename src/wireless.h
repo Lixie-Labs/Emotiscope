@@ -2,8 +2,6 @@
 #define MAX_HTTP_REQUEST_ATTEMPTS ( 8 ) // Define the maximum number of retry attempts
 #define INITIAL_BACKOFF_MS ( 1000 )  // Initial backoff delay in milliseconds
 
-#define MAX_WEBSOCKET_CLIENTS (4) // Max simultaneous remote controls allowed at one time
-
 PsychicHttpServer server;
 PsychicWebSocketHandler websocket_handler;
 websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
@@ -159,26 +157,6 @@ void transmit_to_client_in_slot(char *message, uint8_t client_slot) {
 	PsychicWebSocketClient *client = get_client_in_slot(client_slot);
 	if (client != NULL) {
 		client->sendMessage(message);
-	}
-}
-
-void print_websocket_clients(uint32_t t_now_ms) {
-	static uint32_t next_print_ms = 0;
-	const uint16_t print_interval_ms = 5000;
-
-	if(web_server_ready == true){
-		if (t_now_ms >= next_print_ms) {
-			next_print_ms += print_interval_ms;
-
-			printf("## WS CLIENTS ###############\n");
-			for(uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++){
-				PsychicWebSocketClient *client = get_client_in_slot(i);
-				if (client != NULL) {
-					printf("%s\n", client->remoteIP().toString().c_str());
-				}
-			}
-			printf("#############################\n");
-		}
 	}
 }
 

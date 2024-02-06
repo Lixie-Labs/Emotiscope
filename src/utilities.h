@@ -117,14 +117,6 @@ int autocorrelate_with_pattern(const float* data, unsigned int data_length, cons
 	return max_shift;
 }
 
-// Function to print free stack and heap
-void print_memory_info() {
-    UBaseType_t free_stack = uxTaskGetStackHighWaterMark(NULL);
-    uint32_t free_heap = esp_get_free_heap_size();
-
-    printf("Free Stack: %lu\tFree Heap: %lu\n", (uint32_t)free_stack, (uint32_t)free_heap);
-}
-
 inline bool fastcmp(char* input_a, char* input_b){
 	// Is first char different? DISQUALIFIED!
 	if(input_a[0] != input_b[0]){ return false; }
