@@ -41,7 +41,6 @@
 #include "system.h" // ............ Lowest-level firmware functions
 #include "leds_8.h" // ............ 
 #include "leds.h" // .............. LED dithering, effects and communication
-//#include "rmt_test.h" // .......... 
 #include "microphone.h" // ........ For gathering audio chunks from the microphone
 #include "goertzel.h" // .......... GDFT or God Damn Fast Transform is implemented here
 #include "tempo.h" // ............. Comupation of (and syncronization) to the music tempo
@@ -70,14 +69,8 @@ void loop() {
 
 // One core to run graphics (GPU) ---------------------------------------------
 void loop_gpu(void *param) {
-	//rmt_tx_init(RMT_CHANNEL_0, RMT_A_GPIO );
-	//rmt_tx_init(RMT_CHANNEL_1, RMT_B_GPIO );
 	for (;;) {
-		//show_rmt_leds();
-
-		//printf("run_gpu() = %.4fus\n", measure_execution([&]() {
 		run_gpu();	// (gpu_core.h)
-		//}));
 	}
 }
 

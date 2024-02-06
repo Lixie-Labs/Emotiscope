@@ -7,6 +7,11 @@ let toggles = [];
 
 // TODO: "Help" screens for each slider/toggle can be stored in a JSON served by Emotiscope
 
+// TODO: Hue-related sliders should literally depict their hue settings
+//   For example, the "hue" slider should fade to the currently selected color when dragged,
+//   and the "hue range" slider should show a relevant gradient based on the position of
+//   the "hue" slider.
+
 function render_modes(){
 	let mode_bin = document.getElementById("mode_bin");
 	mode_bin.innerHTML = "";
