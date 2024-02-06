@@ -13,8 +13,6 @@
 float lpf_drag = 0.0;
 
 void run_gpu() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	uint32_t t_start_cycles = ESP.getCycleCount();
 
 	// Get the current time in microseconds and milliseconds
@@ -87,6 +85,4 @@ void run_gpu() {
 
 	uint32_t t_end_cycles = ESP.getCycleCount();
 	volatile uint32_t gpu_total_cycles = t_end_cycles - t_start_cycles;
-
-	end_function_timing(profiler_index);
 }

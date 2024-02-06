@@ -28,8 +28,6 @@ volatile bool waveform_sync_flag = false;
 
 // TODO: Get SPH0645 microphone tested/working
 void init_i2s_microphone() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	// Configure I2S
 	i2s_config_t i2s_config = {
 		.mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX),
@@ -49,38 +47,35 @@ void init_i2s_microphone() {
 	i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
 
 	i2s_set_pin(I2S_NUM_0, &pin_config);
-
-	end_function_timing(profiler_index);
 }
 
 void acquire_sample_chunk() {
-	uint16_t profiler_index = start_function_timing(__func__);
+	profile_function([&]() {
+		// Buffer to hold audio samples
+		int32_t new_samples_raw[CHUNK_SIZE];
+		float new_samples_raw_float[CHUNK_SIZE];
+		float new_samples[CHUNK_SIZE];
 
-	// Buffer to hold audio samples
-	int32_t new_samples_raw[CHUNK_SIZE];
-	float new_samples_raw_float[CHUNK_SIZE];
-	float new_samples[CHUNK_SIZE];
+		// Read audio samples into int32_t buffer
+		size_t bytes_read = 0;
+		i2s_read(I2S_NUM_0, new_samples_raw, sizeof(new_samples_raw), &bytes_read, portMAX_DELAY);
 
-	// Read audio samples into int32_t buffer
-	size_t bytes_read = 0;
-	i2s_read(I2S_NUM_0, new_samples_raw, sizeof(new_samples_raw), &bytes_read, portMAX_DELAY);
+		// Clip the sample value if it's too large, cast to large floats
+		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
+			new_samples_raw_float[i+0] = min(max(new_samples_raw[i+0], -80000000),  80000000);
+			new_samples_raw_float[i+1] = min(max(new_samples_raw[i+1], -80000000),  80000000);
+			new_samples_raw_float[i+2] = min(max(new_samples_raw[i+2], -80000000),  80000000);
+			new_samples_raw_float[i+3] = min(max(new_samples_raw[i+3], -80000000),  80000000);
+		}
 
-	// Clip the sample value if it's too large, cast to large floats
-	for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
-		new_samples_raw_float[i+0] = min(max(new_samples_raw[i+0], -80000000),  80000000);
-		new_samples_raw_float[i+1] = min(max(new_samples_raw[i+1], -80000000),  80000000);
-		new_samples_raw_float[i+2] = min(max(new_samples_raw[i+2], -80000000),  80000000);
-		new_samples_raw_float[i+3] = min(max(new_samples_raw[i+3], -80000000),  80000000);
-	}
+		// Convert audio from large float range to -1.0 to 1.0 range
+		dsps_mulc_f32(new_samples_raw_float, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
 
-	// Convert audio from large float range to -1.0 to 1.0 range
-	dsps_mulc_f32(new_samples_raw_float, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
+		// Add new chunk to audio history
+		waveform_locked = true;
+		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE);
+		waveform_locked = false;
+		waveform_sync_flag = true;
 
-	// Add new chunk to audio history
-	waveform_locked = true;
-	shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE);
-	waveform_locked = false;
-	waveform_sync_flag = true;
-
-	end_function_timing(profiler_index);
+	}, __func__);
 }

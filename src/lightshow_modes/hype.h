@@ -1,6 +1,4 @@
 void draw_hype() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	float beat_sum = 0.0;
 
 	// Draw tempi to the display
@@ -28,6 +26,4 @@ void draw_hype() {
 	if(configuration.mirror_mode == true){
 		draw_dot(leds, 1, dot_color, 1.0 - beat_sum, 1.0);
 	}
-
-	end_function_timing(profiler_index);
 }

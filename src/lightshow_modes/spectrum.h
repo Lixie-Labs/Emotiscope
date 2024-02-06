@@ -1,6 +1,4 @@
 void draw_spectrum() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	float magnitudes[NUM_FREQS];
 	for (uint16_t i = 0; i < NUM_FREQS; i += 4) {
 		magnitudes[i + 0] = frequencies_musical[i + 0].magnitude;
@@ -28,6 +26,4 @@ void draw_spectrum() {
 			leds[i] = hsv(configuration.hue+(progress*configuration.hue_range), 1.0, mag);
 		}
 	}
-
-	end_function_timing(profiler_index);
 }

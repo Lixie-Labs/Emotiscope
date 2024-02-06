@@ -1,5 +1,5 @@
 // UNCOMMENT THIS TO ENABLE IT
-//#define PROFILER_ENABLED  // Slows down the system, but allows watching how much
+#define PROFILER_ENABLED  // Slows down the system, but allows watching how much
 // total time each function takes up
 
 #define PROFILER_SINGLE_SHOT \
@@ -14,8 +14,6 @@
 extern void broadcast(char *message);
 extern void print_websocket_clients(uint32_t t_now_ms);
 
-Ticker profiler_print;
-
 profiler_function profiler_functions[128];
 uint16_t num_profiled_functions = 0;
 bool profiler_locked = false;
@@ -26,8 +24,16 @@ float FPS_GPU_SAMPLES[16];
 float FPS_CPU = 0.0;
 float FPS_GPU = 0.0;
 
-template<typename Func> // used for lambdas
-float measure_execution(Func func) {
+inline bool fastcmp_func_name(const char* input_a, const char* input_b){
+	// Is first char different? DISQUALIFIED!
+	if(input_a[0] != input_b[0]){ return false; }
+
+	// If not, traditional strcmp(), return true for match
+	return (strcmp(input_a, input_b) == 0);
+}
+
+template<typename MeasureFunc> // used for lambdas
+float measure_execution(MeasureFunc func) {
 	volatile uint32_t dummy = 1; // Volatile dummy variable to prevent loop optimization
     uint32_t t_start_us = ESP.getCycleCount();
 
@@ -54,40 +60,10 @@ float measure_execution(Func func) {
     return (static_cast<float>(total_time_us) / 8) / 240; // divided 8 (averaging), then by (CPU MHz), to get sub-microsecond resolution
 }
 
-void print_profiled_function_hits() {
-	printf("--------------------------------\n");
-	printf("CPU: %f GPU: %f (FPS)\n", FPS_CPU, FPS_GPU);
-	printf("FUNCS: %i\n\n", num_profiled_functions);
-
-	for (uint16_t i = 0; i < num_profiled_functions; i++) {
-		if (PROFILER_HITS == true) {
-			printf("HITS: %lu \t %s\n", profiler_functions[i].hits, profiler_functions[i].name);
-		}
-		else {
-			uint32_t total_time = profiler_functions[i].time_total;
-			printf("TIME: %lu \t %s\n", total_time, profiler_functions[i].name);
-		}
-
-		profiler_functions[i].time_total = 0;
-		profiler_functions[i].time_start = 0;
-		profiler_functions[i].time_end = 0;
-		profiler_functions[i].hits = 0;
-	}
-}
-
-void init_profiler() {
-#ifdef PROFILER_ENABLED
-	profiler_locked = true;
-	profiler_print.attach_ms(PROFILER_PRINT_INTERVAL_MS, print_profiled_function_hits);
-	profiler_locked = false;
-#endif
-}
-
 int16_t find_matching_profiler_entry_index(const char *func_name) {
 	for (uint16_t i = 0; i < num_profiled_functions; i++) {
 		const char *profiled_name = profiler_functions[i].name;
-		int16_t match_val = strcmp(func_name, profiled_name);
-		if (match_val == 0) {
+		if(fastcmp_func_name(func_name, profiled_name)){
 			return i;
 		}
 	}
@@ -103,37 +79,56 @@ uint16_t register_profiler_entry(const char *func_name) {
 	return dest_index;
 }
 
-int16_t start_function_timing(const char *func_name) {
-#ifdef PROFILER_ENABLED
-	int16_t index = find_matching_profiler_entry_index(func_name);
+template<typename ProfileFunc> // used for lambdas
+void profile_function(ProfileFunc func, const char* func_name) {
+	#ifdef PROFILER_ENABLED
+		int16_t index = find_matching_profiler_entry_index(func_name);
+		// Not found yet? Register it:
+		if (index == -1) {
+			index = register_profiler_entry(func_name);
+		}
 
-	if (index == -1) {
-		index = register_profiler_entry(func_name);
-	}
+		profiler_functions[index].hits += 1;
+		uint32_t cycle_start = ESP.getCycleCount();
 
-	profiler_functions[index].hits += 1;
-	profiler_functions[index].time_start = micros();
-	return index;
-#endif
-	return 0;
+		// Run the function
+		func();
+
+		uint32_t cycle_end = ESP.getCycleCount();
+		uint32_t num_cycles = cycle_end - cycle_start;
+
+		if (PROFILER_SINGLE_SHOT == true) {
+			profiler_functions[index].cycles_total = num_cycles;
+		}
+		else{
+			profiler_functions[index].cycles_total += num_cycles;
+		}
+	#else
+		// Just run the function
+		func();
+	#endif
 }
 
-void end_function_timing(uint16_t index) {
-#ifdef PROFILER_ENABLED
-	profiler_functions[index].time_end = micros();
-	uint32_t duration = profiler_functions[index].time_end - profiler_functions[index].time_start;
+void print_profiled_function_hits() {
+	printf("--------------------------------\n");
+	printf("CPU: %f GPU: %f (FPS)\n", FPS_CPU, FPS_GPU);
+	printf("FUNCS: %i\n\n", num_profiled_functions);
 
-	if (PROFILER_SINGLE_SHOT == true) {
-		profiler_functions[index].time_total = duration;
+	for (uint16_t i = 0; i < num_profiled_functions; i++) {
+		if (PROFILER_HITS == true) {
+			printf("HITS: %lu \t %s\n", profiler_functions[i].hits, profiler_functions[i].name);
+		}
+		else {
+			uint32_t total_time = profiler_functions[i].cycles_total;
+			printf("CYCLES: %lu \t %s\n", total_time, profiler_functions[i].name);
+		}
+
+		profiler_functions[i].cycles_total = 0;
+		profiler_functions[i].hits = 0;
 	}
-	else{
-		profiler_functions[index].time_total += duration;
-	}
-#endif
 }
 
 void watch_cpu_fps(uint32_t t_now_us) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	static uint32_t last_call;
 	static uint8_t average_index = 0;
 	average_index++;
@@ -141,12 +136,9 @@ void watch_cpu_fps(uint32_t t_now_us) {
 	uint32_t elapsed_us = t_now_us - last_call;
 	FPS_CPU_SAMPLES[average_index % 16] = 1000000.0 / float(elapsed_us);
 	last_call = t_now_us;
-
-	end_function_timing(profiler_index);
 }
 
 void watch_gpu_fps(uint32_t t_now_us) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	static uint32_t last_call;
 	static uint8_t average_index = 0;
 	average_index++;
@@ -155,8 +147,6 @@ void watch_gpu_fps(uint32_t t_now_us) {
 	FPS_GPU_SAMPLES[average_index % 16] = 1000000.0 / float(elapsed_us);
 
 	last_call = t_now_us;
-
-	end_function_timing(profiler_index);
 }
 
 void print_fps_values(uint32_t t_now_ms) {
@@ -179,5 +169,7 @@ void print_fps_values(uint32_t t_now_ms) {
 		snprintf(output, 64, "FPS | CPU: %.2f | GPU: %.2f\n", FPS_CPU, FPS_GPU);
 		printf(output);
 		// printf("I love Julie and Sage!\n");
+
+		print_profiled_function_hits();
 	}
 }

@@ -1,6 +1,4 @@
 void draw_clap() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	static uint32_t iter = 0;
 	iter++;
 
@@ -76,6 +74,4 @@ void draw_clap() {
 		}
 		//}
 	}
-
-	end_function_timing(profiler_index);
 }

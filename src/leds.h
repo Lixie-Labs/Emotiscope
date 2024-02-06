@@ -39,8 +39,6 @@ float note_colors[12] = {0.0000, 0.0833, 0.1666, 0.2499, 0.3333, 0.4166,
 						 0.4999, 0.5833, 0.6666, 0.7499, 0.8333, 0.9166};
 
 void init_leds() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	//FastLED.addLeds<LED_TYPE, DATA_PIN_1>(leds_8, 0, 64);	// Initialize FastLED Data Out 1
 	//FastLED.addLeds<LED_TYPE, DATA_PIN_2>(leds_8, 64, 64);	// Initialize FastLED Data Out 2
 
@@ -48,8 +46,6 @@ void init_leds() {
 
 	rmt_tx_init(RMT_CHANNEL_0, RMT_A_GPIO );
 	rmt_tx_init(RMT_CHANNEL_1, RMT_B_GPIO );
-
-	end_function_timing(profiler_index);
 }
 
 void save_leds_to_temp() {
@@ -86,8 +82,6 @@ void add_CRGBF_arrays(CRGBF* a, CRGBF* b, uint16_t array_length) {
 }
 
 void smooth_led_output(float blend_strength) {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	if (blend_strength > 0.0) {
 		float update_ratio = 1.0 - blend_strength;
 		float update_ratio_inv = blend_strength;
@@ -113,12 +107,9 @@ void smooth_led_output(float blend_strength) {
 	else {
 		memcpy(leds_smooth, leds, sizeof(CRGBF) * NUM_LEDS);
 	}
-
-	end_function_timing(profiler_index);
 }
 
 void clip_leds() {
-	uint16_t profiler_index = start_function_timing(__func__);
 	// Loop unroll for speed
 	for (uint16_t i = 0; i < NUM_LEDS; i += 4) {
 		leds[i + 0].r = clip_float(leds[i + 0].r);
@@ -137,11 +128,9 @@ void clip_leds() {
 		leds[i + 3].g = clip_float(leds[i + 3].g);
 		leds[i + 3].b = clip_float(leds[i + 3].b);
 	}
-	end_function_timing(profiler_index);
 }
 
 void quantize_color() {
-	uint16_t profiler_index = start_function_timing(__func__);
 	const float dither_table[4] = {0.25, 0.50, 0.75, 1.00};
 	static uint8_t dither_step = 0;
 	dither_step++;
@@ -169,11 +158,9 @@ void quantize_color() {
 		fract_b = decimal_b - whole_b;
 		leds_rmt[i].b = whole_b + (fract_b >= dither_table[(dither_step + i) % 4]);
 	}
-	end_function_timing(profiler_index);
 }
 
 CRGBF hsv(float h, float s, float v) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	h = fmodf(h, 1.0f);
 	while (h < 0.0f) h += 1.0f;
 
@@ -191,12 +178,10 @@ CRGBF hsv(float h, float s, float v) {
 	col.g = min(col.g, 1.0f);
 	col.b = min(col.b, 1.0f);
 
-	end_function_timing(profiler_index);
 	return col;
 }
 
 void apply_incandescent_filter(float mix) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	uint32_t t_start_cycles = ESP.getCycleCount();
 
 	float mix_inv = 1.0 - mix;
@@ -209,29 +194,23 @@ void apply_incandescent_filter(float mix) {
 	uint32_t t_end_cycles = ESP.getCycleCount();
 	volatile uint32_t t_total_cycles = t_end_cycles - t_start_cycles;
 
-	end_function_timing(profiler_index);
 }
 
 void save_leds_to_last() {
-	uint16_t profiler_index = start_function_timing(__func__);
 	memcpy(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
-	end_function_timing(profiler_index);
 }
 
 CRGBF mix(CRGBF color_1, CRGBF color_2, float amount) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	CRGBF out_color = {
 		color_1.r * (1.0 - amount) + color_2.r * (amount),
 		color_1.g * (1.0 - amount) + color_2.g * (amount),
 		color_1.b * (1.0 - amount) + color_2.b * (amount),
 	};
 
-	end_function_timing(profiler_index);
 	return out_color;
 }
 
 void apply_scaling_mode() {
-	uint16_t profiler_index = start_function_timing(__func__);
 	// Work using this copy
 	save_leds_to_temp();
 
@@ -264,7 +243,6 @@ void apply_scaling_mode() {
 		leds[((NUM_LEDS >> 1) - 1) - i] = leds[(NUM_LEDS >> 1) + i];
 	}
 
-	end_function_timing(profiler_index);
 }
 
 void rough_mirror_screen() {
@@ -278,7 +256,6 @@ void rough_mirror_screen() {
 }
 
 CRGBF add(CRGBF color_1, CRGBF color_2, float add_amount = 1.0) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	CRGBF out_color = {
 		color_1.r + color_2.r * (add_amount),
 		color_1.g + color_2.g * (add_amount),
@@ -289,23 +266,18 @@ CRGBF add(CRGBF color_1, CRGBF color_2, float add_amount = 1.0) {
 	out_color.g = min(1.0f, out_color.g);
 	out_color.b = min(1.0f, out_color.b);
 
-	end_function_timing(profiler_index);
 	return out_color;
 }
 
 void apply_video_feedback() {
-	uint16_t profiler_index = start_function_timing(__func__);
 	// Work using the last frame
 	for (uint16_t i = 0; i < NUM_LEDS; i++) {
 		// leds[i] = mix(leds[i], leds_last[i], 0.5);
 		leds[i] = add(leds[i], leds_last[i], 0.65);
 	}
-
-	end_function_timing(profiler_index);
 }
 
 void draw_line(CRGBF* layer, float x1, float x2, CRGBF color, float opacity) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	bool lighten = true;
 	if (color.r == 0 && color.g == 0 && color.b == 0) {
 		lighten = false;
@@ -376,13 +348,9 @@ void draw_line(CRGBF* layer, float x1, float x2, CRGBF color, float opacity) {
 			}
 		}
 	}
-
-	end_function_timing(profiler_index);
 }
 
 void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, float opacity = 1.0) {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	fx_dots[fx_dots_slot].position_past = fx_dots[fx_dots_slot].position;
 	fx_dots[fx_dots_slot].position = position;
 
@@ -397,12 +365,9 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 	}
 
 	draw_line(layer, position, fx_dots[fx_dots_slot].position_past, color, spread_brightness * opacity);
-
-	end_function_timing(profiler_index);
 }
 
 void render_debug_value(uint32_t t_now_ms) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	static float value_last = 0;
 	static uint32_t last_update_time;
 	static float opacity_target = 0.0;
@@ -430,7 +395,6 @@ void render_debug_value(uint32_t t_now_ms) {
 	};
 
 	draw_dot(leds, MAX_DOTS - 5, gamma_corrected, clip_float(rendered_debug_value_smooth), opacity);
-	end_function_timing(profiler_index);
 }
 
 void apply_image_lpf(float cutoff_frequency) {

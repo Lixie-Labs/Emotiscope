@@ -49,9 +49,7 @@ struct toggle {
 
 struct profiler_function {
 	char name[32];
-	uint32_t time_start;
-	uint32_t time_end;
-	uint32_t time_total;
+	uint32_t cycles_total;
 	uint32_t hits;
 };
 

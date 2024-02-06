@@ -22,6 +22,9 @@
 
 #define NUM_TEMPI (64)
 
+bool silence_detected = true;
+float silence_level = 1.0;
+
 float MAX_TEMPO_RANGE = 1.0;
 
 float tempi_bpm_values_hz[NUM_TEMPI];
@@ -34,7 +37,6 @@ float tempi_smooth[NUM_TEMPI];
 float tempi_power_sum = 0.0;
 
 uint16_t find_closest_tempo_bin(float target_bpm) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	float target_bpm_hz = target_bpm / 60.0;
 
 	float smallest_difference = 10000000.0;
@@ -48,13 +50,10 @@ uint16_t find_closest_tempo_bin(float target_bpm) {
 		}
 	}
 
-	end_function_timing(profiler_index);
 	return smallest_difference_index;
 }
 
 void init_tempo_goertzel_constants() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	for (uint16_t i = 0; i < NUM_TEMPI; i++) {
 		float progress = float(i) / NUM_TEMPI;
 		float tempi_range = TEMPO_HIGH - TEMPO_LOW;
@@ -119,12 +118,9 @@ void init_tempo_goertzel_constants() {
 		// float radians_per_second = (PI * (tempi[i].target_tempo_hz));
 		tempi[i].phase_radians_per_reference_frame = ((2.0 * PI * tempi[i].target_tempo_hz) / float(REFERENCE_FPS));
 	}
-
-	end_function_timing(profiler_index);
 }
 
 float unwrap_phase(float phase) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	while (phase - phase > M_PI) {
 		phase -= 2 * M_PI;
 	}
@@ -132,97 +128,96 @@ float unwrap_phase(float phase) {
 		phase += 2 * M_PI;
 	}
 
-	end_function_timing(profiler_index);
 	return phase;
 }
 
 float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
-	uint16_t profiler_index = start_function_timing(__func__);
-	uint16_t block_size = tempi[tempo_bin].block_size;
+	float normalized_magnitude;
 
-	float q1 = 0;
-	float q2 = 0;
+	profile_function([&]() {
+		uint16_t block_size = tempi[tempo_bin].block_size;
 
-	// float window_pos = 0.0;
+		float q1 = 0;
+		float q2 = 0;
 
-	for (uint16_t i = 0; i < block_size; i++) {
-		float progress = float(i) / block_size;
-		float sample = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];  // * (progress*progress);
+		// float window_pos = 0.0;
 
-		float q0 = tempi[tempo_bin].coeff * q1 - q2 + sample;
-		q2 = q1;
-		q1 = q0;
+		for (uint16_t i = 0; i < block_size; i++) {
+			float progress = float(i) / block_size;
+			float sample = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];  // * (progress*progress);
 
-		// window_pos += tempi[tempo_bin].window_step;
-	}
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + sample;
+			q2 = q1;
+			q1 = q0;
 
-	float real = (q1 - q2 * tempi[tempo_bin].cosine);
-	float imag = (q2 * tempi[tempo_bin].sine);
+			// window_pos += tempi[tempo_bin].window_step;
+		}
 
-	// Calculate phase
-	tempi[tempo_bin].phase_target = (unwrap_phase(atan2(imag, real)) + (PI * BEAT_SHIFT_PERCENT));
-	if (tempi[tempo_bin].phase_target > PI) {
-		tempi[tempo_bin].phase_target -= (2 * PI);
-	}
-	else if (tempi[tempo_bin].phase_target < -PI) {
-		tempi[tempo_bin].phase_target += (2 * PI);
-	}
+		float real = (q1 - q2 * tempi[tempo_bin].cosine);
+		float imag = (q2 * tempi[tempo_bin].sine);
 
-	tempi[tempo_bin].phase = tempi[tempo_bin].phase_target;
+		// Calculate phase
+		tempi[tempo_bin].phase_target = (unwrap_phase(atan2(imag, real)) + (PI * BEAT_SHIFT_PERCENT));
+		if (tempi[tempo_bin].phase_target > PI) {
+			tempi[tempo_bin].phase_target -= (2 * PI);
+		}
+		else if (tempi[tempo_bin].phase_target < -PI) {
+			tempi[tempo_bin].phase_target += (2 * PI);
+		}
 
-	float magnitude_squared = (q1 * q1) + (q2 * q2) - q1 * q2 * tempi[tempo_bin].coeff;
-	float magnitude = sqrt(magnitude_squared);
-	float normalized_magnitude = magnitude / (block_size / 2.0);
+		tempi[tempo_bin].phase = tempi[tempo_bin].phase_target;
 
-	float progress = tempo_bin / float(NUM_TEMPI);
-	float scale = (0.75 * (1.0 - progress)) + 0.25;
+		float magnitude_squared = (q1 * q1) + (q2 * q2) - q1 * q2 * tempi[tempo_bin].coeff;
+		float magnitude = sqrt(magnitude_squared);
+		normalized_magnitude = magnitude / (block_size / 2.0);
 
-	end_function_timing(profiler_index);
+		float progress = tempo_bin / float(NUM_TEMPI);
+		float scale = (0.75 * (1.0 - progress)) + 0.25;
+	}, __func__ );
+
 	return normalized_magnitude;
 }
 
 void calculate_tempi_magnitudes(int16_t single_bin = -1) {
-	uint16_t profiler_index = start_function_timing(__func__);
+	profile_function([&]() {
+		float max_val = 0.0;
+		for (uint16_t i = 0; i < NUM_TEMPI; i++) {
+			// Should we update all tempo magnitudes on every frame or just one on all frames?
+			if (single_bin != -1) {
+				if (i == single_bin) {
+					tempi[i].magnitude_full_scale = calculate_magnitude_of_tempo(single_bin);
+				}
+			}
+			else {
+				tempi[i].magnitude_full_scale = calculate_magnitude_of_tempo(i);
+			}
 
-	float max_val = 0.0;
-	for (uint16_t i = 0; i < NUM_TEMPI; i++) {
-		// Should we update all tempo magnitudes on every frame or just one on all frames?
-		if (single_bin != -1) {
-			if (i == single_bin) {
-				tempi[i].magnitude_full_scale = calculate_magnitude_of_tempo(single_bin);
+			if (tempi[i].magnitude_full_scale > max_val) {
+				max_val = tempi[i].magnitude_full_scale;
 			}
 		}
-		else {
-			tempi[i].magnitude_full_scale = calculate_magnitude_of_tempo(i);
+
+		if (max_val < 0.004) {
+			max_val = 0.004;
 		}
 
-		if (tempi[i].magnitude_full_scale > max_val) {
-			max_val = tempi[i].magnitude_full_scale;
+		float autoranger_scale = 1.0 / (max_val);
+
+		for (uint16_t i = 0; i < NUM_TEMPI; i++) {
+			float scaled_magnitude = (tempi[i].magnitude_full_scale * autoranger_scale);
+			if (scaled_magnitude < 0.0) {
+				scaled_magnitude = 0.0;
+			}
+			if (scaled_magnitude > 1.0) {
+				scaled_magnitude = 1.0;
+			}
+
+			tempi[i].magnitude = scaled_magnitude * scaled_magnitude * scaled_magnitude;
 		}
-	}
-
-	if (max_val < 0.004) {
-		max_val = 0.004;
-	}
-
-	float autoranger_scale = 1.0 / (max_val);
-
-	for (uint16_t i = 0; i < NUM_TEMPI; i++) {
-		float scaled_magnitude = (tempi[i].magnitude_full_scale * autoranger_scale);
-		if (scaled_magnitude < 0.0) {
-			scaled_magnitude = 0.0;
-		}
-		if (scaled_magnitude > 1.0) {
-			scaled_magnitude = 1.0;
-		}
-
-		tempi[i].magnitude = scaled_magnitude * scaled_magnitude * scaled_magnitude;
-	}
-	end_function_timing(profiler_index);
+	}, __func__ );
 }
 
 void normalize_novelty_curve_slow() {
-	uint16_t profiler_index = start_function_timing(__func__);
 	static float max_val = 0.00001;
 	static float max_val_smooth = 0.1;
 
@@ -243,77 +238,62 @@ void normalize_novelty_curve_slow() {
 		novelty_curve_normalized[i + 2] = clip_float(novelty_curve[i + 2] * auto_scale);
 		novelty_curve_normalized[i + 3] = clip_float(novelty_curve[i + 3] * auto_scale);
 	}
-
-	end_function_timing(profiler_index);
 }
 
 void normalize_novelty_curve() {
-	uint16_t profiler_index = start_function_timing(__func__);
-	static float max_val = 0.00001;
-	static float max_val_smooth = 0.1;
+	profile_function([&]() {
+		static float max_val = 0.00001;
+		static float max_val_smooth = 0.1;
 
-	max_val *= 0.99;
-	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
-		max_val = max(max_val, novelty_curve[i + 0]);
-		max_val = max(max_val, novelty_curve[i + 1]);
-		max_val = max(max_val, novelty_curve[i + 2]);
-		max_val = max(max_val, novelty_curve[i + 3]);
-	}
-	max_val_smooth = max(0.1f, max_val_smooth * 0.99f + max_val * 0.01f);
+		max_val *= 0.99;
+		for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
+			max_val = max(max_val, novelty_curve[i + 0]);
+			max_val = max(max_val, novelty_curve[i + 1]);
+			max_val = max(max_val, novelty_curve[i + 2]);
+			max_val = max(max_val, novelty_curve[i + 3]);
+		}
+		max_val_smooth = max(0.1f, max_val_smooth * 0.99f + max_val * 0.01f);
 
-	float auto_scale = 1.0 / max_val_smooth;
-	dsps_mulc_f32(novelty_curve, novelty_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
-
-	end_function_timing(profiler_index);
+		float auto_scale = 1.0 / max_val_smooth;
+		dsps_mulc_f32(novelty_curve, novelty_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
+	}, __func__ );
 }
 
 void update_tempo() {
-	uint16_t profiler_index = start_function_timing(__func__);
+	profile_function([&]() {
+		static uint32_t iter = 0;
+		iter++;
 
-	static uint32_t iter = 0;
-	iter++;
+		normalize_novelty_curve();
 
-	normalize_novelty_curve();
+		if (iter % 2 == 0) {
+			static uint16_t calc_bin = 0;
 
-	if (iter % 2 == 0) {
-		static uint16_t calc_bin = 0;
+			uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
 
-		uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
-
-		calculate_tempi_magnitudes(calc_bin);
-		calc_bin++;
-		if (calc_bin >= max_bin) {
-			calc_bin = 0;
+			calculate_tempi_magnitudes(calc_bin);
+			calc_bin++;
+			if (calc_bin >= max_bin) {
+				calc_bin = 0;
+			}
 		}
-	}
-
-	end_function_timing(profiler_index);
+	}, __func__ );
 }
 
 void log_novelty(float input) {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	shift_array_left(novelty_curve, NOVELTY_HISTORY_LENGTH, 1);
 	novelty_curve[NOVELTY_HISTORY_LENGTH - 1] = input;
-
-	end_function_timing(profiler_index);
 }
 
 void reduce_tempo_history(float reduction_amount) {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	float reduction_amount_inv = 1.0 - reduction_amount;
 
 	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i++) {
 		novelty_curve[i] = max(novelty_curve[i] * reduction_amount_inv, 0.00001f);	// never go full zero
 	}
-
-	end_function_timing(profiler_index);
 }
 
 void check_silence(float current_novelty) {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	float min_val = 1.0;
 	float max_val = 0.0;
 	for (uint16_t i = 0; i < 128; i++) {
@@ -338,12 +318,9 @@ void check_silence(float current_novelty) {
 	}
 
 	// rendered_debug_value = silence_level;
-
-	end_function_timing(profiler_index);
 }
 
 void update_novelty(uint32_t t_now_us) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	static uint32_t next_update = t_now_us;
 
 	const float update_interval_hz = NOVELTY_LOG_HZ;
@@ -368,12 +345,9 @@ void update_novelty(uint32_t t_now_us) {
 		check_silence(current_novelty);
 		log_novelty(current_novelty);
 	}
-
-	end_function_timing(profiler_index);
 }
 
 void sync_beat_phase(uint16_t tempo_bin, float delta) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	tempi[tempo_bin].phase += (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
 	tempi[tempo_bin].phase_target += (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
 
@@ -401,13 +375,9 @@ void sync_beat_phase(uint16_t tempo_bin, float delta) {
 	}
 
 	tempi[tempo_bin].beat = sin(tempi[tempo_bin].phase);
-
-	end_function_timing(profiler_index);
 }
 
 void update_tempi_phase(float delta) {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	tempi_power_sum = 0.00000001;
 	// Iterate over all tempi to smooth them and calculate the power sum
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
@@ -422,6 +392,4 @@ void update_tempi_phase(float delta) {
 
 		sync_beat_phase(tempo_bin, delta);
 	}
-
-	end_function_timing(profiler_index);
 }

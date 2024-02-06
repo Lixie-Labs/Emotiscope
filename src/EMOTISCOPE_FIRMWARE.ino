@@ -32,11 +32,11 @@
 // Internal dependencies
 #include "secrets.h" // ........... You don't get to have this, rename "YOUR_secrets.h" to use it
 #include "types.h" // ............. typedefs for things like CRGBFs
+#include "profiler.h" // .......... Developer tools, measures the execution of functions
 #include "sliders.h" // ........... Handles sliders that appear in the web app
 #include "toggles.h" // ........... Handles toggles that appear in the web app
 #include "filesystem.h" // ........ LittleFS functions
 #include "configuration.h" // ..... Storing and retreiving your settings
-#include "profiler.h" // .......... Developer tools, measures the execution of functions
 #include "utilities.h" // ......... Custom generic math functions
 #include "system.h" // ............ Lowest-level firmware functions
 #include "led_driver.h" // ........ Low-level LED communication, (ab)uses RMT for non-blocking output

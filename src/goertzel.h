@@ -48,8 +48,6 @@ uint16_t max_goertzel_block_size = 0;
 volatile bool magnitudes_locked = false;
 
 void init_goertzel(uint16_t frequency_slot, float frequency, float bandwidth) {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	frequencies_musical[frequency_slot].block_size = SAMPLE_RATE / (bandwidth);
 
 	while (frequencies_musical[frequency_slot].block_size % 4 != 0) {
@@ -69,13 +67,9 @@ void init_goertzel(uint16_t frequency_slot, float frequency, float bandwidth) {
 	float cosine = cos(w);
 	float sine = sin(w);
 	frequencies_musical[frequency_slot].coeff = 2.0 * cosine;
-
-	end_function_timing(profiler_index);
 }
 
 void init_goertzel_constants_musical() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	for (uint16_t i = 0; i < NUM_FREQS; i++) {
 		// INIT MUSICAL FREQS
 		uint16_t note = BOTTOM_NOTE + (i * NOTE_STEP);
@@ -103,13 +97,9 @@ void init_goertzel_constants_musical() {
 
 		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 2.0);
 	}
-
-	end_function_timing(profiler_index);
 }
 
 void init_window_lookup() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	for (uint16_t i = 0; i < 2048; i++) {
 		float ratio = i / 4095.0;
 		float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
@@ -118,8 +108,6 @@ void init_window_lookup() {
 		window_lookup[i] = weighing_factor;
 		window_lookup[4095 - i] = weighing_factor;
 	}
-
-	end_function_timing(profiler_index);
 }
 
 // Function to find the median in a small array of floats
@@ -163,50 +151,52 @@ void median_filter(float* spectrogram_column) {
 }
 
 float calculate_magnitude_of_bin(uint16_t bin_number) {
-	uint16_t profiler_index = start_function_timing(__func__);
-	float q0 = 0;
-	float q1 = 0;
-	float q2 = 0;
-	float window_pos = 0.0;
+	float normalized_magnitude;
+	float scale;
 
-	const uint16_t block_size = frequencies_musical[bin_number].block_size;
+	profile_function([&]() {
+		float q0 = 0;
+		float q1 = 0;
+		float q2 = 0;
+		float window_pos = 0.0;
 
-	float coeff = frequencies_musical[bin_number].coeff;
-	float window_step = frequencies_musical[bin_number].window_step;
+		const uint16_t block_size = frequencies_musical[bin_number].block_size;
 
-	float* sample_ptr = &sample_history[(SAMPLE_HISTORY_LENGTH - 1) - block_size];
+		float coeff = frequencies_musical[bin_number].coeff;
+		float window_step = frequencies_musical[bin_number].window_step;
 
-	for (uint16_t i = 0; i < block_size; i++) {
-		float windowed_sample = sample_ptr[i] * window_lookup[uint32_t(window_pos)];
-		q0 = coeff * q1 - q2 + windowed_sample;
-		q2 = q1;
-		q1 = q0;
+		float* sample_ptr = &sample_history[(SAMPLE_HISTORY_LENGTH - 1) - block_size];
 
-		window_pos += window_step;
-	}
+		for (uint16_t i = 0; i < block_size; i++) {
+			float windowed_sample = sample_ptr[i] * window_lookup[uint32_t(window_pos)];
+			q0 = coeff * q1 - q2 + windowed_sample;
+			q2 = q1;
+			q1 = q0;
 
-	float magnitude_squared = (q1 * q1) + (q2 * q2) - q1 * q2 * coeff;
-	float magnitude = sqrt(magnitude_squared);
-	float normalized_magnitude = magnitude_squared / (block_size / 2.0);
+			window_pos += window_step;
+		}
 
-	float progress = float(bin_number) / NUM_FREQS;
-	progress *= progress;
-	progress *= progress;
-	float scale = (progress * 0.975) + 0.025;
+		float magnitude_squared = (q1 * q1) + (q2 * q2) - q1 * q2 * coeff;
+		float magnitude = sqrt(magnitude_squared);
+		normalized_magnitude = magnitude_squared / (block_size / 2.0);
 
-	end_function_timing(profiler_index);
+		float progress = float(bin_number) / NUM_FREQS;
+		progress *= progress;
+		progress *= progress;
+		scale = (progress * 0.975) + 0.025;
+
+	}, __func__ );
+
 	return normalized_magnitude * scale;
 }
 
 float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
-	uint16_t profiler_index = start_function_timing(__func__);
 	if (noise_calibration_active_frames_remaining == 0) {
 		float output_magnitude = input_magnitude - noise_spectrum[bin];
 		if (output_magnitude < 0.0) {
 			output_magnitude = 0.0;
 		}
 
-		end_function_timing(profiler_index);
 		return output_magnitude;
 	}
 	else {
@@ -214,94 +204,89 @@ float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
 			noise_spectrum[bin] = input_magnitude;
 		}
 
-		end_function_timing(profiler_index);
 		return input_magnitude;
 	}
 }
 
 void calculate_magnitudes() {
-	magnitudes_locked = true;
-	uint16_t profiler_index = start_function_timing(__func__);
+	profile_function([&]() {
+		magnitudes_locked = true;
 
-	const uint16_t NUM_AVERAGE_SAMPLES = 2;
+		const uint16_t NUM_AVERAGE_SAMPLES = 2;
 
-	static bool interlacing_frame_field = 0;
-	static float magnitudes_raw[NUM_FREQS];
-	static float magnitudes_avg[NUM_AVERAGE_SAMPLES][NUM_FREQS];
-	static float magnitudes_smooth[NUM_FREQS];
-	static float max_val_smooth = 0.0;
+		static bool interlacing_frame_field = 0;
+		static float magnitudes_raw[NUM_FREQS];
+		static float magnitudes_avg[NUM_AVERAGE_SAMPLES][NUM_FREQS];
+		static float magnitudes_smooth[NUM_FREQS];
+		static float max_val_smooth = 0.0;
 
-	static uint32_t iter = 0;
-	iter++;
+		static uint32_t iter = 0;
+		iter++;
 
-	interlacing_frame_field = !interlacing_frame_field;
+		interlacing_frame_field = !interlacing_frame_field;
 
-	float max_val = 0.0;
-	// Iterate over all target frequencies
-	for (uint16_t i = 0; i < NUM_FREQS; i++) {
-		bool interlace_line = i % 2;
-		if (interlace_line == interlacing_frame_field) {
-			// Get raw magnitude of frequency
-			magnitudes_raw[i] = calculate_magnitude_of_bin(i);  // fast_mode enabled (downsampled audio)
+		float max_val = 0.0;
+		// Iterate over all target frequencies
+		for (uint16_t i = 0; i < NUM_FREQS; i++) {
+			bool interlace_line = i % 2;
+			if (interlace_line == interlacing_frame_field) {
+				// Get raw magnitude of frequency
+				magnitudes_raw[i] = calculate_magnitude_of_bin(i);  // fast_mode enabled (downsampled audio)
+			}
+
+			// Store raw magnitude
+			frequencies_musical[i].magnitude_full_scale = magnitudes_raw[i];
+
+			// Add raw magnitude to moving average array
+			magnitudes_avg[iter % NUM_AVERAGE_SAMPLES][i] = magnitudes_raw[i];
+
+			// Sum up current moving average and divide
+			float magnitudes_avg_result = 0.0;
+			for (uint8_t a = 0; a < NUM_AVERAGE_SAMPLES; a++) {
+				magnitudes_avg_result += magnitudes_avg[a][i];
+			}
+			magnitudes_avg_result /= NUM_AVERAGE_SAMPLES;
+
+			// Store averaged value
+			magnitudes_smooth[i] = magnitudes_avg_result;
+
+			// Accumulate maximum magnitude of all bins
+			if (magnitudes_smooth[i] > max_val) {
+				max_val = magnitudes_smooth[i];
+			}
 		}
 
-		// Store raw magnitude
-		frequencies_musical[i].magnitude_full_scale = magnitudes_raw[i];
-
-		// Add raw magnitude to moving average array
-		magnitudes_avg[iter % NUM_AVERAGE_SAMPLES][i] = magnitudes_raw[i];
-
-		// Sum up current moving average and divide
-		float magnitudes_avg_result = 0.0;
-		for (uint8_t a = 0; a < NUM_AVERAGE_SAMPLES; a++) {
-			magnitudes_avg_result += magnitudes_avg[a][i];
+		// Smooth max_val with different speed limits for increases vs. decreases
+		if (max_val > max_val_smooth) {
+			float delta = max_val - max_val_smooth;
+			max_val_smooth += delta * 0.005;
 		}
-		magnitudes_avg_result /= NUM_AVERAGE_SAMPLES;
-
-		// Store averaged value
-		magnitudes_smooth[i] = magnitudes_avg_result;
-
-		// Accumulate maximum magnitude of all bins
-		if (magnitudes_smooth[i] > max_val) {
-			max_val = magnitudes_smooth[i];
+		if (max_val < max_val_smooth) {
+			float delta = max_val_smooth - max_val;
+			max_val_smooth -= delta * 0.005;
 		}
-	}
 
-	// Smooth max_val with different speed limits for increases vs. decreases
-	if (max_val > max_val_smooth) {
-		float delta = max_val - max_val_smooth;
-		max_val_smooth += delta * 0.005;
-	}
-	if (max_val < max_val_smooth) {
-		float delta = max_val_smooth - max_val;
-		max_val_smooth -= delta * 0.005;
-	}
+		// Set a minimum "floor" to auto-range for, below this we don't auto-range anymore
+		if (max_val_smooth < 0.005) {
+			max_val_smooth = 0.005;
+		}
 
-	// Set a minimum "floor" to auto-range for, below this we don't auto-range anymore
-	if (max_val_smooth < 0.01) {
-		max_val_smooth = 0.01;
-	}
+		// Calculate auto-ranging scale
+		float autoranger_scale = 1.0 / (max_val_smooth);
 
-	// Calculate auto-ranging scale
-	float autoranger_scale = 1.0 / (max_val_smooth);
+		// Iterate over all frequencies
+		for (uint16_t i = 0; i < NUM_FREQS; i++) {
+			// Apply the auto-scaler
+			frequencies_musical[i].magnitude = clip_float(magnitudes_smooth[i] * autoranger_scale);
+		}
 
-	// Iterate over all frequencies
-	for (uint16_t i = 0; i < NUM_FREQS; i++) {
-		// Apply the auto-scaler
-		frequencies_musical[i].magnitude = clip_float(magnitudes_smooth[i] * autoranger_scale);
-	}
-
-	end_function_timing(profiler_index);
-	magnitudes_locked = false;
+		magnitudes_locked = false;
+	}, __func__ );
 }
 
 void start_noise_calibration() {
-	uint16_t profiler_index = start_function_timing(__func__);
-
 	Serial.println("NOISE CAL DELAY");
 	memset(noise_spectrum, 0, sizeof(float) * NUM_FREQS);
 	noise_calibration_delay_frames_remaining = NOISE_CALIBRATION_FRAME_DELAY;
 	noise_calibration_active_frames_remaining = NOISE_CALIBRATION_FRAMES;
-
-	end_function_timing(profiler_index);
 }
