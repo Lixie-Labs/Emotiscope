@@ -31,6 +31,7 @@
 
 // Internal dependencies
 #include "secrets.h" // ........... You don't get to have this, rename "YOUR_secrets.h" to use it
+#include "global_defines.h" // .... Compile-time configuration
 #include "types.h" // ............. typedefs for things like CRGBFs
 #include "profiler.h" // .......... Developer tools, measures the execution of functions
 #include "sliders.h" // ........... Handles sliders that appear in the web app
