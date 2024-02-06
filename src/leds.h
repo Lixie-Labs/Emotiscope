@@ -39,13 +39,8 @@ float note_colors[12] = {0.0000, 0.0833, 0.1666, 0.2499, 0.3333, 0.4166,
 						 0.4999, 0.5833, 0.6666, 0.7499, 0.8333, 0.9166};
 
 void init_leds() {
-	//FastLED.addLeds<LED_TYPE, DATA_PIN_1>(leds_8, 0, 64);	// Initialize FastLED Data Out 1
-	//FastLED.addLeds<LED_TYPE, DATA_PIN_2>(leds_8, 64, 64);	// Initialize FastLED Data Out 2
-
-	//FastLED.setDither(false);
-
-	rmt_tx_init(RMT_CHANNEL_0, RMT_A_GPIO );
-	rmt_tx_init(RMT_CHANNEL_1, RMT_B_GPIO );
+	//rmt_tx_init(RMT_CHANNEL_0, RMT_A_GPIO );
+	//rmt_tx_init(RMT_CHANNEL_1, RMT_B_GPIO );
 }
 
 void save_leds_to_temp() {
@@ -144,19 +139,19 @@ void quantize_color() {
 		decimal_r = leds[i].r * 254;
 		whole_r = decimal_r;
 		fract_r = decimal_r - whole_r;
-		leds_rmt[i].r = whole_r + (fract_r >= dither_table[(dither_step + i) % 4]);
+		//leds_rmt[i].r = whole_r + (fract_r >= dither_table[(dither_step + i) % 4]);
 		
 		// GREEN #####################################################
 		decimal_g = leds[i].g * 254;
 		whole_g = decimal_g;
 		fract_g = decimal_g - whole_g;
-		leds_rmt[i].g = whole_g + (fract_g >= dither_table[(dither_step + i) % 4]);
+		//leds_rmt[i].g = whole_g + (fract_g >= dither_table[(dither_step + i) % 4]);
 
 		// BLUE #####################################################
 		decimal_b = leds[i].b * 254;
 		whole_b = decimal_b;
 		fract_b = decimal_b - whole_b;
-		leds_rmt[i].b = whole_b + (fract_b >= dither_table[(dither_step + i) % 4]);
+		//leds_rmt[i].b = whole_b + (fract_b >= dither_table[(dither_step + i) % 4]);
 	}
 }
 
@@ -169,10 +164,18 @@ CRGBF hsv(float h, float s, float v) {
 
 	v = clip_float(v);
 
+	// TODO: Re-implement HSV calculation without FastLED
+	/*
 	CRGB base_color = CHSV(h_8_bit, s_8_bit, 255);
 
 	CRGBF col = {(base_color.r / 255.0f) * v, (base_color.g / 255.0f) * v,
 				 (base_color.b / 255.0f) * v};
+	*/
+	CRGBF col = {
+		1.0 * v,
+		0.0 * v, 
+		0.0 * v
+	};
 
 	col.r = min(col.r, 1.0f);
 	col.g = min(col.g, 1.0f);

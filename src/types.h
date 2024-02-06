@@ -7,16 +7,13 @@ struct command {
 
 struct freq {
 	float target_freq;
-
-	uint16_t block_size;
 	float coeff;
-
 	float window_step;
-
 	float magnitude;
 	float magnitude_full_scale;
 	float magnitude_last;
 	float novelty;
+	uint16_t block_size;
 };
 
 struct CRGBF {	// A bit like FastLED with floating point color channels that
@@ -58,19 +55,14 @@ struct tempo {
 	float coeff;
 	float sine;
 	float cosine;
-
-	uint32_t block_size;
-
 	float window_step;
-
 	float phase;
 	float phase_target;
 	float phase_radians_per_reference_frame;
-
 	float beat;
-
 	float magnitude;
 	float magnitude_full_scale;
+	uint32_t block_size;
 };
 
 struct websocket_client {

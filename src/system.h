@@ -11,10 +11,17 @@
 // Foundational functions like UART initialization
 
 void init_serial(uint32_t baud_rate) {
+	// Artificial 10-second boot up wait time if needed
+	//for(uint16_t i = 0; i < 10; i++){ printf("WAITING FOR %d SECONDS...\n", 10-i); delay(1000); }
+
+	// Get the ESP-IDF version
+    const char* idf_version = esp_get_idf_version();
+
 	Serial.begin(baud_rate);
 	Serial.println('\n');
 	Serial.println("######################");
-	Serial.printf( "EMOTISCOPE v%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+	Serial.printf( "EMOTISCOPE v%d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    Serial.printf( "ESP-IDF Version: %s\n", IDF_VER);
 	Serial.println("######################");
 }
 
@@ -27,9 +34,6 @@ void init_system() {
 	extern void init_tempo_goertzel_constants();
 	extern void init_wifi();
 	extern void init_filesystem();
-
-	// Artificial 5-second boot up wait time if needed
-	//for(uint16_t i = 0; i < 5; i++){ printf("WAITING FOR %d SECONDS...\n", 5-i); delay(1000); }
 
 	init_serial(2000000);					  // (system.h)
 	init_filesystem();                        // (filesystem.h)

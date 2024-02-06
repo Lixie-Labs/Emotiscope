@@ -76,8 +76,7 @@ void run_gpu() {
 
 	// Output the quantized color to the 8-bit LED strand
 	// uint16_t fastled_profiler_index = start_function_timing("FastLED.show()");
-	// FastLED.show();
-	transmit_leds();
+	//transmit_leds();
 	// end_function_timing(fastled_profiler_index);
 
 	// Update the FPS_GPU variable

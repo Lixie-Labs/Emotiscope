@@ -169,7 +169,7 @@ void print_system_info(uint32_t t_now_ms) {
 		UBaseType_t free_stack_cpu = uxTaskGetStackHighWaterMark(NULL); // CPU core (this one)
 		UBaseType_t free_stack_gpu = uxTaskGetStackHighWaterMark(xTaskGetHandle("loop_gpu")); // GPU core
 
-		extern bool web_server_ready;
+		extern volatile bool web_server_ready;
 		extern PsychicWebSocketClient *get_client_in_slot(uint8_t slot);
 
 		printf("# SYSTEM INFO ####################\n");

@@ -62,10 +62,10 @@ void acquire_sample_chunk() {
 
 		// Clip the sample value if it's too large, cast to large floats
 		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
-			new_samples_raw_float[i+0] = min(max(new_samples_raw[i+0], -80000000),  80000000);
-			new_samples_raw_float[i+1] = min(max(new_samples_raw[i+1], -80000000),  80000000);
-			new_samples_raw_float[i+2] = min(max(new_samples_raw[i+2], -80000000),  80000000);
-			new_samples_raw_float[i+3] = min(max(new_samples_raw[i+3], -80000000),  80000000);
+			new_samples_raw_float[i+0] = min(max((int32_t)new_samples_raw[i+0], (int32_t)-80000000), (int32_t)80000000);
+			new_samples_raw_float[i+1] = min(max((int32_t)new_samples_raw[i+1], (int32_t)-80000000), (int32_t)80000000);
+			new_samples_raw_float[i+2] = min(max((int32_t)new_samples_raw[i+2], (int32_t)-80000000), (int32_t)80000000);
+			new_samples_raw_float[i+3] = min(max((int32_t)new_samples_raw[i+3], (int32_t)-80000000), (int32_t)80000000);
 		}
 
 		// Convert audio from large float range to -1.0 to 1.0 range
@@ -76,6 +76,21 @@ void acquire_sample_chunk() {
 		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE);
 		waveform_locked = false;
 		waveform_sync_flag = true;
+
+		/*
+		// Used to print raw microphone values over UART for debugging
+		float* samples = &sample_history[SAMPLE_HISTORY_LENGTH-1-CHUNK_SIZE];
+		char output[32];
+		memset(output, 0, 32);
+		for(uint16_t i = 0; i < CHUNK_SIZE; i++){
+			uint16_t offset = 16;
+			uint16_t position = offset + int16_t(samples[i]*8.0);
+			memset(output, 0, 32);
+			memset(output, ' ', position);
+			output[position] = '|';
+			printf("%s\n", output);
+		}
+		*/
 
 	}, __func__);
 }
