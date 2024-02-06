@@ -39,8 +39,8 @@
 #include "profiler.h" // .......... Developer tools, measures the execution of functions
 #include "utilities.h" // ......... Custom generic math functions
 #include "system.h" // ............ Lowest-level firmware functions
-#include "leds_8.h" // ............ 
-#include "leds.h" // .............. LED dithering, effects and communication
+#include "led_driver.h" // ........ Low-level LED communication, (ab)uses RMT for non-blocking output
+#include "leds.h" // .............. LED dithering, effects, filters
 #include "microphone.h" // ........ For gathering audio chunks from the microphone
 #include "goertzel.h" // .......... GDFT or God Damn Fast Transform is implemented here
 #include "tempo.h" // ............. Comupation of (and syncronization) to the music tempo
