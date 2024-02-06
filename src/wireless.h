@@ -10,6 +10,10 @@ websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
 
 volatile bool web_server_ready = false;
 
+void run_ping_pong(){
+	// TODO: Implement server-side ping-pong communication test
+}
+
 void discovery_check_in() {
     static uint32_t next_discovery_check_in_time = 0;
     static uint8_t attempt_count = 0;  // Keep track of the current attempt count

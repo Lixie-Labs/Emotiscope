@@ -9,6 +9,10 @@ let auto_response_table = {
 	"mode_selected":"get|config",
 };
 
+function run_ping_pong(){
+	// TODO: Implement client-side ping-pong communication test
+}
+
 function set_locked_state(locked_state){
 	let dimmer = document.getElementById("dimmer");
 	if(locked_state == true){
