@@ -256,10 +256,14 @@ void calculate_magnitudes() {
 		}
 
 		if(noise_calibration_active_frames_remaining > 0){
+			// Not done yet? Decrement...
 			noise_calibration_active_frames_remaining -= 1;
+
+			// If background noise calibration just finished
 			if(noise_calibration_active_frames_remaining == 0){
-				printf("NOISE CAL COMPLETE\n");
-				// TODO: Finished noise cal should report back to the UI to unlock it
+				// Let the UI know
+				broadcast("noise_cal_ready");
+				//save_config_delayed();
 			}
 		}
 

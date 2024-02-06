@@ -40,6 +40,11 @@ function attempt_auto_response(message){
 	return success;
 }
 
+function start_noise_calibration(){
+	set_locked_state(true);
+	transmit('noise_cal');
+}
+
 function sync_data_from_device(){
 	transmit("get|config"); // Triggers chain of data sync commands
 }
@@ -116,6 +121,11 @@ function parse_message(message){
 
 			render_controls();
 			//tint_svg_images();
+			set_locked_state(false);
+		}
+		else if(command_type == "noise_cal_ready"){
+			console.log("NOISE CAL COMPLETE!");
+			hide_page('page_calibration');
 			set_locked_state(false);
 		}
 		else{
