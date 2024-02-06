@@ -145,7 +145,6 @@ bool load_noise_spectrum() {
 		// Ensure the noise_spectrum array is sized properly
 		if (file.size() != sizeof(float) * NUM_FREQS) {
 			printf("Noise spectrum size does not match expected size! (%lu != %lu)\n", file.size(), sizeof(float) * NUM_FREQS);
-			// TODO: When files don't match their expected size on load, just delete them and start fresh
 			file.close();
 			return false;
 		}
@@ -167,7 +166,6 @@ bool load_noise_spectrum() {
 }
 
 void save_config_delayed() {
-	// TODO: Finished noise cals should open a save request
 	last_save_request_ms = millis();
 	save_request_open = true;
 }
