@@ -1,94 +1,164 @@
-/*
-#include "driver/rmt.h"
-#define RMT_CLK_DIV 8 // 80MHz --> 10MHz
-#define RMT_TICK  (80000000/RMT_CLK_DIV/10000000) // 1 tick = 100ns
+#include <driver/rmt_tx.h>
+#include <driver/rmt_encoder.h>
+#include <esp_check.h>
+#include <esp_log.h>
 
-gpio_num_t RMT_A_GPIO = (gpio_num_t)13;
-gpio_num_t RMT_B_GPIO = (gpio_num_t)12;
+rmt_channel_handle_t tx_chan_a = NULL;
+rmt_channel_handle_t tx_chan_b = NULL;
+rmt_encoder_handle_t led_encoder_a = NULL;
+rmt_encoder_handle_t led_encoder_b = NULL;
+
+typedef struct {
+    rmt_encoder_t base;
+    rmt_encoder_t *bytes_encoder;
+    rmt_encoder_t *copy_encoder;
+    int state;
+    rmt_symbol_word_t reset_code;
+} rmt_led_strip_encoder_t;
+
+rmt_led_strip_encoder_t strip_encoder_a;
+rmt_led_strip_encoder_t strip_encoder_b;
 
 const uint32_t NUM_LEDS_TOTAL = 128;
-const uint32_t NUM_LED_BITS  = NUM_LEDS_TOTAL*24;
-const uint32_t NUM_LED_BYTES = NUM_LEDS_TOTAL*3;
-const uint32_t NUM_LEDS_PER_RMT  = NUM_LEDS_TOTAL / 2;
-const uint32_t NUM_BITS_PER_RMT  = NUM_LED_BITS / 2;
 
-rmt_item32_t rmt_items_a[NUM_BITS_PER_RMT * sizeof(rmt_item32_t)];
-rmt_item32_t rmt_items_b[NUM_BITS_PER_RMT * sizeof(rmt_item32_t)];
-
-struct ERGB8 {
-	uint8_t g;
-	uint8_t r;
-	uint8_t b;
+rmt_transmit_config_t tx_config = {
+	.loop_count = 0,  // no transfer loop
+	.flags = { .eot_level = 0, .queue_nonblocking = 0 }
 };
 
-ERGB8 leds_rmt[NUM_LEDS_TOTAL];
+typedef struct {
+    uint32_t resolution; /*!< Encoder resolution, in Hz */
+} led_strip_encoder_config_t;
 
-// Initialize RMT for transmission
-void rmt_tx_init(rmt_channel_t channel, gpio_num_t gpio_num) {
-    rmt_config_t config = {
-        .rmt_mode = RMT_MODE_TX,
-        .channel = channel,
-        .gpio_num = gpio_num,
-        .clk_div = RMT_CLK_DIV, 
-        .mem_block_num = 1, // Number of memory blocks
-        .tx_config = {
-		    .carrier_freq_hz = 10000000,
-			.carrier_level = RMT_CARRIER_LEVEL_HIGH,
-			.idle_level = RMT_IDLE_LEVEL_LOW,
-            .carrier_duty_percent = 50,
-			.loop_count = 0,
-			.carrier_en = false,
-			.loop_en = false,
-			.idle_output_en = true,
-        },
-    };
+static const char *TAG = "led_encoder";
 
-    // Configure the RMT peripheral based on the config
-    rmt_config(&config);
-    rmt_driver_install(config.channel, 0, 0);
-}
-
-// Function to prepare RMT items from a bit array
-void prepare_rmt_items(rmt_item32_t* items, uint16_t offset) {
-	uint8_t* bit_array = (uint8_t*)leds_rmt;
-
-	uint8_t bit_index = 0;
-	uint16_t byte_index = offset*3;
-
-    for (size_t i = 0; i < NUM_BITS_PER_RMT; i++) {
-		uint8_t bit_val = bitRead(bit_array[byte_index], 7-bit_index);
-
-        if (bit_val == 0) {
-            // Zero bit: HIGH for 3 ticks, LOW for 6 ticks
-            items[i].level0 = 1;
-            items[i].duration0 = RMT_TICK * 4;
-            items[i].level1 = 0;
-            items[i].duration1 = RMT_TICK * 6;
-        } else {
-            // One bit: HIGH for 7 ticks, LOW for 6 ticks
-            items[i].level0 = 1;
-            items[i].duration0 = RMT_TICK * 7;
-            items[i].level1 = 0;
-            items[i].duration1 = RMT_TICK * 6;
+static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size, rmt_encode_state_t *ret_state){
+    rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
+    rmt_encoder_handle_t bytes_encoder = led_encoder->bytes_encoder;
+    rmt_encoder_handle_t copy_encoder = led_encoder->copy_encoder;
+    rmt_encode_state_t session_state = RMT_ENCODING_RESET;
+    rmt_encode_state_t state = RMT_ENCODING_RESET;
+    size_t encoded_symbols = 0;
+    switch (led_encoder->state) {
+    case 0: // send RGB data
+        encoded_symbols += bytes_encoder->encode(bytes_encoder, channel, primary_data, data_size, &session_state);
+        if (session_state & RMT_ENCODING_COMPLETE) {
+            led_encoder->state = 1; // switch to next state when current encoding session finished
         }
-
-		bit_index++;
-		if(bit_index >= 8){
-			bit_index = 0;
-			byte_index++;
-		}
+        if (session_state & RMT_ENCODING_MEM_FULL) {
+            state = (rmt_encode_state_t)(state | (uint32_t)RMT_ENCODING_MEM_FULL);
+            goto out; // yield if there's no free space for encoding artifacts
+        }
+    // fall-through
+    case 1: // send reset code
+        encoded_symbols += copy_encoder->encode(copy_encoder, channel, &led_encoder->reset_code,
+                                                sizeof(led_encoder->reset_code), &session_state);
+        if (session_state & RMT_ENCODING_COMPLETE) {
+            led_encoder->state = RMT_ENCODING_RESET; // back to the initial encoding session
+			state = (rmt_encode_state_t)(state | (uint32_t)RMT_ENCODING_COMPLETE);
+        }
+        if (session_state & RMT_ENCODING_MEM_FULL) {
+			state = (rmt_encode_state_t)(state | (uint32_t)RMT_ENCODING_MEM_FULL);
+            goto out; // yield if there's no free space for encoding artifacts
+        }
     }
+out:
+    *ret_state = state;
+    return encoded_symbols;
 }
 
-// Function to transmit the bit array
+static esp_err_t rmt_del_led_strip_encoder(rmt_encoder_t *encoder){
+    rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
+    rmt_del_encoder(led_encoder->bytes_encoder);
+    rmt_del_encoder(led_encoder->copy_encoder);
+    free(led_encoder);
+    return ESP_OK;
+}
+
+static esp_err_t rmt_led_strip_encoder_reset(rmt_encoder_t *encoder){
+    rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
+    rmt_encoder_reset(led_encoder->bytes_encoder);
+    rmt_encoder_reset(led_encoder->copy_encoder);
+    led_encoder->state = RMT_ENCODING_RESET;
+    return ESP_OK;
+}
+
+esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder_a, rmt_encoder_handle_t *ret_encoder_b){
+    esp_err_t ret = ESP_OK;
+
+	strip_encoder_a.base.encode = rmt_encode_led_strip;
+    strip_encoder_a.base.del    = rmt_del_led_strip_encoder;
+    strip_encoder_a.base.reset  = rmt_led_strip_encoder_reset;
+
+	strip_encoder_b.base.encode = rmt_encode_led_strip;
+    strip_encoder_b.base.del    = rmt_del_led_strip_encoder;
+    strip_encoder_b.base.reset  = rmt_led_strip_encoder_reset;
+
+    // different led strip might have its own timing requirements, following parameter is for WS2812
+    rmt_bytes_encoder_config_t bytes_encoder_config = {
+        .bit0 = { 4, 1, 6, 0 },
+        .bit1 = { 7, 1, 6, 0 },
+		.flags = { .msb_first = 1 }
+    };
+    
+	rmt_new_bytes_encoder(&bytes_encoder_config, &strip_encoder_a.bytes_encoder);
+	rmt_new_bytes_encoder(&bytes_encoder_config, &strip_encoder_b.bytes_encoder);
+    rmt_copy_encoder_config_t copy_encoder_config = {};
+    rmt_new_copy_encoder(&copy_encoder_config, &strip_encoder_a.copy_encoder);
+	rmt_new_copy_encoder(&copy_encoder_config, &strip_encoder_b.copy_encoder);
+
+    strip_encoder_a.reset_code = (rmt_symbol_word_t) { 250, 0, 250, 0 };
+    strip_encoder_b.reset_code = (rmt_symbol_word_t) { 250, 0, 250, 0 };
+
+    *ret_encoder_a = &strip_encoder_a.base;
+    *ret_encoder_b = &strip_encoder_b.base;
+    return ESP_OK;
+}
+
+void init_rmt_driver() {
+	printf("init_rmt_driver\n");
+	rmt_tx_channel_config_t tx_chan_a_config = {
+		.gpio_num = (gpio_num_t)13,		 // GPIO number
+		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
+		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
+		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
+		.flags = { .with_dma = 0 }
+	};
+
+	rmt_tx_channel_config_t tx_chan_b_config = {
+		.gpio_num = (gpio_num_t)12,		 // GPIO number
+		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
+		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
+		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
+		.flags = { .with_dma = 0 }
+	};
+
+	printf("rmt_new_tx_channel\n");
+	ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_a_config, &tx_chan_a));
+	ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_b_config, &tx_chan_b));
+
+	ESP_LOGI(TAG, "Install led strip encoder");
+    led_strip_encoder_config_t encoder_config = {
+        .resolution = 10000000,
+    };
+	printf("rmt_new_led_strip_encoder\n");
+    ESP_ERROR_CHECK(rmt_new_led_strip_encoder(&encoder_config, &led_encoder_a, &led_encoder_b));
+	
+	printf("rmt_enable\n");
+	ESP_ERROR_CHECK(rmt_enable(tx_chan_a));
+	ESP_ERROR_CHECK(rmt_enable(tx_chan_b));
+}
+
+static uint8_t raw_led_data[NUM_LEDS_TOTAL*3];
+static uint8_t raw_led_data_out[NUM_LEDS_TOTAL*3];
+
 void transmit_leds() {
-	rmt_wait_tx_done(RMT_CHANNEL_0, portMAX_DELAY);
-	rmt_wait_tx_done(RMT_CHANNEL_1, portMAX_DELAY);
+	memcpy(raw_led_data_out, raw_led_data, NUM_LEDS_TOTAL*3);
+	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
+	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
 
-    prepare_rmt_items(rmt_items_a, 0);
-	prepare_rmt_items(rmt_items_b, 64);
-
-	rmt_write_items(RMT_CHANNEL_0, rmt_items_a, NUM_LED_BITS, false);
-	rmt_write_items(RMT_CHANNEL_1, rmt_items_b, NUM_LED_BITS, false);
+	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data_out, (sizeof(raw_led_data_out) >> 1), &tx_config);
+	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data_out+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data_out) >> 1), &tx_config);
 }
-*/
