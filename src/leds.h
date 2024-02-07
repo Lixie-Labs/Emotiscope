@@ -139,19 +139,29 @@ void quantize_color() {
 		decimal_r = leds[i].r * 254;
 		whole_r = decimal_r;
 		fract_r = decimal_r - whole_r;
-		//leds_rmt[i].r = whole_r + (fract_r >= dither_table[(dither_step + i) % 4]);
+		raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step + i) % 4]);
 		
 		// GREEN #####################################################
 		decimal_g = leds[i].g * 254;
 		whole_g = decimal_g;
 		fract_g = decimal_g - whole_g;
-		//leds_rmt[i].g = whole_g + (fract_g >= dither_table[(dither_step + i) % 4]);
+		raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step + i) % 4]);
 
 		// BLUE #####################################################
 		decimal_b = leds[i].b * 254;
 		whole_b = decimal_b;
 		fract_b = decimal_b - whole_b;
-		//leds_rmt[i].b = whole_b + (fract_b >= dither_table[(dither_step + i) % 4]);
+		raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step + i) % 4]);
+	}
+}
+
+void quantize_color_rough() {
+	memset(raw_led_data, 0, sizeof(raw_led_data));
+
+	for (uint16_t i = 0; i < NUM_LEDS; i++) {
+		raw_led_data[3*i+0] = leds[i].g*254;
+		raw_led_data[3*i+1] = leds[i].r*254;
+		raw_led_data[3*i+2] = leds[i].b*254;
 	}
 }
 
@@ -159,10 +169,7 @@ CRGBF hsv(float h, float s, float v) {
 	h = fmodf(h, 1.0f);
 	while (h < 0.0f) h += 1.0f;
 
-	uint8_t h_8_bit = h * 255.0f;
-	uint8_t s_8_bit = s * 255.0f;
-
-	v = clip_float(v);
+	//v = clip_float(v);
 
 	// TODO: Re-implement HSV calculation without FastLED
 	/*

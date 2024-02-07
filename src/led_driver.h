@@ -1,3 +1,4 @@
+/*
 #include "driver/rmt.h"
 #define RMT_CLK_DIV 8 // 80MHz --> 10MHz
 #define RMT_TICK  (80000000/RMT_CLK_DIV/10000000) // 1 tick = 100ns
@@ -90,3 +91,4 @@ void transmit_leds() {
 	rmt_write_items(RMT_CHANNEL_0, rmt_items_a, NUM_LED_BITS, false);
 	rmt_write_items(RMT_CHANNEL_1, rmt_items_b, NUM_LED_BITS, false);
 }
+*/

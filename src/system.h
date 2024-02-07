@@ -26,6 +26,7 @@ void init_serial(uint32_t baud_rate) {
 }
 
 void init_system() {
+	extern void init_rmt_driver();
 	extern void init_leds();
 	extern void init_i2s_microphone();
 	extern void init_window_lookup();
@@ -38,6 +39,7 @@ void init_system() {
 	init_serial(2000000);					  // (system.h)
 	init_filesystem();                        // (filesystem.h)
 	init_configuration();                     // (configuration.h)
+	init_rmt_driver();
 	init_leds();							  // (leds.h)
 	init_i2s_microphone();					  // (microphone.h)
 	init_window_lookup();					  // (goertzel.h)

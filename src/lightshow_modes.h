@@ -16,6 +16,7 @@
 #include "lightshow_modes/spectrum_clap.h"
 #include "lightshow_modes/hype.h"
 #include "lightshow_modes/plot.h"
+#include "lightshow_modes/debug.h"
 
 lightshow_mode lightshow_modes[] = {
 	{ "Spectrum",        &draw_spectrum      }, // 0
@@ -23,6 +24,7 @@ lightshow_mode lightshow_modes[] = {
 	{ "Spectrum + Clap", &draw_spectrum_clap }, // 2
 	{ "Hype",            &draw_hype          }, // 3
 	{ "Plot",            &draw_plot          }, // 4
+	{ "Debug",           &draw_debug         }, // 5
 };
 
 extern float lpf_drag; // Used for fade transition

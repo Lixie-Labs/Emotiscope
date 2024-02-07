@@ -79,3 +79,9 @@ struct config {
 	float incandescent_filter;
 	float hue_range;
 };
+
+struct ERGB8 {
+	uint8_t g;
+	uint8_t r;
+	uint8_t b;
+};
