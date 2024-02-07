@@ -72,8 +72,8 @@ void run_gpu() {
 	}
 
 	// Quantize the floating point color to 8-bit with dithering
-	//quantize_color();  // (leds.h)
-	quantize_color_rough();  // (leds.h)
+	quantize_color();  // (leds.h)
+	//quantize_color_rough();  // (leds.h)
 
 	// Output the quantized color to the 8-bit LED strand
 	// uint16_t fastled_profiler_index = start_function_timing("FastLED.show()");

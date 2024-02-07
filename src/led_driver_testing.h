@@ -3,8 +3,21 @@
 #include <esp_check.h>
 #include <esp_log.h>
 
-rmt_channel_handle_t tx_chan = NULL;
-rmt_encoder_handle_t led_encoder = NULL;
+rmt_channel_handle_t tx_chan_a = NULL;
+rmt_channel_handle_t tx_chan_b = NULL;
+rmt_encoder_handle_t led_encoder_a = NULL;
+rmt_encoder_handle_t led_encoder_b = NULL;
+
+typedef struct {
+    rmt_encoder_t base;
+    rmt_encoder_t *bytes_encoder;
+    rmt_encoder_t *copy_encoder;
+    int state;
+    rmt_symbol_word_t reset_code;
+} rmt_led_strip_encoder_t;
+
+rmt_led_strip_encoder_t strip_encoder_a;
+rmt_led_strip_encoder_t strip_encoder_b;
 
 const uint32_t NUM_LEDS_TOTAL = 128;
 
@@ -18,14 +31,6 @@ typedef struct {
 } led_strip_encoder_config_t;
 
 static const char *TAG = "led_encoder";
-
-typedef struct {
-    rmt_encoder_t base;
-    rmt_encoder_t *bytes_encoder;
-    rmt_encoder_t *copy_encoder;
-    int state;
-    rmt_symbol_word_t reset_code;
-} rmt_led_strip_encoder_t;
 
 static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size, rmt_encode_state_t *ret_state){
     rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
@@ -78,14 +83,16 @@ static esp_err_t rmt_led_strip_encoder_reset(rmt_encoder_t *encoder){
     return ESP_OK;
 }
 
-rmt_led_strip_encoder_t strip_encoder;
-
-esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder){
+esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder_a, rmt_encoder_handle_t *ret_encoder_b){
     esp_err_t ret = ESP_OK;
 
-	strip_encoder.base.encode = rmt_encode_led_strip;
-    strip_encoder.base.del = rmt_del_led_strip_encoder;
-    strip_encoder.base.reset = rmt_led_strip_encoder_reset;
+	strip_encoder_a.base.encode = rmt_encode_led_strip;
+    strip_encoder_a.base.del    = rmt_del_led_strip_encoder;
+    strip_encoder_a.base.reset  = rmt_led_strip_encoder_reset;
+
+	strip_encoder_b.base.encode = rmt_encode_led_strip;
+    strip_encoder_b.base.del    = rmt_del_led_strip_encoder;
+    strip_encoder_b.base.reset  = rmt_led_strip_encoder_reset;
 
     // different led strip might have its own timing requirements, following parameter is for WS2812
     rmt_bytes_encoder_config_t bytes_encoder_config = {
@@ -94,45 +101,62 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
 		.flags = { .msb_first = 1 }
     };
     
-	rmt_new_bytes_encoder(&bytes_encoder_config, &strip_encoder.bytes_encoder);
+	rmt_new_bytes_encoder(&bytes_encoder_config, &strip_encoder_a.bytes_encoder);
+	rmt_new_bytes_encoder(&bytes_encoder_config, &strip_encoder_b.bytes_encoder);
     rmt_copy_encoder_config_t copy_encoder_config = {};
-    rmt_new_copy_encoder(&copy_encoder_config, &strip_encoder.copy_encoder);
+    rmt_new_copy_encoder(&copy_encoder_config, &strip_encoder_a.copy_encoder);
+	rmt_new_copy_encoder(&copy_encoder_config, &strip_encoder_b.copy_encoder);
 
-    strip_encoder.reset_code = (rmt_symbol_word_t) { 250, 0, 250, 0 };
+    strip_encoder_a.reset_code = (rmt_symbol_word_t) { 250, 0, 250, 0 };
+    strip_encoder_b.reset_code = (rmt_symbol_word_t) { 250, 0, 250, 0 };
 
-    *ret_encoder = &strip_encoder.base;
+    *ret_encoder_a = &strip_encoder_a.base;
+    *ret_encoder_b = &strip_encoder_b.base;
     return ESP_OK;
 }
 
 void init_rmt_driver() {
 	printf("init_rmt_driver\n");
-	rmt_tx_channel_config_t tx_chan_config = {
+	rmt_tx_channel_config_t tx_chan_a_config = {
 		.gpio_num = (gpio_num_t)13,		 // GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
-		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
+		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
+		.flags = { .with_dma = 0 }
+	};
+
+	rmt_tx_channel_config_t tx_chan_b_config = {
+		.gpio_num = (gpio_num_t)12,		 // GPIO number
+		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
+		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
+		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.flags = { .with_dma = 0 }
 	};
 
 	printf("rmt_new_tx_channel\n");
-	ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config, &tx_chan));
+	ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_a_config, &tx_chan_a));
+	ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_b_config, &tx_chan_b));
 
 	ESP_LOGI(TAG, "Install led strip encoder");
     led_strip_encoder_config_t encoder_config = {
         .resolution = 10000000,
     };
 	printf("rmt_new_led_strip_encoder\n");
-    ESP_ERROR_CHECK(rmt_new_led_strip_encoder(&encoder_config, &led_encoder));
+    ESP_ERROR_CHECK(rmt_new_led_strip_encoder(&encoder_config, &led_encoder_a, &led_encoder_b));
 	
 	printf("rmt_enable\n");
-	ESP_ERROR_CHECK(rmt_enable(tx_chan));
+	ESP_ERROR_CHECK(rmt_enable(tx_chan_a));
+	ESP_ERROR_CHECK(rmt_enable(tx_chan_b));
 }
 
 static uint8_t raw_led_data[NUM_LEDS_TOTAL*3];
 
 void transmit_leds() {
-	//printf( "%u, %u, %u | %u, %u, %u\n", raw_led_data[0], raw_led_data[1], raw_led_data[2], raw_led_data[3], raw_led_data[4], raw_led_data[5] );
-	//ESP_ERROR_CHECK(rmt_tx_wait_all_done(tx_chan, portMAX_DELAY));
-	ESP_ERROR_CHECK(rmt_transmit(tx_chan, led_encoder, raw_led_data, sizeof(raw_led_data), &tx_config));
+	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
+	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
+
+	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
+	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
 }
