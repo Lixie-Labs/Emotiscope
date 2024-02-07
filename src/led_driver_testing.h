@@ -152,11 +152,13 @@ void init_rmt_driver() {
 }
 
 static uint8_t raw_led_data[NUM_LEDS_TOTAL*3];
+static uint8_t raw_led_data_out[NUM_LEDS_TOTAL*3];
 
 void transmit_leds() {
+	memcpy(raw_led_data_out, raw_led_data, NUM_LEDS_TOTAL*3);
 	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
 	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
 
-	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
-	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
+	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data_out, (sizeof(raw_led_data_out) >> 1), &tx_config);
+	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data_out+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data_out) >> 1), &tx_config);
 }
