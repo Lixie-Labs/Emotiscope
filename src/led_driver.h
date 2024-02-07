@@ -121,7 +121,7 @@ void init_rmt_driver() {
 		.gpio_num = (gpio_num_t)13,		 // GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
-		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.flags = { .with_dma = 0 }
 	};
@@ -130,7 +130,7 @@ void init_rmt_driver() {
 		.gpio_num = (gpio_num_t)12,		 // GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
-		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.flags = { .with_dma = 0 }
 	};
@@ -154,10 +154,45 @@ void init_rmt_driver() {
 static uint8_t raw_led_data[NUM_LEDS_TOTAL*3];
 static uint8_t raw_led_data_out[NUM_LEDS_TOTAL*3];
 
+extern CRGBF leds[NUM_LEDS_TOTAL];
+
+void quantize_color() {
+	const float dither_table[4] = {0.25, 0.50, 0.75, 1.00};
+	static uint8_t dither_step = 0;
+	dither_step++;
+
+	float decimal_r; float decimal_g; float decimal_b;
+	uint8_t whole_r; uint8_t whole_g; uint8_t whole_b;
+	float   fract_r; float   fract_g; float   fract_b;
+
+	for (uint16_t i = 0; i < NUM_LEDS_TOTAL; i++) {
+		// RED #####################################################
+		decimal_r = leds[i].r * 254;
+		whole_r = decimal_r;
+		fract_r = decimal_r - whole_r;
+		raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step + i) % 4]);
+		
+		// GREEN #####################################################
+		decimal_g = leds[i].g * 254;
+		whole_g = decimal_g;
+		fract_g = decimal_g - whole_g;
+		raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step + i) % 4]);
+
+		// BLUE #####################################################
+		decimal_b = leds[i].b * 254;
+		whole_b = decimal_b;
+		fract_b = decimal_b - whole_b;
+		raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step + i) % 4]);
+	}
+}
+
 void transmit_leds() {
-	memcpy(raw_led_data_out, raw_led_data, NUM_LEDS_TOTAL*3);
 	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
 	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
+
+	// Quantize the floating point color to 8-bit with dithering
+	quantize_color();
+	memcpy(raw_led_data_out, raw_led_data, NUM_LEDS_TOTAL*3);
 
 	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data_out, (sizeof(raw_led_data_out) >> 1), &tx_config);
 	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data_out+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data_out) >> 1), &tx_config);

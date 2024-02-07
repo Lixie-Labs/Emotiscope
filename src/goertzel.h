@@ -195,8 +195,8 @@ float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
 		return output_magnitude;
 	}
 	else {
-		if (input_magnitude*1.25 > noise_spectrum[bin]) {
-			noise_spectrum[bin] = input_magnitude*1.25;
+		if (input_magnitude*1.1 > noise_spectrum[bin]) {
+			noise_spectrum[bin] = input_magnitude*1.1;
 		}
 
 		return input_magnitude;

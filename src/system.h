@@ -39,8 +39,7 @@ void init_system() {
 	init_serial(2000000);					  // (system.h)
 	init_filesystem();                        // (filesystem.h)
 	init_configuration();                     // (configuration.h)
-	init_rmt_driver();
-	init_leds();							  // (leds.h)
+	init_rmt_driver();                        // (led_driver.h)
 	init_i2s_microphone();					  // (microphone.h)
 	init_window_lookup();					  // (goertzel.h)
 	init_goertzel_constants_musical();		  // (goertzel.h)
