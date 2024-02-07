@@ -70,6 +70,7 @@ void loop() {
 
 // One core to run graphics (GPU) ---------------------------------------------
 void loop_gpu(void *param) {
+	init_rmt_driver();                        // (led_driver.h)
 	for (;;) {
 		run_gpu();	// (gpu_core.h)
 	}

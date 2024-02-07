@@ -32,7 +32,7 @@ typedef struct {
 
 static const char *TAG = "led_encoder";
 
-static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size, rmt_encode_state_t *ret_state){
+IRAM_ATTR static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size, rmt_encode_state_t *ret_state){
     rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
     rmt_encoder_handle_t bytes_encoder = led_encoder->bytes_encoder;
     rmt_encoder_handle_t copy_encoder = led_encoder->copy_encoder;
@@ -122,7 +122,7 @@ void init_rmt_driver() {
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
 		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
-		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
+		.trans_queue_depth = 2,			 // set the number of transactions that can be pending in the background
 		.flags = { .with_dma = 0 }
 	};
 
@@ -131,7 +131,7 @@ void init_rmt_driver() {
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
 		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
-		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
+		.trans_queue_depth = 2,			 // set the number of transactions that can be pending in the background
 		.flags = { .with_dma = 0 }
 	};
 
@@ -152,8 +152,6 @@ void init_rmt_driver() {
 }
 
 static uint8_t raw_led_data[NUM_LEDS_TOTAL*3];
-static uint8_t raw_led_data_out[NUM_LEDS_TOTAL*3];
-
 extern CRGBF leds[NUM_LEDS_TOTAL];
 
 void quantize_color() {
@@ -191,9 +189,9 @@ void transmit_leds() {
 	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
 
 	// Quantize the floating point color to 8-bit with dithering
+	memset(raw_led_data, 0, NUM_LEDS_TOTAL*3);
 	quantize_color();
-	memcpy(raw_led_data_out, raw_led_data, NUM_LEDS_TOTAL*3);
 
-	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data_out, (sizeof(raw_led_data_out) >> 1), &tx_config);
-	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data_out+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data_out) >> 1), &tx_config);
+	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
+	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
 }

@@ -53,8 +53,10 @@ void acquire_sample_chunk() {
 	profile_function([&]() {
 		// Buffer to hold audio samples
 		int32_t new_samples_raw[CHUNK_SIZE];
-		float new_samples_raw_float[CHUNK_SIZE];
 		float new_samples[CHUNK_SIZE];
+
+		memset(new_samples_raw,       0, sizeof(int32_t) * CHUNK_SIZE);
+		memset(new_samples,           0, sizeof(float)   * CHUNK_SIZE);
 
 		// Read audio samples into int32_t buffer
 		size_t bytes_read = 0;
@@ -62,14 +64,14 @@ void acquire_sample_chunk() {
 
 		// Clip the sample value if it's too large, cast to large floats
 		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
-			new_samples_raw_float[i+0] = min(max((int32_t)new_samples_raw[i+0], (int32_t)-80000000), (int32_t)80000000);
-			new_samples_raw_float[i+1] = min(max((int32_t)new_samples_raw[i+1], (int32_t)-80000000), (int32_t)80000000);
-			new_samples_raw_float[i+2] = min(max((int32_t)new_samples_raw[i+2], (int32_t)-80000000), (int32_t)80000000);
-			new_samples_raw_float[i+3] = min(max((int32_t)new_samples_raw[i+3], (int32_t)-80000000), (int32_t)80000000);
+			new_samples[i+0] = min(max((int32_t)new_samples_raw[i+0], (int32_t)-80000000), (int32_t)80000000);
+			new_samples[i+1] = min(max((int32_t)new_samples_raw[i+1], (int32_t)-80000000), (int32_t)80000000);
+			new_samples[i+2] = min(max((int32_t)new_samples_raw[i+2], (int32_t)-80000000), (int32_t)80000000);
+			new_samples[i+3] = min(max((int32_t)new_samples_raw[i+3], (int32_t)-80000000), (int32_t)80000000);
 		}
 
 		// Convert audio from large float range to -1.0 to 1.0 range
-		dsps_mulc_f32(new_samples_raw_float, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
+		dsps_mulc_f32(new_samples, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
 
 		// Add new chunk to audio history
 		waveform_locked = true;

@@ -6,10 +6,8 @@ void draw_debug(){
 	};
 
 	uint8_t color_index = 0;
-	for(uint16_t i = 0; i < NUM_LEDS/2; i++){
-		float progress = float(i) / (NUM_LEDS/2);
-		progress *= progress;
-		progress *= progress;
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		float progress = float(i) / (NUM_LEDS);
 		progress *= progress;
 
 		leds[i] = {
