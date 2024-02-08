@@ -199,6 +199,11 @@ void parse_command(command com) {
 	else if (fastcmp(substring, "ping")) {
 		transmit_to_client_in_slot("pong", com.origin_client_slot);
 	}
+	else if (fastcmp(substring, "start_debug_recording")) {
+		audio_recording_index = 0;
+		memset(audio_debug_recording, 0, sizeof(int16_t)*MAX_AUDIO_RECORDING_SAMPLES);
+		audio_recording_live = true;
+	}
 	else{
 		unrecognized_command_error(substring);
 	}

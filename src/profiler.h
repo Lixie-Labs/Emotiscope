@@ -179,6 +179,8 @@ void print_system_info(uint32_t t_now_ms) {
 		printf("Free Heap -------- %lu\n", (uint32_t)free_heap);
 		printf("Free Stack CPU --- %lu\n", (uint32_t)free_stack_cpu);
 		printf("Free Stack GPU --- %lu\n", (uint32_t)free_stack_gpu);
+		printf("Total PSRAM ------ %lu\n", (uint32_t)ESP.getPsramSize());
+		printf("Free PSRAM ------- %lu\n", (uint32_t)ESP.getFreePsram());
 		printf("\n");
 		printf("- WS CLIENTS -----------------\n");
 		if(web_server_ready == true){

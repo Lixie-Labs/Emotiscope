@@ -79,6 +79,24 @@ void acquire_sample_chunk() {
 		waveform_locked = false;
 		waveform_sync_flag = true;
 
+		if(audio_recording_live == true){
+			int16_t out_samples[CHUNK_SIZE];
+			for(uint16_t i = 0; i < CHUNK_SIZE; i += 4){
+				out_samples[i+0] = new_samples[i+0] * 32767;
+				out_samples[i+1] = new_samples[i+1] * 32767;
+				out_samples[i+2] = new_samples[i+2] * 32767;
+				out_samples[i+3] = new_samples[i+3] * 32767;
+			}
+			memcpy(&audio_debug_recording[audio_recording_index], out_samples, sizeof(int16_t)*CHUNK_SIZE);
+			audio_recording_index += CHUNK_SIZE;
+			if(audio_recording_index >= MAX_AUDIO_RECORDING_SAMPLES){
+				audio_recording_index = 0;
+				audio_recording_live = false;
+				broadcast("debug_recording_ready");
+				save_audio_debug_recording();
+			}
+		}
+
 		/*
 		// Used to print raw microphone values over UART for debugging
 		float* samples = &sample_history[SAMPLE_HISTORY_LENGTH-1-CHUNK_SIZE];

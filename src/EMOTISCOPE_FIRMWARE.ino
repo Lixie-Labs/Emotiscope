@@ -18,6 +18,8 @@
 // ############################################################################
 // ## DEPENDENCIES ############################################################
 
+SET_LOOP_TASK_STACK_SIZE(16 * 1024); // 16KB
+
 // External dependencies
 //#include <FastLED.h> // ........... Blasting data to the LEDs
 #include <PsychicHttp.h> // ....... Handling the web-app HTTP and WS
@@ -82,5 +84,5 @@ void setup() {
 	init_system();
 
 	// Start the second core as a dedicated GPU for the LEDs/color math
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 0, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 0, NULL, 0);
 }

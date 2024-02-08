@@ -172,7 +172,12 @@ void init_web_server() {
 
 	server.listen(80);
 	server.serveStatic("/", LittleFS, "/");
-	server.serveStatic("/test", LittleFS, "/1px.png");
+	server.on("/audio", [](PsychicRequest *request){
+		String filename = "/audio.bin";
+		PsychicFileResponse response(request, LittleFS, filename);
+
+		return response.send();
+	});
 
 	const char *local_hostname = "emotiscope";
 	if (!MDNS.begin(local_hostname)) {

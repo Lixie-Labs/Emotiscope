@@ -1,6 +1,9 @@
 #define CONFIG_FILENAME "/configuration.bin"
 #define NOISE_SPECTRUM_FILENAME "/noise_spectrum.bin"
+#define AUDIO_DEBUG_RECORDING_FILENAME "/audio.bin"
 #define MIN_SAVE_WAIT_MS (3 * 1000)	 // Values must stabilize for this many seconds to be written to FS
+
+#define MAX_AUDIO_RECORDING_SAMPLES ( 12800 * 3 ) // 3 seconds at [SAMPLE_RATE]
 
 extern lightshow_mode lightshow_modes[];
 extern PsychicWebSocketHandler websocket_handler;
@@ -16,6 +19,10 @@ config configuration = {
 };
 
 float noise_spectrum[NUM_FREQS] = {0.0};
+
+int16_t audio_debug_recording[MAX_AUDIO_RECORDING_SAMPLES];
+uint32_t audio_recording_index = 0;
+volatile bool audio_recording_live = false;
 
 uint32_t last_save_request_ms = 0;
 bool save_request_open = false;
@@ -208,4 +215,25 @@ void init_configuration() {
 	else {
 		printf("PASS\n");
 	}
+}
+
+// Save debug audio recording to LittleFS
+bool save_audio_debug_recording() {
+	File file = LittleFS.open(AUDIO_DEBUG_RECORDING_FILENAME, FILE_WRITE);
+	if (!file) {
+		printf("Failed to open %s for writing!", AUDIO_DEBUG_RECORDING_FILENAME);
+		return false;
+	}
+	else {
+		const uint8_t* ptr = (const uint8_t*)&audio_debug_recording;
+
+		// Iterate over the size of noise_spectrum and write each byte to the file
+		for (size_t i = 0; i < sizeof(int16_t) * MAX_AUDIO_RECORDING_SAMPLES; i++) {
+			file.write(ptr[i]);
+		}
+
+		printf("Audio debug recording saved!\n");
+	}
+	file.close();
+	return true;
 }

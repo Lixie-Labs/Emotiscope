@@ -77,6 +77,11 @@ function start_noise_calibration(){
 	transmit('noise_cal');
 }
 
+function start_debug_recording(){
+	set_ui_locked_state(true);
+	transmit('start_debug_recording');
+}
+
 function sync_data_from_device(){
 	transmit("get|config"); // Triggers chain of data sync commands
 }
@@ -158,6 +163,11 @@ function parse_message(message){
 		}
 		else if(command_type == "noise_cal_ready"){
 			console.log("NOISE CAL COMPLETE!");
+			hide_page('page_calibration');
+			set_ui_locked_state(false);
+		}
+		else if(command_type == "debug_recording_ready"){
+			console.log("DEBUG RECORDING COMPLETE!");
 			hide_page('page_calibration');
 			set_ui_locked_state(false);
 		}
