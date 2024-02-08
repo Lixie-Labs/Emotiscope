@@ -121,8 +121,9 @@ void init_rmt_driver() {
 		.gpio_num = (gpio_num_t)13,		 // GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
-		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
-		.trans_queue_depth = 2,			 // set the number of transactions that can be pending in the background
+		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
+		.intr_priority = 99,
 		.flags = { .with_dma = 0 }
 	};
 
@@ -130,8 +131,9 @@ void init_rmt_driver() {
 		.gpio_num = (gpio_num_t)12,		 // GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
-		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
-		.trans_queue_depth = 2,			 // set the number of transactions that can be pending in the background
+		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
+		.intr_priority = 99,
 		.flags = { .with_dma = 0 }
 	};
 
@@ -184,14 +186,14 @@ void quantize_color() {
 	}
 }
 
-void transmit_leds() {
-	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
-	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
-
+IRAM_ATTR void transmit_leds() {
 	// Quantize the floating point color to 8-bit with dithering
 	memset(raw_led_data, 0, NUM_LEDS_TOTAL*3);
 	quantize_color();
 
 	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
 	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
+
+	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
+	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
 }

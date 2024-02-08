@@ -48,7 +48,7 @@ void draw_clap() {
 
 		float contribution = (tempi_magnitude / tempi_power_sum) * tempi_magnitude;
 
-		float dot_pos = clip_float(sqrt((tempi[tempo_bin].beat * 0.5 + 0.5)) * sqrt(sqrt(contribution)));
+		float dot_pos = clip_float(sqrt((tempi[tempo_bin].beat * 0.5 + 0.5)) * sqrt(contribution));
 		float opacity = contribution;
 		// opacity *= opacity;
 

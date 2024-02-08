@@ -82,5 +82,5 @@ void setup() {
 	init_system();
 
 	// Start the second core as a dedicated GPU for the LEDs/color math
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 0, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 99, NULL, 0);
 }

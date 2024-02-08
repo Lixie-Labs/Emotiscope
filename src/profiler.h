@@ -173,12 +173,12 @@ void print_system_info(uint32_t t_now_ms) {
 		extern PsychicWebSocketClient *get_client_in_slot(uint8_t slot);
 
 		printf("# SYSTEM INFO ####################\n");
-		printf("CPU CORE USAGE: %.2f%%\n", CPU_CORE_USAGE*100);
-		printf("CPU FPS: %.3f\n", FPS_CPU);
-		printf("GPU FPS: %.3f\n", FPS_GPU);
-		printf("Free Heap:      %lu\n", (uint32_t)free_heap);
-		printf("Free Stack CPU: %lu\n", (uint32_t)free_stack_cpu);
-		printf("Free Stack GPU: %lu\n", (uint32_t)free_stack_gpu);
+		printf("CPU CORE USAGE --- %.2f%%\n", CPU_CORE_USAGE*100);
+		printf("CPU FPS ---------- %.3f\n", FPS_CPU);
+		printf("GPU FPS ---------- %.3f\n", FPS_GPU);
+		printf("Free Heap -------- %lu\n", (uint32_t)free_heap);
+		printf("Free Stack CPU --- %lu\n", (uint32_t)free_stack_cpu);
+		printf("Free Stack GPU --- %lu\n", (uint32_t)free_stack_gpu);
 		printf("\n");
 		printf("- WS CLIENTS -----------------\n");
 		if(web_server_ready == true){

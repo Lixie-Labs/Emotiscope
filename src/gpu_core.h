@@ -20,8 +20,7 @@ void run_gpu() {
 	uint32_t t_now_us = micros();
 	uint32_t t_now_ms = t_now_us / 1000.0;
 
-	// Calculate the "delta" value, to scale movements based on FPS, like a game
-	// engine
+	// Calculate the "delta" value, to scale movements based on FPS, like a game engine
 	const uint32_t ideal_us_interval = (1000000 / REFERENCE_FPS);
 	int32_t t_elapsed_us = t_now_us - t_last_us;
 	float delta = float(t_elapsed_us) / ideal_us_interval;
@@ -29,17 +28,16 @@ void run_gpu() {
 	// Save the current timestamp for next loop
 	t_last_us = t_now_us;
 
-	// Update the novelty curve
 	if (magnitudes_locked == false) {
+		// Update the novelty curve
 		update_novelty(t_now_us);  // (tempo.h)
-	}
 
-	// Update the tempi phases
-	update_tempi_phase(delta);	// (tempo.h)
+		// Update the tempi phases
+		update_tempi_phase(delta);	// (tempo.h)
 
-	// RUN THE CURRENT MODE
-	// ------------------------------------------------------------
-	if (magnitudes_locked == false) {
+		// RUN THE CURRENT MODE
+		// ------------------------------------------------------------
+
 		clear_display();
 		lightshow_modes[configuration.current_mode].draw();
 
@@ -69,16 +67,16 @@ void run_gpu() {
 		lpf_drag *= 0.995;
 
 		apply_image_lpf(lpf_cutoff_frequency);
+
+		// Output the quantized color to the 8-bit LED strand
+		// uint16_t fastled_profiler_index = start_function_timing("FastLED.show()");
+		transmit_leds();
+		// end_function_timing(fastled_profiler_index);
+
+		// Update the FPS_GPU variable
+		watch_gpu_fps(t_now_us);  // (system.h)
+
+		uint32_t t_end_cycles = ESP.getCycleCount();
+		volatile uint32_t gpu_total_cycles = t_end_cycles - t_start_cycles;
 	}
-
-	// Output the quantized color to the 8-bit LED strand
-	// uint16_t fastled_profiler_index = start_function_timing("FastLED.show()");
-	transmit_leds();
-	// end_function_timing(fastled_profiler_index);
-
-	// Update the FPS_GPU variable
-	watch_gpu_fps(t_now_us);  // (system.h)
-
-	uint32_t t_end_cycles = ESP.getCycleCount();
-	volatile uint32_t gpu_total_cycles = t_end_cycles - t_start_cycles;
 }
