@@ -20,7 +20,7 @@ function check_connection_timeout(){
 	if(connection_pending == true){
 		if(performance.now() - connection_start_time >= MAX_CONNECTION_TIME_MS){
 			console.log("COULDN'T CONNECT TO DEVICE WITHIN TIMEOUT");
-			reconnect_websockets();
+			//reconnect_websockets();
 		}
 	}
 }
@@ -35,7 +35,7 @@ function check_pong_timeout(){
 	if(pong_pending == true){
 		if(performance.now() - last_ping_time >= MAX_PING_PONG_REPLY_TIME_MS){
 			console.log("NO PONG WITHIN TIMEOUT!");
-			reconnect_websockets();
+			//reconnect_websockets();
 		}
 	}
 }

@@ -26,7 +26,7 @@ function render_modes(){
 }
 
 function render_sliders(){
-	let slider_container = document.getElementById("slider_container");
+	let slider_container = document.getElementById("setting_container");
 	slider_container.innerHTML = "";
 	for(let i in sliders){
 		let slider_name = sliders[i].name;
@@ -44,21 +44,30 @@ function render_sliders(){
 }
 
 function render_toggles(){
-	let toggle_bin = document.getElementById("toggle_bin");
-	toggle_bin.innerHTML = "";
+	let toggle_container = document.getElementById("setting_container");
+	//toggle_container.innerHTML = "";
 	for(let i in toggles){
 		let toggle_name = toggles[i].name;
-		let toggle_state = Boolean(configuration[toggle_name]);
+		let toggle_value = configuration[toggle_name];
 
-		toggle_bin.innerHTML += `<div class="toggle_label">${toggle_name}</div>`
-		toggle_bin.innerHTML += `<input type="checkbox" class="toggle" id="${toggle_name}" oninput="send_toggle_change('${toggle_name}');"/>`;
-
-		document.getElementById(toggle_name).checked = toggle_state;
+		toggle_container.innerHTML += `<span class="toggle"><div class="toggle_label" onclick="show_setting_information('${toggle_name}');">${toggle_name.toUpperCase().replace("_"," ")}</div><div class="toggle_track" id="${toggle_name}"></div><div class="toggle_handle" id="${toggle_name}_handle"></div></span>`;
+		//slider_container.innerHTML += `<span class="slider"><div class="slider_label">${slider_name.toUpperCase()}</div><div class="slider_track" id="${slider_name}"></div></span>`;
 	}
+
+	set_toggles();
+	track_toggles();
 }
 
 function render_controls(){
 	render_modes();
 	render_sliders();
-	//render_toggles();
+	render_toggles();
 }
+
+let toggle_state = false;
+function switch_toggle(){
+	toggle_state = !toggle_state;
+	set_toggle_state("mirror_mode", toggle_state);
+}
+
+setInterval(switch_toggle, 1000);

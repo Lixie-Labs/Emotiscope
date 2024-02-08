@@ -306,14 +306,14 @@ button{
     padding-top: 40px;       
 }
 
-.slider{
+.slider, .toggle{
     width: 28%;
     height: calc(100% - 10px);
     display: inline-block;
     overflow: hidden;
 }
 
-.slider_label{
+.slider_label, .toggle_label{
 	display: block;
     height: 10px;
     width: 100%;
@@ -324,21 +324,39 @@ button{
 	overflow-x: clip;
 }
 
-.slider_track{
+.slider_track, .toggle_track{
     height: calc(100% - 35px);
     display: block;
     margin-left: 5px;
 	margin-right: 5px;
     margin-top: 10px;
     border-radius: 10px;
-    border: 2px solid var(--accent);
-	background-image: linear-gradient(to top, var(--secondary) 0%, var(--secondary) 75%, transparent 0%, transparent 100%);
 }
 
-#slider_container{
+.slider_track{
+    border: 2px solid var(--accent);
+}
+
+.toggle_track{
+    border: 2px solid #5897ce;
+	transition: border 0.15s ease-in-out;
+}
+
+.toggle_handle{
+    height: 60px;
+    width: calc(100% - 10px);
+    position: relative;
+    top: calc(-100% + 31px);
+    left: 5px;
+    border-radius: 10px;
+    background-color: #5897ce;
+	transition: top 0.15s ease-in-out, background 0.15s ease-in-out;
+}
+
+#setting_container{
 	white-space: nowrap;
     padding-left: 8%;
-    padding-right: 8%;
+	padding-right: 8%;
 }
 
 #device_preview{
