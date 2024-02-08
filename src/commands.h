@@ -91,7 +91,7 @@ void parse_command(command com) {
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring), '|');
 			float setting_value = clip_float(atof(substring));
 			configuration.hue = setting_value;
-			rendered_debug_value = configuration.hue;
+			rendered_debug_value = configuration.hue; // TODO: Color-related changes shouldn't show a UI dot
 		}
 		
 		else if (fastcmp(substring, "mirror_mode")) {
