@@ -4,6 +4,7 @@ let information = {
 	"hue"          : "The base hue (color) of the current mode.",
 	"hue_range"    : "How far from the base hue the display can show.",
 	"incandescent" : "Applies a filter to the display which limits the brightness of blue colors, similar to the look of retro light bulbs that were tinted by a colored film.",
+	"mirror_mode"  : "Scales the display to 1/2 size and mirrors it to be symmetrical",
 };
 
 function show_setting_information(setting_name){

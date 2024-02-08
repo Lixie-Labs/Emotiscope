@@ -38,32 +38,40 @@ function render_sliders(){
 		slider_container.innerHTML += `<span class="slider"><div class="slider_label" onclick="show_setting_information('${slider_name}');">${slider_name.toUpperCase().replace("_"," ")}</div><div class="slider_track" id="${slider_name}"></div></span>`;
 		//slider_container.innerHTML += `<span class="slider"><div class="slider_label">${slider_name.toUpperCase()}</div><div class="slider_track" id="${slider_name}"></div></span>`;
 	}
-
-	set_sliders();
-	track_sliders();
 }
 
 function render_toggles(){
 	let toggle_container = document.getElementById("setting_container");
-	//toggle_container.innerHTML = "";
+	let out_html = "";
 	for(let i in toggles){
 		let toggle_name = toggles[i].name;
 		let toggle_value = configuration[toggle_name];
 
-		toggle_container.innerHTML += `<span class="toggle"><div class="toggle_label" onclick="show_setting_information('${toggle_name}');">${toggle_name.toUpperCase().replace("_"," ")}</div><div class="toggle_track" id="${toggle_name}"></div><div class="toggle_handle" id="${toggle_name}_handle"></div></span>`;
-		//slider_container.innerHTML += `<span class="slider"><div class="slider_label">${slider_name.toUpperCase()}</div><div class="slider_track" id="${slider_name}"></div></span>`;
+		out_html += `<span class="toggle">`;
+		out_html += 	`<div class="toggle_label" onclick="show_setting_information('${toggle_name}');">`;
+		out_html += 		`${toggle_name.toUpperCase().replace("_"," ")}`;
+		out_html +=		`</div>`;
+		out_html +=		`<div class="toggle_track" id="${toggle_name}"></div>`;
+		out_html +=		`<div class="toggle_handle" id="${toggle_name}_handle"></div>`;
+		out_html += `</span>`;
 	}
-
-	set_toggles();
-	track_toggles();
+	toggle_container.innerHTML += out_html;
 }
 
 function render_controls(){
 	render_modes();
+	
 	render_sliders();
 	render_toggles();
+
+	set_sliders();
+	set_toggles();
+
+	track_sliders();
+	track_toggles();
 }
 
+/*
 let toggle_state = false;
 function switch_toggle(){
 	toggle_state = !toggle_state;
@@ -71,3 +79,4 @@ function switch_toggle(){
 }
 
 setInterval(switch_toggle, 1000);
+*/

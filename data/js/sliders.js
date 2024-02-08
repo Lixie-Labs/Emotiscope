@@ -9,11 +9,10 @@ function set_sliders(){
 		// Get the 'id' attribute of the current element
 		var id = slider_track.getAttribute('id');
 
-		// Use the 'id' to access the corresponding value in the 'configuration' JSON
-		var value = configuration[id];
-
 		// Check if there's a configuration for the current 'id'
-		if (value) {
+		try{
+			// Use the 'id' to access the corresponding value in the 'configuration' JSON
+			var value = configuration[id];
 			// Log the configuration to the console
 			console.log('Value for', id, ':', value);
 
@@ -30,7 +29,8 @@ function set_sliders(){
 					slider_track.style.backgroundImage = `linear-gradient(to top, var(--secondary) 0%, var(--secondary) ${percentage}%, transparent 0%, transparent 100%)`;
 				}
 			}    
-		} else {
+		}
+		catch(e) {
 			// Log a message if there's no configuration for the current 'id'
 			console.log('No value found for', id);
 		}

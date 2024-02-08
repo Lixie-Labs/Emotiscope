@@ -1,5 +1,3 @@
-var temporary_configuration = {};
-
 function set_toggle_state(toggle_name, toggle_state){
 	if(toggle_state == true){
 		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 31px)";
@@ -22,13 +20,12 @@ function set_toggles(){
 	toggle_tracks.forEach(function(toggle_track) {
 		// Get the 'id' attribute of the current element
 		var id = toggle_track.getAttribute('id');
+		console.log("ID: "+id);
+		console.log(configuration);
 
-		// Use the 'id' to access the corresponding value in the 'configuration' JSON
-		var value = configuration[id];
-
-		// Check if there's a configuration for the current 'id'
-		if (value) {
-			// Log the configuration to the console
+		try{
+			// Use the 'id' to access the corresponding value in the 'configuration' JSON
+			var value = configuration[id];
 			console.log('Value for', id, ':', value);
 
 			for(let i in toggles){
@@ -36,13 +33,10 @@ function set_toggles(){
 				let toggle_name = toggle.name;
 
 				if(toggle_name == id){
-					let percentage = 30;
-					setTimeout(function(){
-						//toggle_track.style.backgroundImage = `linear-gradient(to top, var(--secondary) 0%, var(--secondary) ${percentage}%, transparent 0%, transparent 100%)`;
-					}, 2000);
+					set_toggle_state(id, value);
 				}
 			}    
-		} else {
+		} catch(e) {
 			// Log a message if there's no configuration for the current 'id'
 			console.log('No value found for', id);
 		}
@@ -50,17 +44,15 @@ function set_toggles(){
 }
 
 function track_toggles() {
-    const touch_start_data = new Map(); // To store initial data for each touch
+    const touch_start_data_toggles = new Map(); // To store initial data for each touch
 
     function start_tracking_toggle(event) {
-		temporary_configuration = JSON.parse(JSON.stringify(configuration));
-
         Array.from(event.touches).forEach(touch => {
             // Store initial touch positions
-            touch_start_data.set(touch.identifier, {
+            touch_start_data_toggles.set(touch.identifier, {
                 start_x: touch.clientX,
                 start_y: touch.clientY,
-                target_div: touch.target.closest('.toggle_track'),
+                target_div: touch.target.closest('.toggle_track, .toggle_handle'),
                 tracking_allowed: undefined // We haven't determined the direction yet
             });
         });
@@ -68,7 +60,7 @@ function track_toggles() {
 
     function track_movement_toggle(event) {
         Array.from(event.touches).forEach(touch => {
-            const data = touch_start_data.get(touch.identifier);
+            const data = touch_start_data_toggles.get(touch.identifier);
 
             if (data && data.target_div) {
                 const delta_x = Math.abs(touch.clientX - data.start_x);
@@ -83,23 +75,32 @@ function track_toggles() {
                 if (data.tracking_allowed) {
                     event.preventDefault(); // Prevent default behavior for vertical drags
 
-					var id = data.target_div.getAttribute('id');
+					var id = data.target_div.getAttribute('id').replace("_handle", "");
 
                     // Tracking logic here
                     if (delta_y > 0) { // Ensure there's some vertical movement to track
                         let distance_moved = data.start_y - touch.clientY;
-                        let ratio = Math.min(1.0, Math.max(-1.0, (distance_moved / data.target_div.offsetHeight)));
-                        let div_name = data.target_div.getAttribute('name') || data.target_div.id;
 
 						for(let i in toggles){
-							let toggle = sliders[i];
+							let toggle = toggles[i];
 							let toggle_name = toggle.name;
 
 							if(toggle_name == id){
-								//if(configuration[id] != resulting_value){
-								//	configuration[id] = resulting_value;
-								//	transmit(`set|${id}|${truncate_float(resulting_value, 3)}`);
-								//}
+								let resulting_value = configuration[id];
+
+								if(distance_moved <= -20){
+									set_toggle_state(toggle.name, false);
+									resulting_value = 0;
+								}
+								else if(distance_moved >= 20){
+									set_toggle_state(toggle.name, true);
+									resulting_value = 1;
+								}
+
+								if(configuration[id] != resulting_value){
+									configuration[id] = resulting_value;
+									transmit(`set|${id}|${resulting_value}`);
+								}
 
 								//let percentage = ((resulting_value-slider_min) / (slider_max-slider_min)) * 100.0;
 
@@ -116,13 +117,16 @@ function track_toggles() {
 		console.log(configuration);
 
         Array.from(event.changedTouches).forEach(touch => {
-            touch_start_data.delete(touch.identifier);
+            touch_start_data_toggles.delete(touch.identifier);
         });
     }
 
-    // Apply event listeners to all slider track divs
+    // Apply event listeners to all toggle track divs
     document.querySelectorAll('.toggle_track').forEach(toggle_track => {
         toggle_track.addEventListener('touchstart', start_tracking_toggle, {passive: false});
+    });
+	document.querySelectorAll('.toggle_handle').forEach(toggle_handle => {
+        toggle_handle.addEventListener('touchstart', start_tracking_toggle, {passive: false});
     });
 
     // Add move and end listeners to document to ensure capture even outside divs
