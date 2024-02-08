@@ -38,6 +38,7 @@ void run_gpu() {
 	// ------------------------------------------------------------
 
 	clear_display();
+	// TODO: Fix flickers in Spectrum Mode likely caused by thread-safety issues
 	lightshow_modes[configuration.current_mode].draw();
 
 	// If silence is detected, show a blue debug LED
