@@ -28,55 +28,53 @@ void run_gpu() {
 	// Save the current timestamp for next loop
 	t_last_us = t_now_us;
 
-	if (magnitudes_locked == false) {
-		// Update the novelty curve
-		update_novelty(t_now_us);  // (tempo.h)
+	// Update the novelty curve
+	update_novelty(t_now_us);  // (tempo.h)
 
-		// Update the tempi phases
-		update_tempi_phase(delta);	// (tempo.h)
+	// Update the tempi phases
+	update_tempi_phase(delta);	// (tempo.h)
 
-		// RUN THE CURRENT MODE
-		// ------------------------------------------------------------
+	// RUN THE CURRENT MODE
+	// ------------------------------------------------------------
 
-		clear_display();
-		lightshow_modes[configuration.current_mode].draw();
+	clear_display();
+	lightshow_modes[configuration.current_mode].draw();
 
-		// If silence is detected, show a blue debug LED
-		// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});
+	// If silence is detected, show a blue debug LED
+	// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});
 
-		// Apply an incandescent LUT to reduce harsh blue tones
-		apply_incandescent_filter(configuration.incandescent_filter);  // (leds.h)
+	// Apply an incandescent LUT to reduce harsh blue tones
+	apply_incandescent_filter(configuration.incandescent_filter);  // (leds.h)
 
-		// Restrict CRGBF values to 0.0-1.0 range
-		clip_leds();  // (leds.h)
+	// Restrict CRGBF values to 0.0-1.0 range
+	clip_leds();  // (leds.h)
 
-		// Save this frame for the next loop
-		// save_leds_to_last(); // (leds.h)
+	// Save this frame for the next loop
+	// save_leds_to_last(); // (leds.h)
 
-		// Smooth the output via EMA
-		// volatile float frame_blending_strength = 0.75;
-		// smooth_led_output(frame_blending_strength);
+	// Smooth the output via EMA
+	// volatile float frame_blending_strength = 0.75;
+	// smooth_led_output(frame_blending_strength);
 
-		apply_brightness();
+	apply_brightness();
 
-		// Render the current debug value as a dot
-		render_debug_value(t_now_ms);  // (leds.h)
+	// Render the current debug value as a dot
+	render_debug_value(t_now_ms);  // (leds.h)
 
-		float lpf_cutoff_frequency = configuration.speed;
-		lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
-		lpf_drag *= 0.995;
+	float lpf_cutoff_frequency = configuration.speed;
+	lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
+	lpf_drag *= 0.995;
 
-		apply_image_lpf(lpf_cutoff_frequency);
+	apply_image_lpf(lpf_cutoff_frequency);
 
-		// Output the quantized color to the 8-bit LED strand
-		// uint16_t fastled_profiler_index = start_function_timing("FastLED.show()");
-		transmit_leds();
-		// end_function_timing(fastled_profiler_index);
+	// Output the quantized color to the 8-bit LED strand
+	// uint16_t fastled_profiler_index = start_function_timing("FastLED.show()");
+	transmit_leds();
+	// end_function_timing(fastled_profiler_index);
 
-		// Update the FPS_GPU variable
-		watch_gpu_fps(t_now_us);  // (system.h)
+	// Update the FPS_GPU variable
+	watch_gpu_fps(t_now_us);  // (system.h)
 
-		uint32_t t_end_cycles = ESP.getCycleCount();
-		volatile uint32_t gpu_total_cycles = t_end_cycles - t_start_cycles;
-	}
+	uint32_t t_end_cycles = ESP.getCycleCount();
+	volatile uint32_t gpu_total_cycles = t_end_cycles - t_start_cycles;
 }

@@ -292,16 +292,6 @@ void calculate_magnitudes() {
 	}, __func__ );
 }
 
-// TODO: WDT crashes before noise cal is finished. WTF:
-// New problem in IDF 5.1.2, maybe from increasing the GPU thread priority to 99, lol
-// 
-// Starting noise cal...
-// E (9925070) task_wdt: Task watchdog got triggered. The following tasks/users did not reset the watchdog in time:
-// E (9925070) task_wdt:  - IDLE0 (CPU 0)
-// E (9925070) task_wdt: Tasks currently running:
-// E (9925070) task_wdt: CPU 0: loop_gpu
-// E (9925070) task_wdt: CPU 1: IDLE1
-// E (9925070) task_wdt: Aborting.
 void start_noise_calibration() {
 	Serial.println("Starting noise cal...");
 	memset(noise_spectrum, 0, sizeof(float) * NUM_FREQS);
