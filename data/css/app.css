@@ -344,11 +344,11 @@ button{
 
 .toggle_handle{
     height: 60px;
-    width: calc(100% - 10px);
+    width: calc(100% - 20px);
     position: relative;
-    top: calc(-100% + 31px);
-    left: 5px;
-    border-radius: 10px;
+    top: calc(-100% + 37px);
+    left: 10px;
+    border-radius: 6px;
     background-color: #5897ce;
 	transition: top 0.15s ease-in-out, background 0.15s ease-in-out;
 }

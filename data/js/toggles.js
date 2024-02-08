@@ -1,12 +1,12 @@
 function set_toggle_state(toggle_name, toggle_state){
 	if(toggle_state == true){
-		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 31px)";
+		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 36px)";
 		document.getElementById(toggle_name+"_handle").style.backgroundColor = "#5897ce";
 		document.getElementById(toggle_name).style.border = "2px solid #5897ce";
 	}
 	else if(toggle_state == false){
-		let offset = document.getElementById(toggle_name).offsetHeight - 60;
-		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 31px + "+offset+"px)";
+		let offset = document.getElementById(toggle_name).offsetHeight - 70;
+		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 36px + "+offset+"px)";
 		document.getElementById(toggle_name+"_handle").style.backgroundColor = "#5d5d5d";
 		document.getElementById(toggle_name).style.border = "2px solid #5d5d5d";
 	}

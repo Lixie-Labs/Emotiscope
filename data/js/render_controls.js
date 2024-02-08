@@ -3,8 +3,6 @@ let modes = [];
 let sliders = [];
 let toggles = [];
 
-// TODO: Add UI for toggles to setting gallery
-
 // TODO: Hue-related sliders should literally depict their hue settings
 //   For example, the "hue" slider should fade to the currently selected color when dragged,
 //   and the "hue range" slider should show a relevant gradient based on the position of
@@ -60,7 +58,7 @@ function render_toggles(){
 
 function render_controls(){
 	render_modes();
-	
+
 	render_sliders();
 	render_toggles();
 
