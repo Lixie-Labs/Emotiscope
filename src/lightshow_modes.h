@@ -18,6 +18,7 @@
 #include "lightshow_modes/plot.h"
 #include "lightshow_modes/debug.h"
 
+// TODO: Make all lightshow modes react to hue/hue range
 lightshow_mode lightshow_modes[] = {
 	{ "Spectrum",        &draw_spectrum      }, // 0
 	{ "Clap",            &draw_clap          }, // 1

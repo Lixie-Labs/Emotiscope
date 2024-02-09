@@ -197,7 +197,6 @@ void init_configuration() {
 	if (load_success == false) {
 		printf("FAIL\n");
 		save_config();
-		;
 	}
 	else {
 		printf("PASS\n");
@@ -205,7 +204,7 @@ void init_configuration() {
 
 	// Attempt to load noise_spectrum from flash
 	printf("LOADING NOISE SPECTRUM...");
-	//load_success = load_noise_spectrum();
+	load_success = load_noise_spectrum();
 
 	// If we couldn't load the file, save a fresh copy
 	if (load_success == false) {
