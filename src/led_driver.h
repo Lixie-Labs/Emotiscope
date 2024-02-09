@@ -187,6 +187,7 @@ void quantize_color() {
 }
 
 IRAM_ATTR void transmit_leds() {
+	// Wait here if previous frame transmission has not yet completed
 	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
 	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
 	
@@ -194,6 +195,7 @@ IRAM_ATTR void transmit_leds() {
 	memset(raw_led_data, 0, NUM_LEDS_TOTAL*3);
 	quantize_color();
 
+	// Transmit new frame to dual LED lanes
 	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
 	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
 }

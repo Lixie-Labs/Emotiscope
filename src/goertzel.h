@@ -90,15 +90,15 @@ void init_goertzel_constants_musical() {
 			fabs(frequencies_musical[i].target_freq - neighbor_left),
 			fabs(frequencies_musical[i].target_freq - neighbor_right));
 
-		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 1.5);
+		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 2.0);
 	}
 }
 
 void init_window_lookup() {
 	for (uint16_t i = 0; i < 2048; i++) {
 		float ratio = i / 4095.0;
-		float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
-		// float weighing_factor = 0.3635819 - (0.4891775 * (cos(TWOPI * ratio))) + (0.1365995 * (cos(FOURPI * ratio))) - (0.0106411 * (cos(SIXPI * ratio)));
+		//float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
+		float weighing_factor = 0.3635819 - (0.4891775 * (cos(TWOPI * ratio))) + (0.1365995 * (cos(FOURPI * ratio))) - (0.0106411 * (cos(SIXPI * ratio)));
 
 		window_lookup[i] = weighing_factor;
 		window_lookup[4095 - i] = weighing_factor;
@@ -207,7 +207,7 @@ void calculate_magnitudes() {
 	profile_function([&]() {
 		magnitudes_locked = true;
 
-		const uint16_t NUM_AVERAGE_SAMPLES = 2;
+		const uint16_t NUM_AVERAGE_SAMPLES = 1;
 
 		static bool interlacing_frame_field = 0;
 		static float magnitudes_raw[NUM_FREQS];
