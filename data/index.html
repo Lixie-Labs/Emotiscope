@@ -96,11 +96,14 @@
 				<img src="svg/close.svg" class="footer_icon tint_accent" />
 			</span>
 
+			<!-- TODO: Implement frequency response calibration -->
+			<!-- Via white noise broadcasted from JS in web-app, measure (and compensate for) the frequency response of both the speaker and mic -->
+			<!-- Calibration should result in equal representation of all bins in the DFT when white noise is played afterward -->
+			<!-- When calibration starts, white noise should fade in for 0.5 seconds, be measured for 2 seconds, then fade out for 0.5 seconds -->
 			<div class="page_title">CALIBRATION</div>
 			<div class="page_paragraph">
 				<button onclick="start_noise_calibration();">REMOVE BACKGROUND NOISE</button>
-				<!-- TODO: Hide "START DEBUG RECORDING" button behind eventual "Advanced Mode" toggle -->
-				<button onclick="start_debug_recording();">START DEBUG RECORDING</button>
+				<button onclick="start_frequency_calibration();">CALIBRATE FREQUENCY RESPONSE</button>
 			</div>
 		</div>
 
