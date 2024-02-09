@@ -17,6 +17,8 @@ void draw_spectrum() {
 			// TODO: Make "base coat" a slider in the web app for (at least) Spectrum Mode
 			// mag = mag * 0.99 + 0.01;
 			CRGBF color = hsv(configuration.hue+(progress*configuration.hue_range), 0.9, mag);
+
+			// TODO: Make "saturation" a slider in the web app
 			
 			leds[63-i] = color;
 			leds[64+i] = color;
