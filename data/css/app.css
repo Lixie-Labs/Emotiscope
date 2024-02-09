@@ -283,6 +283,8 @@ button{
 	color: var(--primary);
     font-weight: bold;
     font-size: 18px;
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 15px;
 }
 
 #info_panel_description{

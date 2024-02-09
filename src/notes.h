@@ -32,3 +32,17 @@ esp_err_t dsps_sqrt_f32_ansi(const float *input, float *output, int len)
     return ESP_OK;
 }
 */
+
+// ##################################################################################################################################################
+// POTENTIAL SSL workaround:
+/*
+
+app.emotiscope.rocks is an SSL page and thus qualifies as a PWA
+
+if a url parameter like "wait=true" is present, it will not automatically
+hop to the discovered HTTP server on Emotiscope, but show it in a list of devices instead
+
+This way, the user has time to see and click the "Install PWA" button
+
+Once installed, it will no longer wait before redirecting unless no devices are found
+*/
