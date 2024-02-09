@@ -18,7 +18,7 @@ function render_modes(){
 	}
 
 	let current_mode = document.getElementById("current_mode");
-	let current_mode_name = modes[configuration.current_mode];
+	let current_mode_name = modes[configuration.current_mode]; 
 	console.log("CURRENT MODE: "+current_mode_name);
 	current_mode.innerHTML = current_mode_name;
 }
