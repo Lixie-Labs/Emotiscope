@@ -23,6 +23,7 @@ function render_modes(){
 	current_mode.innerHTML = current_mode_name;
 }
 
+// TODO: Make setting gallery snap magnetically into place when scrolling completes to keep sliders/toggles centered
 function render_sliders(){
 	let slider_container = document.getElementById("setting_container");
 	slider_container.innerHTML = "";
