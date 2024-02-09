@@ -140,3 +140,13 @@ inline bool fastcmp(char* input_a, const char* input_b){
 	// If not, traditional strcmp(), return true for match
 	return (strcmp(input_a, input_b) == 0);
 }
+
+void print_binary(uint32_t input, uint8_t bit_width, char tail){
+	char output[64];
+	memset(output, 0, 64);
+	for(uint8_t i = 0; i < bit_width; i++){
+		output[i] = char('0' + bitRead(input, (bit_width-1)-i));
+	}
+
+	printf("%s%c", output, tail);
+}

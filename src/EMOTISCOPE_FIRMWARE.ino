@@ -18,8 +18,6 @@
 // ############################################################################
 // ## DEPENDENCIES ############################################################
 
-SET_LOOP_TASK_STACK_SIZE(16 * 1024); // 16KB
-
 // External dependencies
 //#include <FastLED.h> // ........... Blasting data to the LEDs
 #include <PsychicHttp.h> // ....... Handling the web-app HTTP and WS
@@ -27,7 +25,6 @@ SET_LOOP_TASK_STACK_SIZE(16 * 1024); // 16KB
 #include <ESPmDNS.h> // ........... Used for "emotiscope.local" domain name
 #include <Ticker.h> // ............ For timing functions
 #include <WiFi.h> // .............. WiFi connection library
-#include <driver/i2s.h> // ........ I2S microphone driver
 #include <esp_dsp.h> // ........... Fast SIMD-style array math
 #include <esp_wifi.h> // .......... WiFi, but like - the hardware side of it
 

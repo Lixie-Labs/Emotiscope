@@ -13,7 +13,7 @@ extern void transmit_to_client_in_slot(char* message, uint8_t client_slot);
 
 // Function to return the selected index as a null-terminated string with custom delimiter
 // The result is stored in the provided buffer
-bool load_substring_from_split_index(const char* input, int index, char* result, size_t result_size, char delimiter) {
+bool load_substring_from_split_index(const char* input, int index, char* result, size_t result_size, char delimiter = '|') {
     // Ensure input and result buffer are not NULL
     if (input == NULL || result == NULL) {
         return false;
@@ -66,21 +66,21 @@ void parse_command(command com) {
     char substring[MAX_COMMAND_LENGTH];
 
 	// Get command type
-	load_substring_from_split_index(com.command, 0, substring, sizeof(substring), '|');
+	load_substring_from_split_index(com.command, 0, substring, sizeof(substring));
 
 	if (fastcmp(substring, "set")) {
 		// Get setting name
-		load_substring_from_split_index(com.command, 1, substring, sizeof(substring), '|');
+		load_substring_from_split_index(com.command, 1, substring, sizeof(substring));
 		if (fastcmp(substring, "brightness")) {
 			// Get brightness value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring), '|');
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = clip_float(atof(substring));
 			configuration.brightness = setting_value;
 			rendered_debug_value = configuration.brightness;
 		}
 		else if (fastcmp(substring, "speed")) {
 			// Get speed value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring), '|');
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
 			configuration.speed = setting_value;
 
@@ -88,7 +88,7 @@ void parse_command(command com) {
 		}
 		else if (fastcmp(substring, "hue")) {
 			// Get brightness value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring), '|');
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = clip_float(atof(substring));
 			configuration.hue = setting_value;
 			rendered_debug_value = configuration.hue; // TODO: Color-related changes shouldn't show a UI dot
@@ -96,26 +96,26 @@ void parse_command(command com) {
 		
 		else if (fastcmp(substring, "mirror_mode")) {
 			// Get mirror_mode value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring), '|');
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			bool setting_value = (bool)atoi(substring);
 			configuration.mirror_mode = setting_value;
 		}
 		else if (fastcmp(substring, "incandescent")) {
 			// Get incandescent_filter value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring), '|');
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
 			configuration.incandescent_filter = setting_value;
 		}
 		else if (fastcmp(substring, "hue_range")) {
 			// Get hue_range value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring), '|');
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
 			configuration.hue_range = setting_value;
 		}
 
 		else if (fastcmp(substring, "mode")) {
 			// Get mode name
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring), '|');
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 
 			int16_t mode_index = set_lightshow_mode_by_name(substring);
 			if(mode_index == -1){
@@ -136,7 +136,7 @@ void parse_command(command com) {
 	}
 	else if (fastcmp(substring, "get")) {
 		// Name of thing to get
-		load_substring_from_split_index(com.command, 1, substring, sizeof(substring), '|');
+		load_substring_from_split_index(com.command, 1, substring, sizeof(substring));
 
 		// If getting configuration struct contents
 		if (fastcmp(substring, "config")) {

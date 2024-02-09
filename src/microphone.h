@@ -10,6 +10,9 @@
 //
 // Functions for reading and storing data acquired by the I2S microphone0
 
+#include "driver/i2s_std.h"
+#include "driver/gpio.h"
+
 // Define I2S pins
 #define I2S_BCLK_PIN 6
 #define I2S_LRCLK_PIN 5
@@ -21,63 +24,96 @@
 #define SAMPLE_HISTORY_LENGTH 4096
 
 float sample_history[SAMPLE_HISTORY_LENGTH];
-const float recip_scale = 1.0 / 80000000.0;
+const float recip_scale = 1.0 / 131072.0; // max 18 bit signed value
 
 volatile bool waveform_locked = false;
 volatile bool waveform_sync_flag = false;
 
-// TODO: Get SPH0645 microphone tested/working
-void init_i2s_microphone() {
-	// Configure I2S
-	i2s_config_t i2s_config = {
-		.mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX),
-		.sample_rate = SAMPLE_RATE,
-		.bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
-		.channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
-		.communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB),
-		.dma_buf_count = 4,
-		.dma_buf_len = CHUNK_SIZE};
+i2s_chan_handle_t rx_handle;
 
-	i2s_pin_config_t pin_config = {
-		.bck_io_num = I2S_BCLK_PIN,
-		.ws_io_num = I2S_LRCLK_PIN,
-		.data_out_num = I2S_PIN_NO_CHANGE,
-		.data_in_num = I2S_DIN_PIN};
+void init_i2s_microphone(){
+	// Get the default channel configuration
+	i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
 
-	i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
+	// Create a new RX channel and get the handle of this channel
+	i2s_new_channel(&chan_cfg, NULL, &rx_handle);
 
-	i2s_set_pin(I2S_NUM_0, &pin_config);
+	// Configuration for the I2S standard mode, suitable for the SPH0645 microphone
+	i2s_std_config_t std_cfg = {
+		.clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(12800), // BCLK frequency for a 2kHz sample rate (64 * 2kHz)
+		.slot_cfg = {
+			.data_bit_width = I2S_DATA_BIT_WIDTH_32BIT, // Data bit width as 24 bits
+			.slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT, // Slot width as 32 bits to accommodate data
+			.slot_mode = I2S_SLOT_MODE_STEREO, // Mono mode since it's a single microphone
+			.slot_mask = I2S_STD_SLOT_RIGHT, // Only reading the left channel slot
+			.ws_width = 32, // WS signal width as 32 BCLK periods (since BCLK/64 and we are in mono mode)
+			.ws_pol = true, // Inverting WS polarity, so it changes on falling edge of BCLK
+			.bit_shift = false, // No bit shift needed as MSB is delayed by 1 BCLK after WS
+			.left_align = true, // Data is left-aligned within the 32-bit slot
+			.big_endian = false, // Data format is little endian
+			.bit_order_lsb = false, // MSB is received first
+		},
+		.gpio_cfg = {
+			.mclk = I2S_GPIO_UNUSED,
+			.bclk = (gpio_num_t)I2S_BCLK_PIN,
+			.ws = (gpio_num_t)I2S_LRCLK_PIN,
+			.dout = I2S_GPIO_UNUSED,
+			.din = (gpio_num_t)I2S_DIN_PIN,
+			.invert_flags = {
+				.mclk_inv = false,
+				.bclk_inv = false,
+				.ws_inv = false,
+			},
+		},
+	};
+
+
+
+	// Initialize the channel
+	i2s_channel_init_std_mode(rx_handle, &std_cfg);
+
+	// Start the RX channel
+	i2s_channel_enable(rx_handle);
 }
 
 void acquire_sample_chunk() {
 	profile_function([&]() {
 		// Buffer to hold audio samples
-		int32_t new_samples_raw[CHUNK_SIZE];
+		uint32_t new_samples_raw[CHUNK_SIZE];
+		int32_t new_samples_shifted[CHUNK_SIZE];
+		float new_samples_raw_float[CHUNK_SIZE];
 		float new_samples[CHUNK_SIZE];
-
-		memset(new_samples_raw,       0, sizeof(int32_t) * CHUNK_SIZE);
-		memset(new_samples,           0, sizeof(float)   * CHUNK_SIZE);
 
 		// Read audio samples into int32_t buffer
 		size_t bytes_read = 0;
-		i2s_read(I2S_NUM_0, new_samples_raw, sizeof(new_samples_raw), &bytes_read, portMAX_DELAY);
+		i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
 
-		// Clip the sample value if it's too large, cast to large floats
+		/*
+		for (int i = 0; i < CHUNK_SIZE; i++) {
+    		int32_t sample = (((int32_t)new_samples_raw[i]) >> 14) + 7000;
+
+			Serial.print(sample);
+			Serial.print('\t');
+			print_binary(sample, 32, '\n');
+
+			new_samples_shifted[i] = sample;
+		}
+		*/
+
+		// Clip the sample value if it's too large, cast to floats
 		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
-			new_samples[i+0] = min(max((int32_t)new_samples_raw[i+0], (int32_t)-80000000), (int32_t)80000000);
-			new_samples[i+1] = min(max((int32_t)new_samples_raw[i+1], (int32_t)-80000000), (int32_t)80000000);
-			new_samples[i+2] = min(max((int32_t)new_samples_raw[i+2], (int32_t)-80000000), (int32_t)80000000);
-			new_samples[i+3] = min(max((int32_t)new_samples_raw[i+3], (int32_t)-80000000), (int32_t)80000000);
+			new_samples_raw_float[i+0] = min(max((((int32_t)new_samples_raw[i+0]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples_raw_float[i+1] = min(max((((int32_t)new_samples_raw[i+1]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples_raw_float[i+2] = min(max((((int32_t)new_samples_raw[i+2]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples_raw_float[i+3] = min(max((((int32_t)new_samples_raw[i+3]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
 		}
 
-		// Convert audio from large float range to -1.0 to 1.0 range
-		dsps_mulc_f32(new_samples, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
+		// Convert audio from "18-bit" float range to -1.0 to 1.0 range
+		dsps_mulc_f32(new_samples_raw_float, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
 
 		// Add new chunk to audio history
 		waveform_locked = true;
 		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE);
-		waveform_locked = false;
-		waveform_sync_flag = true;
 
 		if(audio_recording_live == true){
 			int16_t out_samples[CHUNK_SIZE];
@@ -96,6 +132,9 @@ void acquire_sample_chunk() {
 				save_audio_debug_recording();
 			}
 		}
+		
+		waveform_locked = false;
+		waveform_sync_flag = true;
 
 		/*
 		// Used to print raw microphone values over UART for debugging

@@ -35,7 +35,7 @@ void init_system() {
 	extern void init_wifi();
 	extern void init_filesystem();
 
-	init_serial(115200);					  // (system.h)
+	init_serial(2000000);					  // (system.h)
 	init_filesystem();                        // (filesystem.h)
 	init_configuration();                     // (configuration.h)
 	init_i2s_microphone();					  // (microphone.h)
