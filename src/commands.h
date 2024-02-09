@@ -110,7 +110,7 @@ void parse_command(command com) {
 			// Get hue_range value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
-			configuration.hue_range = (setting_value * 2.0) - 1.0; // 0.0-1.0 range to -1.0 to 1.0 range
+			configuration.hue_range = setting_value; // -1.0 to 1.0 range
 		}
 
 		else if (fastcmp(substring, "mode")) {
