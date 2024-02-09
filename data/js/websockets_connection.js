@@ -215,7 +215,7 @@ function reconnect_websockets(){
 		set_ui_locked_state(true);
 		setTimeout(function(){
 			window.location.reload();
-		}, 250);
+		}, 2000);
 	}
 }
 

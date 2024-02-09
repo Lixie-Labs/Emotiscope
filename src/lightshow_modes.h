@@ -26,6 +26,7 @@ lightshow_mode lightshow_modes[] = {
 	{ "Hype",            &draw_hype          }, // 3
 	{ "Plot",            &draw_plot          }, // 4
 	{ "Debug",           &draw_debug         }, // 5
+	// TODO: Design bloom mode from tempi novelty curve
 };
 
 extern float lpf_drag; // Used for fade transition
