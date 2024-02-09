@@ -187,6 +187,8 @@ SAVING CONFIGURATION TO FILESYSTEM
 SAVING CONFIGURATION TO FILESYSTEM
 SAVING CONFIGURATION TO FILESYSTEM
 SAVING CONFIGURATION TO FILESYSTEM
+
+Also the FPS and memory are no longer printed either
 */
 void save_config_delayed() {
 	last_save_request_ms = millis();
