@@ -14,13 +14,13 @@
 <body>
 	<div id="app_container">
 		<div id="header">
-			<span onclick="show_page('page_menu');">
+			<span onclick="show_page('page_menu');" class="buzz">
 				<img id="left_header_item" src="svg/menu.svg" class="header_icon tint_accent"/>
 			</span>
 
 			<span id="header_logo">emotiscope</span>
 
-			<span onclick="show_page('page_info');">
+			<span onclick="show_page('page_info');" class="buzz">
 				<img src="svg/info.svg" class="footer_icon tint_accent"/>
 			</span>
 		</div>
@@ -50,21 +50,21 @@
 		<!--<div id="mode_bin"></div>-->
 
 		<div id="footer">
-			<span onclick="show_page('page_calibration');">
+			<span onclick="show_page('page_calibration');" class="buzz">
 				<img id="right_header_item" src="svg/microphone.svg" class="header_icon tint_accent"/>
 			</span>
 
 			<span onclick="show_page('page_modes');" style="margin-bottom: 30px;">
-				<span id="current_mode">LOADING</span>
+				<span id="current_mode" class="buzz">LOADING</span>
 			</span>
 
-			<span onclick="show_page('page_presets');" class="invisible">
+			<span onclick="show_page('page_presets');" class="invisible" id="presets_button">
 				<img src="svg/wand.svg" class="footer_icon tint_accent"/>
 			</span>
 		</div>
 
 		<div id="page_info">
-			<span onclick="hide_page('page_info');" class="icon_top_right">
+			<span onclick="hide_page('page_info');" class="icon_top_right buzz">
 				<img src="svg/close.svg" class="footer_icon tint_accent"/>
 			</span>
 		
@@ -81,7 +81,7 @@
 		<!-- TODO: Add main menu content -->
 		<!-- Nickname your device? Advanced settings? Check firmware update? -->
 		<div id="page_menu">
-			<span onclick="hide_page('page_menu');" class="icon_top_left">
+			<span onclick="hide_page('page_menu');" class="icon_top_left buzz">
 				<img src="svg/close.svg" class="footer_icon tint_accent"/>
 			</span>
 
@@ -94,7 +94,7 @@
 		</div>
 
 		<div id="page_calibration">
-			<span onclick="hide_page('page_calibration');" class="icon_bottom_left">
+			<span onclick="hide_page('page_calibration');" class="icon_bottom_left buzz">
 				<img src="svg/close.svg" class="footer_icon tint_accent" />
 			</span>
 
@@ -104,13 +104,14 @@
 			<!-- When calibration starts, white noise should fade in for 0.5 seconds, be measured for 2 seconds, then fade out for 0.5 seconds -->
 			<div class="page_title">CALIBRATION</div>
 			<div class="page_paragraph">
-				<button onclick="start_noise_calibration();">REMOVE BACKGROUND NOISE</button>
-				<button onclick="start_frequency_calibration();">CALIBRATE FREQUENCY RESPONSE</button>
+				<button onclick="start_noise_calibration();" class="buzz">REMOVE BACKGROUND NOISE</button>
+				<br>
+				<button onclick="start_frequency_calibration();" class="buzz">CALIBRATE FREQUENCY RESPONSE</button>
 			</div>
 		</div>
 
 		<div id="page_presets">
-			<span onclick="hide_page('page_presets');" class="icon_bottom_left">
+			<span onclick="hide_page('page_presets');" class="icon_bottom_left buzz">
 				<img src="svg/close.svg" class="footer_icon tint_accent" />
 			</span>
 
@@ -125,7 +126,7 @@
 			
 			<div id="mode_bin"></div>
 			
-			<span onclick="hide_page('page_modes');" class="icon_bottom_center">
+			<span onclick="hide_page('page_modes');" class="icon_bottom_center buzz">
 				<img src="svg/close.svg" class="footer_icon tint_accent"/>
 			</span>
 		</div>
@@ -135,7 +136,7 @@
 			<div id="info_panel_description">
 				Applies a filter to the display which limits the brightness of blue colors, similar to retro tinted holiday bulbs
 			</div>
-			<span onclick="hide_setting_information();">
+			<span onclick="hide_setting_information();" class="buzz">
 				<img src="svg/close.svg" class="footer_icon tint_accent"/>
 			</span>
 		</div>

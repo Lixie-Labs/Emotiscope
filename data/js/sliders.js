@@ -66,6 +66,9 @@ function track_sliders() {
                 if (data.tracking_allowed === undefined && (delta_x > 10 || delta_y > 10)) {
                     // Allow tracking for more vertical movement; otherwise, keep default behavior
                     data.tracking_allowed = delta_y > delta_x;
+					if(data.tracking_allowed == true){
+						trigger_vibration(5);						
+					}
                 }
 
                 if (data.tracking_allowed) {
@@ -75,7 +78,7 @@ function track_sliders() {
 
                     // Tracking logic here
                     if (delta_y > 0) { // Ensure there's some vertical movement to track
-                        let distance_moved = data.start_y - touch.clientY;
+						let distance_moved = data.start_y - touch.clientY;
                         let ratio = Math.min(1.0, Math.max(-1.0, (distance_moved / data.target_div.offsetHeight)));
                         let div_name = data.target_div.getAttribute('name') || data.target_div.id;
 
@@ -101,7 +104,7 @@ function track_sliders() {
 								data.target_div.style.backgroundImage = `linear-gradient(to top, var(--secondary) 0%, var(--secondary) ${percentage}%, transparent 0%, transparent 100%)`;
 							}
 						}
-                    }
+					}
                 }
             }
         });

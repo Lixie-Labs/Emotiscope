@@ -3,17 +3,32 @@ let modes = [];
 let sliders = [];
 let toggles = [];
 
+let magnetic_snapping_enabled = true;
+
 // TODO: Hue-related sliders should literally depict their hue settings
 //   For example, the "hue" slider should fade to the currently selected color when dragged,
 //   and the "hue range" slider should show a relevant gradient based on the position of
 //   the "hue" slider.
+
+function trigger_vibration(length_ms) {
+	console.log("~~~~~~~~~~~~~buzz~~~~~~~~~~~~~");
+    // Check if the Vibrate API is supported in the navigator
+    if ("vibrate" in navigator) {
+        // Trigger vibration for the specified length
+        navigator.vibrate([length_ms]);
+        return true; // Indicate that the vibration was triggered
+    } else {
+        // Vibrate API not supported
+        return false; // Indicate that the vibration could not be triggered
+    }
+}
 
 function render_modes(){
 	let mode_bin = document.getElementById("mode_bin");
 	mode_bin.innerHTML = "";
 	for(let i in modes){
 		let mode_name = modes[i];
-		let mode_button = `<div class="mode_button" onclick="set_mode('${mode_name}'); hide_page('page_modes');">${mode_name}</div>`;
+		let mode_button = `<div class="mode_button buzz" onclick="set_mode('${mode_name}'); hide_page('page_modes');">${mode_name}</div>`;
 		mode_bin.innerHTML += mode_button;
 	}
 
@@ -57,7 +72,109 @@ function render_toggles(){
 	toggle_container.innerHTML += out_html;
 }
 
+function calculate_slider_distance() {
+    // Get all elements with the class "slider"
+    var sliders = document.getElementsByClassName("slider");
+
+    // Ensure there are at least two sliders to measure the distance between
+    if (sliders.length < 2) {
+        console.error("Not enough sliders found to calculate the distance.");
+        return 0; // Return 0 as there aren't enough sliders to measure distance
+    }
+
+    // Get bounding rectangle of the first slider
+    var first_slider_rect = sliders[0].getBoundingClientRect();
+    // Get bounding rectangle of the second slider
+    var second_slider_rect = sliders[1].getBoundingClientRect();
+
+    // Calculate the horizontal distance between the first two sliders
+    // Note: This calculation assumes the sliders are aligned in some way (vertically or at least partially)
+    // For a more robust solution, consider handling cases where sliders are not aligned vertically.
+    var distance = Math.abs(second_slider_rect.left - first_slider_rect.left);
+
+    // Return the calculated distance
+    return distance;
+}
+
+function v_sync(callback) {
+    // The function to be called repeatedly by requestAnimationFrame
+    function frame() {
+        // Execute the callback function passed to v_sync
+        callback();
+
+        // Request the next frame
+        requestAnimationFrame(frame);
+    }
+
+    // Start the animation loop
+    requestAnimationFrame(frame);
+}
+
+function init_vibration(){
+	v_sync(function(){
+		// Nothing
+	});
+}
+
+function init_setting_gallery_snapping(){
+	let nearest_click_point_last_frame = 0;
+	v_sync(function(){
+		
+		// Do this every screen redraw
+		var setting_gallery = document.getElementById('setting_gallery');
+		var scroll_position = setting_gallery.scrollLeft;
+		//console.log("SCROLL POSITION: "+scroll_position);
+
+		// Calculate how far apart each snap point in the setting gallery is based on screen width
+		let snap_interval = calculate_slider_distance();
+
+		let magnetic_bounds = [];
+		let click_points = [];
+		let click_offset = (snap_interval / 2);
+		let num_magnetic_bounds = (sliders.length + toggles.length) - 2; // Not counting edges
+		let num_click_points = num_magnetic_bounds;
+		for(let i = 0; i < num_magnetic_bounds; i++){
+			magnetic_bounds.push(  snap_interval * i );
+			click_points.push( snap_interval * i + click_offset );
+		}
+
+		let min_distance = 100000000;
+		let nearest_magnetic_bound = -1;
+		for(let i = 0; i < num_magnetic_bounds; i++){
+			let absolute_distance = Math.abs(magnetic_bounds[i] - scroll_position);
+			if(absolute_distance < min_distance){
+				min_distance = absolute_distance;
+				nearest_magnetic_bound = i;
+			}
+		}
+
+		min_distance = 100000000;
+		let nearest_click_point = -1;
+		for(let i = 0; i < num_click_points; i++){
+			let absolute_distance = Math.abs(click_points[i] - scroll_position);
+			if(absolute_distance < min_distance){
+				min_distance = absolute_distance;
+				nearest_click_point = i;
+			}
+		}
+
+		if(nearest_click_point != nearest_click_point_last_frame){
+			trigger_vibration(5);
+			nearest_click_point_last_frame = nearest_click_point;
+		}
+
+		let magnetic_pull = magnetic_bounds[nearest_magnetic_bound] - scroll_position; // 100 - 90 = 10
+		//console.log(magnetic_pull);
+			
+		if(magnetic_snapping_enabled){
+			setting_gallery.scrollLeft += magnetic_pull * 0.2;
+		}
+	});
+}
+
 function render_controls(){
+	console.log("render_controls()");
+	init_setting_gallery_snapping();
 	render_modes();
 
 	render_sliders();
@@ -70,12 +187,46 @@ function render_controls(){
 	track_toggles();
 }
 
-/*
-let toggle_state = false;
-function switch_toggle(){
-	toggle_state = !toggle_state;
-	set_toggle_state("mirror_mode", toggle_state);
+function attach_buzz_listeners_to_element(element) {
+    element.addEventListener('touchstart', function(){
+		trigger_vibration(10);
+		element.classList.add('buzz_pressed');
+	});
+    element.addEventListener('touchend', function(){
+		trigger_vibration(10);
+		element.classList.remove('buzz_pressed');
+	});
+    element.dataset.hasListeners = 'true'; // Mark the element to avoid attaching listeners again
+	console.log("NEW BUZZ ELEMENT");
+	console.log(element);
 }
 
-setInterval(switch_toggle, 1000);
+function check_and_attach_buzz_listeners() {
+    const buzz_elements = document.querySelectorAll('.buzz:not([data-has-listeners])');
+    buzz_elements.forEach(attach_buzz_listeners_to_element);
+}
+
+let setting_gallery = document.getElementById("setting_gallery");
+setting_gallery.addEventListener('touchstart', function(){
+	trigger_vibration(5);
+	console.log("snapping_off");
+	magnetic_snapping_enabled = false;
+});
+setting_gallery.addEventListener('touchend', function(){
+	trigger_vibration(5);
+	console.log("snapping_on");
+	magnetic_snapping_enabled = true;
+});
+
+/*
+document.getRootNode().addEventListener('touchstart', function(){
+	trigger_vibration(10);
+});
+
+document.getRootNode().addEventListener('touchend', function(){
+	trigger_vibration(5);
+});
 */
+
+// Periodically check for new '.buzz' elements every 100ms
+setInterval(check_and_attach_buzz_listeners, 100);

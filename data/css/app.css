@@ -36,7 +36,6 @@ body{
 }
 
 #dimmer{
-	background-color: rgba(var(--background), 0.75);
 	width:100%;
 	height:100%;
 	position: absolute;
@@ -47,11 +46,12 @@ body{
     justify-content: center;
 	pointer-events: none;
 	opacity: 1.0;
-    transition: opacity 0.25s ease-in-out;
+    transition: opacity 0.15s ease-in-out;
+	background-color: rgba(var(--background), 0.75);
+    backdrop-filter: blur(12px);
 }
 
 #page_info{
-	background-color: rgb(var(--background));
 	width:100%;
 	height:100%;
 	display: flex;
@@ -59,15 +59,16 @@ body{
     justify-content: center;
 	opacity: 0.0;
 	pointer-events: none;
-    transition: opacity 0.25s ease-in-out;
+    transition: opacity 0.15s ease-in-out;
 	flex-direction: column;
 	position: absolute;
     top: 0%;
     left: 0%;
+	background-color: rgba(var(--background), 0.45);
+    backdrop-filter: blur(12px);
 }
 
 #page_menu{
-	background-color: rgb(var(--background));
 	width:100%;
 	height:100%;
 	display: flex;
@@ -75,31 +76,33 @@ body{
     justify-content: center;
 	opacity: 0.0;
 	pointer-events: none;
-    transition: opacity 0.25s ease-in-out;
+    transition: opacity 0.15s ease-in-out;
 	flex-direction: column;
 	position: absolute;
     top: 0%;
     left: 0%;
+	background-color: rgba(var(--background), 0.45);
+    backdrop-filter: blur(12px);
 }
 
 #page_calibration{
-	background-color: rgb(var(--background));
-	width:100%;
-	height:100%;
-	display: flex;
-	align-items: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
     justify-content: center;
-	opacity: 0.0;
-	pointer-events: none;
-    transition: opacity 0.25s ease-in-out;
-	flex-direction: column;
-	position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease-in-out;
+    flex-direction: column;
+    position: absolute;
     top: 0%;
     left: 0%;
+    background-color: rgba(var(--background), 0.45);
+    backdrop-filter: blur(12px);
 }
 
 #page_presets{
-	background-color: rgb(var(--background));
 	width:100%;
 	height:100%;
 	display: flex;
@@ -112,10 +115,11 @@ body{
 	position: absolute;
     top: 0%;
     left: 0%;
+	background-color: rgba(var(--background), 0.45);
+    backdrop-filter: blur(12px);
 }
 
 #page_modes{
-	background-color: rgb(var(--background));
 	width:100%;
 	height:100%;
 	display: flex;
@@ -128,6 +132,8 @@ body{
 	position: absolute;
     top: 0%;
     left: 0%;
+	background-color: rgba(var(--background), 0.45);
+    backdrop-filter: blur(12px);
 }
 
 .mode_button{
@@ -142,6 +148,13 @@ body{
     border-radius: 10px;
     margin-bottom: 10px;
     color: var(--primary);
+	background-color: rgba(var(--background), 0.5);
+}
+
+.buzz_pressed{
+	background-color: var(--secondary) !important;
+    color: #000 !important;
+	border-radius: 10px;
 }
 
 #app_container{
@@ -243,7 +256,7 @@ button{
     border-radius: 10px;
     margin-bottom: 10px;
     color: var(--primary);
-    background-color: rgb(var(--background));
+	background-color: rgba(var(--background), 0.5);
     font-family: unset;
     width: 100%;
 	font-weight: bold;
