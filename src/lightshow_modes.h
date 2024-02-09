@@ -25,7 +25,8 @@ lightshow_mode lightshow_modes[] = {
 	{ "Spectrum + Clap", &draw_spectrum_clap }, // 2
 	{ "Hype",            &draw_hype          }, // 3
 	{ "Plot",            &draw_plot          }, // 4
-	{ "Debug",           &draw_debug         }, // 5
+
+	//{ "Debug",           &draw_debug         },
 	// TODO: Design bloom mode from tempi novelty curve
 };
 
