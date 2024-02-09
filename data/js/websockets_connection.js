@@ -3,7 +3,7 @@ const MAX_CONNECTION_TIME_MS = 3000;
 const AUTO_RECONNECT = true;
 
 let ws;
-let device_ip = "192.168.1.49";
+let device_ip;
 let connection_start_time;
 let connection_pending = false;
 let last_ping_time;
@@ -220,6 +220,7 @@ function reconnect_websockets(){
 }
 
 function open_websockets_connection_to_device(){
+	console.log("CONNECTING TO "+device_ip);
 	ws = new WebSocket("ws://"+device_ip+":80/ws");
 
 	ws.onopen = function(e) {
@@ -250,8 +251,3 @@ function open_websockets_connection_to_device(){
 		reconnect_websockets();
 	};
 }
-
-connection_start_time = performance.now();
-connection_pending = true;
-setInterval(check_connection_timeout, 100);
-open_websockets_connection_to_device();

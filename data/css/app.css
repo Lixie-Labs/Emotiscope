@@ -294,6 +294,7 @@ button{
     font-size:24px;
 	font-weight: bold;
 	color:var(--primary);
+	z-index: 9999 !important;
 }
 
 .header_icon {

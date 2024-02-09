@@ -101,8 +101,6 @@
                         if (data.length > 0 && data[0].local_ip) {
 							retry_count = 0;
 							output("Device seen on network @ "+data[0].local_ip+"! Redirecting...");
-                            //window.location.href = `http://${data[0].local_ip}`;
-							document.getElementById("app_frame").src = `http://${data[0].local_ip}`;
                         } else {
 							if (retry_count < max_retry_attempts) {
 								let delay = base_delay * Math.pow(2, retry_count);

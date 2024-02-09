@@ -1,0 +1,52 @@
+const max_retry_attempts = 3;
+let retry_count = 0;
+const base_delay = 250;
+
+function fetch_and_redirect() {
+	console.log("fetch");
+	const target_url = 'https://discovery.lixielabs.com/';
+
+	fetch(target_url)
+		.then(response => {
+			if (!response.ok) {
+				output("Network response was not ok");
+				throw new Error('Network response was not ok');
+			}
+			return response.json();
+		})
+		.then(data => {
+			if (data.length > 0) {
+				console.log(data);
+				retry_count = 0;
+				console.log("Device seen on network @ "+data[0].local_ip+"! Redirecting...");
+
+				device_ip = data[0].local_ip;
+				connection_start_time = performance.now();
+				connection_pending = true;
+				setInterval(check_connection_timeout, 100);
+
+				open_websockets_connection_to_device();
+			} else {
+				if (retry_count < max_retry_attempts) {
+					let delay = base_delay * Math.pow(2, retry_count);
+					console.log(`No devices seen on network, re-checking in ${delay}ms...`);
+					setTimeout(fetch_and_redirect, delay);
+					retry_count++;
+				} else {
+					console.log('Failed to fetch local IP after ' + max_retry_attempts + '!');
+					show_connection_error();
+				}
+			}
+		})
+		.catch(error => {
+			if (retry_count < max_retry_attempts) {
+				let delay = base_delay * Math.pow(2, retry_count);
+				setTimeout(fetch_and_redirect, delay);
+				retry_count++;
+			} else {
+				output('Failed to reach discovery server after ' + max_retry_attempts + ' attempts: ' + error.message);
+			}
+		});
+}
+
+fetch_and_redirect();

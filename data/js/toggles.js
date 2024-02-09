@@ -102,7 +102,7 @@ function track_toggles() {
 
 								if(configuration[id] != resulting_value){
 									configuration[id] = resulting_value;
-									trigger_vibration(10);
+									trigger_vibration(20);
 									transmit(`set|${id}|${resulting_value}`);
 								}
 

@@ -66,9 +66,6 @@ function track_sliders() {
                 if (data.tracking_allowed === undefined && (delta_x > 10 || delta_y > 10)) {
                     // Allow tracking for more vertical movement; otherwise, keep default behavior
                     data.tracking_allowed = delta_y > delta_x;
-					if(data.tracking_allowed == true){
-						trigger_vibration(5);						
-					}
                 }
 
                 if (data.tracking_allowed) {

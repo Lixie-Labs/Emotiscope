@@ -197,8 +197,6 @@ function attach_buzz_listeners_to_element(element) {
 		element.classList.remove('buzz_pressed');
 	});
     element.dataset.hasListeners = 'true'; // Mark the element to avoid attaching listeners again
-	console.log("NEW BUZZ ELEMENT");
-	console.log(element);
 }
 
 function check_and_attach_buzz_listeners() {
