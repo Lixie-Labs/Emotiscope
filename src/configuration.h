@@ -177,6 +177,8 @@ void save_config_delayed() {
 	save_request_open = true;
 }
 
+// TODO: Display flicker when saving config+noise_spectrum after accepting save request
+// Could be RMT doesn't have enough buffer, could be LittleFS takes too long
 void sync_configuration_to_file_system(uint32_t t_now_ms) {
 	if (save_request_open == true) {
 		if ((t_now_ms - last_save_request_ms) >= MIN_SAVE_WAIT_MS) {
