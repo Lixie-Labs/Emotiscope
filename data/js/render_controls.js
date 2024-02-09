@@ -23,7 +23,6 @@ function render_modes(){
 	current_mode.innerHTML = current_mode_name;
 }
 
-// TODO: Make setting gallery snap magnetically into place when scrolling completes to keep sliders/toggles centered
 function render_sliders(){
 	let slider_container = document.getElementById("setting_container");
 	slider_container.innerHTML = "";
@@ -38,6 +37,7 @@ function render_sliders(){
 		//slider_container.innerHTML += `<span class="slider"><div class="slider_label">${slider_name.toUpperCase()}</div><div class="slider_track" id="${slider_name}"></div></span>`;
 	}
 }
+// TODO: Make the ]setting gallery snap magnetically into place when scrolling completes to keep sliders/toggles centered
 
 function render_toggles(){
 	let toggle_container = document.getElementById("setting_container");
