@@ -45,7 +45,7 @@ void draw_plot(){
 		float samples[num_samples];
 		memcpy(samples, samples_raw, sizeof(float)*num_samples);
 
-		float max_stretch = 0.25;
+		float max_stretch = 0.025;
 		for(uint16_t i = 0; i < num_samples; i+=1){
 			float sample = samples[i];
 			max_stretch = max(max_stretch, fabs(sample));
@@ -84,63 +84,6 @@ void draw_plot(){
 		leds[i] = {
 			0.0,
 			pixel*pixel,
-			0.0
-		};		
-	}
-}
-
-void draw_plot_old(){
-	static float image_smooth[NUM_LEDS];
-	static float image[NUM_LEDS];
-	static float previous_plotter_pos = 64.0;
-
-	if(waveform_locked == false && waveform_sync_flag == true){
-		waveform_sync_flag = false;
-		
-		memset(image, 0, sizeof(float)*NUM_LEDS);
-
-		const uint16_t num_samples = 64;
-
-		float max_stretch = 0.25;
-		for(uint16_t i = 0; i < num_samples; i+=1){
-			float sample = sample_history[(((SAMPLE_HISTORY_LENGTH-1) - (num_samples))) + i];
-			max_stretch = max(max_stretch, fabs(sample));
-		}
-
-		float auto_stretch = 1.0 / max_stretch;
-
-		for(uint16_t i = 0; i < num_samples; i+=1){
-			float sample = (sample_history[(((SAMPLE_HISTORY_LENGTH-1) - (num_samples))) + i] * auto_stretch) * 62.0 + 64;
-			float position_distance = fabs(sample-previous_plotter_pos);
-
-			if(position_distance < 1.0){
-				position_distance = 1.0;
-			}
-
-			float spread_brightness = 1.0;// / position_distance;
-			if (spread_brightness > 1.0) {
-				spread_brightness = 1.0;
-			}
-
-			draw_line(image, sample, sample, spread_brightness);
-
-			previous_plotter_pos = sample;
-		}
-	}
-
-	float max_val = 0.0000001;	
-	for(uint16_t i = 0; i < NUM_LEDS; i++){
-		max_val = max(max_val, image[i]);
-	}
-
-	float auto_scale = 1.0 / (max_val);
-
-	for(uint16_t i = 0; i < NUM_LEDS; i++){
-		float pixel = clip_float( image[i] * auto_scale );
-		//image_smooth[i] = image_smooth[i]*0.75 + pixel*0.25;
-		leds[i] = {
-			0.0,
-			pixel*pixel*pixel,
 			0.0
 		};		
 	}

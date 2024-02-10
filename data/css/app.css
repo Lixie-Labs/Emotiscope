@@ -330,14 +330,13 @@ button{
 }
 
 .slider_label, .toggle_label{
-	display: block;
-    height: 10px;
+    display: block;
     width: 100%;
     font-size: 12px;
     text-align: center;
     color: var(--primary);
-    margin-bottom: 20px;
-	overflow-x: clip;
+    margin-bottom: 10px;
+    overflow-x: clip;
 }
 
 .slider_track, .toggle_track{

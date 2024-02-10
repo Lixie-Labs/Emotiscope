@@ -34,7 +34,7 @@ esp_err_t dsps_sqrt_f32_ansi(const float *input, float *output, int len)
 */
 
 // ##################################################################################################################################################
-// POTENTIAL SSL workaround:
+// POTENTIAL SSL workaround: YEAH NEVERMIND
 /*
 
 app.emotiscope.rocks is an SSL page and thus qualifies as a PWA
@@ -48,3 +48,13 @@ Once installed, it will no longer wait before redirecting unless no devices are 
 
 UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to HTTP. Good security, shitty UX.
 */
+
+// ##################################################################################################################################################
+// Sub-frame audio
+
+// If the CPU can get an audio frame at 200 FPS but the GPU can render at 500 FPS,
+// it could be possible to render "extra" audio frames that make temporal sense.
+//
+// If we're 25% of the way between when the last audio frame was recieved and when the next one will arrive,
+// a float value of 0.25 could be used to index into the previous audio chunk to break the 64 samples into 
+// an even smaller (but temporally consistent) chunk.

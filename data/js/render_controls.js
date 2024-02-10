@@ -48,7 +48,7 @@ function render_sliders(){
 		let slider_step = sliders[i].step;
 		let slider_value = configuration[slider_name];
 
-		slider_container.innerHTML += `<span class="slider"><div class="slider_label" onclick="show_setting_information('${slider_name}');">${slider_name.toUpperCase().replace("_"," ")}</div><div class="slider_track" id="${slider_name}"></div></span>`;
+		slider_container.innerHTML += `<span class="slider"><div class="slider_label buzz" onclick="show_setting_information('${slider_name}');">${slider_name.toUpperCase().replace("_"," ")}</div><div class="slider_track" id="${slider_name}"></div></span>`;
 		//slider_container.innerHTML += `<span class="slider"><div class="slider_label">${slider_name.toUpperCase()}</div><div class="slider_track" id="${slider_name}"></div></span>`;
 	}
 }
@@ -61,7 +61,7 @@ function render_toggles(){
 		let toggle_value = configuration[toggle_name];
 
 		out_html += `<span class="toggle">`;
-		out_html += 	`<div class="toggle_label" onclick="show_setting_information('${toggle_name}');">`;
+		out_html += 	`<div class="toggle_label buzz" onclick="show_setting_information('${toggle_name}');">`;
 		out_html += 		`${toggle_name.toUpperCase().replace("_"," ")}`;
 		out_html +=		`</div>`;
 		out_html +=		`<div class="toggle_track" id="${toggle_name}"></div>`;
