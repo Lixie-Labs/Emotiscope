@@ -8,6 +8,8 @@ websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
 
 volatile bool web_server_ready = false;
 
+// TODO: Add runtime WiFi credential input method
+
 void discovery_check_in() {
     static uint32_t next_discovery_check_in_time = 0;
     static uint8_t attempt_count = 0;  // Keep track of the current attempt count
