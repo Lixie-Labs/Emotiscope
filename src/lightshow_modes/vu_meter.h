@@ -18,7 +18,7 @@ void draw_vu(){
 
 	if(max_amplitude_now_smooth > max_amplitude_cap){
 		float distance = max_amplitude_now_smooth - max_amplitude_cap;
-		max_amplitude_cap += (distance * 0.1);
+		max_amplitude_cap += (distance * 0.25);
 	}
 	else if(max_amplitude_cap > max_amplitude_now_smooth){
 		float distance = max_amplitude_cap - max_amplitude_now_smooth;

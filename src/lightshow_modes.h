@@ -21,7 +21,6 @@
 
 #include "lightshow_modes/debug.h"
 
-// TODO: Make all lightshow modes react to hue/hue range
 lightshow_mode lightshow_modes[] = {
 	{ "Spectrum",        &draw_spectrum      }, // 0
 	{ "Clap",            &draw_clap          }, // 1
@@ -32,7 +31,6 @@ lightshow_mode lightshow_modes[] = {
 	{ "VU Meter",        &draw_vu            }, // 6
 
 	//{ "Debug",           &draw_debug         },
-	// TODO: Design bloom mode from tempi novelty curve
 };
 
 extern float lpf_drag; // Used for fade transition

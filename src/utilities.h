@@ -19,6 +19,21 @@ void broadcast(char* message){
 	printf("%s\n", message);
 }
 
+float linear_to_tri(float input) {
+    if (input < 0.0f || input > 1.0f) {
+        // Input out of range
+        return -1.0f; // Return an error value (or handle as you see fit)
+    }
+
+    if (input <= 0.5f) {
+        // Scale up the first half
+        return 2.0f * input;
+    } else {
+        // Scale down the second half
+        return 2.0f * (1.0f - input);
+    }
+}
+
 // Can return a value between two array indices with linear interpolation
 float IRAM_ATTR interpolate(float index, float* array, uint16_t array_size) {
 	float index_f = index * (array_size - 1);

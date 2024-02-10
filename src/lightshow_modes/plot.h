@@ -35,8 +35,8 @@ void draw_line(float* layer, float x1, float x2, float opacity) {
 void draw_plot(){
 	static float image[NUM_LEDS];
 
-	if(waveform_locked == false && waveform_sync_flag == true){
-		waveform_sync_flag = false;
+	//if(waveform_locked == false && waveform_sync_flag == true){
+		//waveform_sync_flag = false;
 		
 		memset(image, 0, sizeof(float)*NUM_LEDS);
 
@@ -70,7 +70,7 @@ void draw_plot(){
 			image[sample_whole  ] += (1.0-sample_fract);
 			image[sample_whole+1] += (sample_fract);
 		}
-	}
+	//}
 
 	float max_val = 0.0000001;	
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
@@ -80,11 +80,10 @@ void draw_plot(){
 	float auto_scale = 1.0 / (max_val);
 
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		float progress = float(i) / NUM_LEDS;
 		float pixel = clip_float( image[i] * auto_scale );
-		leds[i] = {
-			0.0,
-			pixel*pixel,
-			0.0
-		};		
+		pixel *= pixel;
+		CRGBF pixel_color = hsv(configuration.hue + linear_to_tri(progress)*configuration.hue_range, 1.0, pixel);
+		leds[i] = pixel_color;
 	}
 }
