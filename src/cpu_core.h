@@ -20,7 +20,7 @@ void run_cpu() {
 
 		// Get the current time in microseconds and milliseconds
 		uint32_t t_now_us = micros();
-		uint32_t t_now_ms = t_now_us / 1000;
+		uint32_t t_now_ms = millis();
 
 		//------------------------------------------------------------------------------------------
 		// AUDIO CALCULATIONS

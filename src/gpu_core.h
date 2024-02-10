@@ -17,12 +17,13 @@ void run_gpu() {
 
 	// Get the current time in microseconds and milliseconds
 	static uint32_t t_last_us = micros();
+
 	uint32_t t_now_us = micros();
-	uint32_t t_now_ms = t_now_us / 1000.0;
+	uint32_t t_now_ms = millis();
 
 	// Calculate the "delta" value, to scale movements based on FPS, like a game engine
 	const uint32_t ideal_us_interval = (1000000 / REFERENCE_FPS);
-	int32_t t_elapsed_us = t_now_us - t_last_us;
+	uint32_t t_elapsed_us = t_now_us - t_last_us;
 	float delta = float(t_elapsed_us) / ideal_us_interval;
 
 	// Save the current timestamp for next loop
