@@ -413,11 +413,27 @@ button{
 	right: 0px;
 	width: 8%;
 	height: calc(100% - 120px);
-	background: linear-gradient( to right, rgba(var(--background), 0), /* Fully transparent on the left */ rgba(var(--background), 1) /* Fully opaque on the right */ );
+	background: linear-gradient( to right, rgba(var(--background), 0), /* Fully transparent on the right */ rgba(var(--background), 1) /* Fully opaque on the left */ );
 	pointer-events: none;
 }
 
+@keyframes rotate_counterclockwise {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
 
+#rotating_div {
+    width: 100px;
+    height: 100px;
+    background-color: lightblue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 
 

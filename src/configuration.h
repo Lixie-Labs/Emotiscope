@@ -37,8 +37,8 @@ void sync_configuration_to_client() {
 	websocket_handler.sendAll(config_item_buffer);
 	memset(config_item_buffer, 0, 120);
 
-	// speed
-	snprintf(config_item_buffer, 120, "new_config|speed|float|%.3f", configuration.speed);
+	// melt
+	snprintf(config_item_buffer, 120, "new_config|melt|float|%.3f", configuration.melt);
 	websocket_handler.sendAll(config_item_buffer);
 	memset(config_item_buffer, 0, 120);
 
@@ -71,6 +71,8 @@ void sync_configuration_to_client() {
 }
 
 // Save configuration to LittleFS
+// TODO: save_config() causes a large frame stutter whenever called
+// Maybe I can chunk the file save operations?
 bool save_config() {
 	File file = LittleFS.open(CONFIG_FILENAME, FILE_WRITE);
 	if (!file) {

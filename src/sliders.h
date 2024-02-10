@@ -34,25 +34,31 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	clear_sliders();
 
 	register_slider("brightness", 0.000, 1.000, 0.001);
-	register_slider("speed", 0.000, 1.000, 0.001);
+	register_slider("melt", 0.000, 1.000, 0.001);
 	register_slider("hue", 0.000, 1.000, 0.001);
 	register_slider("hue_range", -1.000, 1.000, 0.001);
 	register_slider("incandescent", 0.0, 1.000, 0.001);
 
 	if (mode_index == 0) {  // Spectrum
-		// No extra sliders
+		// No extra sliders yet
 	}
 	else if (mode_index == 1) {  // Clap
-		// No extra sliders
+		// No extra sliders yet
 	}
 	else if (mode_index == 2) {  // Spectrum + Clap
-		// No extra sliders
+		// No extra sliders yet
 	}
 	else if (mode_index == 3) {  // Hype
-		// No extra sliders
+		// No extra sliders yet
 	}
 	else if (mode_index == 4) {  // Plot
-		// No extra sliders
+		// No extra sliders yet
+	}
+	else if (mode_index == 5) {  // Bloom
+		// No extra sliders yet
+	}
+	else if (mode_index == 6) {  // VU Meter
+		// No extra sliders yet
 	}
 	
 	else{

@@ -3,6 +3,15 @@
 #include <esp_check.h>
 #include <esp_log.h>
 
+// It won't void any kind of stupid warranty, but things might still break at this point if your change this
+#define NUM_LEDS ( 128 )
+
+// 32-bit color input
+extern CRGBF leds[NUM_LEDS];
+
+// 8-bit color output
+static uint8_t raw_led_data[NUM_LEDS*3];
+
 rmt_channel_handle_t tx_chan_a = NULL;
 rmt_channel_handle_t tx_chan_b = NULL;
 rmt_encoder_handle_t led_encoder_a = NULL;
@@ -18,8 +27,6 @@ typedef struct {
 
 rmt_led_strip_encoder_t strip_encoder_a;
 rmt_led_strip_encoder_t strip_encoder_b;
-
-const uint32_t NUM_LEDS_TOTAL = 128;
 
 rmt_transmit_config_t tx_config = {
 	.loop_count = 0,  // no transfer loop
@@ -153,9 +160,6 @@ void init_rmt_driver() {
 	ESP_ERROR_CHECK(rmt_enable(tx_chan_b));
 }
 
-static uint8_t raw_led_data[NUM_LEDS_TOTAL*3];
-extern CRGBF leds[NUM_LEDS_TOTAL];
-
 void quantize_color() {
 	const float dither_table[4] = {0.25, 0.50, 0.75, 1.00};
 	static uint8_t dither_step = 0;
@@ -165,24 +169,24 @@ void quantize_color() {
 	uint8_t whole_r; uint8_t whole_g; uint8_t whole_b;
 	float   fract_r; float   fract_g; float   fract_b;
 
-	for (uint16_t i = 0; i < NUM_LEDS_TOTAL; i++) {
+	for (uint16_t i = 0; i < NUM_LEDS; i++) {
 		// RED #####################################################
 		decimal_r = leds[i].r * 254;
 		whole_r = decimal_r;
 		fract_r = decimal_r - whole_r;
-		raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step + i) % 4]);
+		raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step) % 4]);
 		
 		// GREEN #####################################################
 		decimal_g = leds[i].g * 254;
 		whole_g = decimal_g;
 		fract_g = decimal_g - whole_g;
-		raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step + i) % 4]);
+		raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step) % 4]);
 
 		// BLUE #####################################################
 		decimal_b = leds[i].b * 254;
 		whole_b = decimal_b;
 		fract_b = decimal_b - whole_b;
-		raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step + i) % 4]);
+		raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step) % 4]);
 	}
 }
 
@@ -190,12 +194,18 @@ IRAM_ATTR void transmit_leds() {
 	// Wait here if previous frame transmission has not yet completed
 	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
 	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
-	
+
+	// Get to safety, THE PHOTONS ARE COMING!!!
+	memset(raw_led_data, 0, NUM_LEDS*3);
+
 	// Quantize the floating point color to 8-bit with dithering
-	memset(raw_led_data, 0, NUM_LEDS_TOTAL*3);
+	//
+	// This allows the 8-bit LEDs to emulate the look of a higher bit-depth using persistence of vision tricks
+	// The contents of the floating point CRGBF "leds" array are downsampled into the in alternating ways hundreds of
+	// time 
 	quantize_color();
 
 	// Transmit new frame to dual LED lanes
 	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
-	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS_TOTAL>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
+	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
 }

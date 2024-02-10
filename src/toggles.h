@@ -40,7 +40,7 @@ void load_toggles_relevant_to_mode(int16_t mode_index) {
 		register_toggle("mirror_mode");
 	}
 	else if (mode_index == 4) {  // Plot
-		// No extra toggles
+		// No extra toggles yet
 	}
 	else if (mode_index == 5) {  // Bloom
 		register_toggle("mirror_mode");
@@ -48,7 +48,8 @@ void load_toggles_relevant_to_mode(int16_t mode_index) {
 	else if (mode_index == 6) {  // VU Meter
 		register_toggle("mirror_mode");
 	}
+
 	else{
-		// WTF happened that got you here?
+		wtf_error();
 	}
 }

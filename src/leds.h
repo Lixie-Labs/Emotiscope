@@ -13,22 +13,23 @@
 #define DATA_PIN_2 12
 #define LED_TYPE NEOPIXEL
 #define COLOR_ORDER GRB
-#define NUM_LEDS 128
-
-#define MAX_DOTS 256
 
 #define REFERENCE_FPS 100
 
 CRGBF WHITE = {1.0, 1.0, 1.0};
 CRGBF BLACK = {0.0, 0.0, 0.0};
 
-CRGBF leds[NUM_LEDS];
-CRGBF leds_temp[NUM_LEDS];
+CRGBF leds[NUM_LEDS]; // 32-bit image buffer
+
+CRGBF leds_temp[NUM_LEDS]; // for temporary copies of the image buffer (scaling)
+
 CRGBF leds_last[NUM_LEDS];
+
 CRGBF leds_smooth[NUM_LEDS];
 
-//CRGB leds_8[NUM_LEDS];
-
+#define MAX_DOTS 192 
+#define NUM_RESERVED 64 // TODO: implement reserved dots at the end of the array with an enum to name them
+                        // Some can be specfically reserved for UI like tuning needles and the screensaver
 fx_dot fx_dots[MAX_DOTS];
 
 float rendered_debug_value = 0.0;
@@ -55,6 +56,15 @@ void load_leds_from_temp() {
 	// end_function_timing(profiler_index);
 }
 
+// These dsps_***() functions are from the ESP-DSP Espressif library which seem to
+// multiply arrays of floats faster than otherwise possible.
+//
+// There's a hardware accelerated FFT function in there that I'm not even using
+// because the current method of having 128 instances of the Goertzel algorithm at once
+// is still more flexible for getting good spectral shows.
+//
+// (64 are musical notes, the other 64 are tempi)
+//
 void multiply_CRGBF_array_by_LUT(CRGBF* input, CRGBF LUT, uint16_t array_length) {
 	float* ptr = (float*)input;
 
@@ -373,21 +383,14 @@ void render_debug_value(uint32_t t_now_ms) {
 }
 
 void apply_image_lpf(float cutoff_frequency) {
-	// Calculate alpha once and pass it to the low_pass_image function
 	float alpha = 1.0 - expf(-6.28318530718 * cutoff_frequency / FPS_GPU);
 	float alpha_inv = 1.0 - alpha;
 
+	// Crasy fast SIMD-style math possible with the S3
 	scale_CRGBF_array_by_constant(leds, alpha, NUM_LEDS);
 	scale_CRGBF_array_by_constant(leds_last, alpha_inv, NUM_LEDS);
-	add_CRGBF_arrays(leds, leds_last, NUM_LEDS);
 
-	/*
-	for(uint16_t i = 0; i < NUM_LEDS; i += 1){
-	  leds[i].r = (alpha_inv) * leds_last[i].r + alpha * leds[i].r;
-	  leds[i].g = (alpha_inv) * leds_last[i].g + alpha * leds[i].g;
-	  leds[i].b = (alpha_inv) * leds_last[i].b + alpha * leds[i].b;
-	}
-	*/
+	add_CRGBF_arrays(leds, leds_last, NUM_LEDS);
 
 	memcpy(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
 }

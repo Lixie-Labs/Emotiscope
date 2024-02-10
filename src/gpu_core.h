@@ -53,25 +53,39 @@ void run_gpu() {
 	// Save this frame for the next loop
 	// save_leds_to_last(); // (leds.h)
 
-	// Smooth the output via EMA
-	// volatile float frame_blending_strength = 0.75;
-	// smooth_led_output(frame_blending_strength);
+	// TODO: Screensaver
+	// When ever the GPU hits this point in the loop, check if the total luminosity is below a small threshold value,
+	// and if so, use 4 reserved draw_dots() in the same color palette as your current mode, and some sine functions
+	// to make them "spin around" in a 1-D sense.
+	// This can be randomized in fun ways, so that when your album finishes and the room is quiet, the display slowly
+	// goes into a slow resting state that still indicates that it's on.
+	//
+	// Definitely get's it's own toggle in the app in case I hate it
 
 	apply_brightness();
 
 	// Render the current debug value as a dot
 	render_debug_value(t_now_ms);  // (leds.h)
-
-	float lpf_cutoff_frequency = 0.5 + configuration.speed*9.5;
-	lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
+	
+	// This value decays itself non linearly toward zero all the time, 
+	// *really* slowing down the LPF when it's set to 1.0.
+	// This is a super hacky way to fake a true fade transition between modes
 	lpf_drag *= 0.995;
-
+	
+	// Apply a low pass filter to every color channel of every pixel on every frame
+	// at hundreds of frames per second
+	// 
+	// To anyone who reads this: hobbyist microcontrollers are fucking insane now.
+	// When I got into all this in 2012, I had a 16MHz single core AVR
+	// 
+	// The DMA and SIMD-style stuff inside the ESP32-S3 is some pretty crazy shit.
+	float lpf_cutoff_frequency = 0.5 + (1.0-configuration.melt)*9.5;
+	lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
 	apply_image_lpf(lpf_cutoff_frequency);
 
-	// Output the quantized color to the 8-bit LED strand
-	// uint16_t fastled_profiler_index = start_function_timing("FastLED.show()");
+	// Quantize the image buffer with dithering, 
+	// output to the 8-bit LED strand
 	transmit_leds();
-	// end_function_timing(fastled_profiler_index);
 
 	// Update the FPS_GPU variable
 	watch_gpu_fps(t_now_us);  // (system.h)

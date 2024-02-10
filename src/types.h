@@ -74,7 +74,7 @@ struct websocket_client {
 // "Speed" should be a separate variable from frame blending
 struct config {
 	float brightness;
-	float speed; 
+	float melt; 
 	float hue;
 	int32_t current_mode;
 	bool mirror_mode;
@@ -82,7 +82,7 @@ struct config {
 	float hue_range;
 };
 
-struct ERGB8 {
+struct CRGB8 {
 	uint8_t g;
 	uint8_t r;
 	uint8_t b;

@@ -33,8 +33,7 @@ void draw_vu(){
 	float auto_scale = 1.0 / max(max_amplitude_cap, 0.00001f);
 
 	float dot_pos = clip_float(max_amplitude_now_smooth*auto_scale);
-	
-	CRGBF dot_color = hsv(0.0, 1.0, 1.0);
+	CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*dot_pos, 1.0, 1.0);
 
 	if(configuration.mirror_mode == true){
 		draw_dot(leds, 0, dot_color, 0.5 + (dot_pos* 0.5), 1.0);

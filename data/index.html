@@ -64,18 +64,20 @@
 		</div>
 
 		<div id="page_info">
-			<span onclick="hide_page('page_info');" class="icon_top_right buzz">
-				<img src="svg/close.svg" class="footer_icon tint_accent"/>
-			</span>
-		
-			<img src="svg/lixielabs.svg" style="height: 120px;"/>
-			<div class="page_title">ABOUT</div>
-			<div class="page_paragraph">
-				Emotiscope was developed<br>by <a href="https://github.com/connornishijima">Connor Nishijima</a> for <a href="https://lixielabs.com/">Lixie Labs</a><br>(2023-2024)
-			</div>
-			<div class="page_paragraph">
-				The documentation, open source<br>hardware/software, and more are<br>available at <a href="https://emotiscope.rocks/">www.emotiscope.rocks</a>.
-			</div>
+			<!--<span id="spin_container">-->
+				<span onclick="hide_page('page_info');" class="icon_top_right buzz">
+					<img src="svg/close.svg" class="footer_icon tint_accent"/>
+				</span>
+			
+				<img src="svg/lixielabs.svg" style="height: 120px;"/>
+				<div class="page_title">ABOUT</div>
+				<div class="page_paragraph">
+					Emotiscope was developed<br>by <a href="https://github.com/connornishijima">Connor Nishijima</a> for <a href="https://lixielabs.com/">Lixie Labs</a><br>(2023-2024)
+				</div>
+				<div class="page_paragraph">
+					The documentation, open source<br>hardware/software, and more are<br>available at <a href="https://emotiscope.rocks/">www.emotiscope.rocks</a>.
+				</div>
+			<!--</span>-->
 		</div>
 
 		<!-- TODO: Add main menu content -->
@@ -157,5 +159,6 @@
 	<script src="js/render_controls.js"></script>
 	<script src="js/websockets_connection.js"></script>
 	<script src="js/pages.js"></script>
+	<script src="js/spin_ui.js"></script>
 </body>
 </html>

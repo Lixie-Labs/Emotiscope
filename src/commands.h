@@ -78,13 +78,13 @@ void parse_command(command com) {
 			configuration.brightness = setting_value;
 			rendered_debug_value = configuration.brightness;
 		}
-		else if (fastcmp(substring, "speed")) {
+		else if (fastcmp(substring, "melt")) {
 			// Get speed value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
-			configuration.speed = setting_value;
+			configuration.melt = setting_value;
 
-			rendered_debug_value = configuration.speed;
+			rendered_debug_value = configuration.melt;
 		}
 		else if (fastcmp(substring, "hue")) {
 			// Get brightness value
