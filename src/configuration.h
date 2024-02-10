@@ -174,31 +174,11 @@ bool load_noise_spectrum() {
 	return true;
 }
 
-// TODO: save_config_delayed() breaks down after a few hours, saves the config on every single frame:
-/*
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-[socket] connection #51 connected from 192.168.1.48
-WEBSOCKET CLIENT IS WELCOME INTO OPEN SLOT #0
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-SAVING CONFIGURATION TO FILESYSTEM
-
-Also the FPS and memory are no longer printed either
-*/
 void save_config_delayed() {
 	last_save_request_ms = millis();
 	save_request_open = true;
 }
 
-// TODO: Display flicker when saving config+noise_spectrum after accepting save request
-// Could be RMT doesn't have enough buffer, could be LittleFS takes too long
 void sync_configuration_to_file_system(uint32_t t_now_ms) {
 	if (save_request_open == true) {
 		if ((t_now_ms - last_save_request_ms) >= MIN_SAVE_WAIT_MS) {
