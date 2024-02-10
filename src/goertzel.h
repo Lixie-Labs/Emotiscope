@@ -42,6 +42,8 @@ uint16_t max_goertzel_block_size = 0;
 
 volatile bool magnitudes_locked = false;
 
+float magnitudes[NUM_FREQS];
+
 void init_goertzel(uint16_t frequency_slot, float frequency, float bandwidth) {
 	frequencies_musical[frequency_slot].block_size = SAMPLE_RATE / (bandwidth);
 
@@ -286,6 +288,7 @@ void calculate_magnitudes() {
 		for (uint16_t i = 0; i < NUM_FREQS; i++) {
 			// Apply the auto-scaler
 			frequencies_musical[i].magnitude = clip_float(magnitudes_smooth[i] * autoranger_scale);
+			magnitudes[i] = frequencies_musical[i].magnitude;
 		}
 
 		magnitudes_locked = false;

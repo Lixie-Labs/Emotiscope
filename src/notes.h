@@ -45,4 +45,6 @@ hop to the discovered HTTP server on Emotiscope, but show it in a list of device
 This way, the user has time to see and click the "Install PWA" button
 
 Once installed, it will no longer wait before redirecting unless no devices are found
+
+UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to HTTP. Good security, shitty UX.
 */

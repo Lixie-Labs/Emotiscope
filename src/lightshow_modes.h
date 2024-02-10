@@ -16,6 +16,8 @@
 #include "lightshow_modes/spectrum_clap.h"
 #include "lightshow_modes/hype.h"
 #include "lightshow_modes/plot.h"
+#include "lightshow_modes/bloom.h"
+
 #include "lightshow_modes/debug.h"
 
 // TODO: Make all lightshow modes react to hue/hue range
@@ -25,6 +27,7 @@ lightshow_mode lightshow_modes[] = {
 	{ "Spectrum + Clap", &draw_spectrum_clap }, // 2
 	{ "Hype",            &draw_hype          }, // 3
 	{ "Plot",            &draw_plot          }, // 4
+	{ "Bloom",           &draw_bloom         }, // 5
 
 	//{ "Debug",           &draw_debug         },
 	// TODO: Design bloom mode from tempi novelty curve
