@@ -84,7 +84,7 @@ void parse_command(command com) {
 			float setting_value = atof(substring);
 			configuration.speed = setting_value;
 
-			rendered_debug_value = (configuration.speed-0.5) / (10.0-0.5);
+			rendered_debug_value = configuration.speed;
 		}
 		else if (fastcmp(substring, "hue")) {
 			// Get brightness value

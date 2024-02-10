@@ -62,7 +62,7 @@ void run_gpu() {
 	// Render the current debug value as a dot
 	render_debug_value(t_now_ms);  // (leds.h)
 
-	float lpf_cutoff_frequency = configuration.speed;
+	float lpf_cutoff_frequency = 0.5 + configuration.speed*9.5;
 	lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
 	lpf_drag *= 0.995;
 

@@ -70,9 +70,11 @@ struct websocket_client {
 	uint32_t last_ping;
 };
 
+// TODO: Don't call it speed, invert it and call it blending
+// "Speed" should be a separate variable from frame blending
 struct config {
 	float brightness;
-	float speed;
+	float speed; 
 	float hue;
 	int32_t current_mode;
 	bool mirror_mode;
