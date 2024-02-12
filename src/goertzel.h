@@ -184,7 +184,7 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 
 	}, __func__ );
 
-	return normalized_magnitude;// * scale;
+	return normalized_magnitude * scale;
 }
 
 float collect_and_filter_noise(float input_magnitude, uint16_t bin) {

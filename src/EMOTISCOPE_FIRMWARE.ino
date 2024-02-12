@@ -39,6 +39,7 @@
 #include "configuration.h" // ..... Storing and retreiving your settings
 #include "utilities.h" // ......... Custom generic math functions
 #include "system.h" // ............ Lowest-level firmware functions
+#include "touch.h"
 #include "led_driver.h" // ........ Low-level LED communication, (ab)uses RMT for non-blocking output
 #include "leds.h" // .............. LED dithering, effects, filters
 #include "microphone.h" // ........ For gathering audio chunks from the microphone

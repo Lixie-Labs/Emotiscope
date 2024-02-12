@@ -18,7 +18,7 @@
 #define TEMPO_LOW (64)
 #define TEMPO_HIGH (192)
 
-#define BEAT_SHIFT_PERCENT (-0.15)
+#define BEAT_SHIFT_PERCENT (-0.08)
 
 #define NUM_TEMPI (64)
 
