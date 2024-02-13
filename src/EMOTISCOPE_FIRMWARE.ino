@@ -46,6 +46,7 @@
 #include "goertzel.h" // .......... GDFT or God Damn Fast Transform is implemented here
 #include "tempo.h" // ............. Comupation of (and syncronization) to the music tempo
 #include "audio_debug.h" // ....... Print audio data over UART
+#include "screensaver.h"
 #include "lightshow_modes.h" // ... Definition and handling of lightshow modes
 #include "commands.h" // .......... Queuing and parsing of commands recieved
 #include "wireless.h" // .......... Communication with your network and the web-app

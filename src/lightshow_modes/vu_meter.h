@@ -36,10 +36,10 @@ void draw_vu(){
 	CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*dot_pos, 1.0, 1.0);
 
 	if(configuration.mirror_mode == true){
-		draw_dot(leds, 0, dot_color, 0.5 + (dot_pos* 0.5), 1.0);
-		draw_dot(leds, 1, dot_color, 0.5 + (dot_pos*-0.5), 1.0);
+		draw_dot(leds, NUM_RESERVED_DOTS+0, dot_color, 0.5 + (dot_pos* 0.5), 1.0);
+		draw_dot(leds, NUM_RESERVED_DOTS+1, dot_color, 0.5 + (dot_pos*-0.5), 1.0);
 	}
 	else{
-		draw_dot(leds, 0, dot_color, dot_pos, 1.0);
+		draw_dot(leds, NUM_RESERVED_DOTS+0, dot_color, dot_pos, 1.0);
 	}
 }

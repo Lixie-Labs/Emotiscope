@@ -21,9 +21,9 @@ void draw_hype() {
 		beat_sum *= 0.5;
 	}
 
-	draw_dot(leds, 0, dot_color, 1.0-beat_sum, 1.0);
+	draw_dot(leds, NUM_RESERVED_DOTS + 0, dot_color, 1.0-beat_sum, 1.0);
 
 	if(configuration.mirror_mode == true){
-		draw_dot(leds, 1, dot_color, beat_sum, 1.0);
+		draw_dot(leds, NUM_RESERVED_DOTS + 1, dot_color, beat_sum, 1.0);
 	}
 }

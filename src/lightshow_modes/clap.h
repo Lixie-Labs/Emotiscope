@@ -67,10 +67,10 @@ void draw_clap() {
 			dot_pos = dot_pos * 0.5 + 0.5;	// scale to half
 		}
 
-		draw_dot(leds, tempo_bin * 2 + 0, dot_color, dot_pos, opacity);
+		draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity);
 
 		if(configuration.mirror_mode == true){
-			draw_dot(leds, tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity);
+			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity);
 		}
 		//}
 	}

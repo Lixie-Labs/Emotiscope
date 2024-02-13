@@ -16,6 +16,18 @@
 
 #define REFERENCE_FPS 100
 
+#define MAX_DOTS 192 
+
+typedef enum {
+	UI_1, UI_2, UI_3, UI_4, UI_5,
+	UI_6, UI_7, UI_8, UI_9, UI_10,
+	UI_NEEDLE,
+	SCREENSAVER_1, SCREENSAVER_2, SCREENSAVER_3, SCREENSAVER_4, SCREENSAVER_5,
+    NUM_RESERVED_DOTS
+} reserved_dots_t;
+
+fx_dot fx_dots[MAX_DOTS];
+
 CRGBF WHITE = {1.0, 1.0, 1.0};
 CRGBF BLACK = {0.0, 0.0, 0.0};
 
@@ -26,11 +38,6 @@ CRGBF leds_temp[NUM_LEDS]; // for temporary copies of the image buffer (scaling)
 CRGBF leds_last[NUM_LEDS];
 
 CRGBF leds_smooth[NUM_LEDS];
-
-#define MAX_DOTS 192 
-#define NUM_RESERVED 64 // TODO: implement reserved dots at the end of the array with an enum to name them
-                        // Some can be specfically reserved for UI like tuning needles and the screensaver
-fx_dot fx_dots[MAX_DOTS];
 
 float rendered_debug_value = 0.0;
 
@@ -379,7 +386,7 @@ void render_debug_value(uint32_t t_now_ms) {
 		incandescent_lookup.b*incandescent_lookup.b,
 	};
 
-	draw_dot(leds, MAX_DOTS - 5, gamma_corrected, clip_float(rendered_debug_value_smooth), opacity);
+	draw_dot(leds, UI_NEEDLE, gamma_corrected, clip_float(rendered_debug_value_smooth), opacity);
 }
 
 void apply_image_lpf(float cutoff_frequency) {
