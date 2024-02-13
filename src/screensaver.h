@@ -37,7 +37,7 @@ void run_screensaver(uint32_t t_now_ms){
 	}
 
 	if(screensaver_mix > 0.001){
-		scale_CRGBF_array_by_constant(leds, 1.0-screensaver_mix, NUM_LEDS);
+		scale_CRGBF_array_by_constant(leds, 1.0-(screensaver_mix*screensaver_mix), NUM_LEDS);
 
 		const float push_val = 0.005;
 		CRGBF screensaver_colors[4] = {

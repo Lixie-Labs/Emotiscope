@@ -53,6 +53,7 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	}
 	else if (mode_index == 5) {  // Bloom
 		// No extra sliders yet
+		register_slider("speed", 0.000, 1.000, 0.001);
 	}
 	else if (mode_index == 6) {  // VU Meter
 		// No extra sliders yet

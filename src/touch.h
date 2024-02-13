@@ -12,10 +12,7 @@ uint32_t touch_end   = 0;
 bool touch_active = false;
 bool hold_active = false;
 
-// TODO: Add device standby state
-// - Dark display
-// - No mic
-// - Just websockets and touch to wake again
+extern void toggle_standby();
 
 void read_touch( uint32_t t_now_ms ){
 	static float touch_value = 0;
@@ -37,6 +34,7 @@ void read_touch( uint32_t t_now_ms ){
 				if(hold_active == false){
 					hold_active = true;
 					printf("HOLD TOUCH TRIGGER\n");
+					toggle_standby();
 				}
 			}
 		}

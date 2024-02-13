@@ -27,9 +27,9 @@ void run_cpu() {
 		// ----------------------------------------------------------------------
 
 		// Get new audio chunk from the I2S microphone
-		if( EMOTISCOPE_ACTIVE == true ){
+		//if( EMOTISCOPE_ACTIVE == true ){
 			acquire_sample_chunk();	 // (microphone.h)
-		}
+		//}
 
 		uint32_t processing_start_us = micros();
 

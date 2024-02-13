@@ -39,9 +39,7 @@ void run_gpu() {
 	// ------------------------------------------------------------
 
 	clear_display();
-	if( EMOTISCOPE_ACTIVE == true ){
-		lightshow_modes[configuration.current_mode].draw();
-	}
+	lightshow_modes[configuration.current_mode].draw();
 
 	// If silence is detected, show a blue debug LED
 	// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});
@@ -49,7 +47,9 @@ void run_gpu() {
 	// Apply an incandescent LUT to reduce harsh blue tones
 	apply_incandescent_filter(configuration.incandescent_filter);  // (leds.h)
 
-	run_screensaver(t_now_ms);
+	if( EMOTISCOPE_ACTIVE == true ){
+		run_screensaver(t_now_ms);
+	}
 
 	// Restrict CRGBF values to 0.0-1.0 range
 	clip_leds();  // (leds.h)
@@ -70,6 +70,10 @@ void run_gpu() {
 
 	// Render the current debug value as a dot
 	render_debug_value(t_now_ms);  // (leds.h)
+
+	if( EMOTISCOPE_ACTIVE == false ){
+		run_standby();
+	}
 	
 	// This value decays itself non linearly toward zero all the time, 
 	// *really* slowing down the LPF when it's set to 1.0.
@@ -90,6 +94,8 @@ void run_gpu() {
 	float lpf_cutoff_frequency = 0.5 + (1.0-configuration.melt)*9.5;
 	lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
 	apply_image_lpf(lpf_cutoff_frequency);
+
+	clip_leds();  // (leds.h)
 
 	// Quantize the image buffer with dithering, 
 	// output to the 8-bit LED strand
