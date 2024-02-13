@@ -60,7 +60,7 @@ void unrecognized_command_error(char* command){
 	printf("UNRECOGNIZED COMMAND: %s\n", command);
 }
 
-void parse_command(command com) {
+void parse_command(uint32_t t_now_ms, command com) {
 	// printf("Parsing command: '%s'\n", com.command);
 	// Buffer to store results from get_index
     char substring[MAX_COMMAND_LENGTH];
@@ -132,7 +132,7 @@ void parse_command(command com) {
 		}
 
 		// Open a save request for later
-		save_config_delayed();
+		save_config_delayed(t_now_ms);
 	}
 	else if (fastcmp(substring, "get")) {
 		// Name of thing to get
@@ -211,9 +211,9 @@ void parse_command(command com) {
 	// printf("current brightness value: %.3f\n", configuration.brightness);
 }
 
-void process_command_queue() {
+void process_command_queue(uint32_t t_now_ms) {
 	if (commands_queued > 0) {
-		parse_command(command_queue[0]);
+		parse_command(t_now_ms, command_queue[0]);
 		shift_command_queue_left();
 		commands_queued -= 1;
 	}

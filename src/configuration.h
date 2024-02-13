@@ -174,8 +174,8 @@ bool load_noise_spectrum() {
 	return true;
 }
 
-void save_config_delayed() {
-	last_save_request_ms = millis();
+void save_config_delayed(uint32_t t_now_ms) {
+	last_save_request_ms = t_now_ms;
 	save_request_open = true;
 }
 

@@ -39,7 +39,9 @@ void run_gpu() {
 	// ------------------------------------------------------------
 
 	clear_display();
-	lightshow_modes[configuration.current_mode].draw();
+	if( EMOTISCOPE_ACTIVE == true ){
+		lightshow_modes[configuration.current_mode].draw();
+	}
 
 	// If silence is detected, show a blue debug LED
 	// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});

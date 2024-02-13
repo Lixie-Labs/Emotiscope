@@ -10,6 +10,8 @@
 //
 // Foundational functions like UART initialization
 
+volatile bool EMOTISCOPE_ACTIVE = true;
+
 void init_serial(uint32_t baud_rate) {
 	// Artificial 10-second boot up wait time if needed
 	//for(uint16_t i = 0; i < 10; i++){ printf("WAITING FOR %d SECONDS...\n", 10-i); delay(1000); }
@@ -34,6 +36,7 @@ void init_system() {
 	extern void init_tempo_goertzel_constants();
 	extern void init_wifi();
 	extern void init_filesystem();
+	extern void init_rmt_driver();
 
 	init_serial(2000000);					  // (system.h)
 	init_filesystem();                        // (filesystem.h)
@@ -42,7 +45,8 @@ void init_system() {
 	init_window_lookup();					  // (goertzel.h)
 	init_goertzel_constants_musical();		  // (goertzel.h)
 	init_tempo_goertzel_constants();		  // (tempo.h)
-	init_wifi();                              // (wireless.h)
+	
+	init_rmt_driver();
 
 	load_sliders_relevant_to_mode(configuration.current_mode);
 	load_toggles_relevant_to_mode(configuration.current_mode);

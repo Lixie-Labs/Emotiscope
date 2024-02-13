@@ -50,9 +50,10 @@
 #include "commands.h" // .......... Queuing and parsing of commands recieved
 #include "wireless.h" // .......... Communication with your network and the web-app
 
-// Dual-core loops
+// Loops
 #include "cpu_core.h"
 #include "gpu_core.h"
+#include "web_core.h"
 
 // Development Notes
 #include "notes.h"
@@ -63,16 +64,17 @@
 // ############################################################################
 // ## CODE ####################################################################
 
-// One core to run audio (CPU) ------------------------------------------------
+// One core to run audio and graphics -----------------------------------------
 void loop() {
 	run_cpu();	// (cpu_core.h)
+	run_gpu();  // (gpu_core.h)
 }
 
-// One core to run graphics (GPU) ---------------------------------------------
-void loop_gpu(void *param) {
-	init_rmt_driver();                        // (led_driver.h)
+// One core to run web services -----------------------------------------------
+void loop_web(void *param) {
+	init_wifi();                              // (wireless.h)
 	for (;;) {
-		run_gpu();	// (gpu_core.h)
+		run_web();	// (web_core.h)
 	}
 }
 
@@ -81,6 +83,6 @@ void setup() {
 	// (system.h) Initialize all peripherals
 	init_system();
 
-	// Start the second core as a dedicated GPU for the LEDs/color math
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 0, NULL, 0);
+	// Start the second core as a dedicated webserver
+	(void)xTaskCreatePinnedToCore(loop_web, "loop_web", 8192, NULL, 0, NULL, 0);
 }

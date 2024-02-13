@@ -27,12 +27,14 @@ void run_cpu() {
 		// ----------------------------------------------------------------------
 
 		// Get new audio chunk from the I2S microphone
-		acquire_sample_chunk();	 // (microphone.h)
+		if( EMOTISCOPE_ACTIVE == true ){
+			acquire_sample_chunk();	 // (microphone.h)
+		}
 
 		uint32_t processing_start_us = micros();
 
 		// Calculate the magnitude of the currently studied frequency set
-		calculate_magnitudes();  // (goertzel.h)
+		calculate_magnitudes(t_now_ms);  // (goertzel.h)
 
 		//printf("update_tempo() = %.4fus\n", measure_execution([&]() {
 		// Log novelty and calculate the most probable tempi
@@ -45,9 +47,6 @@ void run_cpu() {
 		// Occasionally print the average frame rate
 		print_system_info(t_now_ms);
 
-		// Write pending changes to LittleFS
-		sync_configuration_to_file_system(t_now_ms);
-
 		// print_audio_data();
 
 		read_touch(t_now_ms);
@@ -55,7 +54,7 @@ void run_cpu() {
 		//------------------------------------------------------------------------------------------
 		// WIFI
 		// ------------------------------------------------------------------------------------
-		run_wireless();	 // (wireless.h)
+		//run_wireless();	 // (wireless.h)
 
 		//------------------------------------------------------------------------------------------
 		// TESTING AREA, SHOULD BE BLANK IN PRODUCTION

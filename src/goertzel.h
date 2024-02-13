@@ -205,7 +205,7 @@ float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
 	}
 }
 
-void calculate_magnitudes() {
+void calculate_magnitudes(uint32_t t_now_ms) {
 	profile_function([&]() {
 		magnitudes_locked = true;
 
@@ -262,7 +262,7 @@ void calculate_magnitudes() {
 			if(noise_calibration_active_frames_remaining == 0){
 				// Let the UI know
 				broadcast("noise_cal_ready");
-				save_config_delayed();
+				save_config_delayed(t_now_ms);
 			}
 		}
 

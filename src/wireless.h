@@ -294,13 +294,3 @@ void handle_wifi() {
 
 	connection_status_last = connection_status;
 }
-
-void run_wireless() {
-	profile_function([&]() {
-		handle_wifi();
-		if (web_server_ready == true) {
-			process_command_queue();
-			discovery_check_in();
-		}
-	}, __func__ );
-}
