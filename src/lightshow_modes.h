@@ -33,6 +33,8 @@ lightshow_mode lightshow_modes[] = {
 	//{ "Debug",           &draw_debug         },
 };
 
+const uint16_t NUM_LIGHTSHOW_MODES = sizeof(lightshow_modes) / sizeof(lightshow_mode);
+
 extern float lpf_drag; // Used for fade transition
 
 // Lightshow Modes can be summoned by their string name shown in the UI
@@ -57,7 +59,12 @@ int16_t set_lightshow_mode_by_name(char* name){
 	return mode_index;
 }
 
-
+void increment_mode(){
+	int16_t new_mode = configuration.current_mode + 1;
+	configuration.current_mode = new_mode % NUM_LIGHTSHOW_MODES;
+	lpf_drag = 1.0; // Causes slow fade using low pass filtered image
+	save_config_delayed(millis());
+}
 
 
 

@@ -13,6 +13,7 @@ bool touch_active = false;
 bool hold_active = false;
 
 extern void toggle_standby();
+extern void increment_mode();
 
 void read_touch( uint32_t t_now_ms ){
 	static float touch_value = 0;
@@ -49,6 +50,7 @@ void read_touch( uint32_t t_now_ms ){
 			if(touch_duration < TOUCH_HOLD_MS){
 				// Handle tap
 				printf("TAP TOUCH TRIGGER\n");
+				increment_mode();
 			}
 		}
 	}
