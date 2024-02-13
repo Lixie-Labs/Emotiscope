@@ -1,6 +1,6 @@
-#define DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS ( 10 * (1000 * 60) ) // "10" is minutes
-#define MAX_HTTP_REQUEST_ATTEMPTS ( 8 ) // Define the maximum number of retry attempts
-#define INITIAL_BACKOFF_MS ( 1000 )  // Initial backoff delay in milliseconds
+#define DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS (10 * (1000 * 60))	 // "10" is minutes
+#define MAX_HTTP_REQUEST_ATTEMPTS (8)								 // Define the maximum number of retry attempts
+#define INITIAL_BACKOFF_MS (1000)									 // Initial backoff delay in milliseconds
 
 PsychicHttpServer server;
 PsychicWebSocketHandler websocket_handler;
@@ -11,56 +11,59 @@ volatile bool web_server_ready = false;
 // TODO: Add runtime WiFi credential input method
 
 void discovery_check_in() {
-    static uint32_t next_discovery_check_in_time = 0;
-    static uint8_t attempt_count = 0;  // Keep track of the current attempt count
-    uint32_t t_now_ms = millis();
+	static uint32_t next_discovery_check_in_time = 0;
+	static uint8_t attempt_count = 0;  // Keep track of the current attempt count
+	uint32_t t_now_ms = millis();
 
-    if (t_now_ms >= next_discovery_check_in_time) {
-        // Check Wi-Fi connection status
-        if (WiFi.status() == WL_CONNECTED) {
-            HTTPClient http_client;
-            http_client.begin("https://discovery.lixielabs.com/");
-            http_client.addHeader("Content-Type", "application/x-www-form-urlencoded");
+	if (t_now_ms >= next_discovery_check_in_time) {
+		// Check Wi-Fi connection status
+		if (WiFi.status() == WL_CONNECTED) {
+			HTTPClient http_client;
+			http_client.begin("https://discovery.lixielabs.com/");
+			http_client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            char params[120];
-            snprintf(params, 120, "product=emotiscope&version=%d.%d.%d&local_ip=%s", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, WiFi.localIP().toString().c_str());
+			char params[120];
+			snprintf(params, 120, "product=emotiscope&version=%d.%d.%d&local_ip=%s", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, WiFi.localIP().toString().c_str());
 
-            int http_response_code = http_client.POST(params);  // Make the request
+			int http_response_code = http_client.POST(params);	// Make the request
 
-            if (http_response_code == 200) {  // Check for a successful response
-                printf("RESPONSE CODE: %i\n", http_response_code);  // Print HTTP return code
-                String response = http_client.getString();  // Get the request response payload
-                printf("RESPONSE BODY: %s\n", response.c_str());  // Print request response payload
+			if (http_response_code == 200) {						// Check for a successful response
+				printf("RESPONSE CODE: %i\n", http_response_code);	// Print HTTP return code
+				String response = http_client.getString();			// Get the request response payload
+				printf("RESPONSE BODY: %s\n", response.c_str());	// Print request response payload
 
-				if(response.equals( "{\"check_in\":true}" )){
-					next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS;  // Schedule the next check-in
+				if (response.equals("{\"check_in\":true}")) {
+					next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS;	 // Schedule the next check-in
 					printf("Check in successful!\n");
 				}
-				else{
-					next_discovery_check_in_time = t_now_ms + 5000;  // If server didn't respond correctly, try again in 5 seconds
+				else {
+					next_discovery_check_in_time = t_now_ms + 5000;	 // If server didn't respond correctly, try again in 5 seconds
 					printf("ERROR: BAD CHECK-IN RESPONSE\n");
 				}
-				attempt_count = 0;  // Reset attempt count on success
-            } else {
-                printf("Error on sending POST: %d\n", http_response_code);
-                if (attempt_count < MAX_HTTP_REQUEST_ATTEMPTS) {
-                    uint32_t backoff_delay = INITIAL_BACKOFF_MS * (1 << attempt_count);  // Calculate the backoff delay
-                    next_discovery_check_in_time = t_now_ms + backoff_delay;  // Schedule the next attempt
-                    attempt_count++;  // Increment the attempt count
+				attempt_count = 0;	// Reset attempt count on success
+			}
+			else {
+				printf("Error on sending POST: %d\n", http_response_code);
+				if (attempt_count < MAX_HTTP_REQUEST_ATTEMPTS) {
+					uint32_t backoff_delay = INITIAL_BACKOFF_MS * (1 << attempt_count);	 // Calculate the backoff delay
+					next_discovery_check_in_time = t_now_ms + backoff_delay;			 // Schedule the next attempt
+					attempt_count++;													 // Increment the attempt count
 					printf("Retrying with backoff delay of %ums.\n", backoff_delay);
-                } else {
+				}
+				else {
 					printf("Couldn't reach server in time, will try again in a few minutes.\n");
-                    next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS;  // Reset to regular interval after max attempts
-                    attempt_count = 0;  // Reset attempt count
-                }
-            }
+					next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS;	 // Reset to regular interval after max attempts
+					attempt_count = 0;																	 // Reset attempt count
+				}
+			}
 
-            http_client.end();  // Free resources
-        } else {
-            printf("WiFi not connected before discovery server POST. Retrying in 5 seconds.\n");
-            next_discovery_check_in_time = t_now_ms + 5000;  // Retry in 5 seconds if WiFi is not connected
-        }
-    }
+			http_client.end();	// Free resources
+		}
+		else {
+			printf("WiFi not connected before discovery server POST. Retrying in 5 seconds.\n");
+			next_discovery_check_in_time = t_now_ms + 5000;	 // Retry in 5 seconds if WiFi is not connected
+		}
+	}
 }
 
 int16_t get_slot_of_client(PsychicWebSocketClient client) {
@@ -173,8 +176,36 @@ void init_web_server() {
 	server.config.max_uri_handlers = 20;  // maximum number of .on() calls
 
 	server.listen(80);
-	server.serveStatic("/", LittleFS, "/");
-	server.on("/audio", [](PsychicRequest *request){
+
+	//server.serveStatic("/", LittleFS, "/");
+
+	server.on("/ws", &websocket_handler);
+
+	server.on("/*", HTTP_GET, [](PsychicRequest *request) {
+		esp_err_t result = ESP_OK;
+		String path = "/";
+
+		path += (request->url() == "/") ? "index.html" : request->url();
+		Serial.printf("HTTP GET %s\n", request->url());
+
+		File file = LittleFS.open(path);
+
+		if (file) {
+			String etagStr(file.getLastWrite(), 10);
+
+			PsychicFileResponse response(request, file, path);
+			response.addHeader("Cache-Control", "public, max-age=31536000");
+			//response.addHeader("ETag", etagStr.c_str());
+			result = response.send();
+			file.close();
+		}
+		else {
+			result = request->reply(404);
+		}
+		return result;
+	});
+
+	server.on("/audio", [](PsychicRequest *request) {
 		String filename = "/audio.bin";
 		PsychicFileResponse response(request, LittleFS, filename);
 
@@ -183,10 +214,10 @@ void init_web_server() {
 
 	const char *local_hostname = "emotiscope";
 	if (!MDNS.begin(local_hostname)) {
-      Serial.println("Error starting mDNS");
-      return;
-    }
-    MDNS.addService("http", "tcp", 80);
+		Serial.println("Error starting mDNS");
+		return;
+	}
+	MDNS.addService("http", "tcp", 80);
 
 	websocket_handler.onOpen([](PsychicWebSocketClient *client) {
 		printf("[socket] connection #%i connected from %s\n", client->socket(), client->remoteIP().toString().c_str());
@@ -207,7 +238,7 @@ void init_web_server() {
 
 		// If it's text, it might be a command
 		if (frame_type == HTTPD_WS_TYPE_TEXT) {
-			//printf("RX: %s\n", (char *)frame->payload);
+			// printf("RX: %s\n", (char *)frame->payload);
 			queue_command((char *)frame->payload, frame->len, get_slot_of_client(request->client()));
 		}
 		else {
@@ -221,8 +252,6 @@ void init_web_server() {
 		printf("[socket] connection #%i closed from %s\n", client->socket(), client->remoteIP().toString().c_str());
 		websocket_client_left(client);
 	});
-
-	server.on("/ws", &websocket_handler);
 
 	init_websocket_clients();
 

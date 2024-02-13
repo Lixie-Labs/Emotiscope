@@ -148,6 +148,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 		// If getting configuration struct contents
 		if (fastcmp(substring, "config")) {
+			// Wake on command
+			EMOTISCOPE_ACTIVE = true;
 			sync_configuration_to_client();
 		}
 

@@ -24,8 +24,8 @@ struct CRGBF {	// A bit like FastLED with floating point color channels that
 };
 
 struct fx_dot {	 // Used to draw dots with subpixel precision and motion blur
-	float position;
-	float position_past;
+	float position = 0.5;
+	float position_past = 0.5;
 };
 
 struct lightshow_mode {
@@ -70,8 +70,6 @@ struct websocket_client {
 	uint32_t last_ping;
 };
 
-// TODO: Don't call it speed, invert it and call it blending
-// "Speed" should be a separate variable from frame blending
 struct config {
 	float brightness;
 	float melt; 
