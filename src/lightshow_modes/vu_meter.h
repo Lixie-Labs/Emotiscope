@@ -14,7 +14,9 @@ void draw_vu(){
 	}
 	max_amplitude_now = clip_float(max_amplitude_now);
 
-	max_amplitude_now_smooth = max_amplitude_now_smooth*0.95 + max_amplitude_now*0.05;
+	float mix_speed = 0.005 + 0.045*configuration.speed;
+
+	max_amplitude_now_smooth = max_amplitude_now_smooth*(1.0-mix_speed) + max_amplitude_now*mix_speed;
 
 	if(max_amplitude_now_smooth > max_amplitude_cap){
 		float distance = max_amplitude_now_smooth - max_amplitude_cap;

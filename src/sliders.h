@@ -35,9 +35,6 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 
 	register_slider("brightness", 0.000, 1.000, 0.001);
 	register_slider("melt", 0.000, 1.000, 0.001);
-	register_slider("hue", 0.000, 1.000, 0.001);
-	register_slider("hue_range", -1.000, 1.000, 0.001);
-	register_slider("incandescent", 0.0, 1.000, 0.001);
 
 	if (mode_index == 0) {  // Spectrum
 		// No extra sliders yet
@@ -59,9 +56,13 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	}
 	else if (mode_index == 6) {  // VU Meter
 		// No extra sliders yet
+		register_slider("speed", 0.000, 1.000, 0.001);
 	}
-	
 	else{
 		// WTF happened that got you here?
 	}
+
+	register_slider("hue", 0.000, 1.000, 0.001);
+	register_slider("hue_range", -1.000, 1.000, 0.001);
+	register_slider("incandescent", 0.0, 1.000, 0.001);
 }

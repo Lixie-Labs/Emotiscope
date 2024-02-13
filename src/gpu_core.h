@@ -43,13 +43,13 @@ void run_gpu() {
 		lightshow_modes[configuration.current_mode].draw();
 	}
 
-	run_screensaver();
-
 	// If silence is detected, show a blue debug LED
 	// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});
 
 	// Apply an incandescent LUT to reduce harsh blue tones
 	apply_incandescent_filter(configuration.incandescent_filter);  // (leds.h)
+
+	run_screensaver(t_now_ms);
 
 	// Restrict CRGBF values to 0.0-1.0 range
 	clip_leds();  // (leds.h)
@@ -75,6 +75,10 @@ void run_gpu() {
 	// *really* slowing down the LPF when it's set to 1.0.
 	// This is a super hacky way to fake a true fade transition between modes
 	lpf_drag *= 0.995;
+
+	if(lpf_drag < screensaver_mix*0.8){
+		lpf_drag = screensaver_mix*0.8;
+	}
 	
 	// Apply a low pass filter to every color channel of every pixel on every frame
 	// at hundreds of frames per second

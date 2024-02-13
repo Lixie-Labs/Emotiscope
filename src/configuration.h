@@ -42,6 +42,11 @@ void sync_configuration_to_client() {
 	websocket_handler.sendAll(config_item_buffer);
 	memset(config_item_buffer, 0, 120);
 
+	// speed
+	snprintf(config_item_buffer, 120, "new_config|speed|float|%.3f", configuration.speed);
+	websocket_handler.sendAll(config_item_buffer);
+	memset(config_item_buffer, 0, 120);
+
 	// hue
 	snprintf(config_item_buffer, 120, "new_config|hue|float|%.3f", configuration.hue);
 	websocket_handler.sendAll(config_item_buffer);

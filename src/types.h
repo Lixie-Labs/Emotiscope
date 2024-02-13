@@ -80,6 +80,7 @@ struct config {
 	bool mirror_mode;
 	float incandescent_filter;
 	float hue_range;
+	float speed;
 };
 
 struct CRGB8 {

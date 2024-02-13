@@ -1,6 +1,6 @@
 const MAX_PING_PONG_REPLY_TIME_MS = 2000;
 const MAX_CONNECTION_TIME_MS = 3000;
-const AUTO_RECONNECT = true;
+const AUTO_RECONNECT = false;
 
 let ws;
 let device_ip;
