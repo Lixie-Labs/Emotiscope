@@ -45,7 +45,7 @@ void load_toggles_relevant_to_mode(int16_t mode_index) {
 	else if (mode_index == 5) {  // Bloom
 		register_toggle("mirror_mode");
 	}
-	else if (mode_index == 6) {  // VU Meter
+	else if (mode_index == 6) {  // Analog
 		register_toggle("mirror_mode");
 	}
 

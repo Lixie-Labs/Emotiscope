@@ -17,7 +17,7 @@
 #include "lightshow_modes/hype.h"
 #include "lightshow_modes/plot.h"
 #include "lightshow_modes/bloom.h"
-#include "lightshow_modes/vu_meter.h"
+#include "lightshow_modes/analog.h"
 
 #include "lightshow_modes/debug.h"
 
@@ -28,7 +28,7 @@ lightshow_mode lightshow_modes[] = {
 	{ "Hype",            &draw_hype          }, // 3
 	{ "Plot",            &draw_plot          }, // 4
 	{ "Bloom",           &draw_bloom         }, // 5
-	{ "VU Meter",        &draw_vu            }, // 6
+	{ "Analog",          &draw_analog        }, // 6
 
 	//{ "Debug",           &draw_debug         },
 };

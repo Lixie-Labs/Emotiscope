@@ -61,7 +61,7 @@ void unrecognized_command_error(char* command){
 }
 
 void parse_command(uint32_t t_now_ms, command com) {
-	// printf("Parsing command: '%s'\n", com.command);
+	//printf("Parsing command: '%s'\n", com.command);
 	// Buffer to store results from get_index
     char substring[MAX_COMMAND_LENGTH];
 
@@ -205,6 +205,19 @@ void parse_command(uint32_t t_now_ms, command com) {
 	}
 	else if (fastcmp(substring, "noise_cal")) {
 		start_noise_calibration();
+	}
+	else if (fastcmp(substring, "button_tap")) {
+		printf("REMOTE TAP TRIGGER\n");
+		if(EMOTISCOPE_ACTIVE == true){
+			increment_mode();
+		}
+		else{
+			toggle_standby();
+		}
+	}
+	else if (fastcmp(substring, "button_hold")) {
+		printf("REMOTE HOLD TRIGGER\n");
+		toggle_standby();
 	}
 	else if (fastcmp(substring, "ping")) {
 		transmit_to_client_in_slot("pong", com.origin_client_slot);

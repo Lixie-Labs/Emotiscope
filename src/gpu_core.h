@@ -91,7 +91,7 @@ void run_gpu() {
 	// When I got into all this in 2012, I had a 16MHz single core AVR
 	// 
 	// The DMA and SIMD-style stuff inside the ESP32-S3 is some pretty crazy shit.
-	float lpf_cutoff_frequency = 0.5 + (1.0-configuration.melt)*9.5;
+	float lpf_cutoff_frequency = 0.5 + (1.0-(sqrt(configuration.melt)))*9.5;
 	lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
 	apply_image_lpf(lpf_cutoff_frequency);
 

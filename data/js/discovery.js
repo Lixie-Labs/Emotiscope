@@ -18,7 +18,7 @@ function fetch_and_redirect() {
 			if (data.length > 0) {
 				console.log(data);
 				retry_count = 0;
-				console.log("Device seen on network @ "+data[0].local_ip+"! Redirecting...");
+				console.log("Device seen on network @ "+data[0].local_ip+"!");
 
 				device_ip = data[0].local_ip;
 				connection_start_time = performance.now();

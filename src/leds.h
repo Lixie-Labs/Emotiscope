@@ -311,95 +311,63 @@ void apply_video_feedback() {
 	}
 }
 
+// Function to draw a line with motion blur effect
 void draw_line(CRGBF* layer, float x1, float x2, CRGBF color, float opacity) {
-	bool lighten = true;
-	if (color.r == 0 && color.g == 0 && color.b == 0) {
-		lighten = false;
-	}
+    bool lighten = !(color.r == 0 && color.g == 0 && color.b == 0);
 
-	x1 *= (float)(NUM_LEDS - 1);
-	x2 *= (float)(NUM_LEDS - 1);
+    // Scale positions to pixel range
+    x1 *= (float)(NUM_LEDS - 1);
+    x2 *= (float)(NUM_LEDS - 1);
 
-	if (x1 > x2) {	// Ensure x1 <= x2
-		float temp = x1;
-		x1 = x2;
-		x2 = temp;
-	}
+    // Swap if x2 is less than x1 to ensure x1 is always the start
+    if (x1 > x2) {
+        float temp = x1;
+        x1 = x2;
+        x2 = temp;
+    }
 
-	float ix1 = floor(x1);
-	float ix2 = ceil(x2);
+    // Calculate integer indices and coverage for the start and end pixels
+    int ix1 = (int)floor(x1);
+    int ix2 = (int)ceil(x2);
+    float start_coverage = 1.0 - (x1 - ix1);
+    float end_coverage = x2 - floor(x2);
 
-	// start pixel
-	if (ix1 >= 0 && ix1 < NUM_LEDS) {
-		float coverage = 1.0 - (x1 - ix1);
-		float mix = opacity * coverage;
+    // Loop through all affected pixels
+    for (int i = ix1; i <= ix2; i++) {
+        if (i >= 0 && i < NUM_LEDS) {
+            float mix = opacity;
+            if (i == ix1) mix *= start_coverage; // Adjust mix for start pixel
+            else if (i == ix2) mix *= end_coverage; // Adjust mix for end pixel
 
-		if (lighten == true) {
-			layer[uint16_t(ix1)].r += color.r * mix;
-			layer[uint16_t(ix1)].g += color.g * mix;
-			layer[uint16_t(ix1)].b += color.b * mix;
-		}
-		else {
-			layer[uint16_t(ix1)].r = layer[uint16_t(ix1)].r * (1.0 - mix) + color.r * mix;
-			layer[uint16_t(ix1)].g = layer[uint16_t(ix1)].g * (1.0 - mix) + color.g * mix;
-			layer[uint16_t(ix1)].b = layer[uint16_t(ix1)].b * (1.0 - mix) + color.b * mix;
-		}
-	}
-
-	// end pixel
-	if (ix2 >= 0 && ix2 < 128) {
-		float coverage = x2 - floor(x2);
-		float mix = opacity * coverage;
-
-		if (lighten == true) {
-			layer[uint16_t(ix2)].r += color.r * mix;
-			layer[uint16_t(ix2)].g += color.g * mix;
-			layer[uint16_t(ix2)].b += color.b * mix;
-		}
-		else {
-			layer[uint16_t(ix2)].r = layer[uint16_t(ix2)].r * (1.0 - mix) + color.r * mix;
-			layer[uint16_t(ix2)].g = layer[uint16_t(ix2)].g * (1.0 - mix) + color.g * mix;
-			layer[uint16_t(ix2)].b = layer[uint16_t(ix2)].b * (1.0 - mix) + color.b * mix;
-		}
-	}
-
-	// pixels in between
-	for (float i = ix1 + 1; i < ix2; i++) {
-		if (i >= 0 && i < NUM_LEDS) {
-			layer[uint16_t(i)].r += color.r * opacity;
-			layer[uint16_t(i)].g += color.g * opacity;
-			layer[uint16_t(i)].b += color.b * opacity;
-
-			if (lighten == true) {
-				layer[uint16_t(i)].r += color.r * opacity;
-				layer[uint16_t(i)].g += color.g * opacity;
-				layer[uint16_t(i)].b += color.b * opacity;
-			}
-			else {
-				layer[uint16_t(i)].r = layer[uint16_t(i)].r * (1.0 - opacity) + color.r * opacity;
-				layer[uint16_t(i)].g = layer[uint16_t(i)].g * (1.0 - opacity) + color.g * opacity;
-				layer[uint16_t(i)].b = layer[uint16_t(i)].b * (1.0 - opacity) + color.b * opacity;
-			}
-		}
-	}
+            if (lighten) {
+                // Lighten mode: Add color
+                layer[i].r += color.r * mix;
+                layer[i].g += color.g * mix;
+                layer[i].b += color.b * mix;
+            } else {
+                // Blend mode: Mix color
+                layer[i].r = layer[i].r * (1.0 - mix) + color.r * mix;
+                layer[i].g = layer[i].g * (1.0 - mix) + color.g * mix;
+                layer[i].b = layer[i].b * (1.0 - mix) + color.b * mix;
+            }
+        }
+    }
 }
 
+// Function to draw a dot with motion blur
 void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, float opacity = 1.0) {
-	fx_dots[fx_dots_slot].position_past = fx_dots[fx_dots_slot].position;
-	fx_dots[fx_dots_slot].position = position;
+    // Store previous position
+    float prev_position = fx_dots[fx_dots_slot].position;
+    fx_dots[fx_dots_slot].position = position;
 
-	float position_distance = fabs(position - fx_dots[fx_dots_slot].position_past);
-	if (position_distance < 1.0) {
-		position_distance = 1.0;
-	}
+    // Calculate distance moved and adjust brightness spread accordingly
+    float position_distance = fabs(position - prev_position);
+    float spread_brightness = 1.0 / fmax(position_distance, 1.0); // Ensure minimum spread
 
-	float spread_brightness = 1.0 / position_distance;
-	if (spread_brightness > 1.0) {
-		spread_brightness = 1.0;
-	}
-
-	draw_line(layer, position, fx_dots[fx_dots_slot].position_past, color, spread_brightness * opacity);
+    // Draw the line representing the motion blur
+    draw_line(layer, prev_position, position, color, spread_brightness * opacity);
 }
+
 
 void render_debug_value(uint32_t t_now_ms) {
 	static float value_last = 0;
