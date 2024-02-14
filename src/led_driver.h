@@ -174,19 +174,19 @@ void quantize_color() {
 		decimal_r = leds[i].r * 254;
 		whole_r = decimal_r;
 		fract_r = decimal_r - whole_r;
-		raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step+i) % 4]);
+		raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step) % 4]);
 		
 		// GREEN #####################################################
 		decimal_g = leds[i].g * 254;
 		whole_g = decimal_g;
 		fract_g = decimal_g - whole_g;
-		raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step+i) % 4]);
+		raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step) % 4]);
 
 		// BLUE #####################################################
 		decimal_b = leds[i].b * 254;
 		whole_b = decimal_b;
 		fract_b = decimal_b - whole_b;
-		raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step+i) % 4]);
+		raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step) % 4]);
 	}
 }
 

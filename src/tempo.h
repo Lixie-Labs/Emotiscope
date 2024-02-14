@@ -173,6 +173,8 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 
 		float progress = tempo_bin / float(NUM_TEMPI);
 		float scale = (0.75 * (1.0 - progress)) + 0.25;
+
+		normalized_magnitude *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;

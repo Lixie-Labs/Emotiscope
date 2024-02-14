@@ -43,6 +43,7 @@
 #include "led_driver.h" // ........ Low-level LED communication, (ab)uses RMT for non-blocking output
 #include "leds.h" // .............. LED dithering, effects, filters
 #include "microphone.h" // ........ For gathering audio chunks from the microphone
+#include "vu.h"
 #include "goertzel.h" // .......... GDFT or God Damn Fast Transform is implemented here
 #include "tempo.h" // ............. Comupation of (and syncronization) to the music tempo
 #include "audio_debug.h" // ....... Print audio data over UART
@@ -69,14 +70,13 @@
 // One core to run audio and graphics -----------------------------------------
 void loop() {
 	run_cpu();	// (cpu_core.h)
-	run_gpu();  // (gpu_core.h)
+	run_web();	// (web_core.h)	
 }
 
 // One core to run web services -----------------------------------------------
-void loop_web(void *param) {
-	init_wifi();                              // (wireless.h)
+void loop_gpu(void *param) {
 	for (;;) {
-		run_web();	// (web_core.h)
+		run_gpu();  // (gpu_core.h)
 	}
 }
 
@@ -84,7 +84,8 @@ void loop_web(void *param) {
 void setup() {
 	// (system.h) Initialize all peripherals
 	init_system();
+	init_wifi();                              // (wireless.h)
 
 	// Start the second core as a dedicated webserver
-	(void)xTaskCreatePinnedToCore(loop_web, "loop_web", 8192, NULL, 0, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 0, NULL, 0);
 }

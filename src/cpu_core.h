@@ -36,6 +36,8 @@ void run_cpu() {
 		// Calculate the magnitude of the currently studied frequency set
 		calculate_magnitudes(t_now_ms);  // (goertzel.h)
 
+		run_vu();
+
 		//printf("update_tempo() = %.4fus\n", measure_execution([&]() {
 		// Log novelty and calculate the most probable tempi
 		update_tempo();	 // (tempo.h)
