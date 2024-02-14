@@ -1,4 +1,4 @@
-#define SCREENSAVER_WAIT_MS 2500
+#define SCREENSAVER_WAIT_MS 5000
 
 float screensaver_mix = 0.0000;
 float screensaver_threshold = 1.0;

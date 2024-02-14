@@ -1,6 +1,6 @@
-const MAX_PING_PONG_REPLY_TIME_MS = 2000;
+const MAX_PING_PONG_REPLY_TIME_MS = 4000;
 const MAX_CONNECTION_TIME_MS = 3000;
-const AUTO_RECONNECT = false;
+const AUTO_RECONNECT = true;
 
 let ws;
 let device_ip;
@@ -8,6 +8,7 @@ let connection_start_time;
 let connection_pending = false;
 let last_ping_time;
 let pong_pending = false;
+let reconnecting = false;
 
 let auto_response_table = {
 	"welcome":"get|config",
@@ -204,18 +205,21 @@ function transmit(message){
 }
 
 function reconnect_websockets(){
-	if(AUTO_RECONNECT == true){
-		try{
-			ws.close();
-		}
-		catch(e){
-			console.log("ERROR: "+e);
-		}
+	if(reconnecting == false){
+		reconnecting = true;
+		if(AUTO_RECONNECT == true){
+			try{
+				ws.close();
+			}
+			catch(e){
+				console.log("ERROR: "+e);
+			}
 
-		set_ui_locked_state(true);
-		setTimeout(function(){
-			window.location.reload();
-		}, 2000);
+			set_ui_locked_state(true);
+			setTimeout(function(){
+				window.location.reload();
+			}, 2000);
+		}
 	}
 }
 
@@ -243,6 +247,7 @@ function open_websockets_connection_to_device(){
 			// e.g. server process killed or network down
 			// event.code is usually 1006 in this case
 			console.log('[close] Connection died');
+			reconnect_websockets();
 		}
 	};
 

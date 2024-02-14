@@ -24,8 +24,8 @@ void run_standby(){
 		incandescent_lookup.b * incandescent_lookup.b,
 	};
 
-	draw_dot(leds, SCREENSAVER_1, dot_color,     dot_pos, dot_brightness);
-	draw_dot(leds, SCREENSAVER_2, dot_color, 1.0-dot_pos, dot_brightness);
+	draw_dot(leds, SLEEP_1, dot_color,     dot_pos, dot_brightness);
+	draw_dot(leds, SLEEP_2, dot_color, 1.0-dot_pos, dot_brightness);
 
 	if(standby_brightness > 0.00001){
 		standby_brightness *= 0.999;

@@ -183,9 +183,9 @@ void init_web_server() {
 
 	server.on("/*", HTTP_GET, [](PsychicRequest *request) {
 		esp_err_t result = ESP_OK;
-		String path = "/";
+		String path = "";
 
-		path += (request->url() == "/") ? "index.html" : request->url();
+		path += (request->url() == "/") ? "/index.html" : request->url();
 		Serial.printf("HTTP GET %s\n", request->url());
 
 		File file = LittleFS.open(path);
