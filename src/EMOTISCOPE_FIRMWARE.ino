@@ -42,6 +42,7 @@
 #include "touch.h"
 #include "led_driver.h" // ........ Low-level LED communication, (ab)uses RMT for non-blocking output
 #include "leds.h" // .............. LED dithering, effects, filters
+#include "ui.h"
 #include "microphone.h" // ........ For gathering audio chunks from the microphone
 #include "vu.h"
 #include "goertzel.h" // .......... GDFT or God Damn Fast Transform is implemented here

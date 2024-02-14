@@ -205,7 +205,7 @@ float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
 	}
 }
 
-void calculate_magnitudes(uint32_t t_now_ms) {
+void calculate_magnitudes() {
 	profile_function([&]() {
 		magnitudes_locked = true;
 

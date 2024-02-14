@@ -76,7 +76,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = clip_float(atof(substring));
 			configuration.brightness = setting_value;
-			rendered_debug_value = configuration.brightness;
+
+			update_ui(configuration.brightness, UI_NEEDLE_EVENT);
 		}
 		else if (fastcmp(substring, "melt")) {
 			// Get speed value
@@ -84,7 +85,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.melt = setting_value;
 
-			rendered_debug_value = configuration.melt;
+			update_ui(configuration.melt, UI_NEEDLE_EVENT);
 		}
 		else if (fastcmp(substring, "speed")) {
 			// Get speed value
@@ -92,14 +93,15 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.speed = setting_value;
 
-			rendered_debug_value = configuration.melt;
+			update_ui(configuration.speed, UI_NEEDLE_EVENT);
 		}
 		else if (fastcmp(substring, "hue")) {
 			// Get brightness value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = clip_float(atof(substring));
 			configuration.hue = setting_value;
-			rendered_debug_value = configuration.hue; // TODO: Color-related changes shouldn't show a UI dot
+
+			update_ui(configuration.hue, UI_HUE_EVENT); // TODO: Color-related changes shouldn't show a UI dot
 		}
 		
 		else if (fastcmp(substring, "mirror_mode")) {
@@ -113,12 +115,16 @@ void parse_command(uint32_t t_now_ms, command com) {
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
 			configuration.incandescent_filter = setting_value;
+
+			update_ui(configuration.incandescent_filter, UI_NEEDLE_EVENT);
 		}
 		else if (fastcmp(substring, "hue_range")) {
 			// Get hue_range value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
-			configuration.hue_range = setting_value; // -1.0 to 1.0 range
+			configuration.hue_range = setting_value;
+
+			update_ui( configuration.hue, UI_HUE_EVENT);
 		}
 
 		else if (fastcmp(substring, "mode")) {

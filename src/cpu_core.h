@@ -18,10 +18,6 @@ void run_cpu() {
 		static uint32_t iter = 0;
 		iter++;
 
-		// Get the current time in microseconds and milliseconds
-		uint32_t t_now_us = micros();
-		uint32_t t_now_ms = millis();
-
 		//------------------------------------------------------------------------------------------
 		// AUDIO CALCULATIONS
 		// ----------------------------------------------------------------------
@@ -34,7 +30,7 @@ void run_cpu() {
 		uint32_t processing_start_us = micros();
 
 		// Calculate the magnitude of the currently studied frequency set
-		calculate_magnitudes(t_now_ms);  // (goertzel.h)
+		calculate_magnitudes();  // (goertzel.h)
 
 		run_vu();
 
@@ -44,14 +40,14 @@ void run_cpu() {
 		//}));
 
 		// Update the FPS_CPU variable
-		watch_cpu_fps(t_now_us);  // (system.h)
+		watch_cpu_fps();  // (system.h)
 
 		// Occasionally print the average frame rate
-		print_system_info(t_now_ms);
+		print_system_info();
 
 		// print_audio_data();
 
-		read_touch(t_now_ms);
+		read_touch();
 
 		//------------------------------------------------------------------------------------------
 		// WIFI

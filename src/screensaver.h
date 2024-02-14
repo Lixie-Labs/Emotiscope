@@ -8,7 +8,7 @@ float sine_positions[4] = { 0.0, 0.0, 0.0, 0.0 };
 uint32_t inactive_start = 0;
 bool inactive = false;
 
-void run_screensaver(uint32_t t_now_ms){
+void run_screensaver(){
 	float mag_sum = 0;
 	for(uint16_t i = 0; i < NUM_FREQS; i++){
 		mag_sum += frequencies_musical[i].magnitude;

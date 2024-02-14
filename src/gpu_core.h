@@ -18,8 +18,8 @@ void run_gpu() {
 	// Get the current time in microseconds and milliseconds
 	static uint32_t t_last_us = micros();
 
-	uint32_t t_now_us = micros();
-	uint32_t t_now_ms = millis();
+	t_now_us = micros();
+	t_now_ms = millis();
 
 	// Calculate the "delta" value, to scale movements based on FPS, like a game engine
 	const uint32_t ideal_us_interval = (1000000 / REFERENCE_FPS);
@@ -30,7 +30,7 @@ void run_gpu() {
 	t_last_us = t_now_us;
 
 	// Update the novelty curve
-	update_novelty(t_now_us);  // (tempo.h)
+	update_novelty();  // (tempo.h)
 
 	// Update the tempi phases
 	update_tempi_phase(delta);	// (tempo.h)
@@ -48,7 +48,7 @@ void run_gpu() {
 	apply_incandescent_filter(configuration.incandescent_filter);  // (leds.h)
 
 	if( EMOTISCOPE_ACTIVE == true ){
-		run_screensaver(t_now_ms);
+		run_screensaver();
 	}
 
 	// Restrict CRGBF values to 0.0-1.0 range
@@ -68,12 +68,11 @@ void run_gpu() {
 
 	apply_brightness();
 
-	// Render the current debug value as a dot
-	render_debug_value(t_now_ms);  // (leds.h)
-
 	if( EMOTISCOPE_ACTIVE == false ){
 		run_standby();
 	}
+
+	draw_ui_overlay();
 	
 	// This value decays itself non linearly toward zero all the time, 
 	// *really* slowing down the LPF when it's set to 1.0.
@@ -102,7 +101,7 @@ void run_gpu() {
 	transmit_leds();
 
 	// Update the FPS_GPU variable
-	watch_gpu_fps(t_now_us);  // (system.h)
+	watch_gpu_fps();  // (system.h)
 
 	uint32_t t_end_cycles = ESP.getCycleCount();
 	volatile uint32_t gpu_total_cycles = t_end_cycles - t_start_cycles;

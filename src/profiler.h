@@ -14,6 +14,9 @@
 extern void broadcast(char *message);
 extern void print_websocket_clients(uint32_t t_now_ms);
 
+uint32_t t_now_ms = 0;
+uint32_t t_now_us = 0;
+
 profiler_function profiler_functions[128];
 uint16_t num_profiled_functions = 0;
 bool profiler_locked = false;
@@ -128,28 +131,30 @@ void print_profiled_function_hits() {
 	#endif
 }
 
-void watch_cpu_fps(uint32_t t_now_us) {
+void watch_cpu_fps() {
+	uint32_t us_now = micros();
 	static uint32_t last_call;
 	static uint8_t average_index = 0;
 	average_index++;
 
-	uint32_t elapsed_us = t_now_us - last_call;
+	uint32_t elapsed_us = us_now - last_call;
 	FPS_CPU_SAMPLES[average_index % 16] = 1000000.0 / float(elapsed_us);
-	last_call = t_now_us;
+	last_call = us_now;
 }
 
-void watch_gpu_fps(uint32_t t_now_us) {
+void watch_gpu_fps() {
+	uint32_t us_now = micros();
 	static uint32_t last_call;
 	static uint8_t average_index = 0;
 	average_index++;
 
-	uint32_t elapsed_us = t_now_us - last_call;
+	uint32_t elapsed_us = us_now - last_call;
 	FPS_GPU_SAMPLES[average_index % 16] = 1000000.0 / float(elapsed_us);
 
-	last_call = t_now_us;
+	last_call = us_now;
 }
 
-void print_system_info(uint32_t t_now_ms) {
+void print_system_info() {
 	static uint32_t next_print_ms = 0;
 	const uint16_t print_interval_ms = 1000;
 

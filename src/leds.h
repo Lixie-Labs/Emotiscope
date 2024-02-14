@@ -369,7 +369,7 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 }
 
 
-void render_debug_value(uint32_t t_now_ms) {
+void render_debug_value() {
 	static float value_last = 0;
 	static uint32_t last_update_time;
 	static float opacity_target = 0.0;
@@ -389,14 +389,49 @@ void render_debug_value(uint32_t t_now_ms) {
 	}
 
 	opacity = opacity*0.95 + opacity_target*0.05;
+}
 
-	CRGBF gamma_corrected = {
-		incandescent_lookup.r*incandescent_lookup.r,
-		incandescent_lookup.g*incandescent_lookup.g,
-		incandescent_lookup.b*incandescent_lookup.b,
-	};
+void apply_box_blur(CRGBF* pixels, uint16_t num_pixels, int kernel_size) {
+    // Ensure kernel size is odd for symmetry around the central pixel
+    if (kernel_size % 2 == 0) {
+        printf("Kernel size must be odd.\n");
+        return;
+    }
 
-	draw_dot(leds, UI_NEEDLE, gamma_corrected, clip_float(rendered_debug_value_smooth), opacity);
+    int half_kernel = kernel_size / 2;
+
+    // Temporary array to store blurred values
+    CRGBF temp_pixels[num_pixels];
+    memset(temp_pixels, 0, sizeof(temp_pixels));
+
+    // Apply box blur to each pixel within the first 64 pixels
+    for (int i = 0; i < num_pixels; ++i) {
+        int valid_kernel_pixels = 0;
+        CRGBF sum = {0.0f, 0.0f, 0.0f};
+
+        // Sum the colors within the kernel's range, handle edges by duplicating pixels
+        for (int k = -half_kernel; k <= half_kernel; ++k) {
+            int pixel_index = i + k;
+
+            // Handle OOB by duplicating edge pixels
+            if (pixel_index < 0) pixel_index = 0;
+            if (pixel_index >= num_pixels) pixel_index = num_pixels - 1;
+
+            sum.r += pixels[pixel_index].r;
+            sum.g += pixels[pixel_index].g;
+            sum.b += pixels[pixel_index].b;
+
+            valid_kernel_pixels++;
+        }
+
+        // Calculate the average and assign it to the temporary array
+        temp_pixels[i].r = sum.r / valid_kernel_pixels;
+        temp_pixels[i].g = sum.g / valid_kernel_pixels;
+        temp_pixels[i].b = sum.b / valid_kernel_pixels;
+    }
+
+    // Copy the blurred values back to the original array
+    memcpy(pixels, temp_pixels, sizeof(CRGBF) * num_pixels);
 }
 
 void apply_image_lpf(float cutoff_frequency) {

@@ -322,7 +322,7 @@ void check_silence(float current_novelty) {
 	// rendered_debug_value = silence_level;
 }
 
-void update_novelty(uint32_t t_now_us) {
+void update_novelty() {
 	static uint32_t next_update = t_now_us;
 
 	const float update_interval_hz = NOVELTY_LOG_HZ;
