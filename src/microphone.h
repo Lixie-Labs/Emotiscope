@@ -85,20 +85,10 @@ void acquire_sample_chunk() {
 		float new_samples[CHUNK_SIZE];
 
 		// Read audio samples into int32_t buffer
-		size_t bytes_read = 0;
-		i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
-
-		/*
-		for (int i = 0; i < CHUNK_SIZE; i++) {
-    		int32_t sample = (((int32_t)new_samples_raw[i]) >> 14) + 7000;
-
-			Serial.print(sample);
-			Serial.print('\t');
-			print_binary(sample, 32, '\n');
-
-			new_samples_shifted[i] = sample;
+		if( EMOTISCOPE_ACTIVE == true ){
+			size_t bytes_read = 0;
+			i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
 		}
-		*/
 
 		// Clip the sample value if it's too large, cast to floats
 		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
@@ -115,6 +105,7 @@ void acquire_sample_chunk() {
 		waveform_locked = true;
 		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE);
 
+		// If debug recording was triggered
 		if(audio_recording_live == true){
 			int16_t out_samples[CHUNK_SIZE];
 			for(uint16_t i = 0; i < CHUNK_SIZE; i += 4){
@@ -133,23 +124,8 @@ void acquire_sample_chunk() {
 			}
 		}
 		
+		// Used to sync GPU to this when needed
 		waveform_locked = false;
 		waveform_sync_flag = true;
-
-		/*
-		// Used to print raw microphone values over UART for debugging
-		float* samples = &sample_history[SAMPLE_HISTORY_LENGTH-1-CHUNK_SIZE];
-		char output[32];
-		memset(output, 0, 32);
-		for(uint16_t i = 0; i < CHUNK_SIZE; i++){
-			uint16_t offset = 16;
-			uint16_t position = offset + int16_t(samples[i]*8.0);
-			memset(output, 0, 32);
-			memset(output, ' ', position);
-			output[position] = '|';
-			printf("%s\n", output);
-		}
-		*/
-
 	}, __func__);
 }

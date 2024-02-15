@@ -44,9 +44,9 @@ void init_system() {
 	init_i2s_microphone();					  // (microphone.h)
 	init_window_lookup();					  // (goertzel.h)
 	init_goertzel_constants_musical();		  // (goertzel.h)
-	init_tempo_goertzel_constants();		  // (tempo.h)
-	
-	init_rmt_driver();
+	init_tempo_goertzel_constants();		  // (tempo.h)	
+	init_rmt_driver();                        // (led_driver.h)
+	init_wifi();                              // (wireless.h)
 
 	load_sliders_relevant_to_mode(configuration.current_mode);
 	load_toggles_relevant_to_mode(configuration.current_mode);

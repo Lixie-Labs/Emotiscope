@@ -48,6 +48,9 @@ void load_toggles_relevant_to_mode(int16_t mode_index) {
 	else if (mode_index == 6) {  // Analog
 		register_toggle("mirror_mode");
 	}
+	else if (mode_index == 7) {  // Waveform
+		register_toggle("mirror_mode");
+	}
 
 	else{
 		wtf_error();

@@ -165,3 +165,27 @@ void print_binary(uint32_t input, uint8_t bit_width, char tail){
 
 	printf("%s%c", output, tail);
 }
+
+void low_pass_filter(float* input_array, uint16_t num_samples, uint16_t sample_rate, float cutoff_frequency, uint8_t filter_order) {
+    // Calculate the smoothing factor alpha inline
+    float rc = 1.0f / (2.0f * M_PI * cutoff_frequency);
+    float alpha = 1.0f / (1.0f + (sample_rate * rc));
+
+    // Temporary variable to hold intermediate filter results
+    float filtered_value;
+
+    // Apply the filter multiple times based on filter_order
+    for (uint8_t order = 0; order < filter_order; ++order) {
+        // Initialize the first filtered value
+        filtered_value = input_array[0];
+
+        // Start filtering from the second sample
+        for (uint16_t n = 1; n < num_samples; ++n) {
+            // Implement the filter equation: y[n] = alpha * x[n] + (1 - alpha) * y[n-1]
+            filtered_value = alpha * input_array[n] + (1.0f - alpha) * filtered_value;
+
+            // Store the filtered result back into the array
+            input_array[n] = filtered_value;
+        }
+    }
+}

@@ -39,25 +39,25 @@
 #include "configuration.h" // ..... Storing and retreiving your settings
 #include "utilities.h" // ......... Custom generic math functions
 #include "system.h" // ............ Lowest-level firmware functions
-#include "touch.h"
+#include "touch.h" // ............. Handles capacitive touch input
 #include "led_driver.h" // ........ Low-level LED communication, (ab)uses RMT for non-blocking output
 #include "leds.h" // .............. LED dithering, effects, filters
-#include "ui.h"
+#include "ui.h" // ................ Draws UI elements to the LEDs like indicator needles
 #include "microphone.h" // ........ For gathering audio chunks from the microphone
-#include "vu.h"
+#include "vu.h" // ................ Tracks music loudness from moment to moment
 #include "goertzel.h" // .......... GDFT or God Damn Fast Transform is implemented here
 #include "tempo.h" // ............. Comupation of (and syncronization) to the music tempo
 #include "audio_debug.h" // ....... Print audio data over UART
-#include "screensaver.h"
-#include "standby.h"
+#include "screensaver.h" // ....... Colorful dots play on screen when no audio is present
+#include "standby.h" // ........... Handles sleep/wake + animations
 #include "lightshow_modes.h" // ... Definition and handling of lightshow modes
 #include "commands.h" // .......... Queuing and parsing of commands recieved
 #include "wireless.h" // .......... Communication with your network and the web-app
 
 // Loops
-#include "cpu_core.h"
-#include "gpu_core.h"
-#include "web_core.h"
+#include "cpu_core.h" // Audio
+#include "gpu_core.h" // Video
+#include "web_core.h" // Wireless
 
 // Development Notes
 #include "notes.h"
@@ -68,13 +68,13 @@
 // ############################################################################
 // ## CODE ####################################################################
 
-// One core to run audio and graphics -----------------------------------------
+// One core to run audio and web server ---------------------------------------
 void loop() {
 	run_cpu();	// (cpu_core.h)
 	run_web();	// (web_core.h)	
 }
 
-// One core to run web services -----------------------------------------------
+// One core to run graphics ---------------------------------------------------
 void loop_gpu(void *param) {
 	for (;;) {
 		run_gpu();  // (gpu_core.h)
@@ -85,7 +85,6 @@ void loop_gpu(void *param) {
 void setup() {
 	// (system.h) Initialize all peripherals
 	init_system();
-	init_wifi();                              // (wireless.h)
 
 	// Start the second core as a dedicated webserver
 	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 0, NULL, 0);

@@ -57,6 +57,9 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	else if (mode_index == 6) {  // Analog
 		register_slider("speed", 0.000, 1.000, 0.001);
 	}
+	else if (mode_index == 7) {  // Waveform
+		register_slider("bass", 0.000, 1.000, 0.001);
+	}
 	else{
 		// WTF happened that got you here?
 	}

@@ -81,6 +81,7 @@ struct config {
 	float speed;
 	float saturation;
 	float base_coat;
+	float bass;
 };
 
 struct CRGB8 {

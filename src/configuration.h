@@ -82,6 +82,11 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|base_coat|float|%.3f", configuration.base_coat);
 	websocket_handler.sendAll(config_item_buffer);
 
+	// bass
+	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|bass|float|%.3f", configuration.bass);
+	websocket_handler.sendAll(config_item_buffer);
+
 	websocket_handler.sendAll("config_ready");
 }
 

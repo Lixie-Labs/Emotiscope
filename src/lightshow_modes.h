@@ -18,6 +18,7 @@
 #include "lightshow_modes/plot.h"
 #include "lightshow_modes/bloom.h"
 #include "lightshow_modes/analog.h"
+#include "lightshow_modes/waveform.h"
 
 #include "lightshow_modes/debug.h"
 
@@ -29,6 +30,7 @@ lightshow_mode lightshow_modes[] = {
 	{ "Plot",            &draw_plot          }, // 4
 	{ "Bloom",           &draw_bloom         }, // 5
 	{ "Analog",          &draw_analog        }, // 6
+	{ "Waveform",        &draw_waveform      }, // 7
 
 	//{ "Debug",           &draw_debug         },
 };
