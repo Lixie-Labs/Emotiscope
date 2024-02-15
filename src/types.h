@@ -79,6 +79,7 @@ struct config {
 	float incandescent_filter;
 	float hue_range;
 	float speed;
+	float saturation;
 };
 
 struct CRGB8 {

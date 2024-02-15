@@ -72,6 +72,11 @@ void sync_configuration_to_client() {
 	websocket_handler.sendAll(config_item_buffer);
 	memset(config_item_buffer, 0, 120);
 
+	// saturation
+	snprintf(config_item_buffer, 120, "new_config|saturation|float|%.3f", configuration.saturation);
+	websocket_handler.sendAll(config_item_buffer);
+	memset(config_item_buffer, 0, 120);
+
 	websocket_handler.sendAll("config_ready");
 }
 

@@ -206,7 +206,7 @@ CRGBF hsv(float h, float s, float v) {
 	CRGBF col = {(hsv_lookup[h_8_bit][0] / 255.0f) * v, (hsv_lookup[h_8_bit][1] / 255.0f) * v,
 				 (hsv_lookup[h_8_bit][2] / 255.0f) * v};
 
-	col = desaturate(col, 1.0-s);
+	col = desaturate(col, 1.0-sqrt(s));
 
 	col.r = min(col.r, 1.0f);
 	col.g = min(col.g, 1.0f);

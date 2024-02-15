@@ -51,7 +51,7 @@ void draw_clap() {
 		float dot_pos = clip_float(sqrt((tempi[tempo_bin].beat * 0.5 + 0.5)) * sqrt(contribution));
 		float opacity = contribution;
 
-		CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*progress, 1.0, 1.0);
+		CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*progress, configuration.saturation, 1.0);
 		if (tempo_bin % 2 == 0) {
 			//dot_color = hsv(progress+0.5, 0.9, 1.0);
 		}

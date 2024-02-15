@@ -13,7 +13,7 @@ void draw_bloom() {
 		for(uint16_t i = 0; i < NUM_LEDS>>1; i++){
 			float progress = float(i) / (NUM_LEDS >> 1);
 			float novelty_pixel = clip_float(novelty_image[i]*1.0);
-			CRGBF col = hsv(configuration.hue + progress * configuration.hue_range, 1.0, novelty_pixel*novelty_pixel);
+			CRGBF col = hsv(configuration.hue + progress * configuration.hue_range, configuration.saturation, novelty_pixel*novelty_pixel);
 			leds[64+i] = col;
 			leds[63-i] = col;
 		}
@@ -22,7 +22,7 @@ void draw_bloom() {
 		for(uint16_t i = 0; i < NUM_LEDS; i++){
 			float progress = float(i) / (NUM_LEDS);
 			float novelty_pixel = clip_float(novelty_image[i]*2.0);
-			CRGBF col = hsv(configuration.hue + progress * configuration.hue_range, 1.0, novelty_pixel*novelty_pixel);
+			CRGBF col = hsv(configuration.hue + progress * configuration.hue_range, configuration.saturation, novelty_pixel*novelty_pixel);
 			leds[i] = col;
 		}
 	}
