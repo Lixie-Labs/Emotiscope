@@ -33,49 +33,54 @@ void sync_configuration_to_client() {
 	websocket_handler.sendAll("clear_config");
 
 	// brightness
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|brightness|float|%.3f", configuration.brightness);
 	websocket_handler.sendAll(config_item_buffer);
-	memset(config_item_buffer, 0, 120);
 
 	// melt
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|melt|float|%.3f", configuration.melt);
 	websocket_handler.sendAll(config_item_buffer);
-	memset(config_item_buffer, 0, 120);
 
 	// speed
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|speed|float|%.3f", configuration.speed);
 	websocket_handler.sendAll(config_item_buffer);
-	memset(config_item_buffer, 0, 120);
 
 	// hue
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|hue|float|%.3f", configuration.hue);
 	websocket_handler.sendAll(config_item_buffer);
-	memset(config_item_buffer, 0, 120);
 
 	// current_mode
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|current_mode|int|%li", configuration.current_mode);
 	websocket_handler.sendAll(config_item_buffer);
-	memset(config_item_buffer, 0, 120);
 
 	// mirror_mode
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|mirror_mode|int|%d", configuration.mirror_mode);
 	websocket_handler.sendAll(config_item_buffer);
-	memset(config_item_buffer, 0, 120);
 
 	// incandescent_filter
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|incandescent|float|%.3f", configuration.incandescent_filter);
 	websocket_handler.sendAll(config_item_buffer);
-	memset(config_item_buffer, 0, 120);
 
 	// hue_range
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|hue_range|float|%.3f", configuration.hue_range);
 	websocket_handler.sendAll(config_item_buffer);
-	memset(config_item_buffer, 0, 120);
 
 	// saturation
+	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|saturation|float|%.3f", configuration.saturation);
 	websocket_handler.sendAll(config_item_buffer);
+
+	// base_coat
 	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|base_coat|float|%.3f", configuration.base_coat);
+	websocket_handler.sendAll(config_item_buffer);
 
 	websocket_handler.sendAll("config_ready");
 }

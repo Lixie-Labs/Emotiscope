@@ -134,6 +134,14 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			update_ui(configuration.saturation, UI_NEEDLE_EVENT);
 		}
+		else if (fastcmp(substring, "base_coat")) {
+			// Get base_coat value
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			float setting_value = atof(substring);
+			configuration.base_coat = setting_value;
+
+			update_ui(configuration.base_coat, UI_NEEDLE_EVENT);
+		}
 
 		else if (fastcmp(substring, "mode")) {
 			// Get mode name

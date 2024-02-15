@@ -51,26 +51,28 @@ void draw_clap() {
 		float dot_pos = clip_float(sqrt((tempi[tempo_bin].beat * 0.5 + 0.5)) * sqrt(contribution));
 		float opacity = contribution;
 
-		CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*progress, configuration.saturation, 1.0);
-		if (tempo_bin % 2 == 0) {
-			//dot_color = hsv(progress+0.5, 0.9, 1.0);
+		if(opacity > 0.01){
+			CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*progress, configuration.saturation, 1.0);
+			if (tempo_bin % 2 == 0) {
+				//dot_color = hsv(progress+0.5, 0.9, 1.0);
+			}
+
+			// if (debug == true) {
+			//	draw_dot(leds, tempo_bin * 2 + 0, dot_color, (dot_pos) * 0.5 + 0.5, opacity);
+			//	draw_dot(leds, tempo_bin * 2 + 1, dot_color, (1.0 - dot_pos) * 0.5 + 0.5, opacity);
+			// }
+			// else {
+
+			if(configuration.mirror_mode == true){
+				dot_pos = dot_pos * 0.5 + 0.5;	// scale to half
+			}
+
+			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity);
+
+			if(configuration.mirror_mode == true){
+				draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity);
+			}
+			//}
 		}
-
-		// if (debug == true) {
-		//	draw_dot(leds, tempo_bin * 2 + 0, dot_color, (dot_pos) * 0.5 + 0.5, opacity);
-		//	draw_dot(leds, tempo_bin * 2 + 1, dot_color, (1.0 - dot_pos) * 0.5 + 0.5, opacity);
-		// }
-		// else {
-
-		if(configuration.mirror_mode == true){
-			dot_pos = dot_pos * 0.5 + 0.5;	// scale to half
-		}
-
-		draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity);
-
-		if(configuration.mirror_mode == true){
-			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity);
-		}
-		//}
 	}
 }

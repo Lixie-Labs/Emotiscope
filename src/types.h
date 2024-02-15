@@ -80,6 +80,7 @@ struct config {
 	float hue_range;
 	float speed;
 	float saturation;
+	float base_coat;
 };
 
 struct CRGB8 {

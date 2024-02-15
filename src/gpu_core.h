@@ -44,6 +44,8 @@ void run_gpu() {
 	// If silence is detected, show a blue debug LED
 	// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});
 
+	apply_base_coat();
+
 	// Apply an incandescent LUT to reduce harsh blue tones
 	apply_incandescent_filter(configuration.incandescent_filter);  // (leds.h)
 
@@ -53,18 +55,6 @@ void run_gpu() {
 
 	// Restrict CRGBF values to 0.0-1.0 range
 	clip_leds();  // (leds.h)
-
-	// Save this frame for the next loop
-	// save_leds_to_last(); // (leds.h)
-
-	// TODO: Screensaver
-	// When ever the GPU hits this point in the loop, check if the total luminosity is below a small threshold value,
-	// and if so, use 4 reserved draw_dots() in the same color palette as your current mode, and some sine functions
-	// to make them "spin around" in a 1-D sense.
-	// This can be randomized in fun ways, so that when your album finishes and the room is quiet, the display slowly
-	// goes into a slow resting state that still indicates that it's on.
-	//
-	// Definitely get's it's own toggle in the app in case I hate it
 
 	apply_brightness();
 

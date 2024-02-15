@@ -453,6 +453,21 @@ void apply_brightness() {
 	scale_CRGBF_array_by_constant(leds, brightness_val*brightness_val, NUM_LEDS);
 }
 
+void apply_base_coat(){
+	if(configuration.base_coat > 0.01){
+		float base_coat_level = configuration.base_coat * 0.10; // Max 10% brightness
+
+		float base_coat_inv = (1.0-base_coat_level);
+		for(uint16_t i = 0; i < NUM_LEDS; i++){
+			float progress = float(i) / NUM_LEDS;
+			CRGBF base_coat_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, base_coat_level*base_coat_level);
+			leds[i].r = leds[i].r * base_coat_inv + base_coat_color.r;
+			leds[i].g = leds[i].g * base_coat_inv + base_coat_color.g;
+			leds[i].b = leds[i].b * base_coat_inv + base_coat_color.b;
+		}
+	}
+}
+
 void clear_display(){
 	memset(leds, 0, sizeof(CRGBF)*NUM_LEDS);
 }
