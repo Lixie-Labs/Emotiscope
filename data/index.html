@@ -86,13 +86,23 @@
 			<span onclick="hide_page('page_menu');" class="icon_top_left buzz">
 				<img src="svg/close.svg" class="footer_icon tint_accent"/>
 			</span>
+			<div id="menu_container">
+				<div id="menu_toggles">
+				</div>
+				<div class="menu_item">
+					<span class="menu_item_label">Check Firmware Update</span>
+					<span class="menu_item_content"></span>
+				</div>
 
-			<div class="page_title">MENU</div>
-			<div class="page_paragraph">
-				THIS IS UNFINISHED CONTENT
+			</div>
+
+			<div id="menu_stats">
+				<span class="menu_stat" id="CPU_FPS">LOADING</span>
+				<span class="menu_stat" id="GPU_FPS">LOADING</span>
+				<span class="menu_stat" id="HEAP">LOADING</span>
+			</div>
 
 				<!-- TODO: Main menu can display stats for nerds at the bottom, like current CPU/GPU FPS, Free Heap, VCC level -->
-			</div>
 		</div>
 
 		<div id="page_calibration">
@@ -157,6 +167,7 @@
 	<script src="js/utilities.js"></script>
 	<script src="js/sliders.js"></script>
 	<script src="js/toggles.js"></script>
+	<script src="js/menu_toggles.js"></script>
 	<script src="js/render_controls.js"></script>
 	<script src="js/websockets_connection.js"></script>
 	<script src="js/pages.js"></script>

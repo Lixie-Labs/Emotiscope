@@ -9,13 +9,18 @@ extern lightshow_mode lightshow_modes[];
 extern PsychicWebSocketHandler websocket_handler;
 
 config configuration = {
-	1.00,  // ... brightness
-	8.00,  // ... speed
-	0.00,  // ... hue
-	0,	   // ... current_mode
-	true,  // ... mirror_mode
-	0.6,   // ... incandescent_filter
-	0.0,   // ... hue_range
+	1.00, // brightness
+	0.50, // melt
+	0.00, // hue
+	0,    // current_mode
+	true, // mirror_mode
+	1.00, // incandescent_filter
+	0.00, // hue_range
+	1.00, // speed
+	1.00, // saturation
+	0.00, // base_coat
+	0.00, // bass
+	true, // screensaver
 };
 
 float noise_spectrum[NUM_FREQS] = {0.0};
@@ -24,8 +29,10 @@ int16_t audio_debug_recording[MAX_AUDIO_RECORDING_SAMPLES];
 uint32_t audio_recording_index = 0;
 volatile bool audio_recording_live = false;
 
-uint32_t last_save_request_ms = 0;
-bool save_request_open = false;
+volatile uint32_t last_save_request_ms = 0;
+volatile bool save_request_open = false;
+
+volatile bool filesystem_ready = true;
 
 void sync_configuration_to_client() {
 	char config_item_buffer[120];
@@ -85,6 +92,11 @@ void sync_configuration_to_client() {
 	// bass
 	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|bass|float|%.3f", configuration.bass);
+	websocket_handler.sendAll(config_item_buffer);
+
+	// screensaver
+	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|screensaver|int|%li", configuration.screensaver);
 	websocket_handler.sendAll(config_item_buffer);
 
 	websocket_handler.sendAll("config_ready");
@@ -194,18 +206,20 @@ bool load_noise_spectrum() {
 	return true;
 }
 
-void save_config_delayed(uint32_t t_now_ms) {
+void save_config_delayed() {
 	last_save_request_ms = t_now_ms;
 	save_request_open = true;
 }
 
-void sync_configuration_to_file_system(uint32_t t_now_ms) {
+void sync_configuration_to_file_system() {
 	if (save_request_open == true) {
 		if ((t_now_ms - last_save_request_ms) >= MIN_SAVE_WAIT_MS) {
-			printf("SAVING CONFIGURATION TO FILESYSTEM\n");
+			filesystem_ready = false;
+			printf("SAVING\n");
 			save_config();
 			save_noise_spectrum();
 			save_request_open = false;
+			filesystem_ready = true;
 		}
 	}
 }

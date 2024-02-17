@@ -206,6 +206,8 @@ IRAM_ATTR void transmit_leds() {
 	quantize_color();
 
 	// Get to safety, THE PHOTONS ARE COMING!!!
-	rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
-	rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
+	if(filesystem_ready == true){
+		rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
+		rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
+	}
 }

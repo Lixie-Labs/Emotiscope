@@ -16,6 +16,7 @@ let auto_response_table = {
 	"config_ready":"get|modes",
 	"modes_ready":"get|sliders",
 	"sliders_ready":"get|toggles",
+	"toggles_ready":"get|menu_toggles",
 	"mode_selected":"get|config",
 };
 
@@ -155,7 +156,17 @@ function parse_message(message){
 				"name":toggle_name
 			});
 		}
-		else if(command_type == "toggles_ready"){
+		else if(command_type == "clear_menu_toggles"){
+			menu_toggles = [];
+		}
+		else if(command_type == "new_menu_toggle"){
+			let toggle_name = command_data[1];
+
+			menu_toggles.push({
+				"name":toggle_name
+			});
+		}
+		else if(command_type == "menu_toggles_ready"){
 			console.log("DATA SYNC COMPLETE!");
 			ping_server();
 			setInterval(check_pong_timeout, 100);
@@ -172,6 +183,18 @@ function parse_message(message){
 			console.log("DEBUG RECORDING COMPLETE!");
 			hide_page('page_calibration');
 			set_ui_locked_state(false);
+		}
+		else if(command_type == "fps_cpu"){
+			let FPS = command_data[1];
+			document.getElementById("CPU_FPS").innerHTML = `CPU FPS: ${FPS}`;
+		}
+		else if(command_type == "fps_gpu"){
+			let FPS = command_data[1];
+			document.getElementById("GPU_FPS").innerHTML = `GPU FPS: ${FPS}`;
+		}
+		else if(command_type == "heap"){
+			let heap = command_data[1];
+			document.getElementById("HEAP").innerHTML = `HEAP: ${heap}`;
 		}
 		else if(command_type == "pong"){
 			pong_pending = false;
@@ -195,6 +218,11 @@ function send_slider_change(slider_name){
 }
 
 function send_toggle_change(toggle_name){
+	let new_state = +(document.getElementById(toggle_name).checked);
+	transmit(`set|${toggle_name}|${new_state}`);
+}
+
+function send_menu_toggle_change(toggle_name){
 	let new_state = +(document.getElementById(toggle_name).checked);
 	transmit(`set|${toggle_name}|${new_state}`);
 }

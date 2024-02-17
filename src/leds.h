@@ -197,22 +197,40 @@ CRGBF desaturate(struct CRGBF input_color, float amount) {
 }
 
 CRGBF hsv(float h, float s, float v) {
-	h = fmodf(h, 1.0f);
-	while (h < 0.0f) h += 1.0f;
+    h = fmodf(h, 1.0f);
+    while (h < 0.0f) h += 1.0f;
 
-	v = clip_float(v);
-	uint8_t h_8_bit = h * 255.0f;
+    v = clip_float(v);
+    float h_8_bit = h * 255.0f;
+    uint8_t h_index = (uint8_t)floorf(h_8_bit); // Integer part of hue index
+    float h_frac = h_8_bit - h_index; // Fractional part for interpolation
 
-	CRGBF col = {(hsv_lookup[h_8_bit][0] / 255.0f) * v, (hsv_lookup[h_8_bit][1] / 255.0f) * v,
-				 (hsv_lookup[h_8_bit][2] / 255.0f) * v};
+    // Interpolate between the current and next hue in the lookup table
+    uint8_t next_h_index = (h_index + 1) % 256; // Wrap around at 255
+    CRGBF col1 = {hsv_lookup[h_index][0] / 255.0f, hsv_lookup[h_index][1] / 255.0f, hsv_lookup[h_index][2] / 255.0f};
+    CRGBF col2 = {hsv_lookup[next_h_index][0] / 255.0f, hsv_lookup[next_h_index][1] / 255.0f, hsv_lookup[next_h_index][2] / 255.0f};
 
-	col = desaturate(col, 1.0-sqrt(s));
+    // Linearly interpolate between col1 and col2 based on h_frac
+    CRGBF col = {
+        col1.r + (col2.r - col1.r) * h_frac,
+        col1.g + (col2.g - col1.g) * h_frac,
+        col1.b + (col2.b - col1.b) * h_frac
+    };
 
-	col.r = min(col.r, 1.0f);
-	col.g = min(col.g, 1.0f);
-	col.b = min(col.b, 1.0f);
+    // Scale by value
+    col.r *= v;
+    col.g *= v;
+    col.b *= v;
 
-	return col;
+    // Adjust saturation
+    col = desaturate(col, 1.0f - sqrtf(s));
+
+    // Clamp colors to max value
+    col.r = fminf(col.r, 1.0f);
+    col.g = fminf(col.g, 1.0f);
+    col.b = fminf(col.b, 1.0f);
+
+    return col;
 }
 
 void apply_incandescent_filter(float mix) {
@@ -455,15 +473,35 @@ void apply_brightness() {
 
 void apply_base_coat(){
 	if(configuration.base_coat > 0.01){
-		float base_coat_level = configuration.base_coat * 0.10; // Max 10% brightness
+		float base_coat_level = configuration.base_coat * 0.20; // Max 20% brightness
 
-		float base_coat_inv = (1.0-base_coat_level);
-		for(uint16_t i = 0; i < NUM_LEDS; i++){
-			float progress = float(i) / NUM_LEDS;
-			CRGBF base_coat_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, base_coat_level*base_coat_level);
-			leds[i].r = leds[i].r * base_coat_inv + base_coat_color.r;
-			leds[i].g = leds[i].g * base_coat_inv + base_coat_color.g;
-			leds[i].b = leds[i].b * base_coat_inv + base_coat_color.b;
+		if(configuration.mirror_mode == false){
+			float base_coat_inv = (1.0-base_coat_level);
+			for(uint16_t i = 0; i < NUM_LEDS; i++){
+				float progress = float(i) / NUM_LEDS;
+				CRGBF base_coat_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, base_coat_level*base_coat_level);
+				leds[i].r = leds[i].r * base_coat_inv + base_coat_color.r;
+				leds[i].g = leds[i].g * base_coat_inv + base_coat_color.g;
+				leds[i].b = leds[i].b * base_coat_inv + base_coat_color.b;
+			}
+		}
+		else{
+			float base_coat_inv = (1.0-base_coat_level);
+			for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
+				float progress = float(i) / (NUM_LEDS>>1);
+				CRGBF base_coat_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, base_coat_level*base_coat_level);
+				
+				int16_t left_index = 63-i;
+				int16_t right_index = 64+i;
+
+				leds[left_index].r = leds[left_index].r * base_coat_inv + base_coat_color.r;
+				leds[left_index].g = leds[left_index].g * base_coat_inv + base_coat_color.g;
+				leds[left_index].b = leds[left_index].b * base_coat_inv + base_coat_color.b;
+
+				leds[right_index].r = leds[right_index].r * base_coat_inv + base_coat_color.r;
+				leds[right_index].g = leds[right_index].g * base_coat_inv + base_coat_color.g;
+				leds[right_index].b = leds[right_index].b * base_coat_inv + base_coat_color.b;
+			}
 		}
 	}
 }

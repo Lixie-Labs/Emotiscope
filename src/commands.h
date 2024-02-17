@@ -103,7 +103,6 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			update_ui(configuration.hue, UI_HUE_EVENT); // TODO: Color-related changes shouldn't show a UI dot
 		}
-		
 		else if (fastcmp(substring, "mirror_mode")) {
 			// Get mirror_mode value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
@@ -150,6 +149,12 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			update_ui(configuration.bass, UI_NEEDLE_EVENT);
 		}
+		else if (fastcmp(substring, "screensaver")) {
+			// Get screensaver value
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			bool setting_value = (bool)atoi(substring);
+			configuration.screensaver = setting_value;
+		}
 
 		else if (fastcmp(substring, "mode")) {
 			// Get mode name
@@ -170,7 +175,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 
 		// Open a save request for later
-		save_config_delayed(t_now_ms);
+		save_config_delayed();
 	}
 	else if (fastcmp(substring, "get")) {
 		// Name of thing to get
@@ -181,6 +186,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			// Wake on command
 			EMOTISCOPE_ACTIVE = true;
 			sync_configuration_to_client();
+			load_menu_toggles();
 		}
 
 		// If getting mode list
@@ -220,6 +226,19 @@ void parse_command(uint32_t t_now_ms, command com) {
 			}
 
 			transmit_to_client_in_slot("toggles_ready", com.origin_client_slot);
+		}
+
+		// If getting menu toggle list
+		else if (fastcmp(substring, "menu_toggles")) {
+			transmit_to_client_in_slot("clear_menu_toggles", com.origin_client_slot);
+
+			for(uint16_t i = 0; i < menu_toggles_active; i++){
+				char command_string[80];
+				snprintf(command_string, 80, "new_menu_toggle|%s", menu_toggles[i].name);
+				transmit_to_client_in_slot(command_string, com.origin_client_slot);
+			}
+
+			transmit_to_client_in_slot("menu_toggles_ready", com.origin_client_slot);
 		}
 
 		// Couldn't figure out what to "get"
@@ -264,7 +283,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 	// printf("current brightness value: %.3f\n", configuration.brightness);
 }
 
-void process_command_queue(uint32_t t_now_ms) {
+void process_command_queue() {
 	if (commands_queued > 0) {
 		parse_command(t_now_ms, command_queue[0]);
 		shift_command_queue_left();

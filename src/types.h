@@ -44,6 +44,10 @@ struct toggle {
 	char name[32];
 };
 
+struct menu_toggle {
+	char name[32];
+};
+
 struct profiler_function {
 	char name[32];
 	uint32_t cycles_total;
@@ -82,6 +86,7 @@ struct config {
 	float saturation;
 	float base_coat;
 	float bass;
+	bool screensaver;
 };
 
 struct CRGB8 {

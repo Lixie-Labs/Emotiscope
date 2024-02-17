@@ -2,6 +2,7 @@ let configuration = {};
 let modes = [];
 let sliders = [];
 let toggles = [];
+let menu_toggles = [];
 
 let magnetic_snapping_enabled = true;
 
@@ -9,6 +10,21 @@ let magnetic_snapping_enabled = true;
 //   For example, the "hue" slider should fade to the currently selected color when dragged,
 //   and the "hue range" slider should show a relevant gradient based on the position of
 //   the "hue" slider.
+
+function title_case(input_string) {
+    // Replace all underscores with spaces
+    let replaced_string = input_string.replace(/_/g, ' ');
+
+    // Split the string into words and capitalize the first letter of each word
+    let title_cased_array = replaced_string.split(' ').map(word => {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+
+    // Join the words back into a string
+    let title_cased_string = title_cased_array.join(' ');
+
+    return title_cased_string;
+}
 
 function trigger_vibration(length_ms) {
 	console.log("~~~~~~~~~~~~~buzz~~~~~~~~~~~~~");
@@ -67,6 +83,32 @@ function render_toggles(){
 		out_html +=		`<div class="toggle_track" id="${toggle_name}"></div>`;
 		out_html +=		`<div class="toggle_handle" id="${toggle_name}_handle"></div>`;
 		out_html += `</span>`;
+	}
+	toggle_container.innerHTML += out_html;
+}
+
+function render_menu_toggles(){
+	let toggle_container = document.getElementById("menu_toggles");
+	toggle_container.innerHTML = "";
+	let out_html = "";
+	for(let i in menu_toggles){
+		let toggle_name = menu_toggles[i].name;
+		let toggle_value = configuration[toggle_name];
+		
+		if(toggle_value == true){
+			out_html += `<div class="menu_item buzz" onclick="set_menu_toggle_state('${toggle_name}', false);">`;
+			out_html += `	<span class="menu_item_label">${title_case(toggle_name)}</span>`;
+			out_html += `	<span class="menu_item_content menu_item_toggle_on" id="${toggle_name}">ON</span>`;
+			out_html += `</div>`;
+		}
+		else if(toggle_value == false){
+			out_html += `<div class="menu_item buzz" onclick="set_menu_toggle_state('${toggle_name}', true);">`;
+			out_html += `	<span class="menu_item_label">${title_case(toggle_name)}</span>`;
+			out_html += `	<span class="menu_item_content menu_item_toggle_off" id="${toggle_name}">OFF</span>`;
+			out_html += `</div>`;
+		}
+
+		configuration[toggle_name] = !configuration[toggle_name];
 	}
 	toggle_container.innerHTML += out_html;
 }
@@ -208,9 +250,11 @@ function render_controls(){
 
 	render_sliders();
 	render_toggles();
+	render_menu_toggles();
 
 	set_sliders();
 	set_toggles();
+	set_menu_toggles();
 
 	track_sliders();
 	track_toggles();

@@ -27,10 +27,10 @@ lightshow_mode lightshow_modes[] = {
 	{ "Clap",            &draw_clap          }, // 1
 	{ "Spectrum + Clap", &draw_spectrum_clap }, // 2
 	{ "Hype",            &draw_hype          }, // 3
-	{ "Plot",            &draw_plot          }, // 4
+	//{ "Plot",            &draw_plot          }, // 4
 	{ "Bloom",           &draw_bloom         }, // 5
 	{ "Analog",          &draw_analog        }, // 6
-	{ "Waveform",        &draw_waveform      }, // 7
+	//{ "Waveform",        &draw_waveform      }, // 7
 
 	//{ "Debug",           &draw_debug         },
 };
@@ -65,7 +65,7 @@ void increment_mode(){
 	int16_t new_mode = configuration.current_mode + 1;
 	configuration.current_mode = new_mode % NUM_LIGHTSHOW_MODES;
 	lpf_drag = 1.0; // Causes slow fade using low pass filtered image
-	save_config_delayed(millis());
+	save_config_delayed();
 }
 
 

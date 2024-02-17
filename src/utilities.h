@@ -189,3 +189,16 @@ void low_pass_filter(float* input_array, uint16_t num_samples, uint16_t sample_r
         }
     }
 }
+
+float fixed_interpolate(uint8_t value_a, uint8_t value_b, uint8_t factor) {
+    // Precompute the inverse factor to save one subtraction operation later
+    uint8_t inverse_factor = 255 - factor; // Use 255 to represent 1.0 in fixed-point for factor
+
+    // Compute the weighted sum using only integer operations
+    // The use of uint16_t for intermediate results ensures no overflow for 255*255
+    uint16_t weighted_sum = value_a * inverse_factor + value_b * factor;
+
+    // Convert to float and scale back by dividing by 255*255, which is the maximum possible value
+    // Since we're dividing by a constant, this can be optimized by the compiler
+    return weighted_sum / 65025.0f; // 255*255 = 65025
+}

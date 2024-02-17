@@ -17,17 +17,19 @@ float ui_needle_position = 0.0;
 
 void draw_ui_overlay(){
 	// -----------------------------
-	// Background
+	// Blur background
 	apply_box_blur(leds, (NUM_LEDS>>1)*overlay_size, 13);
-
-	draw_line(leds, 0, 0.5*overlay_size, {0.0,0.0,0.0}, 0.85*overlay_size);
 
 	// -----------------------------
 	// UI
 	
 	if(last_update_type == UI_NEEDLE_EVENT){
+		CRGBF back_color = hsv(0.850, 1.0, 0.05);
+		draw_line(leds, 0, ui_needle_position*0.5*overlay_size, back_color, 0.95*overlay_size);
+	
+		CRGBF dot_color = hsv(0.814, 1.0, 1.0);
 		for(uint16_t i = 0; i < 5; i++){
-			draw_dot(leds, UI_1+i, {0.1,0.00,0.00}, 0 + ((0.5/4.0)*i)*overlay_size, overlay_size);
+			draw_dot(leds, UI_1+i, dot_color, 0 + ((0.5/4.0)*i)*overlay_size, overlay_size*0.15);
 		}
 		
 		CRGBF gamma_corrected = {

@@ -177,6 +177,20 @@ void print_system_info() {
 		extern volatile bool web_server_ready;
 		extern PsychicWebSocketClient *get_client_in_slot(uint8_t slot);
 
+		char stat_buffer[64] = { 0 };
+		
+		memset(stat_buffer, 0, 64);
+		snprintf(stat_buffer, 64, "fps_cpu|%li", int16_t(FPS_CPU));
+		broadcast(stat_buffer);
+
+		memset(stat_buffer, 0, 64);
+		snprintf(stat_buffer, 64, "fps_gpu|%li", int16_t(FPS_GPU));
+		broadcast(stat_buffer);
+
+		memset(stat_buffer, 0, 64);
+		snprintf(stat_buffer, 64, "heap|%lu", (uint32_t)free_heap);
+		broadcast(stat_buffer);
+
 		printf("# SYSTEM INFO ####################\n");
 		printf("CPU CORE USAGE --- %.2f%%\n", CPU_CORE_USAGE*100);
 		printf("CPU FPS ---------- %.3f\n", FPS_CPU);
