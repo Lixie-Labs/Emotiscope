@@ -191,6 +191,7 @@ void print_system_info() {
 		snprintf(stat_buffer, 64, "heap|%lu", (uint32_t)free_heap);
 		broadcast(stat_buffer);
 
+		/*
 		printf("# SYSTEM INFO ####################\n");
 		printf("CPU CORE USAGE --- %.2f%%\n", CPU_CORE_USAGE*100);
 		printf("CPU FPS ---------- %.3f\n", FPS_CPU);
@@ -214,5 +215,6 @@ void print_system_info() {
 
 		//print_profiled_function_hits();	
 		printf("##################################\n\n");
+		*/
 	}
 }

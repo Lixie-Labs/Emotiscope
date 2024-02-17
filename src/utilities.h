@@ -16,7 +16,7 @@
 void broadcast(char* message){
 	extern PsychicWebSocketHandler websocket_handler;
 	websocket_handler.sendAll(message);
-	printf("%s\n", message);
+	//printf("%s\n", message);
 }
 
 float linear_to_tri(float input) {

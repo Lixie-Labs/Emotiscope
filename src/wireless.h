@@ -122,14 +122,14 @@ bool welcome_websocket_client(PsychicWebSocketClient client) {
 			client.socket(),  // int socket;
 			t_now_ms,		  // uint32_t last_ping;
 		};
-		printf("WEBSOCKET CLIENT IS WELCOME INTO OPEN SLOT #%i\n", first_open_slot);
+		printf("PLAYER WELCOMED INTO OPEN SLOT #%i\n", first_open_slot);
 	}
 
 	return client_welcome_status;
 }
 
 void websocket_client_left(uint16_t client_index) {
-	printf("WEBSOCKET CLIENT #%i LEFT\n", client_index);
+	printf("PLAYER #%i LEFT\n", client_index);
 	PsychicWebSocketClient *client = get_client_in_slot(client_index);
 	if (client != NULL) {
 		client->close();
@@ -181,6 +181,13 @@ void init_web_server() {
 
 	server.on("/ws", &websocket_handler);
 
+	server.on("/audio", [](PsychicRequest *request) {
+		String filename = "/audio.bin";
+		PsychicFileResponse response(request, LittleFS, filename);
+
+		return response.send();
+	});
+
 	server.on("/*", HTTP_GET, [](PsychicRequest *request) {
 		esp_err_t result = ESP_OK;
 		String path = "";
@@ -205,13 +212,6 @@ void init_web_server() {
 		return result;
 	});
 
-	server.on("/audio", [](PsychicRequest *request) {
-		String filename = "/audio.bin";
-		PsychicFileResponse response(request, LittleFS, filename);
-
-		return response.send();
-	});
-
 	const char *local_hostname = "emotiscope";
 	if (!MDNS.begin(local_hostname)) {
 		Serial.println("Error starting mDNS");
@@ -226,7 +226,7 @@ void init_web_server() {
 		}
 		else {
 			// Room is full, client not welcome
-			printf("WEBSOCKET CLIENT WAS DENIED ENTRY (ROOM FULL)\n");
+			printf("PLAYER WAS DENIED ENTRY (ROOM FULL)\n");
 			client->close();
 		}
 	});

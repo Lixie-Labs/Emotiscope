@@ -488,6 +488,12 @@ button{
     align-items: center;
 }
 
+.bloom_effect {
+	border-radius: 10px; /* Softens the edges of the div */
+	box-shadow: 0 0 8px rgba(255, 192, 203, 0.6); /* Creates a soft, glowing halo */
+	filter: blur(4px); /* Diffuses the glow for a bloom effect */
+  }
+
 
 
 
