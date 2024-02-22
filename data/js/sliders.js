@@ -44,6 +44,9 @@ function track_sliders() {
 		temporary_configuration = JSON.parse(JSON.stringify(configuration));
 
         Array.from(event.touches).forEach(touch => {
+			let id = touch.target.closest('.slider_track').getAttribute('id');
+			transmit(`slider_touch_start|${id}`);
+
             // Store initial touch positions
             touch_start_data.set(touch.identifier, {
                 start_x: touch.clientX,
@@ -108,9 +111,14 @@ function track_sliders() {
     }
 
     function stop_tracking(event) {
-		console.log(configuration);
-
         Array.from(event.changedTouches).forEach(touch => {
+			console.log(touch);
+			
+			if(touch.target.classList.contains("slider_track")){
+				let id = touch.target.getAttribute('id');
+				transmit(`slider_touch_end|${id}`);
+			}
+
             touch_start_data.delete(touch.identifier);
         });
     }

@@ -49,3 +49,5 @@ function setup_landscape_listener() {
 
 // Initialize the listener on page load
 window.addEventListener('DOMContentLoaded', setup_landscape_listener);
+
+

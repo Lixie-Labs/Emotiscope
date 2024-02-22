@@ -7,6 +7,7 @@ PsychicWebSocketHandler websocket_handler;
 websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
 
 volatile bool web_server_ready = false;
+int16_t connection_status = -1;
 
 // TODO: Add runtime WiFi credential input method
 
@@ -263,7 +264,7 @@ void handle_wifi() {
 	static uint32_t last_reconnect_attempt = 0;
 	const uint32_t reconnect_interval_ms = 5000;
 
-	int16_t connection_status = WiFi.status();
+	connection_status = WiFi.status();
 
 	// WiFi status has changed
 	if (connection_status != connection_status_last) {

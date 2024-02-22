@@ -77,7 +77,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = clip_float(atof(substring));
 			configuration.brightness = setting_value;
 
-			update_ui(configuration.brightness, UI_NEEDLE_EVENT);
+			update_ui(UI_NEEDLE_EVENT, configuration.brightness);
 		}
 		else if (fastcmp(substring, "melt")) {
 			// Get speed value
@@ -85,7 +85,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.melt = setting_value;
 
-			update_ui(configuration.melt, UI_NEEDLE_EVENT);
+			update_ui(UI_NEEDLE_EVENT, configuration.melt);
 		}
 		else if (fastcmp(substring, "speed")) {
 			// Get speed value
@@ -93,7 +93,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.speed = setting_value;
 
-			update_ui(configuration.speed, UI_NEEDLE_EVENT);
+			update_ui(UI_NEEDLE_EVENT, configuration.speed);
 		}
 		else if (fastcmp(substring, "hue")) {
 			// Get brightness value
@@ -101,7 +101,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = clip_float(atof(substring));
 			configuration.hue = setting_value;
 
-			update_ui(configuration.hue, UI_HUE_EVENT); // TODO: Color-related changes shouldn't show a UI dot
+			update_ui(UI_HUE_EVENT, configuration.hue); // TODO: Color-related changes shouldn't show a UI dot but a gradient representing the hue and hue_range values
 		}
 		else if (fastcmp(substring, "mirror_mode")) {
 			// Get mirror_mode value
@@ -115,7 +115,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.incandescent_filter = setting_value;
 
-			update_ui(configuration.incandescent_filter, UI_NEEDLE_EVENT);
+			update_ui(UI_NEEDLE_EVENT, configuration.incandescent_filter);
 		}
 		else if (fastcmp(substring, "hue_range")) {
 			// Get hue_range value
@@ -123,7 +123,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.hue_range = setting_value;
 
-			update_ui( configuration.hue, UI_HUE_EVENT);
+			update_ui(UI_HUE_EVENT, configuration.hue);
 		}
 		else if (fastcmp(substring, "saturation")) {
 			// Get saturation value
@@ -131,7 +131,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.saturation = setting_value;
 
-			update_ui(configuration.saturation, UI_NEEDLE_EVENT);
+			update_ui(UI_NEEDLE_EVENT, configuration.saturation);
 		}
 		else if (fastcmp(substring, "base_coat")) {
 			// Get base_coat value
@@ -139,7 +139,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.base_coat = setting_value;
 
-			update_ui(configuration.base_coat, UI_NEEDLE_EVENT);
+			update_ui(UI_NEEDLE_EVENT, configuration.base_coat);
 		}
 		else if (fastcmp(substring, "bass")) {
 			// Get bass value
@@ -147,7 +147,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.bass = setting_value;
 
-			update_ui(configuration.bass, UI_NEEDLE_EVENT);
+			update_ui(UI_NEEDLE_EVENT, configuration.bass);
 		}
 		else if (fastcmp(substring, "screensaver")) {
 			// Get screensaver value
@@ -270,6 +270,21 @@ void parse_command(uint32_t t_now_ms, command com) {
 	}
 	else if (fastcmp(substring, "ping")) {
 		transmit_to_client_in_slot("pong", com.origin_client_slot);
+	}
+	else if (fastcmp(substring, "touch_start")) {
+		printf("APP TOUCH START\n");
+		app_touch_active = true;
+	}
+	else if (fastcmp(substring, "touch_end")) {
+		printf("APP TOUCH END\n");
+		app_touch_active = false;
+	}
+	else if (fastcmp(substring, "slider_touch_start")) {
+		slider_touch_active = true;
+		update_ui(UI_SHOW_EVENT);
+	}
+	else if (fastcmp(substring, "slider_touch_end")) {
+		slider_touch_active = false;
 	}
 	else if (fastcmp(substring, "start_debug_recording")) {
 		audio_recording_index = 0;

@@ -37,6 +37,7 @@ void init_system() {
 	extern void init_wifi();
 	extern void init_filesystem();
 	extern void init_rmt_driver();
+	extern void init_indicator_light();
 
 	init_serial(2000000);					  // (system.h)
 	init_filesystem();                        // (filesystem.h)
@@ -45,9 +46,13 @@ void init_system() {
 	init_window_lookup();					  // (goertzel.h)
 	init_goertzel_constants_musical();		  // (goertzel.h)
 	init_tempo_goertzel_constants();		  // (tempo.h)	
+	init_indicator_light();                   // (indicator.h)
 	init_rmt_driver();                        // (led_driver.h)
 	init_wifi();                              // (wireless.h)
 
+	// Load sliders 
 	load_sliders_relevant_to_mode(configuration.current_mode);
+
+	// Load toggles
 	load_toggles_relevant_to_mode(configuration.current_mode);
 }

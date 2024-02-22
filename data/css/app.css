@@ -49,6 +49,7 @@ body{
     transition: opacity 0.15s ease-in-out;
 	background-color: rgba(var(--background), 0.75);
     backdrop-filter: blur(12px);
+	z-index: 999 !important;
 }
 
 #page_info{

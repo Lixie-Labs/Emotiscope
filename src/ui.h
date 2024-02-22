@@ -1,6 +1,7 @@
 #define UI_HOLD_TIME_MS 1000
 
 typedef enum {
+	UI_SHOW_EVENT,
     UI_NEEDLE_EVENT,
     UI_HUE_EVENT,
 } ui_update_event;
@@ -20,12 +21,12 @@ void draw_ui_overlay(){
 	// Blur background
 	apply_box_blur(leds, (NUM_LEDS>>1)*overlay_size, 13);
 
+	// -----------------------------
 	// Darken background
 	draw_line(leds, 0, 0.5*overlay_size, {0,0,0}, 0.9*overlay_size);
 
 	// -----------------------------
-	// UI
-	
+	// Draw UI
 	if(last_update_type == UI_NEEDLE_EVENT){
 		CRGBF back_color = hsv(0.850, 1.0, 0.05);
 		draw_line(leds, 0, ui_needle_position*0.5*overlay_size, back_color, 0.98*overlay_size);
@@ -45,10 +46,12 @@ void draw_ui_overlay(){
 	}
 
 	// -----------------------------
-	// Scaling / time
+	// Handle scaling / time
 
 	if(t_now_ms - last_ui_update_ms >= UI_HOLD_TIME_MS){
-		overlay_size_target = 0.0;
+		if(slider_touch_active == false){
+			overlay_size_target = 0.0;
+		}
 	}
 
 	overlay_size = overlay_size_target * 0.05 + overlay_size * 0.95;
@@ -56,7 +59,7 @@ void draw_ui_overlay(){
 	ui_needle_position = ui_needle_position*0.75 + ui_needle_position_raw *0.25;
 }
 
-void update_ui(float new_value, ui_update_event update_type){
+void update_ui(ui_update_event update_type, float new_value = 0.0){
 	last_ui_update_ms = t_now_ms;
 	last_update_type = update_type;
 

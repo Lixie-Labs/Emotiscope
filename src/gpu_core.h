@@ -58,6 +58,8 @@ void run_gpu() {
 
 	apply_brightness();
 
+	run_indicator_light();
+
 	if( EMOTISCOPE_ACTIVE == false ){
 		run_standby();
 	}

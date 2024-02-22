@@ -6,6 +6,9 @@
 
 #define TOUCH_HOLD_MS 500
 
+volatile bool app_touch_active = false;
+volatile bool slider_touch_active = false;
+
 uint32_t touch_start = 0;
 uint32_t touch_end   = 0;
 
