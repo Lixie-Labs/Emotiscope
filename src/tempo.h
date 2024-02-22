@@ -32,6 +32,8 @@ float tempi_bpm_values_hz[NUM_TEMPI];
 float novelty_curve[NOVELTY_HISTORY_LENGTH];
 float novelty_curve_normalized[NOVELTY_HISTORY_LENGTH];
 
+float vu_curve[NOVELTY_HISTORY_LENGTH];
+
 tempo tempi[NUM_TEMPI];
 float tempi_smooth[NUM_TEMPI];
 float tempi_power_sum = 0.0;
@@ -144,9 +146,11 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 
 		for (uint16_t i = 0; i < block_size; i++) {
 			float progress = float(i) / block_size;
-			float sample = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];  // * (progress*progress);
+			float sample_novelty = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
+			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
+			float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + sample;
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + sample_novelty;
 			q2 = q1;
 			q1 = q0;
 
@@ -287,11 +291,17 @@ void log_novelty(float input) {
 	novelty_curve[NOVELTY_HISTORY_LENGTH - 1] = input;
 }
 
+void log_vu(float input) {
+	shift_array_left(vu_curve, NOVELTY_HISTORY_LENGTH, 1);
+	vu_curve[NOVELTY_HISTORY_LENGTH - 1] = input;
+}
+
 void reduce_tempo_history(float reduction_amount) {
 	float reduction_amount_inv = 1.0 - reduction_amount;
 
 	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i++) {
 		novelty_curve[i] = max(novelty_curve[i] * reduction_amount_inv, 0.00001f);	// never go full zero
+		vu_curve[i]      = max(     vu_curve[i] * reduction_amount_inv, 0.00001f);
 	}
 }
 
@@ -345,7 +355,9 @@ void update_novelty() {
 		current_novelty /= float(NUM_FREQS);
 
 		check_silence(current_novelty);
+
 		log_novelty(current_novelty);
+		log_vu(vu_level);
 	}
 }
 

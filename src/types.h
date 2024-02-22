@@ -74,23 +74,52 @@ struct websocket_client {
 	uint32_t last_ping;
 };
 
+struct CRGB8 {
+	uint8_t g;
+	uint8_t r;
+	uint8_t b;
+};
+
+// CONFIGURATION STRUCTS OVER TIME: ---------------------------------------------------------------------------
+
+// Current type: (the CONFIGURATION_TYPE number in configuration.h)
 struct config {
+	int32_t type; // Indirectly decribes the current datatypes of this struct (and their order in physical memory) to a parser
+
 	float brightness;
 	float melt; 
 	float hue;
-	int32_t current_mode;
-	bool mirror_mode;
 	float incandescent_filter;
 	float hue_range;
 	float speed;
 	float saturation;
 	float base_coat;
 	float bass;
+	int32_t current_mode;
+	bool mirror_mode;
 	bool screensaver;
 };
 
-struct CRGB8 {
-	uint8_t g;
-	uint8_t r;
-	uint8_t b;
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// PAST VERSIONS BELOW, DON'T USE THESE: ----------------------------------------------------------------------------------------
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
+// Configuration Type 1: Firmware 1.0.0
+struct config_type_1 {
+	int32_t type; // Indirectly decribes the current datatypes of this struct (and their order in physical memory) to a parser
+
+	float brightness;
+	float melt; 
+	float hue;
+	float incandescent_filter;
+	float hue_range;
+	float speed;
+	float saturation;
+	float base_coat;
+	float bass;
+	int32_t current_mode;
+	bool mirror_mode;
+	bool screensaver;
 };

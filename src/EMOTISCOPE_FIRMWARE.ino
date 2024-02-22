@@ -6,7 +6,7 @@
 //          /  __/ / / / / / /_/ / /_/ (__  ) /__/ /_/ / /_/ /  __/
 //          \___/_/ /_/ /_/\____/\__/_/____/\___/\____/ .___/\___/
 //              Audio-visual engine by @lixielabs    /_/
-//                 Released under the MIT Licence
+//              Released under the GPLv3 Licence
 //
 // ############################################################################
 // ## VERSION #################################################################
@@ -71,14 +71,14 @@
 
 // One core to run audio and web server ---------------------------------------
 void loop() {
-	run_cpu();	// (cpu_core.h)
-	run_web();	// (web_core.h)	
+	run_cpu(); // (cpu_core.h)
+	run_web(); // (web_core.h)	
 }
 
 // One core to run graphics ---------------------------------------------------
 void loop_gpu(void *param) {
 	for (;;) {
-		run_gpu();  // (gpu_core.h)
+		run_gpu(); // (gpu_core.h)
 	}
 }
 

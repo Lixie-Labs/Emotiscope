@@ -3,7 +3,7 @@
 #include <esp_check.h>
 #include <esp_log.h>
 
-// It won't void any kind of stupid warranty, but things might still break at this point if your change this
+// It won't void any kind of stupid warranty, but things will *definitely* break at this point if you change this number.
 #define NUM_LEDS ( 128 )
 
 // 32-bit color input
@@ -131,7 +131,8 @@ void init_rmt_driver() {
 		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.intr_priority = 99,
-		.flags = { .with_dma = 0 }
+		.flags = { .with_dma = 0 },
+		//.flags = { .invert_out = 1, .with_dma = 0 }, // For level shifter
 	};
 
 	rmt_tx_channel_config_t tx_chan_b_config = {
@@ -141,7 +142,8 @@ void init_rmt_driver() {
 		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.intr_priority = 99,
-		.flags = { .with_dma = 0 }
+		.flags = { .with_dma = 0 },
+		//.flags = { .invert_out = 1, .with_dma = 0 },
 	};
 
 	printf("rmt_new_tx_channel\n");

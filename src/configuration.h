@@ -1,3 +1,15 @@
+// TODO: Implement configuration.bin update protection
+//
+// Used to safeguard future firmware updates against reading the wrong pointers
+// after changing the order/length of the config struct between firmware updates.
+//
+// The first official firmware update can have a second depricated typedef called "configuration_type_1"
+// which matches the layout of past config structs over time.
+// When the configuration.bin file's version number doesn't match on boot, the values in it can be
+// ported to the new config struct on boot. The next following save changes the
+// version in flash, making this a one-time conversion.
+#define CONFIGURATION_TYPE ( 1 )
+
 #define CONFIG_FILENAME "/configuration.bin"
 #define NOISE_SPECTRUM_FILENAME "/noise_spectrum.bin"
 #define AUDIO_DEBUG_RECORDING_FILENAME "/audio.bin"
@@ -9,17 +21,19 @@ extern lightshow_mode lightshow_modes[];
 extern PsychicWebSocketHandler websocket_handler;
 
 config configuration = {
+	CONFIGURATION_TYPE,
+
 	1.00, // brightness
 	0.50, // melt
 	0.00, // hue
-	0,    // current_mode
-	true, // mirror_mode
 	1.00, // incandescent_filter
 	0.00, // hue_range
 	1.00, // speed
 	1.00, // saturation
 	0.00, // base_coat
 	0.00, // bass
+	0,    // current_mode
+	true, // mirror_mode
 	true, // screensaver
 };
 
@@ -33,6 +47,12 @@ volatile uint32_t last_save_request_ms = 0;
 volatile bool save_request_open = false;
 
 volatile bool filesystem_ready = true;
+
+void update_configuration_version(int32_t current_type){
+	if(current_type == 1){
+
+	}
+}
 
 void sync_configuration_to_client() {
 	char config_item_buffer[120];

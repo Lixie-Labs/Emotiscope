@@ -3,7 +3,7 @@ float vu_level_smooth = 0.000001;
 void draw_analog(){
 	float mix_speed = 0.005 + 0.145*configuration.speed;
 
-	vu_level_smooth = vu_level * mix_speed + vu_level_smooth*(1.0-mix_speed);
+	vu_level_smooth = (vu_level) * mix_speed + vu_level_smooth*(1.0-mix_speed);
 	float dot_pos = clip_float(vu_level_smooth);
 	CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*dot_pos, configuration.saturation, 1.0);
 

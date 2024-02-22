@@ -1,6 +1,6 @@
 #include <LittleFS.h>
 
-#define FORMAT_LITTLEFS_IF_FAILED false
+#define FORMAT_LITTLEFS_IF_FAILED true
 
 void init_filesystem() {
 	if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
