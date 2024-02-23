@@ -12,8 +12,8 @@
 
 // The individual drawing functions for each mode are defined in these files:
 #include "lightshow_modes/spectrum.h"
-#include "lightshow_modes/clap.h"
-#include "lightshow_modes/spectrum_clap.h"
+#include "lightshow_modes/metronome.h"
+#include "lightshow_modes/spectrum_beat.h"
 #include "lightshow_modes/hype.h"
 #include "lightshow_modes/plot.h"
 #include "lightshow_modes/bloom.h"
@@ -23,14 +23,12 @@
 #include "lightshow_modes/debug.h"
 
 lightshow_mode lightshow_modes[] = {
-	{ "Spectrum",        &draw_spectrum      }, // 0
-	{ "Clap",            &draw_clap          }, // 1
-	{ "Spectrum + Clap", &draw_spectrum_clap }, // 2
-	{ "Hype",            &draw_hype          }, // 3
-	//{ "Plot",            &draw_plot          }, // 4
+	{ "Analog",          &draw_analog        }, // 0
+	{ "Spectrum",        &draw_spectrum      }, // 1
+	{ "Metronome",       &draw_metronome     }, // 2
+	{ "Spectrum + Beat", &draw_spectrum_beat }, // 3
+	{ "Hype",            &draw_hype          }, // 4
 	{ "Bloom",           &draw_bloom         }, // 5
-	{ "Analog",          &draw_analog        }, // 6
-	//{ "Waveform",        &draw_waveform      }, // 7
 
 	//{ "Debug",           &draw_debug         },
 };

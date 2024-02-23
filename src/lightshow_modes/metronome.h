@@ -1,4 +1,38 @@
-void draw_clap() {
+// Function to shape a linear input to a positive half sine wave
+float linear_to_half_sine(float x) {
+    // Ensure the input is clamped between 0.0 and 1.0
+    if (x < 0.0) x = 0.0;
+    if (x > 1.0) x = 1.0;
+
+    // Scale the input from [0, 1] to [0, PI] for a half sine wave
+    float scaled_input = x * M_PI;
+
+    // Compute the sine, which will be in the range [-1, 1]
+    // No need to adjust the output range because we're only interested in the positive half
+    float half_sine_output = sin(scaled_input);
+
+    return half_sine_output;
+}
+
+float linear_to_half_sine_hold(float x) {
+    // Return 0.0 for inputs outside the range [0.25, 0.75]
+    if (x < 0.25 || x > 0.75) {
+        return 0.0;
+    }
+
+    // Normalize the input from [0.25, 0.75] to [0, 1] for sine computation
+    float normalized_input = (x - 0.25) / 0.5;
+
+    // Scale the normalized input from [0, 1] to [0, PI] for a half sine wave
+    float scaled_input = normalized_input * M_PI;
+
+    // Compute the sine for the scaled input
+    float half_sine_output = sin(scaled_input);
+
+    return half_sine_output;
+}
+
+void draw_metronome() {
 	static uint32_t iter = 0;
 	iter++;
 
@@ -48,7 +82,21 @@ void draw_clap() {
 
 		float contribution = (tempi_magnitude / tempi_power_sum) * tempi_magnitude;
 
-		float dot_pos = clip_float(sqrt((tempi[tempo_bin].beat * 0.5 + 0.5)) * sqrt(contribution));
+		/*
+		float phase = (tempi[tempo_bin].phase + M_PI) / (2.0 * M_PI);
+
+		phase = fmod(phase+0.75, 1.0);
+
+		phase = linear_to_half_sine_hold(phase);
+		*/
+
+		float sine = sin(tempi[tempo_bin].phase + (PI*0.5));
+		sine *= 2.0;
+
+		if(sine > 1.0){ sine = 1.0; }
+		else if(sine < -1.0){ sine = -1.0; }
+
+		float dot_pos = clip_float( sine * (0.5*(sqrt(contribution))) + 0.5 );
 		float opacity = sqrt(contribution);
 
 		if(opacity > 0.0025){
@@ -64,7 +112,7 @@ void draw_clap() {
 			// else {
 
 			if(configuration.mirror_mode == true){
-				dot_pos = dot_pos * 0.5 + 0.5;	// scale to half
+				dot_pos *= 0.5;
 			}
 
 			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity);

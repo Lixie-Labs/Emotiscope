@@ -15,10 +15,10 @@
 #define NOVELTY_HISTORY_LENGTH (1024)  // 50 FPS for 20.48 seconds
 #define NOVELTY_LOG_HZ (50)
 
-#define TEMPO_LOW (64)
-#define TEMPO_HIGH (192)
+#define TEMPO_LOW (64-32)
+#define TEMPO_HIGH (192-32)
 
-#define BEAT_SHIFT_PERCENT (-0.08)
+#define BEAT_SHIFT_PERCENT (0.00)
 
 #define NUM_TEMPI (64)
 
@@ -176,7 +176,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		normalized_magnitude = magnitude / (block_size / 2.0);
 
 		float progress = tempo_bin / float(NUM_TEMPI);
-		float scale = (0.75 * (1.0 - progress)) + 0.25;
+		float scale = (0.85 * (1.0 - progress)) + 0.15;
 
 		normalized_magnitude *= scale;
 	}, __func__ );
@@ -362,8 +362,10 @@ void update_novelty() {
 }
 
 void sync_beat_phase(uint16_t tempo_bin, float delta) {
-	tempi[tempo_bin].phase += (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
-	tempi[tempo_bin].phase_target += (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
+	float push = (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
+
+	tempi[tempo_bin].phase += push;
+	tempi[tempo_bin].phase_target += push;
 
 	if (tempi[tempo_bin].phase > PI) {
 		tempi[tempo_bin].phase -= (2 * PI);

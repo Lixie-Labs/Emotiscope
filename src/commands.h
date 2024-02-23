@@ -281,7 +281,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 	}
 	else if (fastcmp(substring, "slider_touch_start")) {
 		slider_touch_active = true;
-		update_ui(UI_SHOW_EVENT);
+		//update_ui(UI_SHOW_EVENT);
 	}
 	else if (fastcmp(substring, "slider_touch_end")) {
 		slider_touch_active = false;
