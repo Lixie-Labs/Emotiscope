@@ -65,7 +65,7 @@ void run_indicator_light(){
 		}
 	}
 
-	indicator_brightness = (indicator_brightness_target * 0.05) + indicator_brightness * 0.95;
+	indicator_brightness = (indicator_brightness_target * 0.1) + indicator_brightness * 0.9;
 
 	ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_MAX_DUTY * (indicator_brightness*indicator_brightness));
 	ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);

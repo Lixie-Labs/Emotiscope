@@ -175,8 +175,10 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float magnitude = sqrt(magnitude_squared);
 		normalized_magnitude = magnitude / (block_size / 2.0);
 
-		float progress = tempo_bin / float(NUM_TEMPI);
-		float scale = (0.85 * (1.0 - progress)) + 0.15;
+		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
+		progress *= progress;
+
+		float scale = (0.75 * progress) + 0.25;
 
 		normalized_magnitude *= scale;
 	}, __func__ );
