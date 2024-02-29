@@ -1,5 +1,6 @@
 volatile float vu_level_raw = 0.0;
 volatile float vu_level = 0.0;
+volatile float vu_max = 0.0;
 
 void run_vu(){
 	static float max_amplitude_cap = 0.0000001;
@@ -34,4 +35,6 @@ void run_vu(){
 
 	float mix_speed = 0.25;
 	vu_level = vu_level_raw * mix_speed + vu_level*(1.0-mix_speed);
+
+	vu_max = max(vu_max, vu_level);
 }

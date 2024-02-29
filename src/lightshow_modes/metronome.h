@@ -97,7 +97,7 @@ void draw_metronome() {
 		else if(sine < -1.0){ sine = -1.0; }
 
 		float dot_pos = clip_float( sine * (0.5*(sqrt(contribution))) + 0.5 );
-		float opacity = sqrt(contribution);
+		float opacity = sqrt(sqrt(contribution));
 
 		if(opacity > 0.0025){
 			CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*progress, configuration.saturation, 1.0);

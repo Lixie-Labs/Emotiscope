@@ -102,18 +102,26 @@ void init_goertzel_constants_musical() {
 }
 
 void init_window_lookup() {
-	for (uint16_t i = 0; i < 2048; i++) {
-		float ratio = i / 4095.0;
+    float sigma = 0.4;
 
-		// Hamming window
-		//float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
+    for (uint16_t i = 0; i < 2048; i++) {
+        float ratio = i / 2047.0;
 
-		// Blackman-Harris window
-		float weighing_factor = 0.3635819 - (0.4891775 * (cos(TWOPI * ratio))) + (0.1365995 * (cos(FOURPI * ratio))) - (0.0106411 * (cos(SIXPI * ratio)));
+        float n_minus_halfN = i - 2048 / 2;
+        float gaussian_weighing_factor = exp(-0.5 * pow((n_minus_halfN / (sigma * 2048 / 2)), 2));
 
-		window_lookup[i] = weighing_factor;
-		window_lookup[4095 - i] = weighing_factor;
-	}
+        // Hamming window
+        //float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
+
+        // Blackman-Harris window
+        //float weighing_factor = 0.3635819 - (0.4891775 * cos(TWOPI * ratio)) + (0.1365995 * cos(FOURPI * ratio)) - (0.0106411 * cos(SIXPI * ratio));
+
+        // Gaussian window
+        float weighing_factor = gaussian_weighing_factor;
+
+        window_lookup[i] = weighing_factor;
+        window_lookup[4095 - i] = weighing_factor; // Mirror the value for the second half
+    }
 }
 
 // Function to find the median in a small array of floats

@@ -15,8 +15,8 @@
 #define NOVELTY_HISTORY_LENGTH (1024)  // 50 FPS for 20.48 seconds
 #define NOVELTY_LOG_HZ (50)
 
-#define TEMPO_LOW (64-32)
-#define TEMPO_HIGH (192-32)
+#define TEMPO_LOW (64-16)
+#define TEMPO_HIGH (192-16)
 
 #define BEAT_SHIFT_PERCENT (0.08)
 
@@ -144,7 +144,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float q1 = 0;
 		float q2 = 0;
 
-		// float window_pos = 0.0;
+		float window_pos = 0.0;
 
 		for (uint16_t i = 0; i < block_size; i++) {
 			float progress = float(i) / block_size;
@@ -152,11 +152,11 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + sample_novelty;
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 
-			// window_pos += tempi[tempo_bin].window_step;
+			window_pos += tempi[tempo_bin].window_step;
 		}
 
 		float real = (q1 - q2 * tempi[tempo_bin].cosine);
@@ -180,7 +180,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
 		progress *= progress;
 
-		float scale = (0.75 * progress) + 0.25;
+		float scale = (0.5 * progress) + 0.5;
 
 		normalized_magnitude *= scale;
 	}, __func__ );
@@ -350,7 +350,7 @@ void update_novelty() {
 
 		float current_novelty = 0.0;
 		for (uint16_t i = 0; i < NUM_FREQS; i++) {
-			float new_mag = frequencies_musical[i].magnitude;	 // sqrt(sqrt(frequencies[i].magnitude));
+			float new_mag = spectrogram_smooth[i];	 // sqrt(sqrt(frequencies[i].magnitude));
 			frequencies_musical[i].novelty = max(0.0f, new_mag - frequencies_musical[i].magnitude_last);
 			frequencies_musical[i].magnitude_last = new_mag;
 
@@ -361,7 +361,9 @@ void update_novelty() {
 		check_silence(current_novelty);
 
 		log_novelty(current_novelty);
-		log_vu(vu_level);
+
+		log_vu(vu_max);
+		vu_max = 0.000001;
 	}
 }
 
