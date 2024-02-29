@@ -18,12 +18,14 @@
 #define TEMPO_LOW (64-32)
 #define TEMPO_HIGH (192-32)
 
-#define BEAT_SHIFT_PERCENT (0.00)
+#define BEAT_SHIFT_PERCENT (0.08)
 
 #define NUM_TEMPI (64)
 
 bool silence_detected = true;
 float silence_level = 1.0;
+
+float tempo_confidence = 0.0;
 
 float MAX_TEMPO_RANGE = 1.0;
 
@@ -96,7 +98,7 @@ void init_tempo_goertzel_constants() {
 			max_distance_hz = neighbor_right_distance_hz;
 		}
 
-		tempi[i].block_size = NOVELTY_LOG_HZ / (max_distance_hz);
+		tempi[i].block_size = NOVELTY_LOG_HZ / (max_distance_hz*0.5);
 
 		if (tempi[i].block_size > NOVELTY_HISTORY_LENGTH) {
 			tempi[i].block_size = NOVELTY_HISTORY_LENGTH;
@@ -262,7 +264,7 @@ void normalize_novelty_curve() {
 		}
 		max_val_smooth = max(0.1f, max_val_smooth * 0.99f + max_val * 0.01f);
 
-		float auto_scale = 1.0 / max_val_smooth;
+		float auto_scale = 1.0 / max_val;
 		dsps_mulc_f32(novelty_curve, novelty_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
 	}, __func__ );
 }
@@ -410,4 +412,13 @@ void update_tempi_phase(float delta) {
 
 		sync_beat_phase(tempo_bin, delta);
 	}
+
+	// Measure contribution factor of each tempi, calculate confidence level
+	float max_contribution = 0.000001;
+	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
+		float contribution = tempi_smooth[tempo_bin] / tempi_power_sum;
+		max_contribution = max(contribution, max_contribution);
+	}
+
+	tempo_confidence = max_contribution;
 }

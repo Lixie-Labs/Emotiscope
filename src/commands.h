@@ -133,13 +133,13 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			update_ui(UI_NEEDLE_EVENT, configuration.saturation);
 		}
-		else if (fastcmp(substring, "base_coat")) {
-			// Get base_coat value
+		else if (fastcmp(substring, "background")) {
+			// Get background value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
-			configuration.base_coat = setting_value;
+			configuration.background = setting_value;
 
-			update_ui(UI_NEEDLE_EVENT, configuration.base_coat);
+			update_ui(UI_NEEDLE_EVENT, configuration.background);
 		}
 		else if (fastcmp(substring, "bass")) {
 			// Get bass value

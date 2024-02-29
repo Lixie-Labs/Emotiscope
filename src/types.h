@@ -93,7 +93,7 @@ struct config {
 	float hue_range;
 	float speed;
 	float saturation;
-	float base_coat;
+	float background;
 	float bass;
 	int32_t current_mode;
 	bool mirror_mode;
@@ -117,7 +117,7 @@ struct config_type_1 {
 	float hue_range;
 	float speed;
 	float saturation;
-	float base_coat;
+	float background;
 	float bass;
 	int32_t current_mode;
 	bool mirror_mode;

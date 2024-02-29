@@ -30,7 +30,7 @@ config configuration = {
 	0.00, // hue_range
 	1.00, // speed
 	1.00, // saturation
-	0.00, // base_coat
+	0.00, // background
 	0.00, // bass
 	0,    // current_mode
 	true, // mirror_mode
@@ -106,7 +106,7 @@ void sync_configuration_to_client() {
 
 	// base_coat
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|base_coat|float|%.3f", configuration.base_coat);
+	snprintf(config_item_buffer, 120, "new_config|background|float|%.3f", configuration.background);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// bass

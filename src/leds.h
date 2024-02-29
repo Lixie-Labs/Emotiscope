@@ -18,6 +18,8 @@
 
 #define MAX_DOTS 192 
 
+CRGBF WHITE_BALANCE = { 1.0, 0.75, 0.60 };
+
 typedef enum {
 	UI_1, UI_2, UI_3, UI_4, UI_5, UI_6, UI_7, UI_8, UI_9, UI_10,
 	UI_NEEDLE,
@@ -41,7 +43,7 @@ CRGBF leds_smooth[NUM_LEDS];
 
 float rendered_debug_value = 0.0;
 
-CRGBF incandescent_lookup = {1.0000, 0.4453, 0.1562};
+CRGBF incandescent_lookup = {1.0000*1.0000, 0.4453*0.4453, 0.1562*0.1562};
 
 float note_colors[12] = {0.0000, 0.0833, 0.1666, 0.2499, 0.3333, 0.4166,
 						 0.4999, 0.5833, 0.6666, 0.7499, 0.8333, 0.9166};
@@ -471,36 +473,36 @@ void apply_brightness() {
 	scale_CRGBF_array_by_constant(leds, brightness_val*brightness_val, NUM_LEDS);
 }
 
-void apply_base_coat(){
-	if(configuration.base_coat > 0.01){
-		float base_coat_level = configuration.base_coat * 0.20; // Max 20% brightness
+void apply_background(){
+	if(configuration.background > 0.01){
+		float background_level = configuration.background * 0.20; // Max 20% brightness
 
 		if(configuration.mirror_mode == false){
-			float base_coat_inv = (1.0-base_coat_level);
+			float background_inv = (1.0-background_level);
 			for(uint16_t i = 0; i < NUM_LEDS; i++){
 				float progress = float(i) / NUM_LEDS;
-				CRGBF base_coat_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, base_coat_level*base_coat_level);
-				leds[i].r = leds[i].r * base_coat_inv + base_coat_color.r;
-				leds[i].g = leds[i].g * base_coat_inv + base_coat_color.g;
-				leds[i].b = leds[i].b * base_coat_inv + base_coat_color.b;
+				CRGBF background_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, background_level*background_level);
+				leds[i].r = leds[i].r * background_inv + background_color.r;
+				leds[i].g = leds[i].g * background_inv + background_color.g;
+				leds[i].b = leds[i].b * background_inv + background_color.b;
 			}
 		}
 		else{
-			float base_coat_inv = (1.0-base_coat_level);
+			float background_inv = (1.0-background_level);
 			for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
 				float progress = float(i) / (NUM_LEDS>>1);
-				CRGBF base_coat_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, base_coat_level*base_coat_level);
+				CRGBF background_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, background_level*background_level);
 				
 				int16_t left_index = 63-i;
 				int16_t right_index = 64+i;
 
-				leds[left_index].r = leds[left_index].r * base_coat_inv + base_coat_color.r;
-				leds[left_index].g = leds[left_index].g * base_coat_inv + base_coat_color.g;
-				leds[left_index].b = leds[left_index].b * base_coat_inv + base_coat_color.b;
+				leds[left_index].r = leds[left_index].r * background_inv + background_color.r;
+				leds[left_index].g = leds[left_index].g * background_inv + background_color.g;
+				leds[left_index].b = leds[left_index].b * background_inv + background_color.b;
 
-				leds[right_index].r = leds[right_index].r * base_coat_inv + base_coat_color.r;
-				leds[right_index].g = leds[right_index].g * base_coat_inv + base_coat_color.g;
-				leds[right_index].b = leds[right_index].b * base_coat_inv + base_coat_color.b;
+				leds[right_index].r = leds[right_index].r * background_inv + background_color.r;
+				leds[right_index].g = leds[right_index].g * background_inv + background_color.g;
+				leds[right_index].b = leds[right_index].b * background_inv + background_color.b;
 			}
 		}
 	}

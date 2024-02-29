@@ -42,7 +42,12 @@ uint16_t max_goertzel_block_size = 0;
 
 volatile bool magnitudes_locked = false;
 
-float magnitudes[NUM_FREQS];
+float spectrogram[NUM_FREQS];
+float chromagram[12];
+
+float spectrogram_smooth[NUM_FREQS] = { 0.0 };
+float spectrogram_average[12][NUM_FREQS];
+uint8_t spectrogram_average_index = 0;
 
 void init_goertzel(uint16_t frequency_slot, float frequency, float bandwidth) {
 	frequencies_musical[frequency_slot].block_size = SAMPLE_RATE / (bandwidth);
@@ -99,8 +104,12 @@ void init_goertzel_constants_musical() {
 void init_window_lookup() {
 	for (uint16_t i = 0; i < 2048; i++) {
 		float ratio = i / 4095.0;
-		float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
-		//float weighing_factor = 0.3635819 - (0.4891775 * (cos(TWOPI * ratio))) + (0.1365995 * (cos(FOURPI * ratio))) - (0.0106411 * (cos(SIXPI * ratio)));
+
+		// Hamming window
+		//float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
+
+		// Blackman-Harris window
+		float weighing_factor = 0.3635819 - (0.4891775 * (cos(TWOPI * ratio))) + (0.1365995 * (cos(FOURPI * ratio))) - (0.0106411 * (cos(SIXPI * ratio)));
 
 		window_lookup[i] = weighing_factor;
 		window_lookup[4095 - i] = weighing_factor;
@@ -288,7 +297,22 @@ void calculate_magnitudes() {
 		for (uint16_t i = 0; i < NUM_FREQS; i++) {
 			// Apply the auto-scaler
 			frequencies_musical[i].magnitude = clip_float(magnitudes_smooth[i] * autoranger_scale);
-			magnitudes[i] = frequencies_musical[i].magnitude;
+			spectrogram[i] = frequencies_musical[i].magnitude;
+		}
+
+		spectrogram_average_index++;
+		if(spectrogram_average_index >= 12){
+			spectrogram_average_index = 0;
+		}
+
+		for(uint16_t i = 0; i < NUM_FREQS; i++){
+			spectrogram_average[spectrogram_average_index][i] = spectrogram[i];
+
+			spectrogram_smooth[i] = 0;
+			for(uint16_t a = 0; a < 12; a++){
+				spectrogram_smooth[i] += spectrogram_average[a][i];
+			}
+			spectrogram_smooth[i] /= 12.0;
 		}
 
 		magnitudes_locked = false;
@@ -299,4 +323,21 @@ void start_noise_calibration() {
 	Serial.println("Starting noise cal...");
 	memset(noise_spectrum, 0, sizeof(float) * NUM_FREQS);
 	noise_calibration_active_frames_remaining = NOISE_CALIBRATION_FRAMES;
+}
+
+void get_chromagram(){
+	memset(chromagram, 0, sizeof(float) * 12);
+
+	float max_val = 0.2;
+	for(uint16_t i = 0; i < 60; i++){
+		chromagram[ i % 12 ] += (spectrogram_smooth[i] / 5.0);
+
+		max_val = max(max_val, chromagram[ i % 12 ]);
+	}
+
+	float auto_scale = 1.0 / max_val;
+
+	for(uint16_t i = 0; i < 12; i++){
+		chromagram[i] *= auto_scale;
+	}
 }

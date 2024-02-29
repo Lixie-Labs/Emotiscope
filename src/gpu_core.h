@@ -44,7 +44,7 @@ void run_gpu() {
 	// If silence is detected, show a blue debug LED
 	// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});
 
-	apply_base_coat();
+	apply_background();
 
 	// Apply an incandescent LUT to reduce harsh blue tones
 	apply_incandescent_filter(configuration.incandescent_filter);  // (leds.h)
@@ -87,6 +87,9 @@ void run_gpu() {
 	apply_image_lpf(lpf_cutoff_frequency);
 
 	clip_leds();  // (leds.h)
+
+	// Apply white balance
+	multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
 
 	// Quantize the image buffer with dithering, 
 	// output to the 8-bit LED strand

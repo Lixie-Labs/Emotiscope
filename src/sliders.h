@@ -36,29 +36,26 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	register_slider("brightness", 0.000, 1.000, 0.001);
 	register_slider("melt", 0.000, 1.000, 0.001);
 
-	if (mode_index == 0) {  // Spectrum
-		// No extra sliders yet
-	}
-	else if (mode_index == 1) {  // Clap
-		// No extra sliders yet
-	}
-	else if (mode_index == 2) {  // Spectrum + Clap
-		// No extra sliders yet
-	}
-	else if (mode_index == 3) {  // Hype
-		// No extra sliders yet
-	}
-	else if (mode_index == 4) {  // Plot
-		// No extra sliders yet
-	}
-	else if (mode_index == 5) {  // Bloom
+	if (mode_index == 0) {  // Analog
 		register_slider("speed", 0.000, 1.000, 0.001);
 	}
-	else if (mode_index == 6) {  // Analog
-		register_slider("speed", 0.000, 1.000, 0.001);
+	else if (mode_index == 1) {  // Spectrum
+		// No extra sliders yet
 	}
-	else if (mode_index == 7) {  // Waveform
-		register_slider("bass", 0.000, 1.000, 0.001);
+	else if (mode_index == 2) {  // Octave
+		// No extra sliders yet
+	}
+	else if (mode_index == 3) {  // Metronome
+		// No extra sliders yet
+	}
+	else if (mode_index == 4) {  // Spectrum + Beat
+		// No extra sliders yet
+	}
+	else if (mode_index == 5) {  // Hype
+		// No extra sliders yet
+	}
+	else if (mode_index == 6) {  // Bloom
+		register_slider("speed", 0.000, 1.000, 0.001);
 	}
 	else{
 		// WTF happened that got you here?
@@ -68,5 +65,5 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	register_slider("hue_range",    0.000, 1.000, 0.001);
 	register_slider("saturation",   0.000, 1.000, 0.001);
 	register_slider("incandescent", 0.000, 1.000, 0.001);
-	register_slider("base_coat",    0.000, 1.000, 0.001);
+	register_slider("background",   0.000, 1.000, 0.001);
 }

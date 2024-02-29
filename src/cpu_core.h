@@ -27,8 +27,11 @@ void run_cpu() {
 
 		uint32_t processing_start_us = micros();
 
-		// Calculate the magnitude of the currently studied frequency set
+		// Calculate the magnitudes of the currently studied frequency set
 		calculate_magnitudes();  // (goertzel.h)
+		get_chromagram();
+
+		run_key_detection();
 
 		run_vu();
 
