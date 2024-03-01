@@ -45,8 +45,9 @@ volatile bool magnitudes_locked = false;
 float spectrogram[NUM_FREQS];
 float chromagram[12];
 
+const uint8_t NUM_SPECTROGRAM_AVERAGE_SAMPLES = 4;
 float spectrogram_smooth[NUM_FREQS] = { 0.0 };
-float spectrogram_average[12][NUM_FREQS];
+float spectrogram_average[NUM_SPECTROGRAM_AVERAGE_SAMPLES][NUM_FREQS];
 uint8_t spectrogram_average_index = 0;
 
 void init_goertzel(uint16_t frequency_slot, float frequency, float bandwidth) {
@@ -102,7 +103,7 @@ void init_goertzel_constants_musical() {
 }
 
 void init_window_lookup() {
-    float sigma = 0.4;
+    float sigma = 0.8; // For gaussian window
 
     for (uint16_t i = 0; i < 2048; i++) {
         float ratio = i / 2047.0;
@@ -309,7 +310,7 @@ void calculate_magnitudes() {
 		}
 
 		spectrogram_average_index++;
-		if(spectrogram_average_index >= 12){
+		if(spectrogram_average_index >= NUM_SPECTROGRAM_AVERAGE_SAMPLES){
 			spectrogram_average_index = 0;
 		}
 
@@ -317,10 +318,10 @@ void calculate_magnitudes() {
 			spectrogram_average[spectrogram_average_index][i] = spectrogram[i];
 
 			spectrogram_smooth[i] = 0;
-			for(uint16_t a = 0; a < 12; a++){
+			for(uint16_t a = 0; a < NUM_SPECTROGRAM_AVERAGE_SAMPLES; a++){
 				spectrogram_smooth[i] += spectrogram_average[a][i];
 			}
-			spectrogram_smooth[i] /= 12.0;
+			spectrogram_smooth[i] /= float(NUM_SPECTROGRAM_AVERAGE_SAMPLES);
 		}
 
 		magnitudes_locked = false;

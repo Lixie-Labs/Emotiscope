@@ -48,7 +48,6 @@
 #include "microphone.h" // ........ For gathering audio chunks from the microphone
 #include "vu.h" // ................ Tracks music loudness from moment to moment
 #include "goertzel.h" // .......... GDFT or God Damn Fast Transform is implemented here
-#include "key_detection.h"
 #include "tempo.h" // ............. Comupation of (and syncronization) to the music tempo
 #include "audio_debug.h" // ....... Print audio data over UART
 #include "screensaver.h" // ....... Colorful dots play on screen when no audio is present

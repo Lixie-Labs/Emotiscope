@@ -20,6 +20,7 @@
 		"initializer_list": "cpp",
 		"*.tcc": "cpp",
 		"fstream": "cpp",
-		"compare": "cpp"
+		"compare": "cpp",
+		"span": "cpp"
 	}
 }

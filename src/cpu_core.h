@@ -31,8 +31,6 @@ void run_cpu() {
 		calculate_magnitudes();  // (goertzel.h)
 		get_chromagram();
 
-		run_key_detection();
-
 		run_vu();
 
 		//printf("update_tempo() = %.4fus\n", measure_execution([&]() {

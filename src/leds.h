@@ -119,14 +119,14 @@ void load_leds_from_temp() {
 void multiply_CRGBF_array_by_LUT(CRGBF* input, CRGBF LUT, uint16_t array_length) {
 	float* ptr = (float*)input;
 
-	dsps_mulc_f32(ptr + 0, ptr + 0, array_length, LUT.r, 3, 3);
-	dsps_mulc_f32(ptr + 1, ptr + 1, array_length, LUT.g, 3, 3);
-	dsps_mulc_f32(ptr + 2, ptr + 2, array_length, LUT.b, 3, 3);
+	dsps_mulc_f32_ae32(ptr + 0, ptr + 0, array_length, LUT.r, 3, 3);
+	dsps_mulc_f32_ae32(ptr + 1, ptr + 1, array_length, LUT.g, 3, 3);
+	dsps_mulc_f32_ae32(ptr + 2, ptr + 2, array_length, LUT.b, 3, 3);
 }
 
 void scale_CRGBF_array_by_constant(CRGBF* input, float scale_value, uint16_t array_length) {
 	float* ptr = (float*)input;
-	dsps_mulc_f32(ptr, ptr, array_length * 3, scale_value, 1, 1);
+	dsps_mulc_f32_ae32(ptr, ptr, array_length * 3, scale_value, 1, 1);
 }
 
 void add_CRGBF_arrays(CRGBF* a, CRGBF* b, uint16_t array_length) {
