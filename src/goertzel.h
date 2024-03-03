@@ -45,7 +45,7 @@ volatile bool magnitudes_locked = false;
 float spectrogram[NUM_FREQS];
 float chromagram[12];
 
-const uint8_t NUM_SPECTROGRAM_AVERAGE_SAMPLES = 4;
+const uint8_t NUM_SPECTROGRAM_AVERAGE_SAMPLES = 8;
 float spectrogram_smooth[NUM_FREQS] = { 0.0 };
 float spectrogram_average[NUM_SPECTROGRAM_AVERAGE_SAMPLES][NUM_FREQS];
 uint8_t spectrogram_average_index = 0;
@@ -57,8 +57,8 @@ void init_goertzel(uint16_t frequency_slot, float frequency, float bandwidth) {
 		frequencies_musical[frequency_slot].block_size -= 1;
 	}
 
-	if (frequencies_musical[frequency_slot].block_size > 4095) {
-		frequencies_musical[frequency_slot].block_size = 4095;
+	if (frequencies_musical[frequency_slot].block_size > SAMPLE_HISTORY_LENGTH-1) {
+		frequencies_musical[frequency_slot].block_size = SAMPLE_HISTORY_LENGTH-1;
 	}
 
 	max_goertzel_block_size = max(max_goertzel_block_size, frequencies_musical[frequency_slot].block_size);
@@ -98,7 +98,7 @@ void init_goertzel_constants_musical() {
 			fabs(frequencies_musical[i].target_freq - neighbor_left),
 			fabs(frequencies_musical[i].target_freq - neighbor_right));
 
-		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 2.0);
+		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 4.0);
 	}
 }
 

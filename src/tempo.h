@@ -18,7 +18,7 @@
 #define TEMPO_LOW (64-16)
 #define TEMPO_HIGH (192-16)
 
-#define BEAT_SHIFT_PERCENT (0.08)
+#define BEAT_SHIFT_PERCENT (0.00)
 
 #define NUM_TEMPI (64)
 
@@ -360,7 +360,7 @@ void update_novelty() {
 
 		check_silence(current_novelty);
 
-		log_novelty(current_novelty);
+		log_novelty(log(1.0 + current_novelty));
 
 		log_vu(vu_max);
 		vu_max = 0.000001;
