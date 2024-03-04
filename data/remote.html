@@ -1,0 +1,173 @@
+<html>
+<head>
+	<title>Emotiscope by Lixie Labs</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" href="css/app.css">
+	
+</head>
+<body>
+		<div id="header">
+			<span onclick="show_page('page_menu');" class="buzz">
+				<img id="left_header_item" src="svg/menu.svg" class="header_icon tint_accent"/>
+			</span>
+
+			<span id="header_logo" class="buzz">emotiscope</span>
+
+			<span onclick="show_page('page_info');" class="buzz">
+				<img src="svg/info.svg" class="footer_icon tint_accent"/>
+			</span>
+		</div>
+
+		<!-- TODO: Add device preview/nickname section to app UI -->
+		<div id="device_preview">
+			<div class="lds-ellipsis">
+				<div></div><div></div><div></div><div></div>
+			</div>
+		</div>
+
+		<div id="gallery_left_edge_fade"></div>
+
+		<div id="setting_gallery">
+			<span id="setting_container">
+				<!--<span class="toggle"><div class="toggle_label" onclick="show_setting_information('mirror_mode');">MIRROR MODE</div><div class="toggle_track" id="mirror_mode" style="background-image: linear-gradient(to top, var(--secondary) 0%, var(--secondary) 100%, transparent 0%, transparent 100%);"></div></span>-->
+				<!--
+				<span class="slider"><span class="slider_track" id="brightness"></span></span>
+				<span class="slider"><span class="slider_track" id="hue"></span></span>
+				<span class="slider"><span class="slider_track" id="speed"></span></span>
+				<span class="slider"><span class="slider_track" id="saturation"></span></span>
+				-->
+			</span>
+		</div>
+		<div id="gallery_right_edge_fade"></div>
+
+		<!--<div id="mode_bin"></div>-->
+
+		<div id="footer">
+			<span onclick="show_page('page_calibration');" class="buzz">
+				<img id="right_header_item" src="svg/microphone.svg" class="header_icon tint_accent"/>
+			</span>
+
+			<span onclick="show_page('page_modes');" style="margin-bottom: 30px;">
+				<span id="current_mode" class="buzz">LOADING</span>
+			</span>
+
+			<span onclick="toggle_fullscreen();" class="" id="fullscreen_button">
+				<img src="svg/expand.svg" class="footer_icon tint_accent"/>
+			</span>
+		</div>
+
+		<div id="page_info">
+			<!--<span id="spin_container">-->
+				<span onclick="hide_page('page_info');" class="icon_top_right buzz">
+					<img src="svg/close.svg" class="footer_icon tint_accent"/>
+				</span>
+			
+				<img src="svg/lixielabs.svg" style="height: 120px;"/>
+				<div class="page_title">ABOUT</div>
+				<div class="page_paragraph">
+					Emotiscope was developed<br>by <a href="https://github.com/connornishijima">Connor Nishijima</a> for <a href="https://lixielabs.com/">Lixie Labs</a><br>(2023-2024)
+				</div>
+				<div class="page_paragraph">
+					The documentation, open source<br>hardware/software, and more are<br>available at <a href="https://emotiscope.rocks/">www.emotiscope.rocks</a>.
+				</div>
+			<!--</span>-->
+		</div>
+
+		<!-- TODO: Add main menu content -->
+		<!-- Nickname your device? Advanced settings? Check firmware update? -->
+		<div id="page_menu">
+			<span onclick="hide_page('page_menu');" class="icon_top_left buzz">
+				<img src="svg/close.svg" class="footer_icon tint_accent"/>
+			</span>
+			<div id="menu_container">
+				<div id="menu_toggles">
+				</div>
+				<div class="menu_item buzz">
+					<span class="menu_item_label">Check Firmware Update</span>
+					<span class="menu_item_content"></span>
+				</div>
+				<div class="menu_item buzz" onclick="transmit('reset'); set_ui_locked_state(true);">
+					<span class="menu_item_label">Reset Emotiscope</span>
+					<span class="menu_item_content"></span>
+				</div>
+			</div>
+
+			<div id="menu_stats">
+				<span class="menu_stat" id="CPU_FPS">LOADING</span>
+				<span class="menu_stat" id="GPU_FPS">LOADING</span>
+				<span class="menu_stat" id="HEAP">LOADING</span>
+			</div>
+
+				<!-- TODO: Main menu can display stats for nerds at the bottom, like current CPU/GPU FPS, Free Heap, VCC level -->
+		</div>
+
+		<div id="page_calibration">
+			<span onclick="hide_page('page_calibration');" class="icon_bottom_left buzz">
+				<img src="svg/close.svg" class="footer_icon tint_accent" />
+			</span>
+
+			<!-- TODO: Implement frequency response calibration -->
+			<!-- Via white noise broadcasted from JS in web-app, measure (and compensate for) the frequency response of both the speaker and mic -->
+			<!-- Calibration should result in equal representation of all bins in the DFT when white noise is played afterward -->
+			<!-- When calibration starts, white noise should fade in for 0.5 seconds, be measured for 2 seconds, then fade out for 0.5 seconds -->
+			<div class="page_title">CALIBRATION</div>
+			<div class="page_paragraph">
+				<button onclick="start_noise_calibration();" class="buzz">REMOVE BACKGROUND NOISE</button>
+				<!--
+				<br>
+				<button onclick="start_frequency_calibration();" class="buzz">CALIBRATE FREQUENCY RESPONSE</button>
+				-->
+			</div>
+		</div>
+
+		<div id="page_presets">
+			<span onclick="hide_page('page_presets');" class="icon_bottom_left buzz">
+				<img src="svg/close.svg" class="footer_icon tint_accent" />
+			</span>
+
+			<div class="page_title">PRESETS</div>
+			<div class="page_paragraph">
+				THIS IS UNFINISHED CONTENT
+			</div>
+		</div>
+
+		<div id="page_modes">
+			<div class="page_title">LIGHT MODE</div>
+			
+			<!-- TODO: Long press mode buttons to reveal description -->
+			<div id="mode_bin"></div>
+			
+			<span onclick="hide_page('page_modes');" class="icon_bottom_center buzz">
+				<img src="svg/close.svg" class="footer_icon tint_accent"/>
+			</span>
+		</div>
+
+		<div id="info_panel">
+			<div id="info_panel_title">INFORMATION</div>
+			<div id="info_panel_description">
+				Applies a filter to the display which limits the brightness of blue colors, similar to retro tinted holiday bulbs
+			</div>
+			<span onclick="hide_setting_information();" class="buzz" style="display:inline-block;">
+				<img src="svg/close.svg" class="footer_icon tint_accent"/>
+			</span>
+		</div>
+
+		<div id="dimmer">
+			<div class="lds-ellipsis">
+				<div></div><div></div><div></div><div></div>
+			</div>
+		</div>
+
+	<script src="js/discovery.js"></script>
+	<script src="js/info.js"></script>
+	<script src="js/utilities.js"></script>
+	<script src="js/sliders.js"></script>
+	<script src="js/toggles.js"></script>
+	<script src="js/menu_toggles.js"></script>
+	<script src="js/render_controls.js"></script>
+	<script src="js/websockets_connection.js"></script>
+	<script src="js/pages.js"></script>
+	<script src="js/spin_ui.js"></script>
+</body>
+</html>

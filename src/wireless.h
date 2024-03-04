@@ -2,6 +2,13 @@
 #define MAX_HTTP_REQUEST_ATTEMPTS (8)								 // Define the maximum number of retry attempts
 #define INITIAL_BACKOFF_MS (1000)									 // Initial backoff delay in milliseconds
 
+#define WIFI_CONFIG_MODE false
+
+const IPAddress ap_ip(192, 168, 4, 1); // IP address for the ESP32-S3 in AP mode
+const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32-S3 IP
+const IPAddress ap_subnet(255, 255, 255, 0); // Subnet mask for the WiFi network
+DNSServer dns_server; // DNS server instance
+
 PsychicHttpServer server;
 PsychicWebSocketHandler websocket_handler;
 websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
@@ -166,13 +173,6 @@ void transmit_to_client_in_slot(char *message, uint8_t client_slot) {
 	}
 }
 
-void init_wifi() {
-	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // Start the WiFi connection with the
-										   // SSID and password in secrets.h
-	esp_wifi_set_ps(WIFI_PS_NONE);
-	printf("Started connection attempt to %s...\n", WIFI_SSID);
-}
-
 void init_web_server() {
 	server.config.max_uri_handlers = 20;  // maximum number of .on() calls
 
@@ -193,11 +193,22 @@ void init_web_server() {
 		esp_err_t result = ESP_OK;
 		String path = "";
 
-		path += (request->url() == "/") ? "/index.html" : request->url();
-		Serial.printf("HTTP GET %s\n", request->url());
+		if(request->url() == "/"){
+			path += "/remote.html";
+		}
+		else if(request->url() == "/remote"){
+			path += "/remote.html";
+		}
+		else if(request->url() == "/wifi-setup"){
+			path += "/index.html";
+		}
+		else{
+			path += request->url();
+		}
+
+		printf("HTTP GET %s\n", request->url());
 
 		File file = LittleFS.open(path);
-
 		if (file) {
 			String etagStr(file.getLastWrite(), 10);
 
@@ -259,6 +270,26 @@ void init_web_server() {
 	web_server_ready = true;
 }
 
+void init_wifi() {
+	if(WIFI_CONFIG_MODE == true){
+		WiFi.softAP("Emotiscope Setup");
+		dns_server.start(53, "*", WiFi.softAPIP());
+
+		printf("Entered AP Mode: %s\n", WiFi.softAPIP().toString().c_str());
+
+		if (web_server_ready == false) {
+			init_web_server();
+		}
+	}
+	else {
+		WiFi.begin(wifi_ssid, wifi_pass);  // Start the WiFi connection with the
+										// SSID and password parsed in configuration.h
+		printf("Started connection attempt to %s...\n", wifi_ssid);
+	}
+
+	esp_wifi_set_ps(WIFI_PS_NONE);
+}
+
 void handle_wifi() {
 	static int16_t connection_status_last = -1;
 	static uint32_t last_reconnect_attempt = 0;
@@ -270,7 +301,7 @@ void handle_wifi() {
 	if (connection_status != connection_status_last) {
 		// Emotiscope connected sucessfully to your network
 		if (connection_status == WL_CONNECTED) {
-			printf("CONNECTED TO %s SUCCESSFULLY @ %s\n", WIFI_SSID, WiFi.localIP().toString().c_str());
+			printf("CONNECTED TO %s SUCCESSFULLY @ %s\n", wifi_ssid, WiFi.localIP().toString().c_str());
 		}
 
 		// Emotiscope disconnected from a network
@@ -285,17 +316,17 @@ void handle_wifi() {
 
 		// Emotiscope failed to connect to your network
 		else if (connection_status == WL_CONNECT_FAILED) {
-			printf("FAILED TO CONNECT TO %s\n", WIFI_SSID);
+			printf("FAILED TO CONNECT TO %s\n", wifi_ssid);
 		}
 
 		// Emotiscope lost connection to your network
 		else if (connection_status == WL_CONNECTION_LOST) {
-			printf("LOST CONNECTION TO %s\n", WIFI_SSID);
+			printf("LOST CONNECTION TO %s\n", wifi_ssid);
 		}
 
 		// Emotiscope can't see your network
 		else if (connection_status == WL_NO_SSID_AVAIL) {
-			printf("UNABLE TO REACH SSID %s\n", WIFI_SSID);
+			printf("UNABLE TO REACH SSID %s\n", wifi_ssid);
 		}
 
 		// Anything else
@@ -317,9 +348,11 @@ void handle_wifi() {
 		}
 	}
 	else if (connection_status != WL_CONNECTED && millis() - last_reconnect_attempt >= reconnect_interval_ms) {
-		printf("ATTEMPTING TO RECONNECT TO THE NETWORK\n");
-		last_reconnect_attempt = millis();
-		WiFi.reconnect();
+		if(WIFI_CONFIG_MODE == false){
+			printf("ATTEMPTING TO RECONNECT TO THE NETWORK\n");
+			last_reconnect_attempt = millis();
+			WiFi.reconnect();
+		}
 	}
 
 	connection_status_last = connection_status;

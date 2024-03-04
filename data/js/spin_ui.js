@@ -40,11 +40,11 @@ function setup_landscape_listener() {
 
     // Add event listener for window resize
     window.addEventListener('resize', () => {
-        toggle_dimmer(is_landscape());
+        //toggle_dimmer(is_landscape());
     });
 
     // Initial check in case the page loads in landscape mode
-    toggle_dimmer(is_landscape());
+    //toggle_dimmer(is_landscape());
 }
 
 // Initialize the listener on page load

@@ -4,6 +4,5 @@
 .vscode/launch.json
 .vscode/ipch
 
-src/secrets.h
 data/secrets/*.txt
 data/*.bkp

@@ -17,6 +17,11 @@
 https://www.realtimecolors.com/?colors=edeff7-070c1d-ffb177-81317b-c15b90&fonts=Poppins-Poppins
 */
 
+@font-face {
+	font-family: 'Chakra Petch'; /* Define a name for your custom font */
+	src: url('../font/chakra_petch.woff2') format('woff2'); /* Specify the font file's path and format */
+  }
+
 body{
 	background-color: rgb(var(--background));
 	color:var(--text);
@@ -140,6 +145,23 @@ body{
 }
 
 #page_calibration{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease-in-out;
+    flex-direction: column;
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    background-color: rgba(var(--background), 0.45);
+    backdrop-filter: blur(12px);
+}
+
+#page_wifi_config{
     width: 100%;
     height: 100%;
     display: flex;

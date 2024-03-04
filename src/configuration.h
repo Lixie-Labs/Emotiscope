@@ -12,6 +12,7 @@
 
 #define CONFIG_FILENAME "/configuration.bin"
 #define NOISE_SPECTRUM_FILENAME "/noise_spectrum.bin"
+#define NETWORK_CONFIG_FILENAME "/secrets/network.txt"
 #define AUDIO_DEBUG_RECORDING_FILENAME "/audio.bin"
 #define MIN_SAVE_WAIT_MS (3 * 1000)	 // Values must stabilize for this many seconds to be written to FS
 
@@ -244,6 +245,71 @@ void sync_configuration_to_file_system() {
 	}
 }
 
+bool load_network_credentials(){
+	memset(wifi_ssid, 0, 64);
+	memset(wifi_pass, 0, 64);
+
+	// Open the file for reading
+	File file = LittleFS.open(NETWORK_CONFIG_FILENAME, FILE_READ);
+	if (!file) {
+		printf("Missing network file, failed to open %s for reading!\n", NETWORK_CONFIG_FILENAME);
+		return false;
+	}
+	else {
+		if ( file.size() <= 1 ) {
+			// It exists, but there's no way this file has proper data
+			printf("Invalid network file, failed to open %s for reading!\n", NETWORK_CONFIG_FILENAME);
+			return false;
+		}
+
+		// Read up to 64 SSID chars
+		for(uint8_t i = 0; i < 64; i++){
+			if(file.position() < file.size()){
+				int byte = file.read();
+				if(byte == '\n'){
+					break;
+				}
+				else if(byte == '\r'){
+					printf("Skipped stupid ass Windows-style carriage return during parsing! >:(\n");
+				}
+				else{
+					wifi_ssid[i] = byte;
+				}
+			}
+			else{
+				printf("Hit end of network file early while parsing!\n");
+				return false;
+			}
+		}
+		printf("Parsed SSID: %s\n", wifi_ssid);
+
+		// Read up to 64 pass chars
+		for(uint8_t i = 0; i < 64; i++){
+			if(file.position() < file.size()){
+				int byte = file.read();	 // Read a byte
+				if(byte == '\n'){
+					break;
+				}
+				else if(byte == '\r'){
+					printf("Skipped stupid ass Windows-style carriage return during parsing! >:(\n");
+				}
+				else{
+					wifi_pass[i] = byte;
+				}
+			}
+			else{
+				printf("Hit end of network file early while parsing!\n");
+				return false;
+			}
+		}
+		printf("Parsed pass: %s\n", wifi_pass);
+	}
+	file.close();  // Close the file after reading
+
+	// We fucken did it
+	return true;
+}
+
 void init_configuration() {
 	// Attempt to load config from flash
 	printf("LOADING CONFIG...");
@@ -266,6 +332,18 @@ void init_configuration() {
 	if (load_success == false) {
 		printf("FAIL\n");
 		save_noise_spectrum();
+	}
+	else {
+		printf("PASS\n");
+	}
+
+	// Attempt to load wifi creds from flash
+	printf("LOADING NETWORK...");
+	load_success = load_network_credentials();
+
+	// If we couldn't load the file, save a fresh copy
+	if (load_success == false) {
+		printf("FAIL\n");
 	}
 	else {
 		printf("PASS\n");

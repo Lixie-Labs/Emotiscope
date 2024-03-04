@@ -24,12 +24,12 @@
 #include <HTTPClient.h> // ........ Used to make POST requests to the discovery server
 #include <ESPmDNS.h> // ........... Used for "emotiscope.local" domain name
 #include <Ticker.h> // ............ For timing functions
+#include <DNSServer.h> // ......... Captive portal functionality
 #include <WiFi.h> // .............. WiFi connection library
 #include <esp_dsp.h> // ........... Fast SIMD-style array math
 #include <esp_wifi.h> // .......... WiFi, but like - the hardware side of it
 
 // Internal dependencies
-#include "secrets.h" // ........... You don't get to have this, rename "YOUR_secrets.h" to use it
 #include "global_defines.h" // .... Compile-time configuration
 #include "types.h" // ............. typedefs for things like CRGBFs
 #include "profiler.h" // .......... Developer tools, measures the execution of functions
@@ -63,9 +63,6 @@
 
 // Development Notes
 #include "notes.h"
-
-// Not for you, you don't get to have my WiFi, SORRY
-#include "secrets.h"
 
 // ############################################################################
 // ## CODE ####################################################################

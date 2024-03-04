@@ -1,7 +1,9 @@
 void run_web() {
 	profile_function([&]() {
 		handle_wifi();
-		if (web_server_ready == true) {
+		dns_server.processNextRequest();
+
+		if (web_server_ready == true && WIFI_CONFIG_MODE == false) {
 			process_command_queue();
 			discovery_check_in();
 
