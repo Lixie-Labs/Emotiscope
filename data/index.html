@@ -18,8 +18,8 @@
 	<div id="page_wifi_config">
 		<div class="page_title">WIFI SETTINGS</div>
 		<div class="page_paragraph">
-			<input type="text" id="ssid" placeholder="Name"></input><br>
-			<input type="text" id="pass" placeholder="Password"></input><br>
+			<input type="text" id="ssid" class="text_input" placeholder="Name"></input><br>
+			<input type="text" id="pass" class="text_input" placeholder="Password"></input><br>
 			<button onclick="update_wifi_credentials();" class="buzz">CONNECT</button>
 		</div>
 	</div>
@@ -28,7 +28,11 @@
 		function update_wifi_credentials(){
 			let ssid = document.getElementById("ssid").value;
 			let pass = document.getElementById("pass").value;
-			window.location.href = "/save-wifi?ssid="+ssid+"&pass="+pass;
+
+			let wifi_endpoint = "/save-wifi?ssid="+ssid+"&pass="+pass;
+			fetch(wifi_endpoint);
+
+			window.location.href = "https://app.emotiscope.rocks/";
 		}
 	</script>
 </body>

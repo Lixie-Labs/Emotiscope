@@ -230,6 +230,18 @@ body{
 	border-radius: 10px;
 }
 
+.text_input{
+	margin-bottom: 10px;
+    font-family: Chakra Petch;
+    background-color: #000;
+    color: var(--accent);
+    border: 2px solid var(--secondary);
+    padding: 10px;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+}
+
 #app_container{
 	display: block;
     width: 100%;
