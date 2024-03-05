@@ -1,3 +1,9 @@
+// This is a tough problem to crack, I thought this might work but maybe ML
+// like TensorFlow Lite is the only way forward for deeper musical observations
+// like this. I have no idea yet what inference times would be like, so
+// using AI may be too slow. Best might be a pre-trained MLP network that uses
+// the ESP-DSP SIMD array multiplication functions for a speed-up.
+
 uint16_t musical_keys[24] = {
     // Major scales
     0b000010101101, // C major
