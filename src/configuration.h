@@ -21,6 +21,8 @@
 extern lightshow_mode lightshow_modes[];
 extern PsychicWebSocketHandler websocket_handler;
 
+volatile bool wifi_config_mode = false;
+
 config configuration = {
 	CONFIGURATION_TYPE,
 
@@ -245,6 +247,38 @@ void sync_configuration_to_file_system() {
 	}
 }
 
+// Function to update the network credentials and restart the ESP
+void update_network_credentials(String new_ssid, String new_pass) {
+    // Check if the file exists and delete it
+    if (LittleFS.exists(NETWORK_CONFIG_FILENAME)) {
+        LittleFS.remove(NETWORK_CONFIG_FILENAME);
+    }
+
+    // Create a new file and open it for writing
+    File file = LittleFS.open(NETWORK_CONFIG_FILENAME, "w");
+    if (!file) {
+        printf("Failed to open %s for writing\n", NETWORK_CONFIG_FILENAME);
+        return;
+    }
+
+    // Write SSID and Password to the file with a newline character after each
+    file.print(new_ssid + "\n");
+    file.print(new_pass + "\n");
+
+    // Close the file
+    file.close();
+
+    // Print a success message
+    printf("Network credentials updated successfully! Restarting to attempt connection\n");
+
+    // Delay for 100 ms
+    delay(100);
+
+    // Restart the ESP
+    ESP.restart();
+}
+
+
 bool load_network_credentials(){
 	memset(wifi_ssid, 0, 64);
 	memset(wifi_pass, 0, 64);
@@ -311,6 +345,12 @@ bool load_network_credentials(){
 }
 
 void init_configuration() {
+	// Check if wifi config mode was requested
+	if (LittleFS.exists("/WIFI_CONFIG_MODE_TRIGGER")) {
+        LittleFS.remove("/WIFI_CONFIG_MODE_TRIGGER");
+		wifi_config_mode = true;
+	}
+
 	// Attempt to load config from flash
 	printf("LOADING CONFIG...");
 	bool load_success = load_config();

@@ -1,8 +1,7 @@
 #define DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS (10 * (1000 * 60))	 // "10" is minutes
 #define MAX_HTTP_REQUEST_ATTEMPTS (8)								 // Define the maximum number of retry attempts
 #define INITIAL_BACKOFF_MS (1000)									 // Initial backoff delay in milliseconds
-
-#define WIFI_CONFIG_MODE false
+#define MAX_NETWORK_CONNECT_ATTEMPTS (3)
 
 const IPAddress ap_ip(192, 168, 4, 1); // IP address for the ESP32-S3 in AP mode
 const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32-S3 IP
@@ -16,7 +15,20 @@ websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
 volatile bool web_server_ready = false;
 int16_t connection_status = -1;
 
-// TODO: Add runtime WiFi credential input method
+uint8_t network_connection_attempts = 0;
+
+void reboot_into_wifi_config_mode(){
+    File file = LittleFS.open("/WIFI_CONFIG_MODE_TRIGGER", "w");
+    if (!file) {
+        printf("Failed to open WIFI_CONFIG_MODE_TRIGGER for writing\n");
+        return;
+    }
+    file.print("NULL");
+    file.close();
+
+	delay(100);
+	ESP.restart();
+}
 
 void discovery_check_in() {
 	static uint32_t next_discovery_check_in_time = 0;
@@ -189,18 +201,51 @@ void init_web_server() {
 		return response.send();
 	});
 
+	server.on("/save-wifi", HTTP_GET, [](PsychicRequest *request) {
+		if(wifi_config_mode == true){
+			esp_err_t result = ESP_OK;
+			String ssid = "";
+			String pass = "";
+
+			if(request->hasParam("ssid") == true){
+				ssid += request->getParam("ssid")->value();
+			}
+			else{
+				printf("MISSING SSID PARAM!\n");
+				return request->reply(400);
+			}
+			
+			if(request->hasParam("pass") == true){
+				pass += request->getParam("pass")->value();
+			}
+			else{
+				printf("MISSING PASS PARAM!\n");
+				return request->reply(400);
+			}
+
+			printf("GOT NEW WIFI CONFIG: '%s|%s'\n", ssid, pass);
+			update_network_credentials(ssid, pass);
+
+			return result;
+		}
+		else{
+			printf("Can't access WIFI config endpoint outside of config AP mode for security reasons!\n");
+			return request->reply(400);
+		}
+	});
+
 	server.on("/*", HTTP_GET, [](PsychicRequest *request) {
 		esp_err_t result = ESP_OK;
 		String path = "";
 
 		if(request->url() == "/"){
-			path += "/remote.html";
-		}
-		else if(request->url() == "/remote"){
-			path += "/remote.html";
+			path += "/index.html";
 		}
 		else if(request->url() == "/wifi-setup"){
 			path += "/index.html";
+		}
+		else if(request->url() == "/remote"){
+			path += "/remote.html";
 		}
 		else{
 			path += request->url();
@@ -271,7 +316,7 @@ void init_web_server() {
 }
 
 void init_wifi() {
-	if(WIFI_CONFIG_MODE == true){
+	if(wifi_config_mode == true){
 		WiFi.softAP("Emotiscope Setup");
 		dns_server.start(53, "*", WiFi.softAPIP());
 
@@ -282,6 +327,7 @@ void init_wifi() {
 		}
 	}
 	else {
+		network_connection_attempts = 0;
 		WiFi.begin(wifi_ssid, wifi_pass);  // Start the WiFi connection with the
 										// SSID and password parsed in configuration.h
 		printf("Started connection attempt to %s...\n", wifi_ssid);
@@ -348,10 +394,16 @@ void handle_wifi() {
 		}
 	}
 	else if (connection_status != WL_CONNECTED && millis() - last_reconnect_attempt >= reconnect_interval_ms) {
-		if(WIFI_CONFIG_MODE == false){
+		if(wifi_config_mode == false){
 			printf("ATTEMPTING TO RECONNECT TO THE NETWORK\n");
 			last_reconnect_attempt = millis();
 			WiFi.reconnect();
+
+			network_connection_attempts++;
+
+			if(network_connection_attempts >= 3){
+				reboot_into_wifi_config_mode();
+			}
 		}
 	}
 

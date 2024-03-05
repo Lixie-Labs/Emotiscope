@@ -3,7 +3,7 @@ void run_web() {
 		handle_wifi();
 		dns_server.processNextRequest();
 
-		if (web_server_ready == true && WIFI_CONFIG_MODE == false) {
+		if (web_server_ready == true && wifi_config_mode == false) {
 			process_command_queue();
 			discovery_check_in();
 

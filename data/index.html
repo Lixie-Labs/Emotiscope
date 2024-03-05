@@ -6,18 +6,30 @@
 </head>
 <body>
 	<div id="header">
+		<span class="buzz">
+		</span>
+
 		<span id="header_logo" class="buzz">emotiscope</span>
+
+		<span class="buzz">
+		</span>
 	</div>
 
 	<div id="page_wifi_config">
 		<div class="page_title">WIFI SETTINGS</div>
 		<div class="page_paragraph">
-			<button onclick="start_noise_calibration();" class="buzz">REMOVE BACKGROUND NOISE</button>
-			<!--
-			<br>
-			<button onclick="start_frequency_calibration();" class="buzz">CALIBRATE FREQUENCY RESPONSE</button>
-			-->
+			<input type="text" id="ssid" placeholder="Name"></input><br>
+			<input type="text" id="pass" placeholder="Password"></input><br>
+			<button onclick="update_wifi_credentials();" class="buzz">CONNECT</button>
 		</div>
 	</div>
+
+	<script>
+		function update_wifi_credentials(){
+			let ssid = document.getElementById("ssid").value;
+			let pass = document.getElementById("pass").value;
+			window.location.href = "/save-wifi?ssid="+ssid+"&pass="+pass;
+		}
+	</script>
 </body>
 </html>
