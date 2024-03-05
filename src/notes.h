@@ -10,6 +10,7 @@
 
 // ##################################################################################################################################################
 // HOW TO GET JTAG WORKING ON PLATFORMIO WITH ESP32S3 DEV BOARD WITH TWO USB PORTS:
+// (Doesn't seem to work on alpha 3.0.0 IDF I'm using right now)
 //
 // https://community.platformio.org/t/how-to-use-jtag-built-in-debugger-of-the-esp32-s3-in-platformio/36042
 // +
