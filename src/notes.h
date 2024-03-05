@@ -59,3 +59,20 @@ UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to
 // If we're 25% of the way between when the last audio frame was recieved and when the next one will arrive,
 // a float value of 0.25 could be used to index into the previous audio chunk to break the 64 samples into 
 // an even smaller (but temporally consistent) chunk.
+
+
+// ###############################################################################################
+// Tasks 3/5/24
+/*
+
+- Redesign feet and spacer layer to interface together to prevent foot swivel
+- Resize logo on front
+- Design microphone adapter PCB
+- Design back plate window to QR code
+- Calc final screw lengths
+- Make shared cut cork file
+- Make shared cut diffuser file
+- Make shared cut wood file
+- Design nut cavity in USB brace
+
+*/
