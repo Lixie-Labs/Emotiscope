@@ -62,7 +62,7 @@ UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to
 
 
 // ###############################################################################################
-// Tasks 3/5/24
+// Tasks 3/6/24
 /*
 
 - Redesign feet and spacer layer to interface together to prevent foot swivel
@@ -74,5 +74,41 @@ UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to
 - Make shared cut diffuser file
 - Make shared cut wood file
 - Design nut cavity in USB brace
+
+*/
+
+// ##############################################################################
+// Live Instrument Classifier
+/*
+
+SETUP
+
+- Write a Python script which can iterate over all dataset items in the "train" partition of the OpenMIC 2018 dataset
+- Port Emotiscope's Goertzel engine to a standalone C++ program that takes a waveform chunk input and replicates the hardware spectral output
+- Validate that outputs match between software and hardware
+- For each OGG file input, downsample, mono, and cut it into as many CHUNK_SIZE waveform chunks as possible
+- Re-export waveform chunk data with original instrument metadata from OpenMIC
+- Same for "test" partition
+
+TRAIN
+
+- Use all waveform chunks + metadata to train a MLP network of size 32->32->32->32->20
+- 32 input neurons are downsampled via averaging from the 64-bin spectrogram
+- Three hidden layers of the same size
+- This hidden network shape can be easily visualized with three color channels on LEDs
+- Validate results against test set
+- Test/benchmark network in other shapes/dimensions
+
+EXPORT
+
+- Export trained neuron weights and biases to C float arrays
+- (Quantize to 16-bit?)
+
+IMPLEMENT
+
+- Use ESP32-S3 SIMD functions (or potentially ESP-DL if I can find at-all decent documentation on it)
+- Downsample spectrogram and feed-forward on trained neural network in hardware
+- Output resulting neurons in a compelling fashion like assigning colors to instrument types
+- Could also filter down to just vocal presence detection too
 
 */
