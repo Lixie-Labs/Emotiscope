@@ -83,16 +83,21 @@ UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to
 
 SETUP
 
-- Write a Python script which can iterate over all dataset items in the "train" partition of the OpenMIC 2018 dataset
+- Write a Python script which can iterate over all dataset items in the "train" partition of the OpenMIC-2018 dataset
 - Port Emotiscope's Goertzel engine to a standalone C++ program that takes a waveform chunk input and replicates the hardware spectral output
 - Validate that outputs match between software and hardware
 - For each OGG file input, downsample, mono, and cut it into as many CHUNK_SIZE waveform chunks as possible
 - Re-export waveform chunk data with original instrument metadata from OpenMIC
 - Same for "test" partition
+- Run each input file through the ported Emotiscope engine to retrieve spectral frames (200FPS)
+- Only export spectral frames for the middle 8 seconds of audio to account for averaging at edges
+- Only export every 20th spectral frame (200 FPS -> 10 FPS)
+- Frames are exported as .bin files in folders named after the input filename
+- Every frame folder contains a metadata file named "instruments.json" that stores the original metadata
 
 TRAIN
 
-- Use all waveform chunks + metadata to train a MLP network of size 32->32->32->32->20
+- Use all spectral frames + metadata to train a MLP network of size 32 -> 32 -> 32 -> 32 -> 20
 - 32 input neurons are downsampled via averaging from the 64-bin spectrogram
 - Three hidden layers of the same size
 - This hidden network shape can be easily visualized with three color channels on LEDs
