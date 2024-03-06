@@ -64,7 +64,6 @@ UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to
 // ###############################################################################################
 // Tasks 3/6/24
 /*
-
 - Redesign feet and spacer layer to interface together to prevent foot swivel
 - Resize logo on front
 - Design microphone adapter PCB
@@ -74,7 +73,6 @@ UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to
 - Make shared cut diffuser file
 - Make shared cut wood file
 - Design nut cavity in USB brace
-
 */
 
 // ##############################################################################
