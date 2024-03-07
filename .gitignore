@@ -4,5 +4,7 @@
 .vscode/launch.json
 .vscode/ipch
 
+extras/instrument_classifier/dataset_processing/*
+
 data/secrets/*.txt
 data/*.bkp

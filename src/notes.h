@@ -64,15 +64,14 @@ UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to
 // ###############################################################################################
 // Tasks 3/6/24
 /*
-- Redesign feet and spacer layer to interface together to prevent foot swivel
-- Resize logo on front
 - Design microphone adapter PCB
 - Design back plate window to QR code
+
 - Calc final screw lengths
+
 - Make shared cut cork file
 - Make shared cut diffuser file
 - Make shared cut wood file
-- Design nut cavity in USB brace
 */
 
 // ##############################################################################
@@ -89,14 +88,12 @@ SETUP
 - Same for "test" partition
 - Run each input file through the ported Emotiscope engine to retrieve spectral frames (200FPS)
 - Only export spectral frames for the middle 8 seconds of audio to account for averaging at edges
-- Only export every 20th spectral frame (200 FPS -> 10 FPS)
+- Only export every 10th spectral frame (200 FPS -> 20 FPS)
 - Frames are exported as .bin files in folders named after the input filename
-- Every frame folder contains a metadata file named "instruments.json" that stores the original metadata
 
 TRAIN
 
-- Use all spectral frames + metadata to train a MLP network of size 32 -> 32 -> 32 -> 32 -> 20
-- 32 input neurons are downsampled via averaging from the 64-bin spectrogram
+- Use all spectral frames + metadata to train a MLP network of size 64 -> 32 -> 32 -> 32 -> 20
 - Three hidden layers of the same size
 - This hidden network shape can be easily visualized with three color channels on LEDs
 - Validate results against test set
@@ -110,7 +107,7 @@ EXPORT
 IMPLEMENT
 
 - Use ESP32-S3 SIMD functions (or potentially ESP-DL if I can find at-all decent documentation on it)
-- Downsample spectrogram and feed-forward on trained neural network in hardware
+- Get spectrogram and feed-forward on trained neural network in hardware
 - Output resulting neurons in a compelling fashion like assigning colors to instrument types
 - Could also filter down to just vocal presence detection too
 
