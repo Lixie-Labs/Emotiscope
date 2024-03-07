@@ -132,7 +132,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.saturation = setting_value;
 
-			update_ui(UI_NEEDLE_EVENT, configuration.saturation);
+			//update_ui(UI_NEEDLE_EVENT, configuration.saturation);
 		}
 		else if (fastcmp(substring, "background")) {
 			// Get background value
