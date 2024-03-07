@@ -1,6 +1,8 @@
 #define NUM_FREQS ( 64 ) // Number of Goertzel instances running in parallel (musical AND tempi, 128 total)
 #define MAX_WEBSOCKET_CLIENTS ( 4 ) // Max simultaneous remote controls allowed at one time
 
+uint8_t HARDWARE_VERSION = 0;
+
 char wifi_ssid[64] = { 0 };
 char wifi_pass[64] = { 0 };
 

@@ -1,5 +1,8 @@
-// Define the touch pad pin number, replace TOUCH_PIN with the actual touch pad you're using
-#define TOUCH_PIN 1
+#define TOUCH_LEFT   4
+                 //  5  -----+-- mind the gap, maybe I'm paranoid of cross-talk
+#define TOUCH_CENTER 6  //   |
+                 //  7  -----+
+#define TOUCH_RIGHT  8
 
 // Threshold for considering a touch detected
 #define TOUCH_THRESHOLD 40000
@@ -21,7 +24,7 @@ extern void increment_mode();
 void read_touch(){
 	static float touch_value = 0;
 
-	int32_t raw_touch_value = touchRead( TOUCH_PIN );
+	int32_t raw_touch_value = touchRead( TOUCH_CENTER );
 	touch_value = raw_touch_value * 0.15 + touch_value * 0.85; // Smooth the input
 
 	if(touch_value >= TOUCH_THRESHOLD){

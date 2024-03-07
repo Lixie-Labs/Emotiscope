@@ -1,6 +1,6 @@
 #include "driver/ledc.h"
 
-#define INDICATOR_LIGHT_GPIO (10)
+#define INDICATOR_LIGHT_GPIO (11)
 #define INDICATOR_RESTING_BRIGHTNESS (0.1);
 
 #define LEDC_TIMER              LEDC_TIMER_0
@@ -65,7 +65,7 @@ void run_indicator_light(){
 		}
 	}
 
-	indicator_brightness = (indicator_brightness_target * 0.1) + indicator_brightness * 0.9;
+	indicator_brightness = (indicator_brightness_target * 0.075) + indicator_brightness * 0.925;
 
 	ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_MAX_DUTY * (indicator_brightness*indicator_brightness));
 	ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);

@@ -1,6 +1,26 @@
+/*
+C_FUNC (
+	float css_input_red   = *; // Extracted from original CSS hex color var!
+	float css_input_green = *; // Extracted from original CSS hex color var!
+	float css_input_blue  = *; // Extracted from original CSS hex color var!
+
+	float mix_val = 0.5;
+
+	float mix_val_inv = 1.0 - mix_val;
+	CRGBF incandescent_lookup = {1.0000, 0.1982, 0.0244};
+	CRGBF input_color = { css_input_red, css_input_green, css_input_blue };
+	CRGBF output_color = {
+		(input_color.r * incandescent_lookup.r) * mix_val + input_color.r * mix_val_inv,
+		(input_color.g * incandescent_lookup.g) * mix_val + input_color.g * mix_val_inv,
+		(input_color.b * incandescent_lookup.b) * mix_val + input_color.b * mix_val_inv
+	};
+
+	return output_color;
+)
+*/
+
 :root {
 	--text: #edeff7;
-	//--background: #070c1d;
 	--background: 7, 12, 29;
 	--primary: #ffb177;
 	--secondary: #81317b;

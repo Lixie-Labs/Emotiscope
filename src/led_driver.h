@@ -3,6 +3,9 @@
 #include <esp_check.h>
 #include <esp_log.h>
 
+#define LED_DATA_1_PIN ( 21 )
+#define LED_DATA_2_PIN ( 17 )
+
 // It won't void any kind of stupid warranty, but things will *definitely* break at this point if you change this number.
 #define NUM_LEDS ( 128 )
 
@@ -125,7 +128,7 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
 void init_rmt_driver() {
 	printf("init_rmt_driver\n");
 	rmt_tx_channel_config_t tx_chan_a_config = {
-		.gpio_num = (gpio_num_t)13,		 // GPIO number
+		.gpio_num = (gpio_num_t)LED_DATA_1_PIN,	// GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
 		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
@@ -136,7 +139,7 @@ void init_rmt_driver() {
 	};
 
 	rmt_tx_channel_config_t tx_chan_b_config = {
-		.gpio_num = (gpio_num_t)12,		 // GPIO number
+		.gpio_num = (gpio_num_t)LED_DATA_2_PIN, // GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
 		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes

@@ -43,7 +43,7 @@ void discovery_check_in() {
 			http_client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 			char params[120];
-			snprintf(params, 120, "product=emotiscope&version=%d.%d.%d&local_ip=%s", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, WiFi.localIP().toString().c_str());
+			snprintf(params, 120, "product=emotiscope&version=%d.%d.%d&local_ip=%s", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH, WiFi.localIP().toString().c_str());
 
 			int http_response_code = http_client.POST(params);	// Make the request
 
