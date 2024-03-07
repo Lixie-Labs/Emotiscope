@@ -331,6 +331,26 @@ void init_wifi() {
 		WiFi.begin(wifi_ssid, wifi_pass);  // Start the WiFi connection with the
 										// SSID and password parsed in configuration.h
 		printf("Started connection attempt to %s...\n", wifi_ssid);
+
+		// Define a variable to hold the MAC address
+		uint8_t mac_address[6]; // MAC address is 6 bytes
+
+		// Retrieve the MAC address of the device
+		WiFi.macAddress(mac_address);
+		//esp_read_mac(mac_address, ESP_MAC_WIFI_STA); // Use ESP_MAC_WIFI_STA for station interface
+		
+		// Define a char array to hold the formatted MAC address string
+		char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
+
+		// Format the MAC address into the char array
+		snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+				mac_address[0], mac_address[1], mac_address[2],
+				mac_address[3], mac_address[4], mac_address[5]);
+
+		// Print the MAC address string
+		printf("MAC Address: %s\n", mac_str);
+
+		// TODO: Fetch and print the MAC address in the app and wifi setup page
 	}
 
 	esp_wifi_set_ps(WIFI_PS_NONE);
