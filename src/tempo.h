@@ -15,8 +15,8 @@
 #define NOVELTY_HISTORY_LENGTH (1024)  // 50 FPS for 20.48 seconds
 #define NOVELTY_LOG_HZ (50)
 
-#define TEMPO_LOW (64-16)
-#define TEMPO_HIGH (192-16)
+#define TEMPO_LOW (64-32)
+#define TEMPO_HIGH (192-32)
 
 #define BEAT_SHIFT_PERCENT (0.00)
 
@@ -182,7 +182,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 
 		float scale = (0.5 * progress) + 0.5;
 
-		normalized_magnitude *= scale;
+		//normalized_magnitude *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;

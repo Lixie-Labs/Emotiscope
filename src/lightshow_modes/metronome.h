@@ -96,8 +96,10 @@ void draw_metronome() {
 		if(sine > 1.0){ sine = 1.0; }
 		else if(sine < -1.0){ sine = -1.0; }
 
-		float dot_pos = clip_float( sine * (0.5*(sqrt(contribution))) + 0.5 );
-		float opacity = sqrt(sqrt(contribution));
+		float metronome_width = 0.5; // Too wide of a show can be distracting, 50% is enough for the effect
+		float dot_pos = clip_float( sine * (0.5*(sqrt(contribution)) * metronome_width) + 0.5 );
+
+		float opacity = linear_to_tri((contribution));
 
 		if(opacity > 0.0025){
 			CRGBF dot_color = hsv(configuration.hue + configuration.hue_range*progress, configuration.saturation, 1.0);

@@ -43,7 +43,7 @@ CRGBF leds_smooth[NUM_LEDS];
 
 float rendered_debug_value = 0.0;
 
-CRGBF incandescent_lookup = {1.0000*1.0000, 0.4453*0.4453, 0.1562*0.1562};
+CRGBF incandescent_lookup = {1.0000, 0.1982, 0.0244};
 
 float note_colors[12] = {0.0000, 0.0833, 0.1666, 0.2499, 0.3333, 0.4166,
 						 0.4999, 0.5833, 0.6666, 0.7499, 0.8333, 0.9166};
@@ -510,4 +510,8 @@ void apply_background(){
 
 void clear_display(){
 	memset(leds, 0, sizeof(CRGBF)*NUM_LEDS);
+}
+
+void fade_display(){
+	scale_CRGBF_array_by_constant(leds, configuration.melt, NUM_LEDS);
 }

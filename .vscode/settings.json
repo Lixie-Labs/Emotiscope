@@ -21,6 +21,7 @@
 		"*.tcc": "cpp",
 		"fstream": "cpp",
 		"compare": "cpp",
-		"span": "cpp"
+		"span": "cpp",
+		"random": "cpp"
 	}
 }

@@ -102,7 +102,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = clip_float(atof(substring));
 			configuration.hue = setting_value;
 
-			update_ui(UI_HUE_EVENT, configuration.hue); // TODO: Color-related changes shouldn't show a UI dot but a gradient representing the hue and hue_range values
+			//update_ui(UI_HUE_EVENT, configuration.hue); // TODO: Color-related changes shouldn't show a UI dot but a gradient representing the hue and hue_range values
 		}
 		else if (fastcmp(substring, "mirror_mode")) {
 			// Get mirror_mode value
@@ -124,7 +124,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			float setting_value = atof(substring);
 			configuration.hue_range = setting_value;
 
-			update_ui(UI_HUE_EVENT, configuration.hue);
+			//update_ui(UI_HUE_EVENT, configuration.hue);
 		}
 		else if (fastcmp(substring, "saturation")) {
 			// Get saturation value
