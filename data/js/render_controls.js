@@ -31,7 +31,9 @@ function trigger_vibration(length_ms) {
     // Check if the Vibrate API is supported in the navigator
     if ("vibrate" in navigator) {
         // Trigger vibration for the specified length
-        navigator.vibrate([length_ms]);
+		if(on_surface == false){ // Only vibrate if the device is not on a surface
+        	navigator.vibrate([length_ms]);
+		}
         return true; // Indicate that the vibration was triggered
     } else {
         // Vibrate API not supported
@@ -200,7 +202,7 @@ function init_setting_gallery_snapping(){
 		}
 
 		if(nearest_click_point != nearest_click_point_last_frame){
-			trigger_vibration(5);
+			//trigger_vibration(5);
 			nearest_click_point_last_frame = nearest_click_point;
 		}
 

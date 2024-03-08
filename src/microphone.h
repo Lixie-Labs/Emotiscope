@@ -80,11 +80,9 @@ void acquire_sample_chunk() {
 	profile_function([&]() {
 		// Buffer to hold audio samples
 		uint32_t new_samples_raw[CHUNK_SIZE];
-		int32_t new_samples_shifted[CHUNK_SIZE];
-		float new_samples_raw_float[CHUNK_SIZE];
 		float new_samples[CHUNK_SIZE];
 
-		// Read audio samples into int32_t buffer
+		// Read audio samples into int32_t buffer, but **only when emotiscope is active**
 		if( EMOTISCOPE_ACTIVE == true ){
 			size_t bytes_read = 0;
 			i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
@@ -92,14 +90,14 @@ void acquire_sample_chunk() {
 
 		// Clip the sample value if it's too large, cast to floats
 		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
-			new_samples_raw_float[i+0] = min(max((((int32_t)new_samples_raw[i+0]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples_raw_float[i+1] = min(max((((int32_t)new_samples_raw[i+1]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples_raw_float[i+2] = min(max((((int32_t)new_samples_raw[i+2]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples_raw_float[i+3] = min(max((((int32_t)new_samples_raw[i+3]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples[i+0] = min(max((((int32_t)new_samples_raw[i+0]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples[i+1] = min(max((((int32_t)new_samples_raw[i+1]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples[i+2] = min(max((((int32_t)new_samples_raw[i+2]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples[i+3] = min(max((((int32_t)new_samples_raw[i+3]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
 		}
 
 		// Convert audio from "18-bit" float range to -1.0 to 1.0 range
-		dsps_mulc_f32(new_samples_raw_float, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
+		dsps_mulc_f32(new_samples, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
 
 		// Add new chunk to audio history
 		waveform_locked = true;

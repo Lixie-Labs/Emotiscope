@@ -1,7 +1,7 @@
 #include "driver/ledc.h"
 
 #define INDICATOR_LIGHT_GPIO (11)
-#define INDICATOR_RESTING_BRIGHTNESS (0.1);
+#define INDICATOR_RESTING_BRIGHTNESS (0.2);
 
 #define LEDC_TIMER              LEDC_TIMER_0
 #define LEDC_MODE               LEDC_LOW_SPEED_MODE
