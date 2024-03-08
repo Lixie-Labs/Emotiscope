@@ -464,7 +464,17 @@ button{
     display: flex;
     align-items: center;
     justify-content: center;
-	color: var(--accent);
+    color: var(--accent);
+    flex-direction: column;
+    position: relative;
+}
+
+#device_nickname{
+    color: var(--background);
+    font-size: 13px;
+    position: relative;
+    top: 38px;
+	pointer-events: none;
 }
 
 #current_mode{

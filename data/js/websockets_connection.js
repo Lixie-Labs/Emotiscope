@@ -282,6 +282,50 @@ function setup_header_logo_touch() {
     });
 }
 
+// Function to handle touch events on the device icon
+function setup_device_icon_touch() {
+    const device_icon = document.getElementById('device_icon');
+    let touch_timer = null;
+    let touch_active = false;
+
+    device_icon.addEventListener('touchstart', function(e) {
+        if (touch_active) return; // Ignore if another touch is already active
+        touch_active = true;
+        touch_timer = setTimeout(function() {
+            transmit('button_hold');
+			trigger_vibration(100);
+
+			if(standby_mode == false){
+				console.log("ENTERING STANDBY");
+				standby_mode = true;
+				document.getElementById("header_logo").style.color = "#5495d761";
+			}
+			else if(standby_mode == true){
+				console.log("EXITING STANDBY");
+				standby_mode = false;
+				document.getElementById("header_logo").style.color = "var(--primary)";
+			}
+
+            touch_timer = null; // Clear the timer once the function is called
+        }, 500); // Set timeout for 500ms
+    });
+
+    device_icon.addEventListener('touchend', function(e) {
+        if (touch_timer) {
+            clearTimeout(touch_timer); // Clear the timer if the touch ends before 500ms
+            transmit('button_tap');
+
+			var num_modes = modes.length;
+			let next_mode = (configuration.current_mode + 1) % num_modes;
+			configuration.current_mode = next_mode;
+			let next_mode_name = modes[next_mode]; 
+			document.getElementById("current_mode").innerHTML = next_mode_name;
+
+        }
+        touch_active = false; // Allow new touches
+    });
+}
+
 function reconnect_websockets(){
 	if(reconnecting == false){
 		reconnecting = true;
@@ -304,6 +348,7 @@ function reconnect_websockets(){
 function open_websockets_connection_to_device(){
 	console.log("CONNECTING TO "+device_ip);
 	ws = new WebSocket("ws://"+device_ip+":80/ws");
+	document.getElementById("device_nickname").innerHTML = device_ip;
 
 	ws.onopen = function(e) {
 		console.log("[open] Connection established");
@@ -338,4 +383,5 @@ function open_websockets_connection_to_device(){
 // Register the touch event listeners on page load
 document.addEventListener('DOMContentLoaded', function() {
     setup_header_logo_touch();
+	setup_device_icon_touch();
 });

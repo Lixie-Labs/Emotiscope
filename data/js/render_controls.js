@@ -313,3 +313,9 @@ window.addEventListener('DOMContentLoaded', function(){
 		transmit("touch_end");
 	}, { passive: true });
 });
+
+window.onload = function() {
+    window.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+}

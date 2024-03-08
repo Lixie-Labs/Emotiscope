@@ -28,7 +28,7 @@ void draw_ui_overlay(){
 	// -----------------------------
 	// Draw UI
 	if(last_update_type == UI_NEEDLE_EVENT){
-		CRGBF back_color = hsv(0.850, 1.0, 0.05);
+		CRGBF back_color = hsv(0.870, 1.0, 0.05);
 		draw_line(leds, 0, ui_needle_position*0.5*overlay_size, back_color, 0.98*overlay_size);
 	
 		CRGBF dot_color = hsv(0.814, 1.0, 1.0);
