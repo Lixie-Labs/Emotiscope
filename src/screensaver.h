@@ -48,9 +48,9 @@ void run_screensaver(){
 		};
 
 		for(uint16_t i = 0; i < 4; i++){
-			screensaver_colors[i].r *= incandescent_lookup.r;
-			screensaver_colors[i].g *= incandescent_lookup.g;
-			screensaver_colors[i].b *= incandescent_lookup.b;
+			screensaver_colors[i].r = (screensaver_colors[i].r * incandescent_lookup.r)*0.5 + screensaver_colors[i].r*0.5;
+			screensaver_colors[i].g = (screensaver_colors[i].g * incandescent_lookup.g)*0.5 + screensaver_colors[i].g*0.5;
+			screensaver_colors[i].b = (screensaver_colors[i].b * incandescent_lookup.b)*0.5 + screensaver_colors[i].b*0.5;
 		}
 		
 		for(uint16_t i = 0; i < 4; i++){

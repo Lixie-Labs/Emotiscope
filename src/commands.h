@@ -80,13 +80,13 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			update_ui(UI_NEEDLE_EVENT, configuration.brightness);
 		}
-		else if (fastcmp(substring, "melt")) {
-			// Get speed value
+		else if (fastcmp(substring, "softness")) {
+			// Get softness value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
-			configuration.melt = setting_value;
+			configuration.softness = setting_value;
 
-			update_ui(UI_NEEDLE_EVENT, configuration.melt);
+			update_ui(UI_NEEDLE_EVENT, configuration.softness);
 		}
 		else if (fastcmp(substring, "speed")) {
 			// Get speed value
@@ -97,7 +97,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			update_ui(UI_NEEDLE_EVENT, configuration.speed);
 		}
 		else if (fastcmp(substring, "hue")) {
-			// Get brightness value
+			// Get hue value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = clip_float(atof(substring));
 			configuration.hue = setting_value;
@@ -141,14 +141,6 @@ void parse_command(uint32_t t_now_ms, command com) {
 			configuration.background = setting_value;
 
 			update_ui(UI_NEEDLE_EVENT, configuration.background);
-		}
-		else if (fastcmp(substring, "bass")) {
-			// Get bass value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
-			float setting_value = atof(substring);
-			configuration.bass = setting_value;
-
-			update_ui(UI_NEEDLE_EVENT, configuration.bass);
 		}
 		else if (fastcmp(substring, "screensaver")) {
 			// Get screensaver value

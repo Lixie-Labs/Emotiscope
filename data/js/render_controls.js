@@ -31,9 +31,9 @@ function trigger_vibration(length_ms) {
     // Check if the Vibrate API is supported in the navigator
     if ("vibrate" in navigator) {
         // Trigger vibration for the specified length
-		if(on_surface == false){ // Only vibrate if the device is not on a surface
+		//if(on_surface == false){ // Only vibrate if the device is not on a surface
         	navigator.vibrate([length_ms]);
-		}
+		//}
         return true; // Indicate that the vibration was triggered
     } else {
         // Vibrate API not supported

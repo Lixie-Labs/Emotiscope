@@ -8,6 +8,8 @@
 // When the configuration.bin file's version number doesn't match on boot, the values in it can be
 // ported to the new config struct on boot. The next following save changes the
 // version in flash, making this a one-time conversion.
+//
+// Downgrades are not supported, and the user is warned that the device will be reset to factory settings
 #define CONFIGURATION_TYPE ( 1 )
 
 #define CONFIG_FILENAME "/configuration.bin"
@@ -27,14 +29,13 @@ config configuration = {
 	CONFIGURATION_TYPE,
 
 	1.00, // brightness
-	0.50, // melt
-	0.00, // hue
-	1.00, // incandescent_filter
+	0.25, // softness
+	0.90, // hue
+	0.00, // incandescent_filter
 	0.00, // hue_range
-	1.00, // speed
+	0.75, // speed
 	1.00, // saturation
 	0.00, // background
-	0.00, // bass
 	0,    // current_mode
 	true, // mirror_mode
 	true, // screensaver
@@ -67,9 +68,9 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|brightness|float|%.3f", configuration.brightness);
 	websocket_handler.sendAll(config_item_buffer);
 
-	// melt
+	// softness
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|melt|float|%.3f", configuration.melt);
+	snprintf(config_item_buffer, 120, "new_config|softness|float|%.3f", configuration.softness);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// speed
@@ -110,11 +111,6 @@ void sync_configuration_to_client() {
 	// base_coat
 	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|background|float|%.3f", configuration.background);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// bass
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|bass|float|%.3f", configuration.bass);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// screensaver

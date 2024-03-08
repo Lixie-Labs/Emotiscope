@@ -513,5 +513,5 @@ void clear_display(){
 }
 
 void fade_display(){
-	scale_CRGBF_array_by_constant(leds, configuration.melt, NUM_LEDS);
+	scale_CRGBF_array_by_constant(leds, configuration.softness, NUM_LEDS);
 }

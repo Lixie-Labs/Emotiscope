@@ -87,14 +87,13 @@ struct config {
 	int32_t type; // Indirectly decribes the current datatypes of this struct (and their order in physical memory) to a parser
 
 	float brightness;
-	float melt; 
+	float softness; 
 	float hue;
 	float incandescent_filter;
 	float hue_range;
 	float speed;
 	float saturation;
 	float background;
-	float bass;
 	int32_t current_mode;
 	bool mirror_mode;
 	bool screensaver;
@@ -111,14 +110,13 @@ struct config_type_1 {
 	int32_t type; // Indirectly decribes the current datatypes of this struct (and their order in physical memory) to a parser
 
 	float brightness;
-	float melt; 
+	float softness; 
 	float hue;
 	float incandescent_filter;
 	float hue_range;
 	float speed;
 	float saturation;
 	float background;
-	float bass;
 	int32_t current_mode;
 	bool mirror_mode;
 	bool screensaver;

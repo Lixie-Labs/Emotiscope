@@ -2,7 +2,7 @@ float samples[NUM_LEDS];
 
 void draw_waveform(){
 	memcpy(samples, &sample_history[(SAMPLE_HISTORY_LENGTH-1) - (NUM_LEDS+CHUNK_SIZE)], sizeof(float) * NUM_LEDS);
-	float cutoff_frequency = 110 + 2000*(1.0-configuration.bass);
+	float cutoff_frequency = 110 + 2000*(1.0/*-configuration.bass*/);
 	low_pass_filter(samples, NUM_LEDS, SAMPLE_RATE, cutoff_frequency, 3);
 
 	float max_val = 0.000001;

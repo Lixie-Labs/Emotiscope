@@ -34,7 +34,7 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	clear_sliders();
 
 	register_slider("brightness", 0.000, 1.000, 0.001);
-	register_slider("melt", 0.000, 1.000, 0.001);
+	register_slider("softness", 0.000, 1.000, 0.001);
 
 	if (mode_index == 0) {  // Analog
 		register_slider("speed", 0.000, 1.000, 0.001);
