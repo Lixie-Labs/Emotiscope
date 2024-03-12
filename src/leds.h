@@ -16,7 +16,7 @@
 
 #define REFERENCE_FPS 100
 
-#define MAX_DOTS 192 
+#define MAX_DOTS 384
 
 CRGBF WHITE_BALANCE = { 1.0, 0.75, 0.60 };
 

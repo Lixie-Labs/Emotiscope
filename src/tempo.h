@@ -20,7 +20,7 @@
 
 #define BEAT_SHIFT_PERCENT (0.00)
 
-#define NUM_TEMPI (64)
+#define NUM_TEMPI (128)
 
 bool silence_detected = true;
 float silence_level = 1.0;
@@ -98,7 +98,7 @@ void init_tempo_goertzel_constants() {
 			max_distance_hz = neighbor_right_distance_hz;
 		}
 
-		tempi[i].block_size = NOVELTY_LOG_HZ / (max_distance_hz*0.5);
+		tempi[i].block_size = NOVELTY_LOG_HZ / (max_distance_hz*1.0);
 
 		if (tempi[i].block_size > NOVELTY_HISTORY_LENGTH) {
 			tempi[i].block_size = NOVELTY_HISTORY_LENGTH;
@@ -182,7 +182,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 
 		float scale = (0.5 * progress) + 0.5;
 
-		//normalized_magnitude *= scale;
+		normalized_magnitude *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;
