@@ -10,6 +10,40 @@ const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32
 const IPAddress ap_subnet(255, 255, 255, 0); // Subnet mask for the WiFi network
 DNSServer dns_server; // DNS server instance
 
+// HTTPS not working yet, PsychicHTTP can't initialize the SSL server
+bool app_enable_ssl = true;
+const char server_cert[] = "-----BEGIN CERTIFICATE-----\n"
+	"MIIEIjCCAwqgAwIBAgISBH7YjHKyJu9WiS8x5r5AoQBbMA0GCSqGSIb3DQEBCwUA\n"
+	"MDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD\n"
+	"EwJSMzAeFw0yNDAzMTIyMjI1MTBaFw0yNDA2MTAyMjI1MDlaMBsxGTAXBgNVBAMT\n"
+	"EGVtb3Rpc2NvcGUucm9ja3MwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATQHjaY\n"
+	"I+CdZFEl7b4uLJQvM9wc4PQuP3bwNYT22xgF+vMqZan+dFPQ2aivqTQTmfpZf7P4\n"
+	"i5Zabvke7fLcVgL6o4ICEjCCAg4wDgYDVR0PAQH/BAQDAgeAMB0GA1UdJQQWMBQG\n"
+	"CCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBTKbZV5\n"
+	"T6G16rxt/6U4ceZ47dH38DAfBgNVHSMEGDAWgBQULrMXt1hWy65QCUDmH6+dixTC\n"
+	"xjBVBggrBgEFBQcBAQRJMEcwIQYIKwYBBQUHMAGGFWh0dHA6Ly9yMy5vLmxlbmNy\n"
+	"Lm9yZzAiBggrBgEFBQcwAoYWaHR0cDovL3IzLmkubGVuY3Iub3JnLzAbBgNVHREE\n"
+	"FDASghBlbW90aXNjb3BlLnJvY2tzMBMGA1UdIAQMMAowCAYGZ4EMAQIBMIIBBAYK\n"
+	"KwYBBAHWeQIEAgSB9QSB8gDwAHYASLDja9qmRzQP5WoC+p0w6xxSActW3SyB2bu/\n"
+	"qznYhHMAAAGONPvyqwAABAMARzBFAiByFzLVHoKxCHjMzswH9uorSMDLaRT7R0Qd\n"
+	"p7GS/wRmxAIhAO+vULdM8/l57nfNbHTO7ZDaPNaHdXtnpB2iPZl1VV+RAHYA7s3Q\n"
+	"ZNXbGs7FXLedtM0TojKHRny87N7DUUhZRnEftZsAAAGONPvyZQAABAMARzBFAiEA\n"
+	"0N6+Jcg5MIQSY8npJf+z6Sos+YvL6oAgBct8ho45J5kCIF4W1k1QmJSDDbT7UvI5\n"
+	"6vM3mNME7+FDsv7Dx+SxXJpHMA0GCSqGSIb3DQEBCwUAA4IBAQAWNeX3A+1elo4H\n"
+	"HclveVrcw1vbJfJWIfN+GYr6EXzWlUtDWHQNzpwNZWy5KhizypJV2nKEMEaZrkMp\n"
+	"hg0nVfU1EIlT7gDmLrxLneZMig5G1HFuikf5iS28qasG+WWwlR6lOPKWmnGb+Eyg\n"
+	"N7KpKPOolfggrmt1n1PjR3CEI9b31ISNW1WiedFZf0WKfva8yhjH+vqM8H179z+H\n"
+	"j3Ly0aEo80dX4CtPhsvuS//Zp8ICeac6Bp7hiy45hOMJVba7e+khdXQOjA5NIf1w\n"
+	"Fg0zi3hBsQ1OuoKirhAXYgMvjhIqVR6hZQCl0Qo04OeGib12o1oIryun9XjElM7A\n"
+	"IAEFbV9H\n"
+	"-----END CERTIFICATE-----\n";
+
+const char server_key[] = "-----BEGIN PRIVATE KEY-----\n"
+	"MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgQhojjmRxKkBrJ2J+\n"
+	"N0xPI/w2QqYFwegoEvwHt2pNF/OhRANCAARM1A650C1wbnD3LDFeYEnBYJU9UG8x\n"
+	"4fFbE06zxFwt04nZJ9RLHu5uwKffSkZzhOAUAB+EjvA+9x4h4vbAM+nd\n"
+	"----------END PRIVATE KEY----------\n";
+
 PsychicHttpServer server;
 PsychicWebSocketHandler websocket_handler;
 websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
