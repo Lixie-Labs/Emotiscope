@@ -1,0 +1,21 @@
+
+	- Get large MIDI dataset
+	
+	PRE-PROCESS:
+	
+		- Filter drums out of all MIDI recordings
+		- Remove all notes above or below GDFT range
+		- Render all MIDI to mono WAV @ 12800Hz
+		- Chunk WAV files into spectral frames
+		- Delete 90% randomly
+		- Feed into C++ spectral frame generator
+		- Convert output to float[64] arrays associated with float[64] arrays of input notes
+	
+	TRAIN:
+	
+		- Goal: network gets real music in, and returns DFT without harmonics
+		- Network takes real GDFT in with 1:1 MIDI notes as an expected output
+		
+	DEPLOY:
+	
+		- Export final weights/biases to float arrays for ESP-DSP
