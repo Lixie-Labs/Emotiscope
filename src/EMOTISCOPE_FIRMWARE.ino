@@ -53,6 +53,7 @@
 #include "audio_debug.h" // ........ Print audio data over UART
 #include "screensaver.h" // ........ Colorful dots play on screen when no audio is present
 #include "standby.h" // ............ Handles sleep/wake + animations
+#include "neural.h" // ............. Neural network for notation classification
 #include "lightshow_modes.h" // .... Definition and handling of lightshow modes
 #include "commands.h" // ........... Queuing and parsing of commands recieved
 #include "wireless.h" // ........... Communication with your network and the web-app

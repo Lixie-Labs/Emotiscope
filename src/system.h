@@ -43,12 +43,14 @@ void init_system() {
 	extern void init_filesystem();
 	extern void init_rmt_driver();
 	extern void init_indicator_light();
+	extern void init_random_weights();
 
 	init_hardware_version_pins();       // (hardware_version.h)
 	init_serial(2000000);				// (system.h)
 	init_filesystem();                  // (filesystem.h)
 	init_configuration();               // (configuration.h)
 	init_i2s_microphone();				// (microphone.h)
+	init_random_weights();				// (neural.h)
 	init_window_lookup();				// (goertzel.h)
 	init_goertzel_constants_musical();	// (goertzel.h)
 	init_tempo_goertzel_constants();	// (tempo.h)	
