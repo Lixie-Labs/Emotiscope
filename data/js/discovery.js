@@ -50,4 +50,7 @@ function fetch_and_redirect() {
 		});
 }
 
-fetch_and_redirect();
+// If page is fully loaded, fetch and redirect
+document.addEventListener('DOMContentLoaded', (event) => {
+	fetch_and_redirect();
+});

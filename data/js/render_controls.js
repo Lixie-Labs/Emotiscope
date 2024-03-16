@@ -300,9 +300,6 @@ document.getRootNode().addEventListener('touchend', function(){
 });
 */
 
-// Periodically check for new '.buzz' elements every 100ms
-setInterval(check_and_attach_buzz_listeners, 100);
-
 // Initialize the listener on page load
 window.addEventListener('DOMContentLoaded', function(){
 	document.addEventListener('touchstart', function(){
@@ -311,10 +308,11 @@ window.addEventListener('DOMContentLoaded', function(){
 	document.addEventListener('touchend', function(){
 		transmit("touch_end");
 	}, { passive: true });
-});
 
-window.onload = function() {
-    window.addEventListener('contextmenu', function(e) {
+	window.addEventListener('contextmenu', function(e) {
         e.preventDefault();
     });
-}
+
+	// Periodically check for new '.buzz' elements every 100ms
+	setInterval(check_and_attach_buzz_listeners, 100);
+});
