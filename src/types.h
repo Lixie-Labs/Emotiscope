@@ -97,6 +97,7 @@ struct config {
 	int32_t current_mode;
 	bool mirror_mode;
 	bool screensaver;
+	bool temporal_dithering;
 };
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -120,4 +121,5 @@ struct config_type_1 {
 	int32_t current_mode;
 	bool mirror_mode;
 	bool screensaver;
+	bool temporal_dithering;
 };

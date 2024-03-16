@@ -48,7 +48,7 @@ void run_cpu() {
 
 		read_touch();
 
-		neural_network_feed_forward();
+		//neural_network_feed_forward();
 
 		//------------------------------------------------------------------------------------------
 		// WIFI

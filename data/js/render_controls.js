@@ -91,11 +91,12 @@ function render_toggles(){
 
 function render_menu_toggles(){
 	let toggle_container = document.getElementById("menu_toggles");
-	toggle_container.innerHTML = "";
 	let out_html = "";
 	for(let i in menu_toggles){
 		let toggle_name = menu_toggles[i].name;
 		let toggle_value = configuration[toggle_name];
+
+		console.log("TOGGLE: "+toggle_name+" VALUE: "+toggle_value);
 		
 		if(toggle_value == true){
 			out_html += `<div class="menu_item buzz" onclick="set_menu_toggle_state('${toggle_name}', false);">`;
@@ -109,10 +110,8 @@ function render_menu_toggles(){
 			out_html += `	<span class="menu_item_content menu_item_toggle_off" id="${toggle_name}">OFF</span>`;
 			out_html += `</div>`;
 		}
-
-		configuration[toggle_name] = !configuration[toggle_name];
 	}
-	toggle_container.innerHTML += out_html;
+	toggle_container.innerHTML = out_html;
 }
 
 function calculate_slider_distance() {

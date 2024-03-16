@@ -20,6 +20,8 @@ bool hold_active = false;
 
 extern void toggle_standby();
 extern void increment_mode();
+extern uint8_t hold_blinks_queued;
+extern bool hold_blink_state;
 
 void read_touch(){
 	static float touch_value = 0;
@@ -41,6 +43,8 @@ void read_touch(){
 				if(hold_active == false){
 					hold_active = true;
 					printf("HOLD TOUCH TRIGGER\n");
+					hold_blinks_queued = 1;
+					hold_blink_state = true;
 					toggle_standby();
 				}
 			}

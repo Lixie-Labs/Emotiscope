@@ -39,6 +39,7 @@ config configuration = {
 	0,    // current_mode
 	true, // mirror_mode
 	true, // screensaver
+	true, // temporal_dithering
 };
 
 float noise_spectrum[NUM_FREQS] = {0.0};
@@ -116,6 +117,11 @@ void sync_configuration_to_client() {
 	// screensaver
 	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|screensaver|int|%li", configuration.screensaver);
+	websocket_handler.sendAll(config_item_buffer);
+
+	// temporal_dithering
+	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|temporal_dithering|int|%li", configuration.temporal_dithering);
 	websocket_handler.sendAll(config_item_buffer);
 
 	websocket_handler.sendAll("config_ready");

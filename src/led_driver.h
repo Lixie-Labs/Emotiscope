@@ -165,33 +165,42 @@ void init_rmt_driver() {
 	ESP_ERROR_CHECK(rmt_enable(tx_chan_b));
 }
 
-void quantize_color() {
-	const float dither_table[4] = {0.25, 0.50, 0.75, 1.00};
-	static uint8_t dither_step = 0;
-	dither_step++;
+void quantize_color(bool temporal_dithering) {
+	if(temporal_dithering == true){
+		const float dither_table[4] = {0.25, 0.50, 0.75, 1.00};
+		static uint8_t dither_step = 0;
+		dither_step++;
 
-	float decimal_r; float decimal_g; float decimal_b;
-	uint8_t whole_r; uint8_t whole_g; uint8_t whole_b;
-	float   fract_r; float   fract_g; float   fract_b;
+		float decimal_r; float decimal_g; float decimal_b;
+		uint8_t whole_r; uint8_t whole_g; uint8_t whole_b;
+		float   fract_r; float   fract_g; float   fract_b;
 
-	for (uint16_t i = 0; i < NUM_LEDS; i++) {
-		// RED #####################################################
-		decimal_r = leds[i].r * 254;
-		whole_r = decimal_r;
-		fract_r = decimal_r - whole_r;
-		raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step) % 4]);
-		
-		// GREEN #####################################################
-		decimal_g = leds[i].g * 254;
-		whole_g = decimal_g;
-		fract_g = decimal_g - whole_g;
-		raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step) % 4]);
+		for (uint16_t i = 0; i < NUM_LEDS; i++) {
+			// RED #####################################################
+			decimal_r = leds[i].r * 254;
+			whole_r = decimal_r;
+			fract_r = decimal_r - whole_r;
+			raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step) % 4]);
+			
+			// GREEN #####################################################
+			decimal_g = leds[i].g * 254;
+			whole_g = decimal_g;
+			fract_g = decimal_g - whole_g;
+			raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step) % 4]);
 
-		// BLUE #####################################################
-		decimal_b = leds[i].b * 254;
-		whole_b = decimal_b;
-		fract_b = decimal_b - whole_b;
-		raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step) % 4]);
+			// BLUE #####################################################
+			decimal_b = leds[i].b * 254;
+			whole_b = decimal_b;
+			fract_b = decimal_b - whole_b;
+			raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step) % 4]);
+		}
+	}
+	else{
+		for (uint16_t i = 0; i < NUM_LEDS; i++) {
+			raw_led_data[3*i+1] = (uint8_t)(leds[i].r * 255);
+			raw_led_data[3*i+0] = (uint8_t)(leds[i].g * 255);
+			raw_led_data[3*i+2] = (uint8_t)(leds[i].b * 255);
+		}
 	}
 }
 
@@ -208,7 +217,7 @@ IRAM_ATTR void transmit_leds() {
 	// This allows the 8-bit LEDs to emulate the look of a higher bit-depth using persistence of vision tricks
 	// The contents of the floating point CRGBF "leds" array are downsampled into the in alternating ways hundreds of
 	// time 
-	quantize_color();
+	quantize_color(configuration.temporal_dithering);
 
 	// Get to safety, THE PHOTONS ARE COMING!!!
 	if(filesystem_ready == true){

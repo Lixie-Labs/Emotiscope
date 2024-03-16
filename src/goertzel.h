@@ -204,7 +204,7 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 		float progress = float(bin_number) / NUM_FREQS;
 		progress *= progress;
 		progress *= progress;
-		scale = (progress * 0.975) + 0.025;
+		scale = (progress * 0.995) + 0.005;
 
 	}, __func__ );
 

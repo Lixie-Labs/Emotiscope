@@ -148,6 +148,12 @@ void parse_command(uint32_t t_now_ms, command com) {
 			bool setting_value = (bool)atoi(substring);
 			configuration.screensaver = setting_value;
 		}
+		else if (fastcmp(substring, "temporal_dithering")){
+			// Get temporal_dithering value
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			bool setting_value = (bool)atoi(substring);
+			configuration.temporal_dithering = setting_value;
+		}
 
 		else if (fastcmp(substring, "mode")) {
 			// Get mode name

@@ -13,6 +13,8 @@ function set_menu_toggle_state(toggle_name, toggle_state){
 		transmit(`set|${toggle_name}|0`);
 	}
 
+	configuration[toggle_name] = !configuration[toggle_name];
+
 	render_menu_toggles();
 }
 

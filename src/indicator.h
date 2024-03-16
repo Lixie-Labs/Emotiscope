@@ -1,7 +1,10 @@
 #include "driver/ledc.h"
 
 #define INDICATOR_LIGHT_GPIO (11)
-#define INDICATOR_RESTING_BRIGHTNESS (0.2);
+#define INDICATOR_RESTING_BRIGHTNESS (0.25);
+#define INDICATOR_MIN_BRIGHTNESS (0.01)
+#define STATUS_BLINK_INTERVAL_MS (400)
+#define HOLD_BLINK_INTERVAL_MS (200)
 
 #define LEDC_TIMER              LEDC_TIMER_0
 #define LEDC_MODE               LEDC_LOW_SPEED_MODE
@@ -17,6 +20,16 @@ float indicator_brightness_target = 0.0;
 
 extern volatile bool web_server_ready;
 extern int16_t connection_status;
+extern bool touch_active;
+extern float standby_brightness;
+extern float standby_breath;
+
+bool status_blink_state = false;
+uint32_t last_status_blink = 0;
+
+uint8_t hold_blinks_queued = 0;
+bool hold_blink_state = false;
+uint32_t last_hold_blink = 0;
 
 void init_indicator_light(){
 	// Prepare and then apply the LEDC PWM timer configuration
@@ -52,21 +65,47 @@ void run_indicator_light(){
 	else{
 		if (connection_status == WL_CONNECTED) {
 			indicator_brightness_target = INDICATOR_RESTING_BRIGHTNESS;
+
+			// if blinks == 0, toggle the indicator target on and off every blink_interval_ms. Only modify the indicator duty cycle if blink_state == true
+			if(touch_active == true){
+				if(hold_blinks_queued > 0){
+					if(t_now_ms - last_hold_blink >= HOLD_BLINK_INTERVAL_MS){
+						hold_blink_state = !hold_blink_state;
+
+						if(hold_blink_state == true){
+							indicator_brightness_target = 1.0;
+							indicator_brightness = 1.0;
+						}
+						else{
+							indicator_brightness_target = 0.0;
+							indicator_brightness = 0.0;
+							hold_blinks_queued--;
+						}
+
+						last_hold_blink = t_now_ms;					}
+				}
+				else{
+					indicator_brightness_target = 1.0;
+				}
+			}
 		}
 		else{
-			if(t_now_ms - last_blink >= 250){
-				blink_state = !blink_state;
+			if(t_now_ms - last_status_blink >= STATUS_BLINK_INTERVAL_MS){
+				status_blink_state = !status_blink_state;
 
-				indicator_brightness_target = blink_state;
-				indicator_brightness = blink_state;
+				indicator_brightness_target = status_blink_state;
+				indicator_brightness = status_blink_state;
 
-				last_blink = t_now_ms;
+				last_status_blink = t_now_ms;
 			}
 		}
 	}
 
 	indicator_brightness = (indicator_brightness_target * 0.075) + indicator_brightness * 0.925;
 
-	ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_MAX_DUTY * (indicator_brightness*indicator_brightness));
+	float output_brightness = clip_float(indicator_brightness*indicator_brightness+standby_breath)*standby_brightness*standby_brightness;
+	output_brightness = output_brightness * (1.0-INDICATOR_MIN_BRIGHTNESS) + INDICATOR_MIN_BRIGHTNESS;
+
+	ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_MAX_DUTY * output_brightness);
 	ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
 }
