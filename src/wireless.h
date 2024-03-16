@@ -3,7 +3,7 @@
 #define INITIAL_BACKOFF_MS (1000)									 // Initial backoff delay in milliseconds
 #define MAX_NETWORK_CONNECT_ATTEMPTS (3)
 
-#define DISCOVERY_SERVER_URL "https://emotiscope.rocks/discovery/"
+#define DISCOVERY_SERVER_URL "https://app.emotiscope.rocks/discovery/"
 
 const IPAddress ap_ip(192, 168, 4, 1); // IP address for the ESP32-S3 in AP mode
 const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32-S3 IP
