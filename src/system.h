@@ -45,7 +45,7 @@ void init_system() {
 	extern void init_indicator_light();
 
 	init_hardware_version_pins();       // (hardware_version.h)
-	init_serial(2000000);				// (system.h)
+	//init_serial(2000000);				// (system.h)
 	init_filesystem();                  // (filesystem.h)
 	init_configuration();               // (configuration.h)
 	init_i2s_microphone();				// (microphone.h)

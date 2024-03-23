@@ -12,7 +12,7 @@
 
 //--------------------------------------------
 
-#define NOVELTY_HISTORY_LENGTH (1024)  // 50 FPS for 20.48 seconds
+#define NOVELTY_HISTORY_LENGTH (512)  // 50 FPS for 20.48 seconds
 #define NOVELTY_LOG_HZ (50)
 
 #define TEMPO_LOW (64-32)
@@ -180,9 +180,9 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
 		progress *= progress;
 
-		float scale = (0.9 * progress) + 0.1;
+		float scale = (0.4 * progress) + 0.6;
 
-		normalized_magnitude *= scale;
+		normalized_magnitude;// *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;
@@ -281,8 +281,10 @@ void update_tempo() {
 
 			uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
 
-			calculate_tempi_magnitudes(calc_bin);
-			calc_bin++;
+			calculate_tempi_magnitudes(calc_bin+0);
+			calculate_tempi_magnitudes(calc_bin+1);
+
+			calc_bin+=2;
 			if (calc_bin >= max_bin) {
 				calc_bin = 0;
 			}

@@ -1,6 +1,11 @@
+#define NUM_VU_AVERAGE_SAMPLES 4
+
 volatile float vu_level_raw = 0.0;
 volatile float vu_level = 0.0;
 volatile float vu_max = 0.0;
+
+float vu_history[NUM_VU_AVERAGE_SAMPLES] = { 0 };
+uint8_t vu_history_index = 0;
 
 void run_vu(){
 	static float max_amplitude_cap = 0.0000001;
@@ -35,6 +40,15 @@ void run_vu(){
 
 	float mix_speed = 0.25;
 	vu_level = vu_level_raw * mix_speed + vu_level*(1.0-mix_speed);
+
+	vu_history[vu_history_index] = vu_level;
+	vu_history_index = (vu_history_index + 1) % NUM_VU_AVERAGE_SAMPLES;
+
+	float vu_sum = 0.0;
+	for(uint8_t i = 0; i < NUM_VU_AVERAGE_SAMPLES; i++){
+		vu_sum += vu_history[i];
+	}
+	vu_level = vu_sum / NUM_VU_AVERAGE_SAMPLES;
 
 	vu_max = max(vu_max, vu_level);
 }
