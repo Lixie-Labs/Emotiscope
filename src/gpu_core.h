@@ -64,6 +64,8 @@ void run_gpu() {
 		run_standby();
 	}
 
+	render_touches();  // (touch.h)
+
 	draw_ui_overlay();
 	
 	// This value decays itself non linearly toward zero all the time, 

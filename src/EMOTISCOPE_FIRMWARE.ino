@@ -41,10 +41,10 @@
 #include "configuration.h" // ...... Storing and retreiving your settings
 #include "utilities.h" // .......... Custom generic math functions
 #include "system.h" // ............. Lowest-level firmware functions
-#include "touch.h" // .............. Handles capacitive touch input
-#include "indicator.h" // .......... Little light bulb
 #include "led_driver.h" // ......... Low-level LED communication, (ab)uses RMT for non-blocking output
 #include "leds.h" // ............... LED dithering, effects, filters
+#include "touch.h" // .............. Handles capacitive touch input
+#include "indicator.h" // .......... Little light bulb
 #include "ui.h" // ................. Draws UI elements to the LEDs like indicator needles
 #include "microphone.h" // ......... For gathering audio chunks from the microphone
 #include "vu.h" // ................. Tracks music loudness from moment to moment

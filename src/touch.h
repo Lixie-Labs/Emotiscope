@@ -8,6 +8,12 @@
 
 #define TOUCH_HOLD_MS 500 // Less than this is a tap, more is a hold
 
+typedef enum touch_position{
+	TOUCH_LEFT = 0,
+	TOUCH_CENTER = 1,
+	TOUCH_RIGHT = 2
+} touch_position;
+
 touch_pin touch_pins[3];
 
 volatile bool app_touch_active = false;
@@ -20,13 +26,13 @@ extern uint8_t hold_blinks_queued;
 extern bool hold_blink_state;
 
 void init_touch(){
-	touch_pins[0].pin = TOUCH_LEFT_PIN;
-	touch_pins[1].pin = TOUCH_CENTER_PIN;
-	touch_pins[2].pin = TOUCH_RIGHT_PIN;
+	touch_pins[TOUCH_LEFT].pin = TOUCH_LEFT_PIN;
+	touch_pins[TOUCH_CENTER].pin = TOUCH_CENTER_PIN;
+	touch_pins[TOUCH_RIGHT].pin = TOUCH_RIGHT_PIN;
 
-	touch_pins[0].threshold = 33000;
-	touch_pins[1].threshold = 95000;
-	touch_pins[2].threshold = 64000;
+	touch_pins[TOUCH_LEFT].threshold = 33000;
+	touch_pins[TOUCH_CENTER].threshold = 95000;
+	touch_pins[TOUCH_RIGHT].threshold = 64000;
 
 	touch_pad_init();
 
@@ -63,68 +69,66 @@ void read_touch(){
 	if(iter >= 3){
 		iter = 0;
 
-		current_pin++;
+		for(uint8_t t = 0; t < 3; t++){
+			uint32_t raw_touch_value;		
+			touch_pad_read_raw_data((touch_pad_t)touch_pins[t].pin, &raw_touch_value);
 
-		uint8_t t = current_pin % 3;
+			touch_pins[t].touch_value = raw_touch_value * 0.9 + touch_pins[t].touch_value * 0.1; // Smooth the input
 
-		uint32_t raw_touch_value;		
-		touch_pad_read_raw_data((touch_pad_t)touch_pins[t].pin, &raw_touch_value);
+			if(touch_pins[t].touch_value >= touch_pins[t].threshold){
+				if(touch_pins[t].touch_active == false){
+					touch_pins[t].touch_active = true;
+					touch_pins[t].hold_active = false;
+					touch_pins[t].touch_start = t_now_ms;
+				}
+				else{
+					uint32_t touch_hold_time = t_now_ms - touch_pins[t].touch_start;
 
-		touch_pins[t].touch_value = raw_touch_value * 0.9 + touch_pins[t].touch_value * 0.1; // Smooth the input
+					if(touch_hold_time >= TOUCH_HOLD_MS){
+						// Handle hold
+						if(touch_pins[t].hold_active == false){
+							touch_pins[t].hold_active = true;
+							printf("HOLD TOUCH TRIGGER ON PIN: %d\n", touch_pins[t].pin);
 
-		if(touch_pins[t].touch_value >= touch_pins[t].threshold){
-			if(touch_pins[t].touch_active == false){
-				touch_pins[t].touch_active = true;
-				touch_pins[t].hold_active = false;
-				touch_pins[t].touch_start = t_now_ms;
+							if(touch_pins[t].pin == TOUCH_LEFT_PIN){
+								// nothing
+							}
+							else if(touch_pins[t].pin == TOUCH_CENTER_PIN){
+								toggle_standby();
+							}
+							else if(touch_pins[t].pin == TOUCH_RIGHT_PIN){
+								// nothing
+							}
+						}
+					}
+				}
 			}
 			else{
-				uint32_t touch_hold_time = t_now_ms - touch_pins[t].touch_start;
+				if(touch_pins[t].touch_active == true){
+					touch_pins[t].touch_active = false;
+					touch_pins[t].hold_active = false;
+					touch_pins[t].touch_end = t_now_ms;
+					int32_t touch_duration = touch_pins[t].touch_end - touch_pins[t].touch_start;
 
-				if(touch_hold_time >= TOUCH_HOLD_MS){
-					// Handle hold
-					if(touch_pins[t].hold_active == false){
-						touch_pins[t].hold_active = true;
-						printf("HOLD TOUCH TRIGGER ON PIN: %d\n", touch_pins[t].pin);
+					if(touch_duration < TOUCH_HOLD_MS){
+						// Handle tap
+						printf("TAP TOUCH TRIGGER CENTER ON PIN: %d\n", touch_pins[t].pin);
 
 						if(touch_pins[t].pin == TOUCH_LEFT_PIN){
 							// nothing
 						}
 						else if(touch_pins[t].pin == TOUCH_CENTER_PIN){
-							toggle_standby();
+							if(EMOTISCOPE_ACTIVE == true){
+								increment_mode();
+								save_config_delayed();
+							}
+							else{
+								toggle_standby();
+							}
 						}
 						else if(touch_pins[t].pin == TOUCH_RIGHT_PIN){
 							// nothing
 						}
-					}
-				}
-			}
-		}
-		else{
-			if(touch_pins[t].touch_active == true){
-				touch_pins[t].touch_active = false;
-				touch_pins[t].hold_active = false;
-				touch_pins[t].touch_end = t_now_ms;
-				int32_t touch_duration = touch_pins[t].touch_end - touch_pins[t].touch_start;
-
-				if(touch_duration < TOUCH_HOLD_MS){
-					// Handle tap
-					printf("TAP TOUCH TRIGGER CENTER ON PIN: %d\n", touch_pins[t].pin);
-
-					if(touch_pins[t].pin == TOUCH_LEFT_PIN){
-						// nothing
-					}
-					else if(touch_pins[t].pin == TOUCH_CENTER_PIN){
-						if(EMOTISCOPE_ACTIVE == true){
-							increment_mode();
-							save_config_delayed();
-						}
-						else{
-							toggle_standby();
-						}
-					}
-					else if(touch_pins[t].pin == TOUCH_RIGHT_PIN){
-						// nothing
 					}
 				}
 			}
@@ -134,28 +138,75 @@ void read_touch(){
 		//printf("TOUCH LEFT: %.3f | TOUCH CENTER: %.3f | TOUCH RIGHT: %.3f\n", touch_pins[0].touch_value, touch_pins[1].touch_value, touch_pins[2].touch_value);
 	}
 
-	if(touch_pins[0].touch_active == true || touch_pins[1].touch_active == true || touch_pins[2].touch_active == true){
+	if(touch_pins[TOUCH_LEFT].touch_active == true || touch_pins[TOUCH_CENTER].touch_active == true || touch_pins[TOUCH_RIGHT].touch_active == true){
 		device_touch_active = true;
 	}
 	else{
 		device_touch_active = false;
 	}
 
-	if(touch_pins[0].hold_active == true){ // Left hold active
-		configuration.hue -= 0.001;
+	if(touch_pins[TOUCH_LEFT].hold_active == true && touch_pins[TOUCH_RIGHT].touch_active == false){ // Left hold active
+		configuration.hue -= 0.0015;
 		if(configuration.hue < 0.0){
 			configuration.hue += 1.0;
 		}
 
 		save_config_delayed();
 	}
-
-	else if(touch_pins[2].hold_active == true){ // Right hold active
-		configuration.hue += 0.001;
+	else if(touch_pins[TOUCH_RIGHT].hold_active == true && touch_pins[TOUCH_LEFT].touch_active == false){ // Right hold active
+		configuration.hue += 0.0015;
 		if(configuration.hue > 1.0){
 			configuration.hue -= 1.0;
 		}
 
 		save_config_delayed();
+	}
+	else if(touch_pins[TOUCH_LEFT].hold_active == true && touch_pins[TOUCH_RIGHT].hold_active == true){ // both hands held
+		printf("BOTH HANDS HELD\n");
+		// TODO: Add noise calibration visual countdown and trigger when both "ears" covered by hands
+	}
+}
+
+void render_touches(){
+	static float touch_left_opacity = 0.0;
+	static float touch_center_opacity = 0.0;
+	static float touch_right_opacity = 0.0;
+
+	float touch_left_opacity_target = 0.0;
+	float touch_center_opacity_target = 0.0;
+	float touch_right_opacity_target = 0.0;
+
+	if(touch_pins[TOUCH_LEFT].touch_active == true){
+		touch_left_opacity_target = 1.0;
+	}
+	if(touch_pins[TOUCH_CENTER].touch_active == true){
+		touch_center_opacity_target = 1.0;
+	}
+	if(touch_pins[TOUCH_RIGHT].touch_active == true){
+		touch_right_opacity_target = 1.0;
+	}
+
+	touch_left_opacity = touch_left_opacity * 0.95 + touch_left_opacity_target * 0.05;
+	touch_center_opacity = touch_center_opacity * 0.95 + touch_center_opacity_target * 0.05;
+	touch_right_opacity = touch_right_opacity * 0.95 + touch_right_opacity_target * 0.05;
+
+	if(touch_left_opacity > 0.005){
+		for(uint8_t i = 0; i < 32; i++){
+			float progress = (float)i / 31.0;
+			float brightness = (1.0-progress) * touch_left_opacity;
+			CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.05);
+
+			leds[i] = add(leds[i], glow_col);
+		}
+	}
+	
+	if(touch_right_opacity > 0.005){
+		for(uint8_t i = 0; i < 32; i++){
+			float progress = (float)i / 31.0;
+			float brightness = (1.0-progress) * touch_right_opacity;
+			CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.05);
+
+			leds[(NUM_LEDS-1)-i] = add(leds[(NUM_LEDS-1)-i], glow_col);
+		}
 	}
 }
