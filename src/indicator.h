@@ -67,7 +67,7 @@ void run_indicator_light(){
 			indicator_brightness_target = INDICATOR_RESTING_BRIGHTNESS;
 
 			// if blinks == 0, toggle the indicator target on and off every blink_interval_ms. Only modify the indicator duty cycle if blink_state == true
-			if(touch_active == true){
+			if(device_touch_active == true){
 				indicator_brightness_target = 1.0;
 			}
 		}

@@ -87,6 +87,9 @@ void acquire_sample_chunk() {
 			size_t bytes_read = 0;
 			i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
 		}
+		else{
+			memset(new_samples_raw, 0, sizeof(uint32_t) * CHUNK_SIZE);
+		}
 
 		// Clip the sample value if it's too large, cast to floats
 		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {

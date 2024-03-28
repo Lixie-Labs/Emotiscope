@@ -12,7 +12,7 @@ touch_pin touch_pins[3];
 
 volatile bool app_touch_active = false;
 volatile bool slider_touch_active = false;
-volatile bool touch_active = false;
+volatile bool device_touch_active = false;
 
 extern void toggle_standby();
 extern void increment_mode();
@@ -135,10 +135,10 @@ void read_touch(){
 	}
 
 	if(touch_pins[0].touch_active == true || touch_pins[1].touch_active == true || touch_pins[2].touch_active == true){
-		touch_active = true;
+		device_touch_active = true;
 	}
 	else{
-		touch_active = false;
+		device_touch_active = false;
 	}
 
 	if(touch_pins[0].hold_active == true){ // Left hold active

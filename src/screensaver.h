@@ -1,5 +1,9 @@
 #define SCREENSAVER_WAIT_MS 5000
 
+extern volatile bool device_touch_active;
+extern volatile bool app_touch_active;
+extern volatile bool slider_touch_active;
+
 float screensaver_mix = 0.0000;
 float screensaver_threshold = 1.0;
 
@@ -22,7 +26,13 @@ void run_screensaver(){
 	}
 	else if(mag_sum > screensaver_threshold){
 		inactive = false;
+	}
 
+	if(device_touch_active == true || app_touch_active == true || slider_touch_active == true){
+		inactive = false;
+	}
+
+	if(inactive == false){
 		if(screensaver_mix > 0.0){
 			screensaver_mix -= 0.01;
 		}
