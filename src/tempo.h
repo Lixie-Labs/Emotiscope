@@ -12,7 +12,7 @@
 
 //--------------------------------------------
 
-#define NOVELTY_HISTORY_LENGTH (512)  // 50 FPS for 20.48 seconds
+#define NOVELTY_HISTORY_LENGTH (1024)  // 50 FPS for 20.48 seconds
 #define NOVELTY_LOG_HZ (50)
 
 #define TEMPO_LOW (64-32)
@@ -20,7 +20,7 @@
 
 #define BEAT_SHIFT_PERCENT (0.08)
 
-#define NUM_TEMPI (128)
+#define NUM_TEMPI (64)
 
 bool silence_detected = true;
 float silence_level = 1.0;
@@ -180,7 +180,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
 		progress *= progress;
 
-		float scale = (0.95 * progress) + 0.05;
+		float scale = (0.75 * progress) + 0.25;
 
 		normalized_magnitude;// *= scale;
 	}, __func__ );
