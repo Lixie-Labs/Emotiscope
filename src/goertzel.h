@@ -286,7 +286,9 @@ void calculate_magnitudes() {
 			if(noise_calibration_active_frames_remaining == 0){
 				// Let the UI know
 				broadcast("noise_cal_ready");
-				save_config_delayed();
+				save_config();
+				save_noise_spectrum();
+				
 			}
 		}
 
@@ -337,6 +339,7 @@ void calculate_magnitudes() {
 void start_noise_calibration() {
 	Serial.println("Starting noise cal...");
 	memset(noise_spectrum, 0, sizeof(float) * NUM_FREQS);
+	configuration.vu_floor = 0.0;
 	noise_calibration_active_frames_remaining = NOISE_CALIBRATION_FRAMES;
 }
 

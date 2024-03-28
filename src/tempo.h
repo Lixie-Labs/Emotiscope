@@ -98,7 +98,7 @@ void init_tempo_goertzel_constants() {
 			max_distance_hz = neighbor_right_distance_hz;
 		}
 
-		tempi[i].block_size = NOVELTY_LOG_HZ / (max_distance_hz*1.0);
+		tempi[i].block_size = NOVELTY_LOG_HZ / (max_distance_hz*0.5);
 
 		if (tempi[i].block_size > NOVELTY_HISTORY_LENGTH) {
 			tempi[i].block_size = NOVELTY_HISTORY_LENGTH;
@@ -152,7 +152,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample);// * window_lookup[uint32_t(window_pos)]);
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 
@@ -180,7 +180,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
 		progress *= progress;
 
-		float scale = (0.4 * progress) + 0.6;
+		float scale = (0.95 * progress) + 0.05;
 
 		normalized_magnitude;// *= scale;
 	}, __func__ );

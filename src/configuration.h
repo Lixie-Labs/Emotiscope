@@ -40,6 +40,7 @@ config configuration = {
 	true, // mirror_mode
 	true, // screensaver
 	true, // temporal_dithering
+	0.0,  // vu_floor
 };
 
 float noise_spectrum[NUM_FREQS] = {0.0};
@@ -55,7 +56,7 @@ volatile bool filesystem_ready = true;
 
 void update_configuration_version(int32_t current_type){
 	if(current_type == 1){
-
+		// TODO: Finish config version update system
 	}
 }
 

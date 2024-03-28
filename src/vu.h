@@ -1,5 +1,7 @@
 #define NUM_VU_AVERAGE_SAMPLES 4
 
+extern uint32_t noise_calibration_active_frames_remaining;
+
 volatile float vu_level_raw = 0.0;
 volatile float vu_level = 0.0;
 volatile float vu_max = 0.0;
@@ -20,13 +22,20 @@ void run_vu(){
 	}
 	max_amplitude_now = clip_float(max_amplitude_now);
 
+	if(noise_calibration_active_frames_remaining == 0){ // Not calibrating
+		max_amplitude_now = clip_float(max_amplitude_now - configuration.vu_floor);
+	}
+	else{ // Calibrating
+		configuration.vu_floor = max(configuration.vu_floor, max_amplitude_now);
+	}
+
 	if(max_amplitude_now > max_amplitude_cap){
 		float distance = max_amplitude_now - max_amplitude_cap;
 		max_amplitude_cap += (distance * 0.1);
 	}
 	else if(max_amplitude_cap > max_amplitude_now){
 		float distance = max_amplitude_cap - max_amplitude_now;
-		max_amplitude_cap -= (distance * 0.001);
+		max_amplitude_cap -= (distance * 0.01);
 	}
 	max_amplitude_cap = clip_float(max_amplitude_cap);
 

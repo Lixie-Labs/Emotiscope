@@ -80,6 +80,16 @@ struct CRGB8 {
 	uint8_t b;
 };
 
+struct touch_pin {
+	uint8_t pin;
+	uint32_t threshold;
+	uint32_t touch_start;
+	uint32_t touch_end;
+	bool touch_active;
+	bool hold_active;
+	float touch_value;
+};
+
 // CONFIGURATION STRUCTS OVER TIME: ---------------------------------------------------------------------------
 
 // Current type: (the CONFIGURATION_TYPE number in configuration.h)
@@ -98,6 +108,7 @@ struct config {
 	bool mirror_mode;
 	bool screensaver;
 	bool temporal_dithering;
+	float vu_floor;
 };
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -122,4 +133,5 @@ struct config_type_1 {
 	bool mirror_mode;
 	bool screensaver;
 	bool temporal_dithering;
+	float vu_floor;
 };

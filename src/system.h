@@ -43,6 +43,7 @@ void init_system() {
 	extern void init_filesystem();
 	extern void init_rmt_driver();
 	extern void init_indicator_light();
+	extern void init_touch();
 
 	init_hardware_version_pins();       // (hardware_version.h)
 	//init_serial(2000000);				// (system.h)
@@ -54,6 +55,7 @@ void init_system() {
 	init_tempo_goertzel_constants();	// (tempo.h)	
 	init_indicator_light();             // (indicator.h)
 	init_rmt_driver();                  // (led_driver.h)
+	init_touch();                       // (touch.h)
 	init_wifi();                        // (wireless.h)
 
 	// Load sliders 

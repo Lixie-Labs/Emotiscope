@@ -20,7 +20,7 @@ float indicator_brightness_target = 0.0;
 
 extern volatile bool web_server_ready;
 extern int16_t connection_status;
-extern bool touch_active;
+extern volatile bool touch_active;
 extern float standby_brightness;
 extern float standby_breath;
 
@@ -68,25 +68,7 @@ void run_indicator_light(){
 
 			// if blinks == 0, toggle the indicator target on and off every blink_interval_ms. Only modify the indicator duty cycle if blink_state == true
 			if(touch_active == true){
-				if(hold_blinks_queued > 0){
-					if(t_now_ms - last_hold_blink >= HOLD_BLINK_INTERVAL_MS){
-						hold_blink_state = !hold_blink_state;
-
-						if(hold_blink_state == true){
-							indicator_brightness_target = 1.0;
-							indicator_brightness = 1.0;
-						}
-						else{
-							indicator_brightness_target = 0.0;
-							indicator_brightness = 0.0;
-							hold_blinks_queued--;
-						}
-
-						last_hold_blink = t_now_ms;					}
-				}
-				else{
-					indicator_brightness_target = 1.0;
-				}
+				indicator_brightness_target = 1.0;
 			}
 		}
 		else{
