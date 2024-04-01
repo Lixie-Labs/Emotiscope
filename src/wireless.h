@@ -273,6 +273,10 @@ void init_web_server() {
 		}
 	});
 
+	server.on("/mac", HTTP_GET, [](PsychicRequest *request) {
+   		return request->reply(mac_str);
+	});
+
 	server.on("/*", HTTP_GET, [](PsychicRequest *request) {
 		esp_err_t result = ESP_OK;
 		String path = "";

@@ -4,7 +4,7 @@
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<link rel="stylesheet" href="css/app.css">
-	
+	<script src="js/fetch_mac.js"></script>
 </head>
 <body>
 		<div id="header">
@@ -100,6 +100,11 @@
 					<span class="menu_item_label">Reboot into WiFi Config Mode</span>
 					<span class="menu_item_content"></span>
 				</div>
+				<div class="menu_item buzz">
+					<div id="mac_address" onload="get_mac_address();">
+						LOADING...
+					</div>
+				</div>
 			</div>
 
 			<div id="menu_stats">
@@ -170,6 +175,7 @@
 
 	<!--<script src="js/accelerometer.js"></script>-->
 	<script src="js/discovery.js"></script>
+	<script src="js/fetch_mac.js"></script>
 	<script src="js/info.js"></script>
 	<script src="js/utilities.js"></script>
 	<script src="js/sliders.js"></script>

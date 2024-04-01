@@ -2,7 +2,8 @@
 <head>
 	<title>Emotiscope Setup</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />    
-	<link rel="stylesheet" href="css/app.css">	
+	<link rel="stylesheet" href="css/app.css">
+	<script src="js/fetch_mac.js"></script>
 </head>
 <body>
 	<div id="header">
@@ -19,8 +20,11 @@
 		<div class="page_title">WIFI SETTINGS</div>
 		<div class="page_paragraph">
 			<input type="text" id="ssid" class="text_input" placeholder="Name"></input><br>
-			<input type="text" id="pass" class="text_input" placeholder="Password"></input><br>
+			<input type="password" id="pass" class="text_input" placeholder="Password"></input><br>
 			<button onclick="update_wifi_credentials();" class="buzz">CONNECT</button>
+		</div>
+		<div id="mac_address" onload="get_mac_address();">
+			LOADING...
 		</div>
 	</div>
 
