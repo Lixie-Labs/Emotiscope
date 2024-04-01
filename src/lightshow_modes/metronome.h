@@ -101,13 +101,13 @@ void draw_metronome() {
 
 		float opacity = (sqrt(contribution));
 
-		float hue_offset = 0.0;
+		float color_offset = 0.0;
 		if(tempo_bin % 2 == 0){
-			hue_offset = 0.25;
+			color_offset = 0.25;
 		}
 
 		if(opacity > 0.001){
-			CRGBF dot_color = hsv((configuration.hue+hue_offset*configuration.hue_range) + configuration.hue_range*progress, configuration.saturation, 1.0);
+			CRGBF dot_color = hsv((configuration.color+color_offset*configuration.color_range) + configuration.color_range*progress, configuration.saturation, 1.0);
 
 			if(configuration.mirror_mode == true){
 				dot_pos *= 0.5;

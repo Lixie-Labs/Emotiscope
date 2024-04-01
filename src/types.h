@@ -98,9 +98,9 @@ struct config {
 
 	float brightness;
 	float softness; 
-	float hue;
-	float incandescent_filter;
-	float hue_range;
+	float color;
+	float blue_filter;
+	float color_range;
 	float speed;
 	float saturation;
 	float background;
@@ -123,9 +123,9 @@ struct config_type_1 {
 
 	float brightness;
 	float softness; 
-	float hue;
-	float incandescent_filter;
-	float hue_range;
+	float color;
+	float blue_filter;
+	float color_range;
 	float speed;
 	float saturation;
 	float background;

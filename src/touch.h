@@ -146,17 +146,17 @@ void read_touch(){
 	}
 
 	if(touch_pins[TOUCH_LEFT].hold_active == true && touch_pins[TOUCH_RIGHT].touch_active == false){ // Left hold active
-		configuration.hue -= 0.0015;
-		if(configuration.hue < 0.0){
-			configuration.hue += 1.0;
+		configuration.color -= 0.0015;
+		if(configuration.color < 0.0){
+			configuration.color += 1.0;
 		}
 
 		save_config_delayed();
 	}
 	else if(touch_pins[TOUCH_RIGHT].hold_active == true && touch_pins[TOUCH_LEFT].touch_active == false){ // Right hold active
-		configuration.hue += 0.0015;
-		if(configuration.hue > 1.0){
-			configuration.hue -= 1.0;
+		configuration.color += 0.0015;
+		if(configuration.color > 1.0){
+			configuration.color -= 1.0;
 		}
 
 		save_config_delayed();

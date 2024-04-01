@@ -10,6 +10,9 @@ const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32
 const IPAddress ap_subnet(255, 255, 255, 0); // Subnet mask for the WiFi network
 DNSServer dns_server; // DNS server instance
 
+// Define a char array to hold the formatted MAC address string
+char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
+
 // HTTPS not working yet, PsychicHTTP can't initialize the SSL server
 bool app_enable_ssl = true;
 const char server_cert[] = "-----BEGIN CERTIFICATE-----\n"
@@ -374,9 +377,6 @@ void init_wifi() {
 		// Retrieve the MAC address of the device
 		WiFi.macAddress(mac_address);
 		//esp_read_mac(mac_address, ESP_MAC_WIFI_STA); // Use ESP_MAC_WIFI_STA for station interface
-		
-		// Define a char array to hold the formatted MAC address string
-		char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
 
 		// Format the MAC address into the char array
 		snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
@@ -460,6 +460,9 @@ void handle_wifi() {
 			if(network_connection_attempts >= 3){
 				reboot_into_wifi_config_mode();
 			}
+		}
+		else{
+			//printf("WIFI CONFIG MODE ACTIVE, NOT RECONNECTING\n");
 		}
 	}
 

@@ -80,9 +80,9 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|speed|float|%.3f", configuration.speed);
 	websocket_handler.sendAll(config_item_buffer);
 
-	// hue
+	// color
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|hue|float|%.3f", configuration.hue);
+	snprintf(config_item_buffer, 120, "new_config|color|float|%.3f", configuration.color);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// current_mode
@@ -95,14 +95,14 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|mirror_mode|int|%d", configuration.mirror_mode);
 	websocket_handler.sendAll(config_item_buffer);
 
-	// incandescent_filter
+	// blue_filter
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|incandescent|float|%.3f", configuration.incandescent_filter);
+	snprintf(config_item_buffer, 120, "new_config|blue_filter|float|%.3f", configuration.blue_filter);
 	websocket_handler.sendAll(config_item_buffer);
 
-	// hue_range
+	// color_range
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|hue_range|float|%.3f", configuration.hue_range);
+	snprintf(config_item_buffer, 120, "new_config|color_range|float|%.3f", configuration.color_range);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// saturation
@@ -110,7 +110,7 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|saturation|float|%.3f", configuration.saturation);
 	websocket_handler.sendAll(config_item_buffer);
 
-	// base_coat
+	// background
 	memset(config_item_buffer, 0, 120);
 	snprintf(config_item_buffer, 120, "new_config|background|float|%.3f", configuration.background);
 	websocket_handler.sendAll(config_item_buffer);

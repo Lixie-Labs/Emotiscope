@@ -12,10 +12,10 @@ void draw_hype() {
 	}
 	beat_sum = clip_float(beat_sum);
 
-	float beat_hue = beat_sum;
-	beat_sum = sqrt(beat_hue);
+	float beat_color = beat_sum;
+	beat_sum = sqrt(beat_color);
 
-	CRGBF dot_color = hsv(configuration.hue + beat_hue*configuration.hue_range, configuration.saturation, 1.0);
+	CRGBF dot_color = hsv(configuration.color + beat_color*configuration.color_range, configuration.saturation, 1.0);
 
 	if(configuration.mirror_mode == true){
 		beat_sum *= 0.5;

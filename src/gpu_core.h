@@ -47,7 +47,7 @@ void run_gpu() {
 	apply_background();
 
 	// Apply an incandescent LUT to reduce harsh blue tones
-	apply_incandescent_filter(configuration.incandescent_filter);  // (leds.h)
+	apply_blue_light_filter(configuration.blue_filter);  // (leds.h)
 
 	if( EMOTISCOPE_ACTIVE == true && configuration.screensaver == true){
 		run_screensaver();

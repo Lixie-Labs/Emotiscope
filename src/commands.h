@@ -96,13 +96,13 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			update_ui(UI_NEEDLE_EVENT, configuration.speed);
 		}
-		else if (fastcmp(substring, "hue")) {
-			// Get hue value
+		else if (fastcmp(substring, "color")) {
+			// Get color value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = clip_float(atof(substring));
-			configuration.hue = setting_value;
+			configuration.color = setting_value;
 
-			//update_ui(UI_HUE_EVENT, configuration.hue); // TODO: Color-related changes shouldn't show a UI dot but a gradient representing the hue and hue_range values
+			//update_ui(UI_HUE_EVENT, configuration.hue); 
 		}
 		else if (fastcmp(substring, "mirror_mode")) {
 			// Get mirror_mode value
@@ -110,19 +110,19 @@ void parse_command(uint32_t t_now_ms, command com) {
 			bool setting_value = (bool)atoi(substring);
 			configuration.mirror_mode = setting_value;
 		}
-		else if (fastcmp(substring, "incandescent")) {
-			// Get incandescent_filter value
+		else if (fastcmp(substring, "blue_filter")) {
+			// Get blue_filter value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
-			configuration.incandescent_filter = setting_value;
+			configuration.blue_filter = setting_value;
 
-			update_ui(UI_NEEDLE_EVENT, configuration.incandescent_filter);
+			update_ui(UI_NEEDLE_EVENT, configuration.blue_filter);
 		}
-		else if (fastcmp(substring, "hue_range")) {
-			// Get hue_range value
+		else if (fastcmp(substring, "color_range")) {
+			// Get color_range value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			float setting_value = atof(substring);
-			configuration.hue_range = setting_value;
+			configuration.color_range = setting_value;
 
 			//update_ui(UI_HUE_EVENT, configuration.hue);
 		}

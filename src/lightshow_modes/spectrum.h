@@ -5,7 +5,7 @@ void draw_spectrum() {
 			float mag = spectrogram_smooth[i];
 			// TODO: Make "base coat" a slider in the web app for (at least) Spectrum Mode
 			// mag = mag * 0.99 + 0.01;
-			CRGBF color = hsv(configuration.hue+(progress*configuration.hue_range), configuration.saturation, mag);
+			CRGBF color = hsv(configuration.color+(progress*configuration.color_range), configuration.saturation, mag);
 
 			// TODO: Make "saturation" a slider in the web app
 			
@@ -17,7 +17,7 @@ void draw_spectrum() {
 		for (uint16_t i = 0; i < NUM_LEDS; i++) {
 			float progress = float(i) / NUM_LEDS;
 			float mag = clip_float(interpolate(progress, spectrogram_smooth, NUM_FREQS));
-			CRGBF color = hsv(configuration.hue+(progress*configuration.hue_range), configuration.saturation, mag);
+			CRGBF color = hsv(configuration.color+(progress*configuration.color_range), configuration.saturation, mag);
 
 			leds[i] = color;
 		}

@@ -19,7 +19,7 @@ void draw_waveform(){
 			float progress = float(i) / NUM_LEDS;
 			float sample = clip_float(samples[i]) * auto_scale;
 			CRGBF pixel_color = hsv(
-				configuration.hue + (configuration.hue_range*progress),
+				configuration.color + (configuration.color_range*progress),
 				configuration.saturation,
 				sample*sample
 			);
@@ -32,7 +32,7 @@ void draw_waveform(){
 			float progress = float(i) / (NUM_LEDS>>1);
 			float sample = clip_float(samples[i]) * auto_scale;
 			CRGBF pixel_color = hsv(
-				configuration.hue + (configuration.hue_range*progress),
+				configuration.color + (configuration.color_range*progress),
 				configuration.saturation,
 				sample*sample
 			);

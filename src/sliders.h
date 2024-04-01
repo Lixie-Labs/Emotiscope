@@ -61,9 +61,9 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 		// WTF happened that got you here?
 	}
 
-	register_slider("hue",          0.000, 1.000, 0.001);
-	register_slider("hue_range",    0.000, 1.000, 0.001);
+	register_slider("color",          0.000, 1.000, 0.001);
+	register_slider("color_range",    0.000, 1.000, 0.001);
 	register_slider("saturation",   0.000, 1.000, 0.001);
-	register_slider("incandescent", 0.000, 1.000, 0.001);
+	register_slider("blue_filter", 0.000, 1.000, 0.001);
 	register_slider("background",   0.000, 1.000, 0.001);
 }

@@ -13,6 +13,7 @@
 
 extern void broadcast(char *message);
 extern void print_websocket_clients(uint32_t t_now_ms);
+extern char mac_str[18];
 
 uint32_t t_now_ms = 0;
 uint32_t t_now_us = 0;
@@ -156,7 +157,7 @@ void watch_gpu_fps() {
 
 void print_system_info() {
 	static uint32_t next_print_ms = 0;
-	const uint16_t print_interval_ms = 1000;
+	const uint16_t print_interval_ms = 5000;
 
 	if (t_now_ms >= next_print_ms) {
 		next_print_ms += print_interval_ms;
@@ -191,7 +192,6 @@ void print_system_info() {
 		snprintf(stat_buffer, 64, "heap|%lu", (uint32_t)free_heap);
 		broadcast(stat_buffer);
 
-		/*
 		printf("# SYSTEM INFO ####################\n");
 		printf("CPU CORE USAGE --- %.2f%%\n", CPU_CORE_USAGE*100);
 		printf("CPU FPS ---------- %.3f\n", FPS_CPU);
@@ -199,8 +199,10 @@ void print_system_info() {
 		printf("Free Heap -------- %lu\n", (uint32_t)free_heap);
 		printf("Free Stack CPU --- %lu\n", (uint32_t)free_stack_cpu);
 		printf("Free Stack GPU --- %lu\n", (uint32_t)free_stack_gpu);
-		printf("Total PSRAM ------ %lu\n", (uint32_t)ESP.getPsramSize());
-		printf("Free PSRAM ------- %lu\n", (uint32_t)ESP.getFreePsram());
+		//printf("Total PSRAM ------ %lu\n", (uint32_t)ESP.getPsramSize());
+		//printf("Free PSRAM ------- %lu\n", (uint32_t)ESP.getFreePsram());
+		printf("IP Address ------- %s\n", WiFi.localIP().toString().c_str());
+		printf("MAC Address ------ %s\n", mac_str);
 		printf("\n");
 		printf("- WS CLIENTS -----------------\n");
 		if(web_server_ready == true){
@@ -215,6 +217,5 @@ void print_system_info() {
 
 		//print_profiled_function_hits();	
 		printf("##################################\n\n");
-		*/
 	}
 }

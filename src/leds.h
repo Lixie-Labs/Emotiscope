@@ -235,7 +235,7 @@ CRGBF hsv(float h, float s, float v) {
     return col;
 }
 
-void apply_incandescent_filter(float mix) {
+void apply_blue_light_filter(float mix) {
 	uint32_t t_start_cycles = ESP.getCycleCount();
 
 	float mix_inv = 1.0 - mix;
@@ -481,7 +481,7 @@ void apply_background(){
 			float background_inv = (1.0-background_level);
 			for(uint16_t i = 0; i < NUM_LEDS; i++){
 				float progress = float(i) / NUM_LEDS;
-				CRGBF background_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, background_level*background_level);
+				CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level*background_level);
 				leds[i].r = leds[i].r * background_inv + background_color.r;
 				leds[i].g = leds[i].g * background_inv + background_color.g;
 				leds[i].b = leds[i].b * background_inv + background_color.b;
@@ -491,7 +491,7 @@ void apply_background(){
 			float background_inv = (1.0-background_level);
 			for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
 				float progress = float(i) / (NUM_LEDS>>1);
-				CRGBF background_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, background_level*background_level);
+				CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level*background_level);
 				
 				int16_t left_index = 63-i;
 				int16_t right_index = 64+i;
