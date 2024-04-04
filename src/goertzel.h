@@ -109,7 +109,7 @@ void init_goertzel_constants_musical() {
 }
 
 void init_window_lookup() {
-    float sigma = 0.9; // For gaussian window
+    float sigma = 0.75; // For gaussian window
 
     for (uint16_t i = 0; i < 2048; i++) {
         float ratio = i / 2047.0;

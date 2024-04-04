@@ -66,6 +66,15 @@ void load_config(){
 
 	// VU Floor
 	configuration.vu_floor = preferences.getFloat("vu_floor", 0.00);
+
+	// Touch Left Threshold
+	configuration.touch_left_threshold = preferences.getULong("tl_threshold", 33000);
+
+	// Touch Center Threshold
+	configuration.touch_center_threshold = preferences.getULong("tc_threshold", 95000);
+
+	// Touch Right Threshold
+	configuration.touch_right_threshold = preferences.getULong("tr_threshold", 64000);
 }
 
 void update_configuration_version(int32_t current_type){
@@ -157,6 +166,9 @@ bool save_config() {
 	preferences.putBool("screensaver", configuration.screensaver);
 	preferences.putBool("dithering", configuration.temporal_dithering);
 	preferences.putFloat("vu_floor", configuration.vu_floor);
+	preferences.putULong("tl_threshold", configuration.touch_left_threshold);
+	preferences.putULong("tc_threshold", configuration.touch_center_threshold);
+	preferences.putULong("tr_threshold", configuration.touch_right_threshold);
 
 	return true;
 }

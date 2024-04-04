@@ -11,6 +11,26 @@ let pong_pending = false;
 let reconnecting = false;
 let standby_mode = false;
 
+let touch_vals = [
+	0,
+	0,
+	0
+];
+
+let touch_low = [
+	0,
+	0,
+	0
+];
+
+let touch_high = [
+	0,
+	0,
+	0
+];
+
+got_touch_vals = true;
+
 let auto_response_table = {
 	"welcome":"get|config",
 	"config_ready":"get|modes",
@@ -201,6 +221,15 @@ function parse_message(message){
 			setTimeout(function(){
 				ping_server();
 			}, MAX_PING_PONG_REPLY_TIME_MS / 2);
+		}
+		else if(command_type == "touch_vals"){
+			touch_vals[0] = parseInt(command_data[1]);
+			touch_vals[1] = parseInt(command_data[2]);
+			touch_vals[2] = parseInt(command_data[3]);
+
+			console.log(`TOUCH VALS: ${touch_vals}`);
+
+			got_touch_vals = true;
 		}
 		else{
 			console.log(`Unrecognized command type: ${command_type}`);

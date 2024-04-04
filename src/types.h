@@ -105,4 +105,7 @@ struct config {
 	bool screensaver;
 	bool temporal_dithering;
 	float vu_floor;
+	uint32_t touch_left_threshold;
+	uint32_t touch_center_threshold;
+	uint32_t touch_right_threshold;
 };

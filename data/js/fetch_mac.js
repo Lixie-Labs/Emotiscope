@@ -9,8 +9,13 @@ let mac_str = "";
 function get_mac_string(){
 	// Fetch the text result from the /mac endpoint
 	fetch(mac_url)
-		.then(response => response.text())
-		.then(result => {
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('Network response was not 200');
+			}
+			return response.text();
+		})
+		.then(result => {                    
 			// Print the result to the console
 			console.log("MAC: "+result);
 			mac_str = result;

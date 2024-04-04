@@ -56,6 +56,23 @@ body{
 	z-index: 999 !important;
 }
 
+#alert_dimmer{
+	width:100%;
+	height:100%;
+	position: absolute;
+	top:0px;
+	left:0px;
+	display: flex;
+	align-items: center;
+    justify-content: center;
+	pointer-events: none;
+	opacity: 0.0;
+    transition: opacity 0.15s ease-in-out;
+	background-color: rgba(var(--background), 0.0);
+    backdrop-filter: blur(12px);
+	z-index: 50 !important;
+}
+
 #page_info{
 	width:100%;
 	height:100%;
@@ -374,6 +391,41 @@ button{
 #info_panel_description{
 	font-size: 14px;
     margin: 20px 0px;
+}
+
+#alert_panel {
+	width: calc(90% - 20px);
+	padding:10px;
+	background-color: rgba(var(--background), 0.5);
+	position: absolute;
+	top:30%;
+	left:5%;
+	border-radius: 10px;
+	border:2px solid var(--accent);
+	z-index:50;
+	backdrop-filter: blur(10px);
+	text-align: center;
+	pointer-events: none;
+	opacity:0.0;
+	transition: opacity 0.15s ease-in-out;
+	z-index: 500 !important;
+}
+
+#alert_panel_title{
+	color: var(--primary);
+    font-weight: bold;
+    font-size: 18px;
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 15px;
+}
+
+#alert_panel_description{
+	font-size: 14px;
+    margin: 20px 0px;
+}
+
+#alert_panel_button{
+
 }
 
 #header_logo {
