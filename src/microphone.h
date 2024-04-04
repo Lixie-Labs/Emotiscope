@@ -93,10 +93,10 @@ void acquire_sample_chunk() {
 
 		// Clip the sample value if it's too large, cast to floats
 		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
-			new_samples[i+0] = min(max((((int32_t)new_samples_raw[i+0]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples[i+1] = min(max((((int32_t)new_samples_raw[i+1]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples[i+2] = min(max((((int32_t)new_samples_raw[i+2]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples[i+3] = min(max((((int32_t)new_samples_raw[i+3]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples[i+0] = min(max((((int32_t)new_samples_raw[i+0]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
+			new_samples[i+1] = min(max((((int32_t)new_samples_raw[i+1]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
+			new_samples[i+2] = min(max((((int32_t)new_samples_raw[i+2]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
+			new_samples[i+3] = min(max((((int32_t)new_samples_raw[i+3]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
 		}
 
 		// Convert audio from "18-bit" float range to -1.0 to 1.0 range

@@ -109,7 +109,7 @@ void init_goertzel_constants_musical() {
 }
 
 void init_window_lookup() {
-    float sigma = 0.8; // For gaussian window
+    float sigma = 0.9; // For gaussian window
 
     for (uint16_t i = 0; i < 2048; i++) {
         float ratio = i / 2047.0;
@@ -221,8 +221,8 @@ float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
 		return output_magnitude;
 	}
 	else {
-		if (input_magnitude*1.1 > noise_spectrum[bin]) {
-			noise_spectrum[bin] = input_magnitude*1.1;
+		if (input_magnitude > noise_spectrum[bin]) {
+			noise_spectrum[bin] = input_magnitude*0.75;
 		}
 
 		return input_magnitude;

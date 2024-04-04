@@ -62,6 +62,7 @@ struct tempo {
 	float window_step;
 	float phase;
 	float phase_target;
+	bool  phase_inverted;
 	float phase_radians_per_reference_frame;
 	float beat;
 	float magnitude;
