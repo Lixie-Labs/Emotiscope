@@ -1,47 +1,18 @@
-// TODO: Implement configuration.bin update protection
-//
-// Used to safeguard future firmware updates against reading the wrong pointers
-// after changing the order/length of the config struct between firmware updates.
-//
-// The first official firmware update can have a second depricated typedef called "configuration_type_1"
-// which matches the layout of past config structs over time.
-// When the configuration.bin file's version number doesn't match on boot, the values in it can be
-// ported to the new config struct on boot. The next following save changes the
-// version in flash, making this a one-time conversion.
-//
-// Downgrades are not supported, and the user is warned that the device will be reset to factory settings
-#define CONFIGURATION_TYPE ( 1 )
-
-#define CONFIG_FILENAME "/configuration.bin"
 #define NOISE_SPECTRUM_FILENAME "/noise_spectrum.bin"
 #define NETWORK_CONFIG_FILENAME "/secrets/network.txt"
 #define AUDIO_DEBUG_RECORDING_FILENAME "/audio.bin"
-#define MIN_SAVE_WAIT_MS (3 * 1000)	 // Values must stabilize for this many seconds to be written to FS
+#define MIN_SAVE_WAIT_MS (3 * 1000)	 // Values must stabilize for this many seconds to be written to NVS
 
 #define MAX_AUDIO_RECORDING_SAMPLES ( 12800 * 3 ) // 3 seconds at [SAMPLE_RATE]
+
+Preferences preferences; // NVS storage for configuration
 
 extern lightshow_mode lightshow_modes[];
 extern PsychicWebSocketHandler websocket_handler;
 
 volatile bool wifi_config_mode = false;
 
-config configuration = {
-	CONFIGURATION_TYPE,
-
-	1.00, // brightness
-	0.25, // softness
-	0.90, // hue
-	0.00, // incandescent_filter
-	0.00, // hue_range
-	0.75, // speed
-	1.00, // saturation
-	0.00, // background
-	0,    // current_mode
-	true, // mirror_mode
-	true, // screensaver
-	true, // temporal_dithering
-	0.0,  // vu_floor
-};
+config configuration; // configuration struct to be filled by NVS or defaults on boot
 
 float noise_spectrum[NUM_FREQS] = {0.0};
 
@@ -53,6 +24,49 @@ volatile uint32_t last_save_request_ms = 0;
 volatile bool save_request_open = false;
 
 volatile bool filesystem_ready = true;
+
+void load_config(){
+	// Load configuration from NVS
+
+	// Brightness
+	configuration.brightness = preferences.getFloat("brightness", 1.00);
+
+	// Softness
+	configuration.softness = preferences.getFloat("softness", 0.25);
+
+	// Color
+	configuration.color = preferences.getFloat("color", 0.90);
+
+	// Color Range
+	configuration.color_range = preferences.getFloat("color_range", 0.00);
+
+	// Blue Filter
+	configuration.blue_filter = preferences.getFloat("blue_filter", 0.00);
+
+	// Speed
+	configuration.speed = preferences.getFloat("speed", 0.75);
+
+	// Saturation
+	configuration.saturation = preferences.getFloat("saturation", 1.00);
+
+	// Background
+	configuration.background = preferences.getFloat("background", 0.00);
+
+	// Current Mode
+	configuration.current_mode = preferences.getInt("current_mode", 0);
+
+	// Mirror Mode
+	configuration.mirror_mode = preferences.getBool("mirror_mode", true);
+
+	// Screensaver
+	configuration.screensaver = preferences.getBool("screensaver", true);
+
+	// Temporal Dithering
+	configuration.temporal_dithering = preferences.getBool("dithering", true);
+
+	// VU Floor
+	configuration.vu_floor = preferences.getFloat("vu_floor", 0.00);
+}
 
 void update_configuration_version(int32_t current_type){
 	if(current_type == 1){
@@ -129,23 +143,21 @@ void sync_configuration_to_client() {
 }
 
 // Save configuration to LittleFS
-// TODO: save_config() causes a large frame stutter whenever called
-// Maybe I can chunk the file save operations?
 bool save_config() {
-	File file = LittleFS.open(CONFIG_FILENAME, FILE_WRITE);
-	if (!file) {
-		printf("Failed to open %s for writing!", CONFIG_FILENAME);
-		return false;
-	}
-	else {
-		const uint8_t* ptr = (const uint8_t*)&configuration;
+	preferences.putFloat("brightness", configuration.brightness);
+	preferences.putFloat("softness",   configuration.softness);
+	preferences.putFloat("color", configuration.color);
+	preferences.putFloat("color_range", configuration.color_range);
+	preferences.putFloat("blue_filter", configuration.blue_filter);
+	preferences.putFloat("speed", configuration.speed);
+	preferences.putFloat("saturation", configuration.saturation);
+	preferences.putFloat("background", configuration.background);
+	preferences.putInt("current_mode", configuration.current_mode);
+	preferences.putBool("mirror_mode", configuration.mirror_mode);
+	preferences.putBool("screensaver", configuration.screensaver);
+	preferences.putBool("dithering", configuration.temporal_dithering);
+	preferences.putFloat("vu_floor", configuration.vu_floor);
 
-		// Iterate over the size of config and write each byte to the file
-		for (size_t i = 0; i < sizeof(config); i++) {
-			file.write(ptr[i]);
-		}
-	}
-	file.close();
 	return true;
 }
 
@@ -165,38 +177,6 @@ bool save_noise_spectrum() {
 		}
 	}
 	file.close();
-	return true;
-}
-
-// Load configuration from LittleFS
-bool load_config() {
-	// Open the file for reading
-	File file = LittleFS.open(CONFIG_FILENAME, FILE_READ);
-	if (!file) {
-		printf("Failed to open %s for reading!\n", CONFIG_FILENAME);
-		return false;
-	}
-	else {
-		// Ensure the configuration structure is sized properly
-		if (file.size() != sizeof(config)) {
-			printf("Config file size does not match config structure size!\n");
-			file.close();
-			return false;
-		}
-
-		uint8_t* ptr = (uint8_t*)&configuration;  // Pointer to the configuration structure
-
-		// Read the file content into the configuration structure
-		for (size_t i = 0; i < sizeof(config); i++) {
-			int byte = file.read();	 // Read a byte
-			if (byte == -1) {		 // Check for read error or end of file
-				printf("Error reading %s!\n", CONFIG_FILENAME);
-				break;
-			}
-			ptr[i] = (uint8_t)byte;	 // Store the byte in the configuration structure
-		}
-	}
-	file.close();  // Close the file after reading
 	return true;
 }
 
@@ -243,7 +223,7 @@ void sync_configuration_to_file_system() {
 			filesystem_ready = false;
 			printf("SAVING\n");
 			save_config();
-			save_noise_spectrum();
+			//save_noise_spectrum();
 			save_request_open = false;
 			filesystem_ready = true;
 		}
@@ -252,24 +232,15 @@ void sync_configuration_to_file_system() {
 
 // Function to update the network credentials and restart the ESP
 void update_network_credentials(String new_ssid, String new_pass) {
-    // Check if the file exists and delete it
-    if (LittleFS.exists(NETWORK_CONFIG_FILENAME)) {
-        LittleFS.remove(NETWORK_CONFIG_FILENAME);
-    }
+	// store the new credentials in the global variables
+	memset(wifi_ssid, 0, 64);
+	memset(wifi_pass, 0, 64);
+	new_ssid.toCharArray(wifi_ssid, 64);
+	new_pass.toCharArray(wifi_pass, 64);
 
-    // Create a new file and open it for writing
-    File file = LittleFS.open(NETWORK_CONFIG_FILENAME, "w");
-    if (!file) {
-        printf("Failed to open %s for writing\n", NETWORK_CONFIG_FILENAME);
-        return;
-    }
-
-    // Write SSID and Password to the file with a newline character after each
-    file.print(new_ssid + "\n");
-    file.print(new_pass + "\n");
-
-    // Close the file
-    file.close();
+	// Update the network credentials in NVS
+	preferences.putBytes("wifi_ssid", wifi_ssid, 64);
+	preferences.putBytes("wifi_pass", wifi_pass, 64);
 
     // Print a success message
     printf("Network credentials updated successfully! Restarting to attempt connection\n");
@@ -282,94 +253,35 @@ void update_network_credentials(String new_ssid, String new_pass) {
 }
 
 
-bool load_network_credentials(){
+void load_network_credentials(){
 	memset(wifi_ssid, 0, 64);
 	memset(wifi_pass, 0, 64);
 
-	// Open the file for reading
-	File file = LittleFS.open(NETWORK_CONFIG_FILENAME, FILE_READ);
-	if (!file) {
-		printf("Missing network file, failed to open %s for reading!\n", NETWORK_CONFIG_FILENAME);
-		return false;
-	}
-	else {
-		if ( file.size() <= 1 ) {
-			// It exists, but there's no way this file has proper data
-			printf("Invalid network file, failed to open %s for reading!\n", NETWORK_CONFIG_FILENAME);
-			return false;
-		}
-
-		// Read up to 64 SSID chars
-		for(uint8_t i = 0; i < 64; i++){
-			if(file.position() < file.size()){
-				int byte = file.read();
-				if(byte == '\n'){
-					break;
-				}
-				else if(byte == '\r'){
-					printf("Skipped stupid ass Windows-style carriage return during parsing! >:(\n");
-				}
-				else{
-					wifi_ssid[i] = byte;
-				}
-			}
-			else{
-				printf("Hit end of network file early while parsing!\n");
-				return false;
-			}
-		}
-		printf("Parsed SSID: %s\n", wifi_ssid);
-
-		// Read up to 64 pass chars
-		for(uint8_t i = 0; i < 64; i++){
-			if(file.position() < file.size()){
-				int byte = file.read();	 // Read a byte
-				if(byte == '\n'){
-					break;
-				}
-				else if(byte == '\r'){
-					printf("Skipped stupid ass Windows-style carriage return during parsing! >:(\n");
-				}
-				else{
-					wifi_pass[i] = byte;
-				}
-			}
-			else{
-				printf("Hit end of network file early while parsing!\n");
-				return false;
-			}
-		}
-		printf("Parsed pass: %s\n", wifi_pass);
-	}
-	file.close();  // Close the file after reading
-
-	// We fucken did it
-	return true;
+	// Load network credentials from NVS with Preferences library, just like the config struct using getBytes on the char arrays:
+	// SSID
+	preferences.getBytes("wifi_ssid", wifi_ssid, 64);
+	// Password
+	preferences.getBytes("wifi_pass", wifi_pass, 64);
 }
 
 void init_configuration() {
+	preferences.begin("emotiscope", false);
+
 	// Check if wifi config mode was requested
-	if (LittleFS.exists("/WIFI_CONFIG_MODE_TRIGGER")) {
-        LittleFS.remove("/WIFI_CONFIG_MODE_TRIGGER");
+	bool wifi_config_mode_trigger = preferences.getBool("WIFI_CONFIG_MODE_TRIGGER", false);
+	if (wifi_config_mode_trigger) {
+		preferences.putBool("WIFI_CONFIG_MODE_TRIGGER", false);
 		wifi_config_mode = true;
 	}
 
 	// Attempt to load config from flash
 	printf("LOADING CONFIG...");
-	bool load_success = load_config();
-
-	// If we couldn't load the file, save a fresh copy
-	if (load_success == false) {
-		printf("FAIL\n");
-		save_config();
-	}
-	else {
-		printf("PASS\n");
-	}
+	load_config();
+	printf("PASS\n");
 
 	// Attempt to load noise_spectrum from flash
 	printf("LOADING NOISE SPECTRUM...");
-	load_success = load_noise_spectrum();
+	bool load_success = load_noise_spectrum();
 
 	// If we couldn't load the file, save a fresh copy
 	if (load_success == false) {
@@ -382,15 +294,8 @@ void init_configuration() {
 
 	// Attempt to load wifi creds from flash
 	printf("LOADING NETWORK...");
-	load_success = load_network_credentials();
-
-	// If we couldn't load the file, save a fresh copy
-	if (load_success == false) {
-		printf("FAIL\n");
-	}
-	else {
-		printf("PASS\n");
-	}
+	load_network_credentials();
+	printf("PASS\n");
 }
 
 // Save debug audio recording to LittleFS

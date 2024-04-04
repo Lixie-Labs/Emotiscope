@@ -91,37 +91,7 @@ struct touch_pin {
 	float touch_value;
 };
 
-// CONFIGURATION STRUCTS OVER TIME: ---------------------------------------------------------------------------
-
-// Current type: (the CONFIGURATION_TYPE number in configuration.h)
 struct config {
-	int32_t type; // Indirectly decribes the current datatypes of this struct (and their order in physical memory) to a parser
-
-	float brightness;
-	float softness; 
-	float color;
-	float blue_filter;
-	float color_range;
-	float speed;
-	float saturation;
-	float background;
-	int32_t current_mode;
-	bool mirror_mode;
-	bool screensaver;
-	bool temporal_dithering;
-	float vu_floor;
-};
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// PAST VERSIONS BELOW, DON'T USE THESE: ----------------------------------------------------------------------------------------
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	
-// Configuration Type 1: Firmware 1.0.0
-struct config_type_1 {
-	int32_t type; // Indirectly decribes the current datatypes of this struct (and their order in physical memory) to a parser
-
 	float brightness;
 	float softness; 
 	float color;

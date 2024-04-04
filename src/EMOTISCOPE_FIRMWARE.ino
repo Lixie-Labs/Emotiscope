@@ -19,12 +19,13 @@
 // ## DEPENDENCIES ############################################################
 
 // External dependencies
-//#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-alpha ESP32 board def yet, and I need the IDF 5.1.2 for this madness to even work. I cobbled my own RMT LED driver for now.
+//#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-alpha ESP32 board def yet, and I need the IDF 5.1.2 for this madness to even work. I cobbled my own RMT LED driver for now for non-blocking frame transmission.
 #include <PsychicHttp.h> // ........ Handling the web-app HTTP and WS
-#include <HTTPClient.h> // ......... Used to make POST requests to the discovery server
+#include <HTTPClient.h> // ......... Used to make POST requests to the device discovery server
 #include <ESPmDNS.h> // ............ Used for "emotiscope.local" domain name
 #include <Ticker.h> // ............. For timing functions
-#include <DNSServer.h> // .......... Captive portal functionality
+#include <DNSServer.h> // .......... Captive portal functionality (not yet working)
+#include <Preferences.h> // ........ Storing settings in NVS flash
 #include <WiFi.h> // ............... WiFi connection library
 #include <esp_dsp.h> // ............ Fast SIMD-style array math
 #include <esp_wifi.h> // ........... WiFi, but like - the hardware side of it
