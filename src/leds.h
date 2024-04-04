@@ -331,6 +331,49 @@ void apply_video_feedback() {
 	}
 }
 
+inline void aaaaa(){
+	// Either you:
+	//   - found where this weird aaaaa() function is called by accident
+	//   - are simply having fun reading leds.h
+	//   - Ctrl-F'd the copyright notice to fuck with it or remove it for your bootleg.
+	//     Get a real job, make your own products.
+
+	static bool bbbbb = false;
+	if(bbbbb == false && t_now_ms >= 10000){
+		bbbbb = true;
+
+		printf("############################################################################\n");
+		printf("                                  __  _\n");
+		printf("            ___  ____ ___  ____  / /_(_)_____________  ____  ___\n");
+		printf("           / _ \\/ __ `__ \\/ __ \\/ __/ / ___/ ___/ __ \\/ __ \\/ _ \\\n");
+		printf("          /  __/ / / / / / /_/ / /_/ (__  ) /__/ /_/ / /_/ /  __/\n");
+		printf("          \\___/_/ /_/ /_/\\____/\\__/_/____/\\___/\\____/ .___/\\___/\n");
+		printf("              Audio-visual engine by @lixielabs    /_/\n");
+		printf("              Released under the GPLv3 Licence\n");
+		printf("############################################################################\n");
+		printf("\n");
+		printf("######################\n");
+		printf("HARDWARE VERSION: %d\n", HARDWARE_VERSION);
+		printf("SOFTWARE VERSION: %d.%d.%d\n", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH);
+		printf("ESP-IDF  VERSION: %s\n", IDF_VER);
+		printf("######################\n");
+		printf("\n");
+		printf("NOTE:\n");
+		printf("If you're seeing this message on a product that\n");
+		printf("isn't an Emotiscope you purchased from Lixie Labs,\n");
+		printf("then it may have been a bootleg! Commerical forks\n");
+		printf("of Emotiscope that I officially endorse will have\n");
+		printf("a different message here, and be listed at:\n");
+		printf("emotiscope.rocks/forks.\n");
+		printf("\n");
+		printf("If you built one yourself, that's awesome. I hope you're\n");
+		printf("enjoying it as much as I enjoyed making it, and I still\n");
+		printf("hope you'll consider supporting me in the future.\n");
+		printf("\n");
+		printf("-lixielabs\n\n");
+	}
+}
+
 // Function to draw a line with motion blur effect
 void draw_line(CRGBF* layer, float x1, float x2, CRGBF color, float opacity) {
     bool lighten = !(color.r == 0 && color.g == 0 && color.b == 0);

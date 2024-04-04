@@ -334,6 +334,7 @@ void calculate_magnitudes() {
 
 		magnitudes_locked = false;
 	}, __func__ );
+	aaaaa();
 }
 
 void start_noise_calibration() {
