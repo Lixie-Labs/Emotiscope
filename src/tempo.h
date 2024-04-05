@@ -18,7 +18,7 @@
 #define TEMPO_LOW (64-32)
 #define TEMPO_HIGH (192-32)
 
-#define BEAT_SHIFT_PERCENT (0.08)
+#define BEAT_SHIFT_PERCENT (0.26)
 
 #define NUM_TEMPI (64)
 
@@ -154,7 +154,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_vu * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 
@@ -183,9 +183,9 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
 		progress *= progress;
 
-		//float scale = (0.75 * progress) + 0.25;
+		float scale = (0.25 * progress) + 0.75;
 
-		normalized_magnitude;// *= scale;
+		normalized_magnitude *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;

@@ -317,6 +317,19 @@ void parse_command(uint32_t t_now_ms, command com) {
 	else if (fastcmp(substring, "slider_touch_end")) {
 		slider_touch_active = false;
 	}
+	else if (fastcmp(substring, "check_update")) {
+		extern bool check_update();
+		if(check_update() == true){ // Update available
+			transmit_to_client_in_slot("update_available", com.origin_client_slot);
+		}
+		else{
+			transmit_to_client_in_slot("no_updates", com.origin_client_slot);
+		}
+	}
+	else if (fastcmp(substring, "perform_update")) {
+		extern void perform_update(int16_t client_slot);
+		perform_update(com.origin_client_slot);
+	}
 	else if (fastcmp(substring, "start_debug_recording")) {
 		audio_recording_index = 0;
 		memset(audio_debug_recording, 0, sizeof(int16_t)*MAX_AUDIO_RECORDING_SAMPLES);

@@ -1,4 +1,4 @@
-#define MAX_COMMAND_LENGTH (64)
+#define MAX_COMMAND_LENGTH (256)
 
 struct command {
 	char command[MAX_COMMAND_LENGTH];

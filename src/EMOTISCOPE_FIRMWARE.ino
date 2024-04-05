@@ -11,7 +11,7 @@
 // ############################################################################
 // ## SOFTWARE VERSION ########################################################
 
-#define SOFTWARE_VERSION_MAJOR ( 1 )
+#define SOFTWARE_VERSION_MAJOR ( 0 )
 #define SOFTWARE_VERSION_MINOR ( 0 )
 #define SOFTWARE_VERSION_PATCH ( 0 )
 
@@ -26,6 +26,7 @@
 #include <Ticker.h> // ............. For timing functions
 #include <DNSServer.h> // .......... Captive portal functionality (not yet working)
 #include <Preferences.h> // ........ Storing settings in NVS flash
+#include <Update.h> // ............. Inline firmware update library
 #include <WiFi.h> // ............... WiFi connection library
 #include <esp_dsp.h> // ............ Fast SIMD-style array math
 #include <esp_wifi.h> // ........... WiFi, but like - the hardware side of it
@@ -58,6 +59,7 @@
 #include "lightshow_modes.h" // .... Definition and handling of lightshow modes
 #include "commands.h" // ........... Queuing and parsing of commands recieved
 #include "wireless.h" // ........... Communication with your network and the web-app
+#include "ota.h" // ................ Over-the-air firmware updates
 
 // Loops
 #include "cpu_core.h" // Audio

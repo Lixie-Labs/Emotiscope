@@ -77,12 +77,6 @@ void load_config(){
 	configuration.touch_right_threshold = preferences.getULong("tr_threshold", 64000);
 }
 
-void update_configuration_version(int32_t current_type){
-	if(current_type == 1){
-		// TODO: Finish config version update system
-	}
-}
-
 void sync_configuration_to_client() {
 	char config_item_buffer[120];
 
@@ -280,9 +274,9 @@ void init_configuration() {
 	preferences.begin("emotiscope", false);
 
 	// Check if wifi config mode was requested
-	bool wifi_config_mode_trigger = preferences.getBool("WIFI_CONFIG_MODE_TRIGGER", false);
+	bool wifi_config_mode_trigger = preferences.getBool("CONFIG_TRIG", false);
 	if (wifi_config_mode_trigger) {
-		preferences.putBool("WIFI_CONFIG_MODE_TRIGGER", false);
+		preferences.putBool("CONFIG_TRIG", false);
 		wifi_config_mode = true;
 	}
 
