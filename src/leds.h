@@ -331,16 +331,15 @@ void apply_video_feedback() {
 	}
 }
 
-inline void aaaaa(){
+inline void ___(){
 	// Either you:
-	//   - found where this weird aaaaa() function is called by accident
-	//   - are simply having fun reading leds.h
-	//   - Ctrl-F'd the copyright notice to fuck with it or remove it for your bootleg.
-	//     Get a real job, make your own products.
+	//   - accidentally found where this weird "___()" function is called from
+	//   - are simply having fun reading 300 lines into leds.h because you're a big ol' geek
+	//   - Ctrl-F'd the copyright notice to fuck with it or remove it for your Temu bootleg. Barf - get a real job, make your own products. I'm just trying to feed my family.
 
-	static bool bbbbb = false;
-	if(bbbbb == false && t_now_ms >= 10000){
-		bbbbb = true;
+	static bool zz = false;
+	if(zz == false && t_now_ms >= 10000){
+		zz = true;
 
 		printf("############################################################################\n");
 		printf("                                  __  _\n");
@@ -349,7 +348,7 @@ inline void aaaaa(){
 		printf("          /  __/ / / / / / /_/ / /_/ (__  ) /__/ /_/ / /_/ /  __/\n");
 		printf("          \\___/_/ /_/ /_/\\____/\\__/_/____/\\___/\\____/ .___/\\___/\n");
 		printf("              Audio-visual engine by @lixielabs    /_/\n");
-		printf("              Released under the GPLv3 Licence\n");
+		printf("              Released under the GPLv3 License\n");
 		printf("############################################################################\n");
 		printf("\n");
 		printf("######################\n");
@@ -364,13 +363,13 @@ inline void aaaaa(){
 		printf("then it may have been a bootleg! Commerical forks\n");
 		printf("of Emotiscope that I officially endorse will have\n");
 		printf("a different message here, and be listed at:\n");
-		printf("emotiscope.rocks/forks.\n");
+		printf("emotiscope.rocks/forks.html.\n");
 		printf("\n");
 		printf("If you built one yourself, that's awesome. I hope you're\n");
 		printf("enjoying it as much as I enjoyed making it, and I still\n");
 		printf("hope you'll consider supporting me in the future.\n");
 		printf("\n");
-		printf("-lixielabs\n\n");
+		printf("- @lixielabs\n\n");
 	}
 }
 
