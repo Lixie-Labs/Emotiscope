@@ -26,7 +26,7 @@ void run_vu(){
 		max_amplitude_now = clip_float(max_amplitude_now - configuration.vu_floor);
 	}
 	else{ // Calibrating
-		configuration.vu_floor = max(configuration.vu_floor, max_amplitude_now/2.0);
+		configuration.vu_floor = max(float(configuration.vu_floor), float(max_amplitude_now/2.0));
 	}
 
 	if(max_amplitude_now > max_amplitude_cap){
@@ -39,8 +39,8 @@ void run_vu(){
 	}
 	max_amplitude_cap = clip_float(max_amplitude_cap);
 
-	if(max_amplitude_cap < 0.0005){
-		max_amplitude_cap = 0.0005;
+	if(max_amplitude_cap < 0.005){
+		max_amplitude_cap = 0.005;
 	}
 
 	float auto_scale = 1.0 / max(max_amplitude_cap, 0.00001f);

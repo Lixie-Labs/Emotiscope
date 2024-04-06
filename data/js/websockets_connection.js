@@ -281,6 +281,10 @@ function parse_message(message){
 				}
 			);
 		}
+		else if(command_type == "version"){
+			let version = command_data[1];
+			document.getElementById("version_number").innerHTML = "Version: "+version;
+		}
 		else{
 			console.log(`Unrecognized command type: ${command_type}`);
 		}
@@ -432,6 +436,8 @@ function open_websockets_connection_to_device(){
 	ws.onopen = function(e) {
 		console.log("[open] Connection established");
 		connection_pending = false;
+
+		transmit("get|version");
 	};
 
 	ws.onmessage = function(event) {

@@ -267,6 +267,13 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot(command_string, com.origin_client_slot);
 		}
 
+		// If getting version number
+		else if (fastcmp(substring, "version")) {
+			char command_string[80];
+			snprintf(command_string, 80, "version|%d.%d.%d", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH);
+			transmit_to_client_in_slot(command_string, com.origin_client_slot);
+		}
+
 		// Couldn't figure out what to "get"
 		else{
 			unrecognized_command_error(substring);

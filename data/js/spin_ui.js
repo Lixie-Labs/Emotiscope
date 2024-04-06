@@ -26,25 +26,25 @@ function setup_landscape_listener() {
     dimmer.style.left = '0';
     dimmer.style.width = '100%';
     dimmer.style.height = '100%';
-    dimmer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    dimmer.style.backgroundColor = 'rgba(0, 0, 0, 1.0)';
     dimmer.style.display = 'flex';
     dimmer.style.alignItems = 'center';
     dimmer.style.justifyContent = 'center';
-    dimmer.style.fontSize = '5em';
+    dimmer.style.fontSize = '1.5em';
     dimmer.style.transition = 'opacity 500ms';
     dimmer.style.visibility = 'hidden';
     dimmer.style.opacity = '0';
 	dimmer.style.color = 'var(--accent)';
-    dimmer.innerHTML = ':(';
+    dimmer.innerHTML = 'Sorry, portrait mode only!';
     document.body.appendChild(dimmer);
 
     // Add event listener for window resize
     window.addEventListener('resize', () => {
-        //toggle_dimmer(is_landscape());
+        toggle_dimmer(is_landscape());
     });
 
     // Initial check in case the page loads in landscape mode
-    //toggle_dimmer(is_landscape());
+    toggle_dimmer(is_landscape());
 }
 
 // Initialize the listener on page load
