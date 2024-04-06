@@ -1,4 +1,4 @@
-void draw_spectrum_beat(){
+void draw_spectronome(){
 	// Draw spectrograph
 	draw_spectrum();
 

@@ -26,13 +26,13 @@ extern uint8_t hold_blinks_queued;
 extern bool hold_blink_state;
 
 void init_touch(){
-	touch_pins[TOUCH_LEFT].pin = TOUCH_LEFT_PIN;
+	touch_pins[TOUCH_LEFT].pin   = TOUCH_LEFT_PIN;
 	touch_pins[TOUCH_CENTER].pin = TOUCH_CENTER_PIN;
-	touch_pins[TOUCH_RIGHT].pin = TOUCH_RIGHT_PIN;
+	touch_pins[TOUCH_RIGHT].pin  = TOUCH_RIGHT_PIN;
 
-	touch_pins[TOUCH_LEFT].threshold = 33000;
-	touch_pins[TOUCH_CENTER].threshold = 95000;
-	touch_pins[TOUCH_RIGHT].threshold = 64000;
+	touch_pins[TOUCH_LEFT].threshold   = configuration.touch_left_threshold;
+	touch_pins[TOUCH_CENTER].threshold = configuration.touch_center_threshold;
+	touch_pins[TOUCH_RIGHT].threshold  = configuration.touch_right_threshold;
 
 	touch_pad_init();
 

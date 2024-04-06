@@ -10,6 +10,27 @@ let last_ping_time;
 let pong_pending = false;
 let reconnecting = false;
 let standby_mode = false;
+let pongs_halted = false;
+
+let touch_vals = [
+	0,
+	0,
+	0
+];
+
+let touch_low = [
+	0,
+	0,
+	0
+];
+
+let touch_high = [
+	0,
+	0,
+	0
+];
+
+got_touch_vals = true;
 
 let auto_response_table = {
 	"welcome":"get|config",
@@ -36,10 +57,12 @@ function ping_server(){
 }
 
 function check_pong_timeout(){
-	if(pong_pending == true){
-		if(performance.now() - last_ping_time >= MAX_PING_PONG_REPLY_TIME_MS){
-			console.log("NO PONG WITHIN TIMEOUT!");
-			reconnect_websockets();
+	if(pongs_halted == false){
+		if(pong_pending == true){
+			if(performance.now() - last_ping_time >= MAX_PING_PONG_REPLY_TIME_MS){
+				console.log("NO PONG WITHIN TIMEOUT!");
+				reconnect_websockets();
+			}
 		}
 	}
 }
@@ -201,6 +224,62 @@ function parse_message(message){
 			setTimeout(function(){
 				ping_server();
 			}, MAX_PING_PONG_REPLY_TIME_MS / 2);
+		}
+		else if(command_type == "touch_vals"){
+			touch_vals[0] = parseInt(command_data[1]);
+			touch_vals[1] = parseInt(command_data[2]);
+			touch_vals[2] = parseInt(command_data[3]);
+
+			console.log(`TOUCH VALS: ${touch_vals}`);
+
+			got_touch_vals = true;
+		}
+		else if(command_type == "update_available"){
+			pongs_halted = true;
+			show_alert(
+				"UPDATE AVAILABLE",
+				"An update is available for your Emotiscope!<br><br>Click below to download the latest firmware.",
+				"UPDATE NOW",
+				function(){
+					hide_alert();
+					transmit("perform_update");
+				}
+			);
+		}
+		else if(command_type == "no_updates"){
+			show_alert(
+				"ALREADY UP-TO-DATE",
+				"Your Emotiscope is already running the latest firmware!<br><br>(But follow @lixielabs on social media to keep <em>yourself</em> up-to-date on new features and improvements that are coming!)",
+				"DAMN, OK",
+				function(){
+					hide_alert();
+				}
+			);
+		}
+		else if(command_type == "ota_firmware_progress"){
+			let progress = parseInt(command_data[1]);
+			show_alert(
+				"UPDATE IN PROGRESS",
+				"Updating firmware: "+progress+"% done.<br><br>Do not disconnect your Emotiscope from power or the internet until the update is complete.",
+				"PLEASE WAIT",
+				function(){
+					// nothing
+				}
+			);
+		}
+		else if(command_type == "ota_filesystem_progress"){
+			let progress = parseInt(command_data[1]);
+			if(progress == 100){
+				window.location.reload();
+			}
+			show_alert(
+				"UPDATE IN PROGRESS",
+				"Updating filesystem: "+progress+"% done.<br><br>Do not disconnect your Emotiscope from power or the internet until the update is complete.",
+				"PLEASE WAIT",
+				function(){
+					// nothing
+				}
+			);
 		}
 		else{
 			console.log(`Unrecognized command type: ${command_type}`);

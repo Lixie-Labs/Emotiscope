@@ -39,8 +39,8 @@ void run_vu(){
 	}
 	max_amplitude_cap = clip_float(max_amplitude_cap);
 
-	if(max_amplitude_cap < 0.005){
-		max_amplitude_cap = 0.005;
+	if(max_amplitude_cap < 0.0005){
+		max_amplitude_cap = 0.0005;
 	}
 
 	float auto_scale = 1.0 / max(max_amplitude_cap, 0.00001f);

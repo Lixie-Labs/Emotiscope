@@ -110,7 +110,7 @@ void draw_metronome() {
 			CRGBF dot_color = hsv((configuration.color+color_offset*configuration.color_range) + configuration.color_range*progress, configuration.saturation, 1.0);
 
 			if(configuration.mirror_mode == true){
-				dot_pos *= 0.5;
+				dot_pos -= 0.25;
 			}
 
 			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity);

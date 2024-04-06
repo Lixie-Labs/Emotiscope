@@ -22,13 +22,6 @@ void init_serial(uint32_t baud_rate) {
 	extern uint8_t HARDWARE_VERSION;
 
 	Serial.begin(baud_rate);
-	Serial.println('\n');
-	Serial.println("######################");
-	Serial.printf( "EMOTISCOPE \n");
-	Serial.printf( "HARDWARE VERSION: %d\n", HARDWARE_VERSION);
-    Serial.printf( "SOFTWARE VERSION: %d.%d.%d\n", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH);
-    Serial.printf( "ESP-IDF  VERSION: %s\n", IDF_VER);
-	Serial.println("######################");
 }
 
 void init_system() {
@@ -46,7 +39,7 @@ void init_system() {
 	extern void init_touch();
 
 	init_hardware_version_pins();       // (hardware_version.h)
-	//init_serial(2000000);				// (system.h)
+	init_serial(2000000);				// (system.h)
 	init_filesystem();                  // (filesystem.h)
 	init_configuration();               // (configuration.h)
 	init_i2s_microphone();				// (microphone.h)

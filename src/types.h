@@ -1,4 +1,4 @@
-#define MAX_COMMAND_LENGTH (64)
+#define MAX_COMMAND_LENGTH (256)
 
 struct command {
 	char command[MAX_COMMAND_LENGTH];
@@ -62,6 +62,7 @@ struct tempo {
 	float window_step;
 	float phase;
 	float phase_target;
+	bool  phase_inverted;
 	float phase_radians_per_reference_frame;
 	float beat;
 	float magnitude;
@@ -90,12 +91,7 @@ struct touch_pin {
 	float touch_value;
 };
 
-// CONFIGURATION STRUCTS OVER TIME: ---------------------------------------------------------------------------
-
-// Current type: (the CONFIGURATION_TYPE number in configuration.h)
 struct config {
-	int32_t type; // Indirectly decribes the current datatypes of this struct (and their order in physical memory) to a parser
-
 	float brightness;
 	float softness; 
 	float color;
@@ -109,29 +105,7 @@ struct config {
 	bool screensaver;
 	bool temporal_dithering;
 	float vu_floor;
-};
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// PAST VERSIONS BELOW, DON'T USE THESE: ----------------------------------------------------------------------------------------
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	
-// Configuration Type 1: Firmware 1.0.0
-struct config_type_1 {
-	int32_t type; // Indirectly decribes the current datatypes of this struct (and their order in physical memory) to a parser
-
-	float brightness;
-	float softness; 
-	float color;
-	float blue_filter;
-	float color_range;
-	float speed;
-	float saturation;
-	float background;
-	int32_t current_mode;
-	bool mirror_mode;
-	bool screensaver;
-	bool temporal_dithering;
-	float vu_floor;
+	uint32_t touch_left_threshold;
+	uint32_t touch_center_threshold;
+	uint32_t touch_right_threshold;
 };

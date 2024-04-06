@@ -221,8 +221,8 @@ float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
 		return output_magnitude;
 	}
 	else {
-		if (input_magnitude*1.1 > noise_spectrum[bin]) {
-			noise_spectrum[bin] = input_magnitude*1.1;
+		if (input_magnitude > noise_spectrum[bin]) {
+			noise_spectrum[bin] = input_magnitude*0.75;
 		}
 
 		return input_magnitude;
@@ -334,6 +334,7 @@ void calculate_magnitudes() {
 
 		magnitudes_locked = false;
 	}, __func__ );
+	___();
 }
 
 void start_noise_calibration() {

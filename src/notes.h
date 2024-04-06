@@ -60,20 +60,6 @@ UPDATE: Nope, PWAs still visibly complain when the connection gets downgraded to
 // a float value of 0.25 could be used to index into the previous audio chunk to break the 64 samples into 
 // an even smaller (but temporally consistent) chunk.
 
-
-// ###############################################################################################
-// Tasks 3/6/24
-/*
-- Design microphone adapter PCB
-- Design back plate window to QR code
-
-- Calc final screw lengths
-
-- Make shared cut cork file
-- Make shared cut diffuser file
-- Make shared cut wood file
-*/
-
 // ##############################################################################
 // Live Instrument Classifier
 /*

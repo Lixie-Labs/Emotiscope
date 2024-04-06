@@ -33,6 +33,10 @@
 			let ssid = document.getElementById("ssid").value;
 			let pass = document.getElementById("pass").value;
 
+			// URL encode the ssid and pass
+			ssid = encodeURIComponent(ssid);
+			pass = encodeURIComponent(pass);
+
 			let wifi_endpoint = "/save-wifi?ssid="+ssid+"&pass="+pass;
 			fetch(wifi_endpoint);
 

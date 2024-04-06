@@ -93,7 +93,11 @@
 			<div id="menu_container">
 				<div id="menu_toggles">
 				</div>
-				<div class="menu_item buzz">
+				<div class="menu_item buzz" onclick="touch_calibration_step(0);">
+					<span class="menu_item_label">Calibrate Touch Sensors</span>
+					<span class="menu_item_content"></span>
+				</div>
+				<div class="menu_item buzz" onclick="transmit('check_update');">
 					<span class="menu_item_label">Check Firmware Update</span>
 					<span class="menu_item_content"></span>
 				</div>
@@ -107,7 +111,7 @@
 				</div>
 				<div class="menu_item buzz">
 					<div id="mac_address" onload="get_mac_address();">
-						LOADING...
+						MAC: LOADING...
 					</div>
 				</div>
 			</div>
@@ -172,6 +176,16 @@
 			</span>
 		</div>
 
+		<div id="alert_panel">
+			<div id="alert_panel_title">ALERT</div>
+			<div id="alert_panel_description">
+				This is an alert, which can be used for critical or non-critical messages and allows for a button
+			</div>
+			<button class="buzz" id="alert_panel_button">OK</button>
+		</div>
+
+		<div id="alert_dimmer"></div>
+
 		<div id="dimmer">
 			<div class="lds-ellipsis">
 				<div></div><div></div><div></div><div></div>
@@ -181,7 +195,9 @@
 	<!--<script src="js/accelerometer.js"></script>-->
 	<script src="js/discovery.js"></script>
 	<script src="js/fetch_mac.js"></script>
+	<script src="js/touch_calibration.js"></script>
 	<script src="js/info.js"></script>
+	<script src="js/alerts.js"></script>
 	<script src="js/utilities.js"></script>
 	<script src="js/sliders.js"></script>
 	<script src="js/toggles.js"></script>

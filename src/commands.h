@@ -169,6 +169,26 @@ void parse_command(uint32_t t_now_ms, command com) {
 				transmit_to_client_in_slot("mode_selected", com.origin_client_slot);
 			}
 		}
+
+		else if (fastcmp(substring, "touch_thresholds")){
+			// Get touch threshold values
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			uint32_t touch_left_threshold = atol(substring);
+			load_substring_from_split_index(com.command, 3, substring, sizeof(substring));
+			uint32_t touch_center_threshold = atol(substring);
+			load_substring_from_split_index(com.command, 4, substring, sizeof(substring));
+			uint32_t touch_right_threshold = atol(substring);
+
+			configuration.touch_left_threshold = touch_left_threshold;
+			configuration.touch_center_threshold = touch_center_threshold;
+			configuration.touch_right_threshold = touch_right_threshold;
+
+			touch_pins[TOUCH_LEFT].threshold   = configuration.touch_left_threshold;
+			touch_pins[TOUCH_CENTER].threshold = configuration.touch_center_threshold;
+			touch_pins[TOUCH_RIGHT].threshold  = configuration.touch_right_threshold;
+
+			printf("Touch thresholds set to: %lu | %lu | %lu\n", configuration.touch_left_threshold, configuration.touch_center_threshold, configuration.touch_right_threshold);
+		}
 		else{
 			unrecognized_command_error(substring);
 		}
@@ -240,6 +260,13 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("menu_toggles_ready", com.origin_client_slot);
 		}
 
+		// If getting touch values
+		else if (fastcmp(substring, "touch_vals")) {
+			char command_string[80];
+			snprintf(command_string, 80, "touch_vals|%lu|%lu|%lu", uint32_t(touch_pins[0].touch_value), uint32_t(touch_pins[1].touch_value), uint32_t(touch_pins[2].touch_value));
+			transmit_to_client_in_slot(command_string, com.origin_client_slot);
+		}
+
 		// Couldn't figure out what to "get"
 		else{
 			unrecognized_command_error(substring);
@@ -289,6 +316,19 @@ void parse_command(uint32_t t_now_ms, command com) {
 	}
 	else if (fastcmp(substring, "slider_touch_end")) {
 		slider_touch_active = false;
+	}
+	else if (fastcmp(substring, "check_update")) {
+		extern bool check_update();
+		if(check_update() == true){ // Update available
+			transmit_to_client_in_slot("update_available", com.origin_client_slot);
+		}
+		else{
+			transmit_to_client_in_slot("no_updates", com.origin_client_slot);
+		}
+	}
+	else if (fastcmp(substring, "perform_update")) {
+		extern void perform_update(int16_t client_slot);
+		perform_update(com.origin_client_slot);
 	}
 	else if (fastcmp(substring, "start_debug_recording")) {
 		audio_recording_index = 0;

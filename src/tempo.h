@@ -18,7 +18,7 @@
 #define TEMPO_LOW (64-32)
 #define TEMPO_HIGH (192-32)
 
-#define BEAT_SHIFT_PERCENT (0.08)
+#define BEAT_SHIFT_PERCENT (0.26)
 
 #define NUM_TEMPI (64)
 
@@ -121,6 +121,8 @@ void init_tempo_goertzel_constants() {
 
 		// float radians_per_second = (PI * (tempi[i].target_tempo_hz));
 		tempi[i].phase_radians_per_reference_frame = ((2.0 * PI * tempi[i].target_tempo_hz) / float(REFERENCE_FPS));
+
+		tempi[i].phase_inverted = false;
 	}
 }
 
@@ -152,7 +154,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_vu * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 
@@ -163,15 +165,16 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float imag = (q2 * tempi[tempo_bin].sine);
 
 		// Calculate phase
-		tempi[tempo_bin].phase_target = (unwrap_phase(atan2(imag, real)) + (PI * BEAT_SHIFT_PERCENT));
-		if (tempi[tempo_bin].phase_target > PI) {
-			tempi[tempo_bin].phase_target -= (2 * PI);
+		tempi[tempo_bin].phase = (unwrap_phase(atan2(imag, real)) + (PI * BEAT_SHIFT_PERCENT));
+		
+		if (tempi[tempo_bin].phase > PI) {
+			tempi[tempo_bin].phase -= (2 * PI);
+			tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
 		}
-		else if (tempi[tempo_bin].phase_target < -PI) {
-			tempi[tempo_bin].phase_target += (2 * PI);
+		else if (tempi[tempo_bin].phase < -PI) {
+			tempi[tempo_bin].phase += (2 * PI);
+			tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
 		}
-
-		tempi[tempo_bin].phase = tempi[tempo_bin].phase_target;
 
 		float magnitude_squared = (q1 * q1) + (q2 * q2) - q1 * q2 * tempi[tempo_bin].coeff;
 		float magnitude = sqrt(magnitude_squared);
@@ -180,9 +183,9 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
 		progress *= progress;
 
-		float scale = (0.75 * progress) + 0.25;
+		float scale = (0.25 * progress) + 0.75;
 
-		normalized_magnitude;// *= scale;
+		normalized_magnitude *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;
@@ -207,8 +210,8 @@ void calculate_tempi_magnitudes(int16_t single_bin = -1) {
 			}
 		}
 
-		if (max_val < 0.004) {
-			max_val = 0.004;
+		if (max_val < 0.04) {
+			max_val = 0.04;
 		}
 
 		float autoranger_scale = 1.0 / (max_val);
@@ -373,22 +376,19 @@ void sync_beat_phase(uint16_t tempo_bin, float delta) {
 	float push = (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
 
 	tempi[tempo_bin].phase += push;
-	tempi[tempo_bin].phase_target += push;
 
 	if (tempi[tempo_bin].phase > PI) {
 		tempi[tempo_bin].phase -= (2 * PI);
+		
+		tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
 	}
 	else if (tempi[tempo_bin].phase < -PI) {
 		tempi[tempo_bin].phase += (2 * PI);
+
+		tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
 	}
 
-	if (tempi[tempo_bin].phase_target > PI) {
-		tempi[tempo_bin].phase_target -= (2 * PI);
-	}
-	else if (tempi[tempo_bin].phase_target < -PI) {
-		tempi[tempo_bin].phase_target += (2 * PI);
-	}
-
+	/*
 	float walk_divider = 200.0;
 	float sync_distance = fabs(tempi[tempo_bin].phase - tempi[tempo_bin].phase_target);
 	if (tempi[tempo_bin].phase > tempi[tempo_bin].phase_target) {
@@ -397,6 +397,7 @@ void sync_beat_phase(uint16_t tempo_bin, float delta) {
 	else if (tempi[tempo_bin].phase < tempi[tempo_bin].phase_target) {
 		tempi[tempo_bin].phase += (sync_distance / walk_divider);
 	}
+	*/
 
 	tempi[tempo_bin].beat = sin(tempi[tempo_bin].phase);
 }

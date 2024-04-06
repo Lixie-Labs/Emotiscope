@@ -14,7 +14,7 @@
 #include "lightshow_modes/spectrum.h"
 #include "lightshow_modes/octave.h"
 #include "lightshow_modes/metronome.h"
-#include "lightshow_modes/spectrum_beat.h"
+#include "lightshow_modes/spectronome.h"
 #include "lightshow_modes/hype.h"
 #include "lightshow_modes/plot.h"
 #include "lightshow_modes/bloom.h"
@@ -30,7 +30,7 @@ lightshow_mode lightshow_modes[] = {
 	{ "Spectrum",        &draw_spectrum      }, // 1
 	{ "Octave",          &draw_octave        }, // 2
 	{ "Metronome",       &draw_metronome     }, // 3
-	{ "Spectrum + Beat", &draw_spectrum_beat }, // 4
+	{ "Spectronome",     &draw_spectronome   }, // 4
 	{ "Hype",            &draw_hype          }, // 5
 	{ "Bloom",           &draw_bloom         }, // 6
 	{ "Neutral",         &draw_neutral       }, // 7

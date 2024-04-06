@@ -6,12 +6,12 @@
 //          /  __/ / / / / / /_/ / /_/ (__  ) /__/ /_/ / /_/ /  __/
 //          \___/_/ /_/ /_/\____/\__/_/____/\___/\____/ .___/\___/
 //              Audio-visual engine by @lixielabs    /_/
-//              Released under the GPLv3 Licence
+//              Released under the GPLv3 License
 //
 // ############################################################################
 // ## SOFTWARE VERSION ########################################################
 
-#define SOFTWARE_VERSION_MAJOR ( 1 )
+#define SOFTWARE_VERSION_MAJOR ( 0 )
 #define SOFTWARE_VERSION_MINOR ( 0 )
 #define SOFTWARE_VERSION_PATCH ( 0 )
 
@@ -19,12 +19,14 @@
 // ## DEPENDENCIES ############################################################
 
 // External dependencies
-//#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-alpha ESP32 board def yet, and I need the IDF 5.1.2 for this madness to even work. I cobbled my own RMT LED driver for now.
+//#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-alpha ESP32 board def yet, and I need the IDF 5.1.2 for this madness to even work. I cobbled my own RMT LED driver for now for non-blocking frame transmission.
 #include <PsychicHttp.h> // ........ Handling the web-app HTTP and WS
-#include <HTTPClient.h> // ......... Used to make POST requests to the discovery server
+#include <HTTPClient.h> // ......... Used to make POST requests to the device discovery server
 #include <ESPmDNS.h> // ............ Used for "emotiscope.local" domain name
 #include <Ticker.h> // ............. For timing functions
-#include <DNSServer.h> // .......... Captive portal functionality
+#include <DNSServer.h> // .......... Captive portal functionality (not yet working)
+#include <Preferences.h> // ........ Storing settings in NVS flash
+#include <Update.h> // ............. Inline firmware update library
 #include <WiFi.h> // ............... WiFi connection library
 #include <esp_dsp.h> // ............ Fast SIMD-style array math
 #include <esp_wifi.h> // ........... WiFi, but like - the hardware side of it
@@ -57,6 +59,7 @@
 #include "lightshow_modes.h" // .... Definition and handling of lightshow modes
 #include "commands.h" // ........... Queuing and parsing of commands recieved
 #include "wireless.h" // ........... Communication with your network and the web-app
+#include "ota.h" // ................ Over-the-air firmware updates
 
 // Loops
 #include "cpu_core.h" // Audio
