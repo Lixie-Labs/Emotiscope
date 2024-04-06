@@ -20,6 +20,7 @@
 #include "lightshow_modes/bloom.h"
 #include "lightshow_modes/analog.h"
 #include "lightshow_modes/waveform.h"
+#include "lightshow_modes/neutral.h"
 //#include "lightshow_modes/neurons.h"
 
 #include "lightshow_modes/debug.h"
@@ -32,7 +33,8 @@ lightshow_mode lightshow_modes[] = {
 	{ "Spectronome",     &draw_spectronome   }, // 4
 	{ "Hype",            &draw_hype          }, // 5
 	{ "Bloom",           &draw_bloom         }, // 6
-	//{ "Neurons",         &draw_neurons       }, // 7
+	{ "Neutral",         &draw_neutral       }, // 7
+	//{ "Neurons",         &draw_neurons       }, // 8
 
 	//{ "Debug",           &draw_debug         },
 };
