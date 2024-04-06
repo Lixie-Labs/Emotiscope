@@ -106,7 +106,7 @@ void draw_metronome() {
 			color_offset = 0.25;
 		}
 
-		if(opacity > 0.001){
+		if(opacity > 0.0001){
 			CRGBF dot_color = hsv((configuration.color+color_offset*configuration.color_range) + configuration.color_range*progress, configuration.saturation, 1.0);
 
 			if(configuration.mirror_mode == true){
