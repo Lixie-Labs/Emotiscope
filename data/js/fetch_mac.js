@@ -1,14 +1,10 @@
 // Get the base URL of the current page
 const base_url = window.location.origin;
-
-// Construct the URL for the /mac endpoint
-const mac_url = `${base_url}/mac`;
-
 let mac_str = "";
 
 function get_mac_string(){
 	// Fetch the text result from the /mac endpoint
-	fetch(mac_url)
+	fetch(`${base_url}/mac`)
 		.then(response => {
 			if (!response.ok) {
 				throw new Error('Network response was not 200');

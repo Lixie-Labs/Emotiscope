@@ -11,6 +11,14 @@ function fetch_and_redirect() {
 			if (!response.ok) {
 				print("BAD RESPONSE");
 				output("Network response was not ok");
+
+				device_ip = window.location.hostname;
+				connection_start_time = performance.now();
+				connection_pending = true;
+				setInterval(check_connection_timeout, 100);
+
+				open_websockets_connection_to_device();
+				
 				throw new Error('Network response was not ok');
 			}
 			return response.json();
@@ -36,6 +44,13 @@ function fetch_and_redirect() {
 				} else {
 					console.log('Failed to fetch local IP after ' + max_retry_attempts + '!');
 					show_connection_error();
+
+					device_ip = window.location.hostname;
+					connection_start_time = performance.now();
+					connection_pending = true;
+					setInterval(check_connection_timeout, 100);
+
+					open_websockets_connection_to_device();
 				}
 			}
 		})
@@ -46,11 +61,25 @@ function fetch_and_redirect() {
 				retry_count++;
 			} else {
 				output('Failed to reach discovery server after ' + max_retry_attempts + ' attempts: ' + error.message);
+
+				device_ip = window.location.hostname;
+				connection_start_time = performance.now();
+				connection_pending = true;
+				setInterval(check_connection_timeout, 100);
+
+				open_websockets_connection_to_device();
 			}
-		});
+		}
+	);
 }
 
 // If page is fully loaded, fetch and redirect
 document.addEventListener('DOMContentLoaded', (event) => {
-	fetch_and_redirect();
+	//fetch_and_redirect();
+	device_ip = window.location.hostname;
+	connection_start_time = performance.now();
+	connection_pending = true;
+	setInterval(check_connection_timeout, 100);
+
+	open_websockets_connection_to_device();
 });

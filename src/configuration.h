@@ -68,13 +68,13 @@ void load_config(){
 	configuration.vu_floor = preferences.getFloat("vu_floor", 0.00);
 
 	// Touch Left Threshold
-	configuration.touch_left_threshold = preferences.getULong("tl_threshold", 33000);
+	configuration.touch_left_threshold = preferences.getULong("tl_threshold", 33000*2);
 
 	// Touch Center Threshold
-	configuration.touch_center_threshold = preferences.getULong("tc_threshold", 95000);
+	configuration.touch_center_threshold = preferences.getULong("tc_threshold", 95000*2);
 
 	// Touch Right Threshold
-	configuration.touch_right_threshold = preferences.getULong("tr_threshold", 64000);
+	configuration.touch_right_threshold = preferences.getULong("tr_threshold", 64000*2);
 }
 
 void sync_configuration_to_client() {
