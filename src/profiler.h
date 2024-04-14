@@ -1,5 +1,5 @@
 // UNCOMMENT THIS TO ENABLE IT
-//#define PROFILER_ENABLED  // Slows down the system, but allows watching how much
+#define PROFILER_ENABLED  // Slows down the system, but allows watching how much
 // total time each function takes up
 
 #define PROFILER_SINGLE_SHOT \
@@ -215,7 +215,7 @@ void print_system_info() {
 		}
 		printf("------------------------------\n");
 
-		//print_profiled_function_hits();	
+		print_profiled_function_hits();	
 		printf("##################################\n\n");
 	}
 }

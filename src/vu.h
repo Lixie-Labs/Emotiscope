@@ -10,6 +10,7 @@ float vu_history[NUM_VU_AVERAGE_SAMPLES] = { 0 };
 uint8_t vu_history_index = 0;
 
 void run_vu(){
+	profile_function([&]() {
 	static float max_amplitude_cap = 0.0000001;
 	float* samples = &sample_history[(SAMPLE_HISTORY_LENGTH-1) - CHUNK_SIZE];
 
@@ -60,4 +61,5 @@ void run_vu(){
 	vu_level = vu_sum / NUM_VU_AVERAGE_SAMPLES;
 
 	vu_max = max(vu_max, vu_level);
+	}, __func__);
 }

@@ -29,13 +29,13 @@ void run_cpu() {
 
 		// Calculate the magnitudes of the currently studied frequency set
 		calculate_magnitudes();  // (goertzel.h)
-		get_chromagram();
+		get_chromagram();        // (goertzel.h)
 
-		run_vu();
+		run_vu(); // (vu.h)
 
 		//printf("update_tempo() = %.4fus\n", measure_execution([&]() {
 		// Log novelty and calculate the most probable tempi
-		update_tempo();	 // (tempo.h)
+		update_tempo_fast();	 // (tempo.h)
 		//}));
 
 		// Update the FPS_CPU variable

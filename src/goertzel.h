@@ -345,18 +345,20 @@ void start_noise_calibration() {
 }
 
 void get_chromagram(){
-	memset(chromagram, 0, sizeof(float) * 12);
+	profile_function([&]() {
+		memset(chromagram, 0, sizeof(float) * 12);
 
-	float max_val = 0.2;
-	for(uint16_t i = 0; i < 60; i++){
-		chromagram[ i % 12 ] += (spectrogram_smooth[i] / 5.0);
+		float max_val = 0.2;
+		for(uint16_t i = 0; i < 60; i++){
+			chromagram[ i % 12 ] += (spectrogram_smooth[i] / 5.0);
 
-		max_val = max(max_val, chromagram[ i % 12 ]);
-	}
+			max_val = max(max_val, chromagram[ i % 12 ]);
+		}
 
-	float auto_scale = 1.0 / max_val;
+		float auto_scale = 1.0 / max_val;
 
-	for(uint16_t i = 0; i < 12; i++){
-		chromagram[i] *= auto_scale;
-	}
+		for(uint16_t i = 0; i < 12; i++){
+			chromagram[i] *= auto_scale;
+		}
+	}, __func__ );
 }

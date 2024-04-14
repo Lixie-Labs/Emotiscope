@@ -36,7 +36,7 @@ lightshow_mode lightshow_modes[] = {
 	{ "Neutral",         &draw_neutral       }, // 7
 	//{ "Neurons",         &draw_neurons       }, // 8
 
-	//{ "Debug",           &draw_debug         },
+	{ "Debug",           &draw_debug         },
 };
 
 const uint16_t NUM_LIGHTSHOW_MODES = sizeof(lightshow_modes) / sizeof(lightshow_mode);
