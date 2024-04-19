@@ -20,11 +20,7 @@
 
 #define BEAT_SHIFT_PERCENT (0.08)
 
-#define NUM_TEMPI (128)
-
-#define FFT_BINS 64
-
-float tempo_fft[FFT_BINS*2];
+#define NUM_TEMPI (64)
 
 bool silence_detected = true;
 float silence_level = 1.0;
@@ -43,37 +39,6 @@ float vu_curve[NOVELTY_HISTORY_LENGTH];
 tempo tempi[NUM_TEMPI];
 float tempi_smooth[NUM_TEMPI];
 float tempi_power_sum = 0.0;
-
-// Function to initialize FFT
-void init_tempo_fft() {
-    esp_err_t ret = dsps_fft2r_init_fc32(tempo_fft, FFT_BINS);
-    if (ret != ESP_OK) {
-        printf("Failed to initialize FFT: %d\n", ret);
-    }
-}
-
-// Function to execute FFT
-void execute_tempo_fft(float *sample_history) {
-    float fft_output[FFT_BINS];
-    esp_err_t ret = dsps_fft4r_fc32_ansi(sample_history, FFT_BINS, tempo_fft, FFT_BINS);
-    if (ret != ESP_OK) {
-        printf("Failed to execute FFT: %d\n", ret);
-    }
-}
-
-void log_spectral_flux(){
-	static uint32_t next_update = t_now_us;
-
-	const float update_interval_hz = NOVELTY_LOG_HZ;
-	const uint32_t update_interval_us = 1000000 / update_interval_hz;
-
-	if (t_now_us >= next_update) {
-		next_update += update_interval_us;
-
-		// Use ESP-DSP function to gather 64 bin fft
-		
-	}
-}
 
 uint16_t find_closest_tempo_bin(float target_bpm) {
 	float target_bpm_hz = target_bpm / 60.0;
@@ -307,10 +272,6 @@ void normalize_novelty_curve() {
 	}, __func__ );
 }
 
-void update_tempo_fast(){
-	execute_fft(sample_history);
-}
-
 void update_tempo() {
 	profile_function([&]() {
 		static uint32_t iter = 0;
@@ -318,14 +279,15 @@ void update_tempo() {
 
 		normalize_novelty_curve();
 
-		if (iter % 4 == 0) {
+		if (iter % 2 == 0) {
 			static uint16_t calc_bin = 0;
 
 			uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
 
 			calculate_tempi_magnitudes(calc_bin+0);
+			calculate_tempi_magnitudes(calc_bin+1);
 
-			calc_bin+=1;
+			calc_bin+=2;
 			if (calc_bin >= max_bin) {
 				calc_bin = 0;
 			}
@@ -441,24 +403,19 @@ void sync_beat_phase(uint16_t tempo_bin, float delta) {
 }
 
 void update_tempi_phase(float delta) {
-	static bool interlacing_field = false;
-	interlacing_field = !interlacing_field;
-
 	tempi_power_sum = 0.00000001;
 	// Iterate over all tempi to smooth them and calculate the power sum
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		//if(tempo_bin % 2 == interlacing_field){
-			float progress = float(tempo_bin) / NUM_TEMPI;
+		float progress = float(tempo_bin) / NUM_TEMPI;
 
-			// Load the magnitude
-			float tempi_magnitude = tempi[tempo_bin].magnitude;
+		// Load the magnitude
+		float tempi_magnitude = tempi[tempo_bin].magnitude;
 
-			// Smooth it
-			tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
-			tempi_power_sum += tempi_smooth[tempo_bin];
+		// Smooth it
+		tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
+		tempi_power_sum += tempi_smooth[tempo_bin];
 
-			sync_beat_phase(tempo_bin, delta);
-		//}
+		sync_beat_phase(tempo_bin, delta);
 	}
 
 	// Measure contribution factor of each tempi, calculate confidence level
