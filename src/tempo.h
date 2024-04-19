@@ -15,12 +15,11 @@
 #define NOVELTY_HISTORY_LENGTH (1024)  // 50 FPS for 20.48 seconds
 #define NOVELTY_LOG_HZ (50)
 
-#define TEMPO_LOW (64-32)
-#define TEMPO_HIGH (192-32)
-
+#define NUM_TEMPI (128) // TEMPO_LOW to TEMPO_HIGH
 #define BEAT_SHIFT_PERCENT (0.08)
 
-#define NUM_TEMPI (64)
+#define TEMPO_LOW (32) // BPM
+#define TEMPO_HIGH (TEMPO_LOW + NUM_TEMPI)
 
 bool silence_detected = true;
 float silence_level = 1.0;
@@ -183,9 +182,9 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
 		progress *= progress;
 
-		//float scale = (0.25 * progress) + 0.75;
+		float scale = (0.6 * progress) + 0.4;
 
-		normalized_magnitude;// *= scale;
+		normalized_magnitude *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;
@@ -210,8 +209,8 @@ void calculate_tempi_magnitudes(int16_t single_bin = -1) {
 			}
 		}
 
-		if (max_val < 0.04) {
-			max_val = 0.04;
+		if (max_val < 0.02) {
+			max_val = 0.02;
 		}
 
 		float autoranger_scale = 1.0 / (max_val);
@@ -279,19 +278,21 @@ void update_tempo() {
 
 		normalize_novelty_curve();
 
-		if (iter % 2 == 0) {
-			static uint16_t calc_bin = 0;
+		static uint16_t calc_bin = 0;
+		uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
 
-			uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
-
+		if(iter % 2 == 0){
 			calculate_tempi_magnitudes(calc_bin+0);
-			calculate_tempi_magnitudes(calc_bin+1);
-
-			calc_bin+=2;
-			if (calc_bin >= max_bin) {
-				calc_bin = 0;
-			}
 		}
+		else{
+			calculate_tempi_magnitudes(calc_bin+1);
+		}
+
+		calc_bin+=2;
+		if (calc_bin >= max_bin) {
+			calc_bin = 0;
+		}
+
 	}, __func__ );
 }
 
@@ -301,8 +302,12 @@ void log_novelty(float input) {
 }
 
 void log_vu(float input) {
+	static float last_input = input;
+	float positive_difference = max(input - last_input, 0.0f);
 	shift_array_left(vu_curve, NOVELTY_HISTORY_LENGTH, 1);
-	vu_curve[NOVELTY_HISTORY_LENGTH - 1] = input;
+	vu_curve[NOVELTY_HISTORY_LENGTH - 1] = positive_difference;
+
+	last_input = input;
 }
 
 void reduce_tempo_history(float reduction_amount) {
@@ -403,19 +408,24 @@ void sync_beat_phase(uint16_t tempo_bin, float delta) {
 }
 
 void update_tempi_phase(float delta) {
+	static bool interlacing_field = 0;
+	interlacing_field = !interlacing_field;
+
 	tempi_power_sum = 0.00000001;
 	// Iterate over all tempi to smooth them and calculate the power sum
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		float progress = float(tempo_bin) / NUM_TEMPI;
+		//if((tempo_bin % 2 == 0) == interlacing_field){
+			float progress = float(tempo_bin) / NUM_TEMPI;
 
-		// Load the magnitude
-		float tempi_magnitude = tempi[tempo_bin].magnitude;
+			// Load the magnitude
+			float tempi_magnitude = tempi[tempo_bin].magnitude;
 
-		// Smooth it
-		tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
-		tempi_power_sum += tempi_smooth[tempo_bin];
+			// Smooth it
+			tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
+			tempi_power_sum += tempi_smooth[tempo_bin];
 
-		sync_beat_phase(tempo_bin, delta);
+			sync_beat_phase(tempo_bin, delta);
+		//}
 	}
 
 	// Measure contribution factor of each tempi, calculate confidence level

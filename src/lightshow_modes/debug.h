@@ -1,6 +1,6 @@
 void draw_debug(){
 	for(uint16_t i = 0; i < NUM_TEMPI; i++){
-		float mag = tempo_fft[i];
+		float mag;// = tempo_fft[i];
 		CRGBF dot_color = hsv(i / (float)NUM_TEMPI, 1.0, mag*mag);
 		leds[i] = dot_color;
 	}

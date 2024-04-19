@@ -35,7 +35,7 @@ void run_cpu() {
 
 		//printf("update_tempo() = %.4fus\n", measure_execution([&]() {
 		// Log novelty and calculate the most probable tempi
-		update_tempo_fast();	 // (tempo.h)
+		update_tempo();	 // (tempo.h)
 		//}));
 
 		// Update the FPS_CPU variable

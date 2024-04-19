@@ -19,7 +19,7 @@ void run_vu(){
 		float sample = samples[i];
 		float sample_abs = fabs(sample);
 
-		max_amplitude_now = max(max_amplitude_now, sample_abs);
+		max_amplitude_now = max(max_amplitude_now, sample_abs*sample_abs);
 	}
 	max_amplitude_now = clip_float(max_amplitude_now);
 
@@ -40,8 +40,8 @@ void run_vu(){
 	}
 	max_amplitude_cap = clip_float(max_amplitude_cap);
 
-	if(max_amplitude_cap < 0.005){
-		max_amplitude_cap = 0.005;
+	if(max_amplitude_cap < 0.0005){
+		max_amplitude_cap = 0.0005;
 	}
 
 	float auto_scale = 1.0 / max(max_amplitude_cap, 0.00001f);
