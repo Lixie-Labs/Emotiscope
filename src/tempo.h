@@ -34,6 +34,7 @@ float novelty_curve[NOVELTY_HISTORY_LENGTH];
 float novelty_curve_normalized[NOVELTY_HISTORY_LENGTH];
 
 float vu_curve[NOVELTY_HISTORY_LENGTH];
+float vu_curve_normalized[NOVELTY_HISTORY_LENGTH];
 
 tempo tempi[NUM_TEMPI];
 float tempi_smooth[NUM_TEMPI];
@@ -152,6 +153,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 			float sample_novelty = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample = (sample_novelty + sample_vu) / 2.0;
+			//sample *= sample;
 
 			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
@@ -229,29 +231,6 @@ void calculate_tempi_magnitudes(int16_t single_bin = -1) {
 	}, __func__ );
 }
 
-void normalize_novelty_curve_slow() {
-	static float max_val = 0.00001;
-	static float max_val_smooth = 0.1;
-
-	max_val *= 0.99;
-	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
-		max_val = max(max_val, novelty_curve[i + 0]);
-		max_val = max(max_val, novelty_curve[i + 1]);
-		max_val = max(max_val, novelty_curve[i + 2]);
-		max_val = max(max_val, novelty_curve[i + 3]);
-	}
-	max_val_smooth = max(0.1f, max_val_smooth * 0.99f + max_val * 0.01f);
-
-	float auto_scale = 1.0 / max_val_smooth;
-
-	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
-		novelty_curve_normalized[i + 0] = clip_float(novelty_curve[i + 0] * auto_scale);
-		novelty_curve_normalized[i + 1] = clip_float(novelty_curve[i + 1] * auto_scale);
-		novelty_curve_normalized[i + 2] = clip_float(novelty_curve[i + 2] * auto_scale);
-		novelty_curve_normalized[i + 3] = clip_float(novelty_curve[i + 3] * auto_scale);
-	}
-}
-
 void normalize_novelty_curve() {
 	profile_function([&]() {
 		static float max_val = 0.00001;
@@ -268,6 +247,25 @@ void normalize_novelty_curve() {
 
 		float auto_scale = 1.0 / max_val;
 		dsps_mulc_f32(novelty_curve, novelty_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
+	}, __func__ );
+}
+
+void normalize_vu_curve() {
+	profile_function([&]() {
+		static float max_val = 0.00001;
+		static float max_val_smooth = 0.1;
+
+		max_val *= 0.99;
+		for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
+			max_val = max(max_val, vu_curve[i + 0]);
+			max_val = max(max_val, vu_curve[i + 1]);
+			max_val = max(max_val, vu_curve[i + 2]);
+			max_val = max(max_val, vu_curve[i + 3]);
+		}
+		max_val_smooth = max(0.1f, max_val_smooth * 0.99f + max_val * 0.01f);
+
+		float auto_scale = 1.0 / max_val;
+		dsps_mulc_f32(vu_curve, vu_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
 	}, __func__ );
 }
 

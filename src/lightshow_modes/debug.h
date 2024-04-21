@@ -1,25 +1,15 @@
 void draw_debug(){
-	for(uint16_t i = 0; i < NUM_TEMPI; i++){
-		float mag;// = tempo_fft[i];
-		CRGBF dot_color = hsv(i / (float)NUM_TEMPI, 1.0, mag*mag);
+	for(uint16_t i = 0; i < 128; i++){
+		int32_t index = ((NOVELTY_HISTORY_LENGTH-1)-128)+i;
+		float mag_vu = vu_curve[index];
+		float mag_spec = novelty_curve_normalized[index];
+
+		CRGBF dot_color = {
+			mag_vu*mag_vu,
+			mag_spec*mag_spec,
+			0.0,
+		};
+
 		leds[i] = dot_color;
-	}
-}
-
-void draw_debug_old(){
-	for(uint16_t i = 0; i < NUM_TEMPI; i++){
-		float tempo_magnitude = tempi_smooth[i];
-		float contribution = clip_float(tempo_magnitude / tempi_power_sum);
-		
-		float phase_linear = (tempi[i].phase + PI) / (PI*2.0);
-		if(tempi[i].phase_inverted == true){
-			phase_linear = 1.0 - phase_linear;
-		}
-
-		//phase_linear *= 0.5;
-
-		CRGBF dot_color = hsv(i / (float)NUM_TEMPI, 1.0, 1.0);
-		draw_dot(leds, NUM_RESERVED_DOTS + (i*2+0), dot_color, phase_linear, contribution);
-		//draw_dot(leds, NUM_RESERVED_DOTS + (i*2+1), dot_color, 1.0-phase_linear, contribution*contribution);
 	}
 }

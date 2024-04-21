@@ -93,6 +93,8 @@ void run_gpu() {
 	// Apply white balance
 	multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
 
+	//apply_frame_blending(sqrt(configuration.softness)*0.99);
+
 	// Quantize the image buffer with dithering, 
 	// output to the 8-bit LED strand
 	transmit_leds();

@@ -453,6 +453,18 @@ void render_debug_value() {
 	opacity = opacity*0.95 + opacity_target*0.05;
 }
 
+void apply_frame_blending(float blend_amount){
+	static CRGBF previous_frame[NUM_LEDS];
+
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		leds[i].r = max(leds[i].r, previous_frame[i].r*blend_amount);
+		leds[i].g = max(leds[i].g, previous_frame[i].g*blend_amount);
+		leds[i].b = max(leds[i].b, previous_frame[i].b*blend_amount);
+	}
+
+	memcpy(previous_frame, leds, sizeof(CRGBF) * NUM_LEDS);
+}
+
 void apply_box_blur(CRGBF* pixels, uint16_t num_pixels, int kernel_size) {
     // Ensure kernel size is odd for symmetry around the central pixel
     if (kernel_size % 2 == 0) {
@@ -550,8 +562,13 @@ void apply_background(){
 	}
 }
 
-void clear_display(){
-	memset(leds, 0, sizeof(CRGBF)*NUM_LEDS);
+void clear_display(float keep = 0.0){
+	if(keep == 0.0){
+		memset(leds, 0, sizeof(CRGBF)*NUM_LEDS);
+	}
+	else{
+		scale_CRGBF_array_by_constant(leds, keep, NUM_LEDS);	
+	}
 }
 
 void fade_display(){
