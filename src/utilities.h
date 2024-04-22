@@ -13,6 +13,15 @@
 #include <freertos/task.h>
 #include <esp_heap_caps.h>
 
+#define TOTAL_NOISE_SAMPLES 666 // and the devil laughs
+uint8_t noise_samples[TOTAL_NOISE_SAMPLES];
+
+void init_noise_samples(){
+	for(uint16_t i = 0; i < TOTAL_NOISE_SAMPLES; i++){
+		noise_samples[i] = esp_random() & 1;
+	}
+}
+
 void broadcast(char* message){
 	extern PsychicWebSocketHandler websocket_handler;
 	websocket_handler.sendAll(message);
@@ -32,6 +41,17 @@ float linear_to_tri(float input) {
         // Scale down the second half
         return 2.0f * (1.0f - input);
     }
+}
+
+inline bool get_random_bit(){
+	static uint16_t position = 0;
+	position++;
+
+	if(position >= TOTAL_NOISE_SAMPLES){
+		position = 0;
+	}
+
+	return noise_samples[position];
 }
 
 // Can return a value between two array indices with linear interpolation

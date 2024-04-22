@@ -37,6 +37,7 @@ void init_system() {
 	extern void init_rmt_driver();
 	extern void init_indicator_light();
 	extern void init_touch();
+	extern void init_noise_samples();
 	//extern void init_tempo_fft();
 
 	init_hardware_version_pins();       // (hardware_version.h)
@@ -51,6 +52,7 @@ void init_system() {
 	init_rmt_driver();                  // (led_driver.h)
 	init_touch();                       // (touch.h)
 	init_wifi();                        // (wireless.h)
+	init_noise_samples();               // (utilities.h)
 	//init_tempo_fft();                   // (tempo.h)
 
 	// Load sliders 

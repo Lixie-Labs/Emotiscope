@@ -42,7 +42,7 @@ void draw_metronome() {
 
 		float contribution = (tempi_magnitude / tempi_power_sum) * tempi_magnitude;
 
-		if(contribution > 0.0001){
+		if(contribution > 0.00001){
 			float sine = sin(tempi[tempo_bin].phase + (PI*0.5));
 			sine *= 2.0;
 
@@ -52,7 +52,7 @@ void draw_metronome() {
 			float metronome_width = 0.5; // Too wide of a show can be distracting, 50% is enough for the effect
 			float dot_pos = clip_float( sine * (0.5*(sqrt(sqrt(contribution))) * metronome_width) + 0.5 );
 
-			float opacity = (sqrt(sqrt(contribution)));
+			float opacity = (sqrt((contribution)));
 
 			CRGBF dot_color = hsv(configuration.color + configuration.color_range*progress, configuration.saturation, 1.0);
 

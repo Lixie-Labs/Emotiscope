@@ -12,6 +12,8 @@
 // 32-bit color input
 extern CRGBF leds[NUM_LEDS];
 
+CRGBF dither_error[NUM_LEDS];
+
 // 8-bit color output
 static uint8_t raw_led_data[NUM_LEDS*3];
 
@@ -19,6 +21,9 @@ rmt_channel_handle_t tx_chan_a = NULL;
 rmt_channel_handle_t tx_chan_b = NULL;
 rmt_encoder_handle_t led_encoder_a = NULL;
 rmt_encoder_handle_t led_encoder_b = NULL;
+
+uint32_t lfsr = 0xACE1u;  // Initial seed for LFSR
+const uint32_t polynomial = 0x10000000u;  // Polynomial for LFSR
 
 typedef struct {
     rmt_encoder_t base;
@@ -41,6 +46,14 @@ typedef struct {
 } led_strip_encoder_config_t;
 
 static const char *TAG = "led_encoder";
+
+void init_random_dither_error(){
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		dither_error[i].r = random(0, 255) / 255.0;
+		dither_error[i].g = random(0, 255) / 255.0;
+		dither_error[i].b = random(0, 255) / 255.0;
+	}
+}
 
 IRAM_ATTR static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size, rmt_encode_state_t *ret_state){
     rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
@@ -163,36 +176,33 @@ void init_rmt_driver() {
 	printf("rmt_enable\n");
 	ESP_ERROR_CHECK(rmt_enable(tx_chan_a));
 	ESP_ERROR_CHECK(rmt_enable(tx_chan_b));
+
+	init_random_dither_error();
 }
 
-void quantize_color(bool temporal_dithering) {
+void quantize_color_error(bool temporal_dithering){
 	if(temporal_dithering == true){
-		const float dither_table[4] = {0.25, 0.50, 0.75, 1.00};
-		static uint8_t dither_step = 0;
-		dither_step++;
-
-		float decimal_r; float decimal_g; float decimal_b;
-		uint8_t whole_r; uint8_t whole_g; uint8_t whole_b;
-		float   fract_r; float   fract_g; float   fract_b;
-
 		for (uint16_t i = 0; i < NUM_LEDS; i++) {
-			// RED #####################################################
-			decimal_r = leds[i].r * 254;
-			whole_r = decimal_r;
-			fract_r = decimal_r - whole_r;
-			raw_led_data[3*i+1] = whole_r + (fract_r >= dither_table[(dither_step) % 4]);
+			float leds_r_scaled = leds[i].r * 255;
+			float leds_g_scaled = leds[i].g * 255;
+			float leds_b_scaled = leds[i].b * 255;
 			
-			// GREEN #####################################################
-			decimal_g = leds[i].g * 254;
-			whole_g = decimal_g;
-			fract_g = decimal_g - whole_g;
-			raw_led_data[3*i+0] = whole_g + (fract_g >= dither_table[(dither_step) % 4]);
+			raw_led_data[3*i+1] = (uint8_t)(leds_r_scaled);
+			raw_led_data[3*i+0] = (uint8_t)(leds_g_scaled);
+			raw_led_data[3*i+2] = (uint8_t)(leds_b_scaled);
 
-			// BLUE #####################################################
-			decimal_b = leds[i].b * 254;
-			whole_b = decimal_b;
-			fract_b = decimal_b - whole_b;
-			raw_led_data[3*i+2] = whole_b + (fract_b >= dither_table[(dither_step) % 4]);
+			float new_error_r = leds_r_scaled - raw_led_data[3*i+1];
+			float new_error_g = leds_g_scaled - raw_led_data[3*i+0];
+			float new_error_b = leds_b_scaled - raw_led_data[3*i+2];
+
+			const float dither_error_threshold = 0.055;
+			if(new_error_r >= dither_error_threshold){ dither_error[i].r += new_error_r; }
+			if(new_error_g >= dither_error_threshold){ dither_error[i].g += new_error_g; }
+			if(new_error_b >= dither_error_threshold){ dither_error[i].b += new_error_b; }
+
+			if(dither_error[i].r >= 1.0){ raw_led_data[3*i+1] += 1; dither_error[i].r -= 1.0; }
+			if(dither_error[i].g >= 1.0){ raw_led_data[3*i+0] += 1; dither_error[i].g -= 1.0; }
+			if(dither_error[i].b >= 1.0){ raw_led_data[3*i+2] += 1; dither_error[i].b -= 1.0; }
 		}
 	}
 	else{
@@ -217,7 +227,8 @@ IRAM_ATTR void transmit_leds() {
 	// This allows the 8-bit LEDs to emulate the look of a higher bit-depth using persistence of vision tricks
 	// The contents of the floating point CRGBF "leds" array are downsampled into the in alternating ways hundreds of
 	// time 
-	quantize_color(configuration.temporal_dithering);
+	quantize_color_error(configuration.temporal_dithering);
+	//add_noise();
 
 	// Get to safety, THE PHOTONS ARE COMING!!!
 	if(filesystem_ready == true){

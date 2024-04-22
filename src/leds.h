@@ -199,40 +199,48 @@ CRGBF desaturate(struct CRGBF input_color, float amount) {
 }
 
 CRGBF hsv(float h, float s, float v) {
-    h = fmodf(h, 1.0f);
-    while (h < 0.0f) h += 1.0f;
+	s = sqrt(s);
+	
+	/*
+	uint8_t dither_bits = (get_random_bit() << 1) | get_random_bit();
+	const float dither_table[4] = {0.00, 0.33, 0.66, 1.00};
+	const float dither_amount = 1 / 32.0;
+	float dither = dither_table[dither_bits] * dither_amount;
+	h += dither;
+	*/
 
-    v = clip_float(v);
-    float h_8_bit = h * 255.0f;
-    uint8_t h_index = (uint8_t)floorf(h_8_bit); // Integer part of hue index
-    float h_frac = h_8_bit - h_index; // Fractional part for interpolation
+	h = fmodf(h, 1.0f);
+	while (h < 0.0f) h += 1.0f;
 
-    // Interpolate between the current and next hue in the lookup table
-    uint8_t next_h_index = (h_index + 1) % 256; // Wrap around at 255
-    CRGBF col1 = {hsv_lookup[h_index][0] / 255.0f, hsv_lookup[h_index][1] / 255.0f, hsv_lookup[h_index][2] / 255.0f};
-    CRGBF col2 = {hsv_lookup[next_h_index][0] / 255.0f, hsv_lookup[next_h_index][1] / 255.0f, hsv_lookup[next_h_index][2] / 255.0f};
+	v = clip_float(v);
+	float c = v * s; // Chroma
+	float h_prime = h * 6.0f;
+	float x = c * (1.0f - fabsf(fmodf(h_prime, 2.0f) - 1.0f));
+	float m = v - c;
 
-    // Linearly interpolate between col1 and col2 based on h_frac
-    CRGBF col = {
-        col1.r + (col2.r - col1.r) * h_frac,
-        col1.g + (col2.g - col1.g) * h_frac,
-        col1.b + (col2.b - col1.b) * h_frac
-    };
+	float r, g, b;
+	if (h_prime >= 0.0f && h_prime < 1.0f) {
+		r = c; g = x; b = 0.0f;
+	} else if (h_prime >= 1.0f && h_prime < 2.0f) {
+		r = x; g = c; b = 0.0f;
+	} else if (h_prime >= 2.0f && h_prime < 3.0f) {
+		r = 0.0f; g = c; b = x;
+	} else if (h_prime >= 3.0f && h_prime < 4.0f) {
+		r = 0.0f; g = x; b = c;
+	} else if (h_prime >= 4.0f && h_prime < 5.0f) {
+		r = x; g = 0.0f; b = c;
+	} else {
+		r = c; g = 0.0f; b = x;
+	}
 
-    // Scale by value
-    col.r *= v;
-    col.g *= v;
-    col.b *= v;
+	CRGBF col = {r + m, g + m, b + m};
 
-    // Adjust saturation
-    col = desaturate(col, 1.0f - sqrtf(s));
+	// Clamp colors to max value
+	col.r = fminf(col.r, 1.0f);
+	col.g = fminf(col.g, 1.0f);
+	col.b = fminf(col.b, 1.0f);
 
-    // Clamp colors to max value
-    col.r = fminf(col.r, 1.0f);
-    col.g = fminf(col.g, 1.0f);
-    col.b = fminf(col.b, 1.0f);
-
-    return col;
+	return col;
 }
 
 void apply_blue_light_filter(float mix) {
@@ -424,10 +432,10 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 
     // Calculate distance moved and adjust brightness spread accordingly
     float position_distance = fabs(position - prev_position);
-    float spread_brightness = 1.0 / fmax(position_distance, 1.0); // Ensure minimum spread
+    float spread_brightness = 1.0 / fmax(position_distance*NUM_LEDS, 1.0); // Ensure minimum spread
 
     // Draw the line representing the motion blur
-    draw_line(layer, prev_position, position, color, (spread_brightness*spread_brightness) * opacity);
+    draw_line(layer, prev_position, position, color, (spread_brightness) * opacity);
 }
 
 
@@ -522,7 +530,7 @@ void apply_image_lpf(float cutoff_frequency) {
 }
 
 void apply_brightness() {
-	float brightness_val = 0.25+configuration.brightness*0.75;
+	float brightness_val = 0.05+configuration.brightness*0.95;
 
 	scale_CRGBF_array_by_constant(leds, brightness_val*brightness_val, NUM_LEDS);
 }

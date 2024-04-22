@@ -1,4 +1,4 @@
-void draw_debug(){
+void draw_debug_novelty(){
 	for(uint16_t i = 0; i < 128; i++){
 		int32_t index = ((NOVELTY_HISTORY_LENGTH-1)-128)+i;
 		float mag_vu = vu_curve[index];
@@ -11,5 +11,17 @@ void draw_debug(){
 		};
 
 		leds[i] = dot_color;
+	}
+}
+
+void draw_debug(){
+	for(uint16_t i = 0; i < 64; i++){
+		float progress = float(i) / 64;
+		leds[i] = hsv(configuration.color + progress*configuration.color_range, 1.0, 1.0);
+	}
+	for(uint16_t i = 0; i < 64; i++){
+		float progress = float(i) / 64;
+		float fade = 1.0 - progress;
+		leds[64+i] = hsv(configuration.color + configuration.color_range, 1.0, (fade*fade));
 	}
 }

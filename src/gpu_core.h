@@ -66,15 +66,15 @@ void run_gpu() {
 
 	render_touches();  // (touch.h)
 
-	draw_ui_overlay();
+	//draw_ui_overlay();
 	
 	// This value decays itself non linearly toward zero all the time, 
 	// *really* slowing down the LPF when it's set to 1.0.
 	// This is a super hacky way to fake a true fade transition between modes
 	lpf_drag *= 0.995;
 
-	if(lpf_drag < screensaver_mix*0.8){
-		lpf_drag = screensaver_mix*0.8;
+	if(lpf_drag < screensaver_mix*0.95){
+		lpf_drag = screensaver_mix*0.95;
 	}
 	
 	// Apply a low pass filter to every color channel of every pixel on every frame
