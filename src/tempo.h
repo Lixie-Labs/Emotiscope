@@ -368,7 +368,7 @@ void update_novelty() {
 
 		check_silence(current_novelty);
 
-		log_novelty(log(1.0 + current_novelty));
+		log_novelty(log1p(current_novelty));
 
 		log_vu(vu_max);
 		vu_max = 0.000001;

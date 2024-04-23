@@ -176,7 +176,6 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 	float scale;
 
 	profile_function([&]() {
-		float q0 = 0;
 		float q1 = 0;
 		float q2 = 0;
 		float window_pos = 0.0;
@@ -190,7 +189,7 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 
 		for (uint16_t i = 0; i < block_size; i++) {
 			float windowed_sample = sample_ptr[i] * window_lookup[uint32_t(window_pos)];
-			q0 = coeff * q1 - q2 + windowed_sample;
+			float q0 = coeff * q1 - q2 + windowed_sample;
 			q2 = q1;
 			q1 = q0;
 

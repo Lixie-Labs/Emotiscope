@@ -75,8 +75,8 @@ void run_indicator_light(){
 			if(t_now_ms - last_status_blink >= STATUS_BLINK_INTERVAL_MS){
 				status_blink_state = !status_blink_state;
 
-				indicator_brightness_target = status_blink_state;
-				indicator_brightness = status_blink_state;
+				indicator_brightness_target = (float)status_blink_state;
+				indicator_brightness = (float)status_blink_state;
 
 				last_status_blink = t_now_ms;
 			}

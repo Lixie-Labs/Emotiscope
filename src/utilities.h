@@ -119,39 +119,6 @@ float fast_sqrt(float number) {
 	return x;
 }
 
-// Function to perform autocorrelation using a given pattern of 128 samples within a larger data set
-// Searches for the best correlation within 512 shift positions
-// Returns the shift value where the pattern has the highest correlation
-int autocorrelate_with_pattern(const float* data, unsigned int data_length, const float* pattern, unsigned int pattern_length) {
-	// Check if the data array and pattern array are of sufficient length
-	if (data_length < 128 || pattern_length != 128 || data_length < pattern_length + 512) {
-		return -1;	// Error: Arrays not of correct length or data array not long enough for 512 shifts
-	}
-
-	unsigned int max_shifts = data_length - pattern_length;
-	float correlations[max_shifts];
-	for (unsigned int i = 0; i < max_shifts; i++) {
-		correlations[i] = 0.0f;
-		for (unsigned int j = 0; j < pattern_length; j++) {
-			if (i + j < data_length) {
-				correlations[i] += data[i + j] * pattern[j];
-			}
-		}
-	}
-
-	// Find the peak (maximum correlation) within the first 512 shifts
-	int max_shift = 0;
-	float max_correlation = correlations[0];
-	for (unsigned int shift = 1; shift < 512 && shift < max_shifts; shift++) {
-		if (correlations[shift] > max_correlation) {
-			max_correlation = correlations[shift];
-			max_shift = shift;
-		}
-	}
-
-	return max_shift;
-}
-
 inline bool fastcmp(char* input_a, char* input_b){
 	// Is first char different? DISQUALIFIED!
 	if(input_a[0] != input_b[0]){ return false; }
@@ -191,13 +158,10 @@ void low_pass_filter(float* input_array, uint16_t num_samples, uint16_t sample_r
     float rc = 1.0f / (2.0f * M_PI * cutoff_frequency);
     float alpha = 1.0f / (1.0f + (sample_rate * rc));
 
-    // Temporary variable to hold intermediate filter results
-    float filtered_value;
-
     // Apply the filter multiple times based on filter_order
     for (uint8_t order = 0; order < filter_order; ++order) {
         // Initialize the first filtered value
-        filtered_value = input_array[0];
+        float filtered_value = input_array[0];
 
         // Start filtering from the second sample
         for (uint16_t n = 1; n < num_samples; ++n) {
