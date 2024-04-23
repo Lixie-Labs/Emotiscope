@@ -66,7 +66,7 @@ void run_gpu() {
 
 	render_touches();  // (touch.h)
 
-	//draw_ui_overlay();
+	draw_ui_overlay();
 	
 	// This value decays itself non linearly toward zero all the time, 
 	// *really* slowing down the LPF when it's set to 1.0.
@@ -91,7 +91,9 @@ void run_gpu() {
 	clip_leds();  // (leds.h)
 
 	// Apply white balance
-	multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
+	//multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
+
+	apply_gamma_correction();
 
 	//apply_frame_blending(sqrt(configuration.softness)*0.99);
 

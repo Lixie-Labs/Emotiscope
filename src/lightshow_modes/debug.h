@@ -5,8 +5,8 @@ void draw_debug_novelty(){
 		float mag_spec = novelty_curve_normalized[index];
 
 		CRGBF dot_color = {
-			mag_vu*mag_vu,
-			mag_spec*mag_spec,
+			mag_vu,
+			mag_spec,
 			0.0,
 		};
 
@@ -21,7 +21,6 @@ void draw_debug(){
 	}
 	for(uint16_t i = 0; i < 64; i++){
 		float progress = float(i) / 64;
-		float fade = 1.0 - progress;
-		leds[64+i] = hsv(configuration.color + configuration.color_range, 1.0, (fade*fade));
+		leds[64+i] = hsv(configuration.color + configuration.color_range, 1.0, 1.0 - progress);
 	}
 }

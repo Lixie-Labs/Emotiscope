@@ -43,7 +43,7 @@ CRGBF leds_smooth[NUM_LEDS];
 
 float rendered_debug_value = 0.0;
 
-CRGBF incandescent_lookup = {1.0000, 0.1982, 0.0244};
+CRGBF incandescent_lookup = {sqrt(1.0000), sqrt(0.1982), sqrt(0.0244)};
 
 float note_colors[12] = {0.0000, 0.0833, 0.1666, 0.2499, 0.3333, 0.4166,
 						 0.4999, 0.5833, 0.6666, 0.7499, 0.8333, 0.9166};
@@ -432,10 +432,10 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 
     // Calculate distance moved and adjust brightness spread accordingly
     float position_distance = fabs(position - prev_position);
-    float spread_brightness = 1.0 / fmax(position_distance*NUM_LEDS, 1.0); // Ensure minimum spread
+    float spread_brightness = 1.0 / fmax(position_distance, 1.0); // Ensure minimum spread
 
     // Draw the line representing the motion blur
-    draw_line(layer, prev_position, position, color, (spread_brightness) * opacity);
+    draw_line(layer, prev_position, position, color, spread_brightness * opacity);
 }
 
 
@@ -529,43 +529,57 @@ void apply_image_lpf(float cutoff_frequency) {
 	memcpy(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
 }
 
-void apply_brightness() {
-	float brightness_val = 0.05+configuration.brightness*0.95;
+void apply_gamma_correction_to_color(CRGBF* color, float gamma) {
+	// Create a new CRGBF object with gamma-corrected color components
+	CRGBF corrected_color = {
+		powf(color->r, gamma),  // Gamma correction for red component
+		powf(color->g, gamma),  // Gamma correction for green component
+		powf(color->b, gamma)   // Gamma correction for blue component
+	};
 
-	scale_CRGBF_array_by_constant(leds, brightness_val*brightness_val, NUM_LEDS);
+	// Assign the gamma-corrected color back to the original CRGBF object
+	*color = corrected_color;
+}
+
+void apply_gamma_correction() {
+	dsps_mul_f32_ae32((float*)leds, (float*)leds, (float*)leds, NUM_LEDS*3, 1, 1, 1);
+}
+
+void apply_brightness() {
+	float brightness_val = 0.3+configuration.brightness*0.7;
+
+	scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
 }
 
 void apply_background(){
-	if(configuration.background > 0.01){
-		float background_level = configuration.background * 0.20; // Max 20% brightness
+	float background_level = configuration.background * 0.25; // Max 25% brightness
 
-		if(configuration.mirror_mode == false){
-			float background_inv = (1.0-background_level);
-			for(uint16_t i = 0; i < NUM_LEDS; i++){
-				float progress = float(i) / NUM_LEDS;
-				CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level*background_level);
-				leds[i].r = leds[i].r * background_inv + background_color.r;
-				leds[i].g = leds[i].g * background_inv + background_color.g;
-				leds[i].b = leds[i].b * background_inv + background_color.b;
-			}
+	if(configuration.mirror_mode == false){
+		float background_inv = (1.0-background_level);
+		for(uint16_t i = 0; i < NUM_LEDS; i++){
+			float progress = float(i) / NUM_LEDS;
+			CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level);
+			leds[i].r = leds[i].r * background_inv + background_color.r;
+			leds[i].g = leds[i].g * background_inv + background_color.g;
+			leds[i].b = leds[i].b * background_inv + background_color.b;
 		}
-		else{
-			float background_inv = (1.0-background_level);
-			for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
-				float progress = float(i) / (NUM_LEDS>>1);
-				CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level*background_level);
-				
-				int16_t left_index = 63-i;
-				int16_t right_index = 64+i;
+	}
+	else{
+		float background_inv = (1.0-background_level);
+		for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
+			float progress = float(i) / (NUM_LEDS>>1);
+			CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level);
+			
+			int16_t left_index = 63-i;
+			int16_t right_index = 64+i;
 
-				leds[left_index].r = leds[left_index].r * background_inv + background_color.r;
-				leds[left_index].g = leds[left_index].g * background_inv + background_color.g;
-				leds[left_index].b = leds[left_index].b * background_inv + background_color.b;
+			leds[left_index].r = leds[left_index].r * background_inv + background_color.r;
+			leds[left_index].g = leds[left_index].g * background_inv + background_color.g;
+			leds[left_index].b = leds[left_index].b * background_inv + background_color.b;
 
-				leds[right_index].r = leds[right_index].r * background_inv + background_color.r;
-				leds[right_index].g = leds[right_index].g * background_inv + background_color.g;
-				leds[right_index].b = leds[right_index].b * background_inv + background_color.b;
-			}
+			leds[right_index].r = leds[right_index].r * background_inv + background_color.r;
+			leds[right_index].g = leds[right_index].g * background_inv + background_color.g;
+			leds[right_index].b = leds[right_index].b * background_inv + background_color.b;
 		}
 	}
 }

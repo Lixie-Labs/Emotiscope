@@ -67,5 +67,5 @@ void update_ui(ui_update_event update_type, float new_value = 0.0){
 		ui_needle_position_raw = new_value;
 	}
 
-	overlay_size_target = 1.0;
+	overlay_size_target = 0.25;
 }

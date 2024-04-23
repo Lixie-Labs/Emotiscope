@@ -21,7 +21,7 @@ void draw_waveform(){
 			CRGBF pixel_color = hsv(
 				configuration.color + (configuration.color_range*progress),
 				configuration.saturation,
-				sample*sample
+				sample
 			);
 
 			leds[i] = pixel_color;
@@ -34,7 +34,7 @@ void draw_waveform(){
 			CRGBF pixel_color = hsv(
 				configuration.color + (configuration.color_range*progress),
 				configuration.saturation,
-				sample*sample
+				sample
 			);
 
 			leds[63-i] = pixel_color;
