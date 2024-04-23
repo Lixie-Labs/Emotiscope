@@ -24,4 +24,6 @@ function get_mac_string(){
 		});
 }
 
-get_mac_string();
+window.addEventListener('DOMContentLoaded', (event) => {
+	setTimeout(get_mac_string, 100);
+});

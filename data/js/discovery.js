@@ -74,7 +74,7 @@ function fetch_and_redirect() {
 }
 
 // If page is fully loaded, fetch and redirect
-document.addEventListener('DOMContentLoaded', (event) => {
+window.addEventListener('DOMContentLoaded', (event) => {
 	//fetch_and_redirect();
 	device_ip = window.location.hostname;
 	connection_start_time = performance.now();

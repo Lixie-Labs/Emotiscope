@@ -401,15 +401,14 @@ void draw_line(CRGBF* layer, float x1, float x2, CRGBF color, float opacity) {
     float start_coverage = 1.0 - (x1 - ix1);
     float end_coverage = x2 - floor(x2);
 
-	start_coverage = sqrt(start_coverage);
-	end_coverage = sqrt(end_coverage);
-
     // Loop through all affected pixels
     for (int i = ix1; i <= ix2; i++) {
         if (i >= 0 && i < NUM_LEDS) {
             float mix = opacity;
             if (i == ix1) mix *= start_coverage; // Adjust mix for start pixel
             else if (i == ix2) mix *= end_coverage; // Adjust mix for end pixel
+
+			mix = sqrt(mix);
 
             if (lighten) {
                 // Lighten mode: Add color
@@ -434,10 +433,10 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 
     // Calculate distance moved and adjust brightness spread accordingly
     float position_distance = fabs(position - prev_position);
-    float spread_brightness = 1.0 / fmax(position_distance, 1.0); // Ensure minimum spread
+    float spread_brightness = 1.0 / fmax(position_distance * NUM_LEDS, 1.0); // Ensure minimum spread
 
     // Draw the line representing the motion blur
-    draw_line(layer, prev_position, position, color, spread_brightness * opacity);
+    draw_line(layer, prev_position, position, color, (spread_brightness*spread_brightness) * opacity);
 }
 
 
