@@ -1,5 +1,6 @@
 void draw_hype() {
-	float beat_sum = 0.0;
+	float beat_sum_odd  = 0.0;
+	float beat_sum_even = 0.0;
 
 	// Draw tempi to the display
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
@@ -8,22 +9,43 @@ void draw_hype() {
 
 		contribution *= tempi[tempo_bin].beat * 0.5 + 0.5;
 
-		beat_sum += contribution;
+		if(tempo_bin % 2 == 0){
+			beat_sum_even += contribution;
+		} else {
+			beat_sum_odd += contribution;
+		}
 	}
-	beat_sum = clip_float(beat_sum);
+	beat_sum_odd  = clip_float(beat_sum_odd);
+	beat_sum_even = clip_float(beat_sum_even);
 
-	float beat_color = beat_sum;
-	beat_sum = sqrt(beat_color);
+	float beat_color_odd  = beat_sum_odd;
+	float beat_color_even = beat_sum_even;
+	beat_sum_odd  = sqrt(beat_color_odd);
+	beat_sum_even = sqrt(beat_color_even);
 
-	CRGBF dot_color = hsv(configuration.color + beat_color*configuration.color_range, configuration.saturation, 1.0);
+	float strength = sqrt(tempo_confidence);
+
+	CRGBF dot_color_odd  = hsv(
+		get_color_range_hue(beat_color_odd),
+		configuration.saturation,
+		1.0
+	);
+	CRGBF dot_color_even = hsv(
+		get_color_range_hue(beat_color_even),
+		configuration.saturation,
+		1.0
+	);
 
 	if(configuration.mirror_mode == true){
-		beat_sum *= 0.5;
+		beat_sum_odd  *= 0.5;
+		beat_sum_even *= 0.5;
 	}
 
-	draw_dot(leds, NUM_RESERVED_DOTS + 0, dot_color, 1.0-beat_sum, 1.0);
+	draw_dot(leds, NUM_RESERVED_DOTS + 0, dot_color_odd,  1.0-beat_sum_odd,  0.1 + 0.4*strength);
+	draw_dot(leds, NUM_RESERVED_DOTS + 1, dot_color_even, 1.0-beat_sum_even, 0.1 + 0.4*strength);
 
 	if(configuration.mirror_mode == true){
-		draw_dot(leds, NUM_RESERVED_DOTS + 1, dot_color, beat_sum, 1.0);
+		draw_dot(leds, NUM_RESERVED_DOTS + 2, dot_color_odd,  beat_sum_odd,  0.5*strength);
+		draw_dot(leds, NUM_RESERVED_DOTS + 3, dot_color_even, beat_sum_even, 0.5*strength);
 	}
 }

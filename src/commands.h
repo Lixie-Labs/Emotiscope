@@ -154,6 +154,12 @@ void parse_command(uint32_t t_now_ms, command com) {
 			bool setting_value = (bool)atoi(substring);
 			configuration.temporal_dithering = setting_value;
 		}
+		else if (fastcmp(substring, "invert_color_range")){
+			// Get invert_color_range value
+			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			bool setting_value = (bool)atoi(substring);
+			configuration.invert_color_range = setting_value;
+		}
 
 		else if (fastcmp(substring, "mode")) {
 			// Get mode name

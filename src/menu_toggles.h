@@ -28,5 +28,6 @@ void load_menu_toggles() {
 	clear_menu_toggles();
 
 	register_menu_toggle("screensaver");
+	register_menu_toggle("invert_color_range");
 	register_menu_toggle("temporal_dithering");
 }

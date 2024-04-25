@@ -199,6 +199,10 @@ CRGBF desaturate(struct CRGBF input_color, float amount) {
 
 CRGBF hsv(float h, float s, float v) {
 	s = sqrt(s);
+
+	if(configuration.invert_color_range == true){
+		h *= -1.0;
+	}
 	
 	/*
 	uint8_t dither_bits = (get_random_bit() << 1) | get_random_bit();
@@ -208,7 +212,7 @@ CRGBF hsv(float h, float s, float v) {
 	h += dither;
 	*/
 
-	h = fmodf(h, 1.0f);
+	while (h > 1.0f) h -= 1.0f;
 	while (h < 0.0f) h += 1.0f;
 
 	v = clip_float(v);
@@ -552,6 +556,14 @@ void apply_brightness() {
 	scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
 }
 
+float get_color_range_hue(float progress){
+	float color_range = configuration.color_range;
+	if(configuration.invert_color_range == true){
+		//color_range *= -1.0;
+	}
+	return configuration.color + (color_range * progress);
+}
+
 void apply_background(){
 	float background_level = configuration.background * 0.25; // Max 25% brightness
 
@@ -559,7 +571,12 @@ void apply_background(){
 		float background_inv = (1.0-background_level);
 		for(uint16_t i = 0; i < NUM_LEDS; i++){
 			float progress = float(i) / NUM_LEDS;
-			CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level);
+			CRGBF background_color = hsv(
+				get_color_range_hue(progress),
+				configuration.saturation,
+				background_level
+			);
+
 			leds[i].r = leds[i].r * background_inv + background_color.r;
 			leds[i].g = leds[i].g * background_inv + background_color.g;
 			leds[i].b = leds[i].b * background_inv + background_color.b;
@@ -569,7 +586,11 @@ void apply_background(){
 		float background_inv = (1.0-background_level);
 		for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
 			float progress = float(i) / (NUM_LEDS>>1);
-			CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level);
+			CRGBF background_color = hsv(
+				get_color_range_hue(progress),
+				configuration.saturation,
+				background_level
+			);
 			
 			int16_t left_index = 63-i;
 			int16_t right_index = 64+i;
