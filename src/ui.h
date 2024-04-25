@@ -34,7 +34,7 @@ void draw_ui_overlay(){
 		
 			CRGBF dot_color = hsv(0.814, 1.0, 1.0);
 			for(uint16_t i = 0; i < 3; i++){
-				draw_dot(leds, UI_1+i, dot_color, (overlay_size*0.25)*(0.5*i), overlay_size*0.15);
+				draw_dot(leds, UI_1+i, dot_color, (overlay_size*0.25)*(0.5*i), overlay_size*0.08);
 			}
 
 			draw_dot(leds, UI_NEEDLE, incandescent_lookup, ui_needle_position*0.25*overlay_size, overlay_size);

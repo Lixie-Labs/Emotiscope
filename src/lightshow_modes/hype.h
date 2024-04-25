@@ -23,7 +23,7 @@ void draw_hype() {
 	beat_sum_odd  = sqrt(beat_color_odd);
 	beat_sum_even = sqrt(beat_color_even);
 
-	float strength = sqrt(tempo_confidence);
+	float strength = sqrt(sqrt(tempo_confidence));
 
 	CRGBF dot_color_odd  = hsv(
 		get_color_range_hue(beat_color_odd),
@@ -31,7 +31,7 @@ void draw_hype() {
 		1.0
 	);
 	CRGBF dot_color_even = hsv(
-		get_color_range_hue(beat_color_even),
+		get_color_range_hue(beat_color_even+0.5*configuration.color_range),
 		configuration.saturation,
 		1.0
 	);

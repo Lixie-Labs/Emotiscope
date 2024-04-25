@@ -16,7 +16,7 @@
 #define NOVELTY_LOG_HZ (50)
 
 #define NUM_TEMPI (128) // TEMPO_LOW to TEMPO_HIGH
-#define BEAT_SHIFT_PERCENT (0.08)
+#define BEAT_SHIFT_PERCENT (0.16)
 
 #define TEMPO_LOW (32) // BPM
 #define TEMPO_HIGH (TEMPO_LOW + NUM_TEMPI)

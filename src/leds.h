@@ -199,10 +199,6 @@ CRGBF desaturate(struct CRGBF input_color, float amount) {
 
 CRGBF hsv(float h, float s, float v) {
 	s = sqrt(s);
-
-	if(configuration.invert_color_range == true){
-		h *= -1.0;
-	}
 	
 	/*
 	uint8_t dither_bits = (get_random_bit() << 1) | get_random_bit();
@@ -557,10 +553,8 @@ void apply_brightness() {
 }
 
 float get_color_range_hue(float progress){
-	float color_range = configuration.color_range;
-	if(configuration.invert_color_range == true){
-		//color_range *= -1.0;
-	}
+	const float range_directions[2] = {1.0, -1.0};
+	float color_range = configuration.color_range * (1.0*range_directions[configuration.invert_color_range]);
 	return configuration.color + (color_range * progress);
 }
 
