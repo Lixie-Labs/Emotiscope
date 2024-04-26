@@ -78,6 +78,9 @@ void load_config(){
 
 	// Color Range Direction
 	configuration.invert_color_range = preferences.getBool("invert_range", false);
+
+	// Auto Color Cycling
+	configuration.auto_color = preferences.getBool("auto_color", false);
 }
 
 void sync_configuration_to_client() {
@@ -150,6 +153,11 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|invert_color_range|int|%li", configuration.invert_color_range);
 	websocket_handler.sendAll(config_item_buffer);
 
+	// auto_color
+	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|auto_color|int|%li", configuration.auto_color);
+	websocket_handler.sendAll(config_item_buffer);
+
 	websocket_handler.sendAll("config_ready");
 }
 
@@ -172,6 +180,7 @@ bool save_config() {
 	preferences.putULong("tc_threshold", configuration.touch_center_threshold);
 	preferences.putULong("tr_threshold", configuration.touch_right_threshold);
 	preferences.putBool("invert_range", configuration.invert_color_range);
+	preferences.putBool("auto_color", configuration.auto_color);
 
 	return true;
 }

@@ -27,29 +27,6 @@ bool register_toggle(char* name) {
 void load_toggles_relevant_to_mode(int16_t mode_index) {
 	clear_toggles();
 
-	if (mode_index == 0) {  // Analog
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 1) {  // Spectrum
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 2) {  // Octave
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 3) {  // Metronome
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 4) {  // Spectrum + Beat
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 5) {  // Hype
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 6) {  // Bloom
-		register_toggle("mirror_mode");
-	}
-
-	else{
-		wtf_error();
-	}
+	register_toggle("mirror_mode");
+	register_toggle("auto_color");
 }

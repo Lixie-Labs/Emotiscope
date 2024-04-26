@@ -44,7 +44,7 @@ void draw_metronome() {
 
 		if(contribution > 0.00001){
 			float sine = sin(tempi[tempo_bin].phase + (PI*0.5));
-			sine *= 2.0;
+			//sine *= 2.0;
 
 			if(sine > 1.0){ sine = 1.0; }
 			else if(sine < -1.0){ sine = -1.0; }
@@ -64,10 +64,10 @@ void draw_metronome() {
 				dot_pos -= 0.25;
 			}
 
-			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity);
+			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity*0.5);
 
 			if(configuration.mirror_mode == true){
-				draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity);
+				draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity*0.5);
 			}
 		}
 		else{

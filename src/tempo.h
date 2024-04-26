@@ -12,15 +12,6 @@
 
 //--------------------------------------------
 
-#define NOVELTY_HISTORY_LENGTH (1024)  // 50 FPS for 20.48 seconds
-#define NOVELTY_LOG_HZ (50)
-
-#define NUM_TEMPI (128) // TEMPO_LOW to TEMPO_HIGH
-#define BEAT_SHIFT_PERCENT (0.16)
-
-#define TEMPO_LOW (32) // BPM
-#define TEMPO_HIGH (TEMPO_LOW + NUM_TEMPI)
-
 bool silence_detected = true;
 float silence_level = 1.0;
 
@@ -243,7 +234,7 @@ void normalize_novelty_curve() {
 			max_val = max(max_val, novelty_curve[i + 2]);
 			max_val = max(max_val, novelty_curve[i + 3]);
 		}
-		max_val_smooth = max(0.1f, max_val_smooth * 0.99f + max_val * 0.01f);
+		max_val_smooth = max(0.1f, max_val_smooth * 0.95f + max_val * 0.05f);
 
 		float auto_scale = 1.0 / max_val;
 		dsps_mulc_f32(novelty_curve, novelty_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);

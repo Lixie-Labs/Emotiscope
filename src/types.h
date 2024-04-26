@@ -109,4 +109,5 @@ struct config {
 	uint32_t touch_center_threshold;
 	uint32_t touch_right_threshold;
 	bool invert_color_range;
+	bool auto_color;
 };
