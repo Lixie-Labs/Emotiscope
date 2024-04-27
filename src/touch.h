@@ -30,6 +30,10 @@ void init_touch(){
 	touch_pins[TOUCH_CENTER].pin = TOUCH_CENTER_PIN;
 	touch_pins[TOUCH_RIGHT].pin  = TOUCH_RIGHT_PIN;
 
+	touch_pins[TOUCH_LEFT].ambient   = configuration.ambient_left_threshold;
+	touch_pins[TOUCH_CENTER].ambient = configuration.ambient_center_threshold;
+	touch_pins[TOUCH_RIGHT].ambient  = configuration.ambient_right_threshold;
+
 	touch_pins[TOUCH_LEFT].threshold   = configuration.touch_left_threshold;
 	touch_pins[TOUCH_CENTER].threshold = configuration.touch_center_threshold;
 	touch_pins[TOUCH_RIGHT].threshold  = configuration.touch_right_threshold;
@@ -168,45 +172,129 @@ void read_touch(){
 }
 
 void render_touches(){
-	static float touch_left_opacity = 0.0;
-	static float touch_center_opacity = 0.0;
-	static float touch_right_opacity = 0.0;
+	static float left_distance_smooth = 0.0;
+	static float right_distance_smooth = 0.0;
+	static float center_distance_smooth = 0.0;
 
-	float touch_left_opacity_target = 0.0;
-	float touch_center_opacity_target = 0.0;
-	float touch_right_opacity_target = 0.0;
+	float left_touch_value = touch_pins[TOUCH_LEFT].touch_value;
+	if(left_touch_value > touch_pins[TOUCH_LEFT].ambient){
+		float opacity = 0.0;
+		if(left_touch_value < touch_pins[TOUCH_LEFT].threshold){
+			float distance = (left_touch_value - touch_pins[TOUCH_LEFT].ambient) / (touch_pins[TOUCH_LEFT].threshold - touch_pins[TOUCH_LEFT].ambient);
+			left_distance_smooth = left_distance_smooth * 0.9 + distance * 0.1;
+			for(uint32_t i = 0; i < 32; i++){
+				float progress = (float)i / 31.0;
+				float brightness = (1.0-progress) * (sqrt(sqrt(left_distance_smooth)));
+				CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.5);
 
-	if(touch_pins[TOUCH_LEFT].touch_active == true){
-		touch_left_opacity_target = 1.0;
-	}
-	if(touch_pins[TOUCH_CENTER].touch_active == true){
-		touch_center_opacity_target = 1.0;
-	}
-	if(touch_pins[TOUCH_RIGHT].touch_active == true){
-		touch_right_opacity_target = 1.0;
-	}
+				leds[i] = add(leds[i], glow_col);
+			}
+		}
+		else{
+			float distance = 1.0;
+			left_distance_smooth = left_distance_smooth * 0.9 + distance * 0.1;
+			for(uint32_t i = 0; i < 32; i++){
+				float progress = (float)i / 31.0;
+				float brightness = (1.0-progress);
+				CRGBF glow_col = hsv(0.060, 0.9, brightness*brightness*0.75);
 
-	touch_left_opacity = touch_left_opacity * 0.95 + touch_left_opacity_target * 0.05;
-	touch_center_opacity = touch_center_opacity * 0.95 + touch_center_opacity_target * 0.05;
-	touch_right_opacity = touch_right_opacity * 0.95 + touch_right_opacity_target * 0.05;
-
-	if(touch_left_opacity > 0.005){
-		for(uint8_t i = 0; i < 32; i++){
-			float progress = (float)i / 31.0;
-			float brightness = (1.0-progress) * touch_left_opacity;
-			CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.05);
-
-			leds[i] = add(leds[i], glow_col);
+				leds[i] = add(leds[i], glow_col);
+			}
 		}
 	}
+	else{
+		float distance = 0.0;
+		left_distance_smooth = left_distance_smooth * 0.9 + distance * 0.1;
+		if(left_distance_smooth > 0.005){
+			for(uint32_t i = 0; i < 32; i++){
+				float progress = (float)i / 31.0;
+				float brightness = (1.0-progress) * (sqrt(sqrt(left_distance_smooth)));
+				CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.5);
+
+				leds[i] = add(leds[i], glow_col);
+			}
+		}
+	}
+
+	float right_touch_value = touch_pins[TOUCH_RIGHT].touch_value;
+	if(right_touch_value > touch_pins[TOUCH_RIGHT].ambient){
+		float opacity = 0.0;
+		if(right_touch_value < touch_pins[TOUCH_RIGHT].threshold){
+			float distance = (right_touch_value - touch_pins[TOUCH_RIGHT].ambient) / (touch_pins[TOUCH_RIGHT].threshold - touch_pins[TOUCH_RIGHT].ambient);
+			right_distance_smooth = right_distance_smooth * 0.9 + distance * 0.1;
+			for(uint32_t i = 0; i < 32; i++){
+				float progress = (float)i / 31.0;
+				float brightness = (1.0-progress) * (sqrt(sqrt(right_distance_smooth)));
+				CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.5);
+
+				leds[(NUM_LEDS-1)-i] = add(leds[(NUM_LEDS-1)-i], glow_col);
+			}
+		}
+		else{
+			float distance = 1.0;
+			right_distance_smooth = right_distance_smooth * 0.9 + distance * 0.1;
+			for(uint32_t i = 0; i < 32; i++){
+				float progress = (float)i / 31.0;
+				float brightness = (1.0-progress);
+				CRGBF glow_col = hsv(0.060, 0.9, brightness*brightness*0.75);
+
+				leds[(NUM_LEDS-1)-i] = add(leds[(NUM_LEDS-1)-i], glow_col);
+			}
+		}
+	}
+	else{
+		float distance = 0.0;
+		right_distance_smooth = right_distance_smooth * 0.9 + distance * 0.1;
+		if(right_distance_smooth > 0.005){
+			for(uint32_t i = 0; i < 32; i++){
+				float progress = (float)i / 31.0;
+				float brightness = (1.0-progress) * (sqrt(sqrt(right_distance_smooth)));
+				CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.5);
+
+				leds[(NUM_LEDS-1)-i] = add(leds[(NUM_LEDS-1)-i], glow_col);
+			}
+		}
+	}
+
+	// Center touch is drawn using the center 64 LEDs
+	float center_touch_value = touch_pins[TOUCH_CENTER].touch_value;
+	if(center_touch_value > touch_pins[TOUCH_CENTER].ambient){
+		float opacity = 0.0;
+		if(center_touch_value < touch_pins[TOUCH_CENTER].threshold){
+			float distance = (center_touch_value - touch_pins[TOUCH_CENTER].ambient) / (touch_pins[TOUCH_CENTER].threshold - touch_pins[TOUCH_CENTER].ambient);
+			center_distance_smooth = center_distance_smooth * 0.9 + distance * 0.1;
+			for(int i = 32; i < 96; i++){
+				float progress = 1.0 - (abs(i - 64) / 32.0); // Adjusted progress calculation
+				float brightness = (progress) * (sqrt(sqrt(center_distance_smooth)));
+				CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.5);
+
+				leds[i] = add(leds[i], glow_col);
+			}
+		}
+		else{
+			float distance = 1.0;
+			center_distance_smooth = center_distance_smooth * 0.9 + distance * 0.1;
+			for(int i = 32; i < 96; i++){
+				float progress = 1.0 - (abs(i - 64) / 32.0); // Adjusted progress calculation
+				float brightness = (progress);
+				CRGBF glow_col = hsv(0.060, 0.9, brightness*brightness*0.75);
 	
-	if(touch_right_opacity > 0.005){
-		for(uint8_t i = 0; i < 32; i++){
-			float progress = (float)i / 31.0;
-			float brightness = (1.0-progress) * touch_right_opacity;
-			CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.05);
-
-			leds[(NUM_LEDS-1)-i] = add(leds[(NUM_LEDS-1)-i], glow_col);
+				leds[i] = add(leds[i], glow_col);
+			}
 		}
 	}
+	else{
+		float distance = 0.0;
+		center_distance_smooth = center_distance_smooth * 0.9 + distance * 0.1;
+		if(center_distance_smooth > 0.005){
+			for(int i = 32; i < 96; i++){
+				float progress = 1.0 - (abs(i - 64) / 32.0); // Adjusted progress calculation
+				float brightness = (progress) * (sqrt(sqrt(center_distance_smooth)));
+				CRGBF glow_col = hsv(0.870, 1.0, brightness*brightness*0.5);
+
+				leds[i] = add(leds[i], glow_col);
+			}
+		}
+	}
+
 }

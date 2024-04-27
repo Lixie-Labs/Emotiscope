@@ -73,11 +73,15 @@ function touch_calibration_step(step){
 			console.log(touch_low);
 			console.log(touch_high);
 
-			let touch_threshold_left   = Math.round((touch_low[0] + touch_high[0]) / 2);
-			let touch_threshold_center = Math.round((touch_low[1] + touch_high[1]) / 2);
-			let touch_threshold_right  = Math.round((touch_low[2] + touch_high[2]) / 2);
+			let ambient_threshold_left   = Math.round(touch_low[0]*0.9 + touch_high[0]*0.1);
+			let ambient_threshold_center = Math.round(touch_low[1]*0.9 + touch_high[1]*0.1);
+			let ambient_threshold_right  = Math.round(touch_low[2]*0.9 + touch_high[2]*0.1);
+
+			let touch_threshold_left   = Math.round(touch_low[0]*0.25 + touch_high[0]*0.75);
+			let touch_threshold_center = Math.round(touch_low[1]*0.25 + touch_high[1]*0.75);
+			let touch_threshold_right  = Math.round(touch_low[2]*0.25 + touch_high[2]*0.75);
 			
-			transmit('set|touch_thresholds|'+touch_threshold_left+'|'+touch_threshold_center+'|'+touch_threshold_right);
+			transmit('set|touch_thresholds|'+ambient_threshold_left+'|'+ambient_threshold_center+'|'+ambient_threshold_right+'|'+touch_threshold_left+'|'+touch_threshold_center+'|'+touch_threshold_right);
 			transmit('end_touch_calibration');
 		}, 250);
 	}

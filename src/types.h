@@ -84,6 +84,7 @@ struct CRGB8 {
 struct touch_pin {
 	uint8_t pin;
 	uint32_t threshold;
+	uint32_t ambient;
 	uint32_t touch_start;
 	uint32_t touch_end;
 	bool touch_active;
@@ -105,6 +106,9 @@ struct config {
 	bool screensaver;
 	bool temporal_dithering;
 	float vu_floor;
+	uint32_t ambient_left_threshold;
+	uint32_t ambient_center_threshold;
+	uint32_t ambient_right_threshold;
 	uint32_t touch_left_threshold;
 	uint32_t touch_center_threshold;
 	uint32_t touch_right_threshold;

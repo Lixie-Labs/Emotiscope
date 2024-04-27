@@ -183,13 +183,24 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 
 		else if (fastcmp(substring, "touch_thresholds")){
-			// Get touch threshold values
+			// Get ambient threshold values
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
-			uint32_t touch_left_threshold = atol(substring);
+			uint32_t ambient_left_threshold = atol(substring);
 			load_substring_from_split_index(com.command, 3, substring, sizeof(substring));
-			uint32_t touch_center_threshold = atol(substring);
+			uint32_t ambient_center_threshold = atol(substring);
 			load_substring_from_split_index(com.command, 4, substring, sizeof(substring));
+			uint32_t ambient_right_threshold = atol(substring);
+			// Get touch threshold values
+			load_substring_from_split_index(com.command, 5, substring, sizeof(substring));
+			uint32_t touch_left_threshold = atol(substring);
+			load_substring_from_split_index(com.command, 6, substring, sizeof(substring));
+			uint32_t touch_center_threshold = atol(substring);
+			load_substring_from_split_index(com.command, 7, substring, sizeof(substring));
 			uint32_t touch_right_threshold = atol(substring);
+
+			configuration.ambient_left_threshold = ambient_left_threshold;
+			configuration.ambient_center_threshold = ambient_center_threshold;
+			configuration.ambient_right_threshold = ambient_right_threshold;
 
 			configuration.touch_left_threshold = touch_left_threshold;
 			configuration.touch_center_threshold = touch_center_threshold;
@@ -199,7 +210,12 @@ void parse_command(uint32_t t_now_ms, command com) {
 			touch_pins[TOUCH_CENTER].threshold = configuration.touch_center_threshold;
 			touch_pins[TOUCH_RIGHT].threshold  = configuration.touch_right_threshold;
 
-			printf("Touch thresholds set to: %lu | %lu | %lu\n", configuration.touch_left_threshold, configuration.touch_center_threshold, configuration.touch_right_threshold);
+			touch_pins[TOUCH_LEFT].ambient   = configuration.ambient_left_threshold;
+			touch_pins[TOUCH_CENTER].ambient = configuration.ambient_center_threshold;
+			touch_pins[TOUCH_RIGHT].ambient  = configuration.ambient_right_threshold;
+
+			printf("Ambient thresholds set to: %lu | %lu | %lu\n", configuration.ambient_left_threshold, configuration.ambient_center_threshold, configuration.ambient_right_threshold);
+			printf("Touch thresholds set to:   %lu | %lu | %lu\n", configuration.touch_left_threshold, configuration.touch_center_threshold, configuration.touch_right_threshold);
 		}
 		else{
 			unrecognized_command_error(substring);
