@@ -154,17 +154,17 @@ void parse_command(uint32_t t_now_ms, command com) {
 			bool setting_value = (bool)atoi(substring);
 			configuration.temporal_dithering = setting_value;
 		}
-		else if (fastcmp(substring, "invert_color_range")){
-			// Get invert_color_range value
+		else if (fastcmp(substring, "reverse_color_range")){
+			// Get reverse_color_range value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			bool setting_value = (bool)atoi(substring);
-			configuration.invert_color_range = setting_value;
+			configuration.reverse_color_range = setting_value;
 		}
-		else if (fastcmp(substring, "auto_color")){
-			// Get auto_color value
+		else if (fastcmp(substring, "auto_color_cycle")){
+			// Get auto_color_cycle value
 			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
 			bool setting_value = (bool)atoi(substring);
-			configuration.auto_color = setting_value;
+			configuration.auto_color_cycle = setting_value;
 		}
 
 		else if (fastcmp(substring, "mode")) {

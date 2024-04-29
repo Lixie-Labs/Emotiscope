@@ -28,5 +28,6 @@ void load_toggles_relevant_to_mode(int16_t mode_index) {
 	clear_toggles();
 
 	register_toggle("mirror_mode");
-	register_toggle("auto_color");
+	register_toggle("reverse_color_range");
+	register_toggle("auto_color_cycle");
 }

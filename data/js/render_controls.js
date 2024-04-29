@@ -80,7 +80,7 @@ function render_toggles(){
 
 		out_html += `<span class="toggle">`;
 		out_html += 	`<div class="toggle_label buzz" onclick="show_setting_information('${toggle_name}');">`;
-		out_html += 		`${toggle_name.toUpperCase().replace("_"," ")}`;
+		out_html += 		`${toggle_name.toUpperCase().replace(/_/g," ")}`;
 		out_html +=		`</div>`;
 		out_html +=		`<div class="toggle_track" id="${toggle_name}"></div>`;
 		out_html +=		`<div class="toggle_handle" id="${toggle_name}_handle"></div>`;

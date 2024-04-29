@@ -466,17 +466,20 @@ button{
 }
 
 .slider_label, .toggle_label{
-    display: block;
-    width: 100%;
     font-size: 12px;
     text-align: center;
     color: var(--primary);
     margin-bottom: 10px;
-    overflow-x: clip;
+    text-wrap: balance;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-content: end;
+    flex-wrap: wrap;
 }
 
 .slider_track, .toggle_track{
-    height: calc(100% - 35px);
+    height: calc(100% - 55px);
     display: block;
     margin-left: 5px;
 	margin-right: 5px;
@@ -497,7 +500,7 @@ button{
     height: 60px;
     width: calc(100% - 20px);
     position: relative;
-    top: calc(-100% + 37px);
+    top: calc(-100% + 56px);
     left: 10px;
     border-radius: 6px;
     background-color: #5897ce;

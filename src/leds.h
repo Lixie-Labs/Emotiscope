@@ -449,7 +449,7 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 
 void update_auto_color(){
 	static float color_momentum = 0.0;
-	if(configuration.auto_color == true){
+	if(configuration.auto_color_cycle == true){
 		float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1];
 		novelty = novelty*novelty*novelty*novelty*novelty*novelty;
 
@@ -459,12 +459,7 @@ void update_auto_color(){
 			color_momentum = 0.1;
 		}
 
-		if(configuration.invert_color_range == false){
-			configuration.color += color_momentum*0.05;
-		}
-		else{
-			configuration.color -= color_momentum*0.05;
-		}
+		configuration.color += color_momentum*0.05;
 	}
 }
 
@@ -583,11 +578,13 @@ void apply_brightness() {
 float get_color_range_hue(float progress){
 	float color_range = configuration.color_range;
 	
-	if(configuration.invert_color_range == true){
+	if(configuration.reverse_color_range == true){
 		color_range *= -1.0;
+		return (1.0-configuration.color) + (color_range * progress);
 	}
-
-	return configuration.color + (color_range * progress);
+	else{
+		return configuration.color + (color_range * progress);
+	}
 }
 
 void apply_background(){
