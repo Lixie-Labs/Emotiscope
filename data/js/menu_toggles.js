@@ -1,5 +1,5 @@
 function set_menu_toggle_state(toggle_name, toggle_state){
-	console.log("TOGGLE: "+toggle_name);
+	//console.log("TOGGLE: "+toggle_name);
 	if(toggle_state == true){
 		document.getElementById(toggle_name).classList.remove("menu_item_toggle_off");
 		document.getElementById(toggle_name).classList.add("menu_item_toggle_on");

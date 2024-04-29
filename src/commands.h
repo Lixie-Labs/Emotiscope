@@ -63,18 +63,17 @@ void unrecognized_command_error(char* command){
 
 void parse_command(uint32_t t_now_ms, command com) {
 	//printf("Parsing command: '%s'\n", com.command);
-	// Buffer to store results from get_index
-    char substring[MAX_COMMAND_LENGTH];
-
-	// Get command type
-	load_substring_from_split_index(com.command, 0, substring, sizeof(substring));
+	
+    fetch_substring(com.command, '|', 0);
+	//printf("command type: %s\n", substring);
 
 	if (fastcmp(substring, "set")) {
 		// Get setting name
-		load_substring_from_split_index(com.command, 1, substring, sizeof(substring));
+		fetch_substring(com.command, '|', 1);
+		
 		if (fastcmp(substring, "brightness")) {
 			// Get brightness value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = clip_float(atof(substring));
 			configuration.brightness = setting_value;
 
@@ -82,7 +81,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "softness")) {
 			// Get softness value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.softness = setting_value;
 
@@ -90,7 +89,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "speed")) {
 			// Get speed value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.speed = setting_value;
 
@@ -98,7 +97,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "color")) {
 			// Get color value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = clip_float(atof(substring));
 			configuration.color = setting_value;
 
@@ -106,13 +105,13 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "mirror_mode")) {
 			// Get mirror_mode value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			bool setting_value = (bool)atoi(substring);
 			configuration.mirror_mode = setting_value;
 		}
 		else if (fastcmp(substring, "blue_filter")) {
 			// Get blue_filter value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.blue_filter = setting_value;
 
@@ -120,7 +119,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "color_range")) {
 			// Get color_range value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.color_range = setting_value;
 
@@ -128,7 +127,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "saturation")) {
 			// Get saturation value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.saturation = setting_value;
 
@@ -136,7 +135,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "background")) {
 			// Get background value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.background = setting_value;
 
@@ -144,32 +143,32 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "screensaver")) {
 			// Get screensaver value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			bool setting_value = (bool)atoi(substring);
 			configuration.screensaver = setting_value;
 		}
 		else if (fastcmp(substring, "temporal_dithering")){
 			// Get temporal_dithering value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			bool setting_value = (bool)atoi(substring);
 			configuration.temporal_dithering = setting_value;
 		}
 		else if (fastcmp(substring, "reverse_color_range")){
 			// Get reverse_color_range value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			bool setting_value = (bool)atoi(substring);
 			configuration.reverse_color_range = setting_value;
 		}
 		else if (fastcmp(substring, "auto_color_cycle")){
 			// Get auto_color_cycle value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			bool setting_value = (bool)atoi(substring);
 			configuration.auto_color_cycle = setting_value;
 		}
 
 		else if (fastcmp(substring, "mode")) {
 			// Get mode name
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 
 			int16_t mode_index = set_lightshow_mode_by_name(substring);
 			if(mode_index == -1){
@@ -184,18 +183,18 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 		else if (fastcmp(substring, "touch_thresholds")){
 			// Get ambient threshold values
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			uint32_t ambient_left_threshold = atol(substring);
-			load_substring_from_split_index(com.command, 3, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 3);
 			uint32_t ambient_center_threshold = atol(substring);
-			load_substring_from_split_index(com.command, 4, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 4);
 			uint32_t ambient_right_threshold = atol(substring);
 			// Get touch threshold values
-			load_substring_from_split_index(com.command, 5, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 5);
 			uint32_t touch_left_threshold = atol(substring);
-			load_substring_from_split_index(com.command, 6, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 6);
 			uint32_t touch_center_threshold = atol(substring);
-			load_substring_from_split_index(com.command, 7, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 7);
 			uint32_t touch_right_threshold = atol(substring);
 
 			configuration.ambient_left_threshold = ambient_left_threshold;
@@ -226,8 +225,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 	}
 	else if (fastcmp(substring, "get")) {
 		// Name of thing to get
-		load_substring_from_split_index(com.command, 1, substring, sizeof(substring));
-
+		fetch_substring(com.command, '|', 1);
+		
 		// If getting configuration struct contents
 		if (fastcmp(substring, "config")) {
 			// Wake on command
@@ -388,6 +387,7 @@ void process_command_queue() {
 bool queue_command(char* command, uint8_t length, uint8_t client_slot) {
 	if (length < MAX_COMMAND_LENGTH) {
 		if (commands_queued < COMMAND_QUEUE_SLOTS - 1) {
+			memset(command_queue[commands_queued].command, 0, MAX_COMMAND_LENGTH);
 			memcpy(command_queue[commands_queued].command, command, length);
 			command_queue[commands_queued].origin_client_slot = client_slot;
 			commands_queued += 1;

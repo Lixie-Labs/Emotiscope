@@ -70,8 +70,8 @@ function touch_calibration_step(step){
 			);
 
 			// Done
-			console.log(touch_low);
-			console.log(touch_high);
+			//console.log(touch_low);
+			//console.log(touch_high);
 
 			let ambient_threshold_left   = Math.round(touch_low[0]*0.9 + touch_high[0]*0.1);
 			let ambient_threshold_center = Math.round(touch_low[1]*0.9 + touch_high[1]*0.1);

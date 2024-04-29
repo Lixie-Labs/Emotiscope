@@ -20,13 +20,13 @@ function set_toggles(){
 	toggle_tracks.forEach(function(toggle_track) {
 		// Get the 'id' attribute of the current element
 		var id = toggle_track.getAttribute('id');
-		console.log("ID: "+id);
-		console.log(configuration);
+		//console.log("ID: "+id);
+		//console.log(configuration);
 
 		try{
 			// Use the 'id' to access the corresponding value in the 'configuration' JSON
 			var value = configuration[id];
-			console.log('Value for', id, ':', value);
+			//console.log('Value for', id, ':', value);
 
 			for(let i in toggles){
 				let toggle = toggles[i];
@@ -38,7 +38,7 @@ function set_toggles(){
 			}    
 		} catch(e) {
 			// Log a message if there's no configuration for the current 'id'
-			console.log('No value found for', id);
+			//console.log('No value found for', id);
 		}
 	});
 }
@@ -47,7 +47,7 @@ function track_toggles() {
     const touch_start_data_toggles = new Map(); // To store initial data for each touch
 
     function start_tracking_toggle(event) {
-		console.log("snapping off");
+		//console.log("snapping off");
 		magnetic_snapping_enabled = false;
 
         Array.from(event.touches).forEach(touch => {
@@ -118,9 +118,9 @@ function track_toggles() {
     }
 
     function stop_tracking_toggle(event) {
-		console.log(configuration);
+		//console.log(configuration);
 
-		console.log("snapping on");
+		//console.log("snapping on");
 		magnetic_snapping_enabled = true;
 
         Array.from(event.changedTouches).forEach(touch => {

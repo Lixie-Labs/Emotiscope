@@ -14,7 +14,7 @@ function set_sliders(){
 			// Use the 'id' to access the corresponding value in the 'configuration' JSON
 			var value = configuration[id];
 			// Log the configuration to the console
-			console.log('Value for', id, ':', value);
+			//console.log('Value for', id, ':', value);
 
 			for(let i in sliders){
 				let slider = sliders[i];
@@ -32,7 +32,7 @@ function set_sliders(){
 		}
 		catch(e) {
 			// Log a message if there's no configuration for the current 'id'
-			console.log('No value found for', id);
+			//console.log('No value found for', id);
 		}
 	});
 }
@@ -112,7 +112,7 @@ function track_sliders() {
 
     function stop_tracking(event) {
         Array.from(event.changedTouches).forEach(touch => {
-			console.log(touch);
+			//console.log(touch);
 			
 			if(touch.target.classList.contains("slider_track")){
 				let id = touch.target.getAttribute('id');

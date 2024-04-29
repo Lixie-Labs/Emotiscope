@@ -13,6 +13,8 @@ uint32_t inactive_start = 0;
 bool inactive = false;
 
 void run_screensaver(){
+	if(configuration.screensaver == false){ return; }
+	
 	float mag_sum = 0;
 	for(uint16_t i = 0; i < NUM_FREQS; i++){
 		mag_sum += frequencies_musical[i].magnitude;

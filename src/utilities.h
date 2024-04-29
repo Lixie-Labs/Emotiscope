@@ -20,6 +20,8 @@ float num_leds_float_lookup[NUM_LEDS];
 float num_freqs_float_lookup[NUM_FREQS];
 float num_tempi_float_lookup[NUM_TEMPI];
 
+char substring[128];
+
 void init_num_leds_float_lookup(){
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
 		num_leds_float_lookup[i] = i / (float)NUM_LEDS;
@@ -50,51 +52,23 @@ void init_noise_samples(){
 	}
 }
 
-char* get_substring_fast(char* input_buffer, char delimiter, uint8_t fetch_index){
+void fetch_substring(char* input_buffer, char delimiter, uint8_t fetch_index){
+	memset(substring, 0, 128);
 	int16_t input_length = strlen(input_buffer);
 
-	// Replace all delimiters with null terminators
-	uint16_t i = 0;
-	for(; i < input_length - 3; i += 4){
-		if(input_buffer[i]   == delimiter){ input_buffer[i]   = 0; }
-		if(input_buffer[i+1] == delimiter){ input_buffer[i+1] = 0; }
-		if(input_buffer[i+2] == delimiter){ input_buffer[i+2] = 0; }
-		if(input_buffer[i+3] == delimiter){ input_buffer[i+3] = 0; }
-	}
-	for(; i < input_length; i++){
-		if(input_buffer[i] == delimiter){ input_buffer[i] = 0; }
-	}
-
-	if(index == 0){
-		return input_buffer; // Null teminator at the first delimiter now
-	}
-	else{
-		bool solved = false;
-		uint16_t current_index = 0;
-		uint16_t pointer_offset = 0;
-		while(solved == false){
-			if(current_index == fetch_index){
-				// Got it
-				printf("Found substring at index %d\n", current_index);
-				printf("Substring: %s\n", input_buffer + pointer_offset);
-
-				return input_buffer + pointer_offset;
+	for(uint16_t i = 0; i < input_length; i++){
+		if(fetch_index == 0){
+			for(uint16_t j = i; j <= input_length; j++){
+				if(input_buffer[j] == delimiter || input_buffer[j] == '\0'){
+					memcpy(substring, input_buffer + i, j-i);
+					return;
+				}
 			}
-			else if(pointer_offset >= input_length){
-				// Couldn't find it, give up gracefully
-				solved = true;
-				printf("BAD SUBSTRING SEARCH!\n");
-				return input_buffer;
-			}
-			else{
-				// Don't have it yet
-				printf("Wrong substring at index %d\n", current_index);
-				printf("Substring: %s\n", input_buffer + pointer_offset);
+			return;
+		}
 
-				int16_t current_substring_length = strlen(input_buffer + pointer_offset);
-				pointer_offset += current_substring_length + 1;
-				current_index++;
-			}
+		if(input_buffer[i] == delimiter){
+			fetch_index--;
 		}
 	}
 }

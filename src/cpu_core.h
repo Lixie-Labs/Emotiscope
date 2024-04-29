@@ -50,9 +50,6 @@ void run_cpu() {
 
 		check_serial();
 
-		char input_buffer[128]  = "set|brightness|100";
-		printf("substring: %s\n", get_substring_fast(input_buffer, '|', 1));
-
 		//neural_network_feed_forward();
 
 		//------------------------------------------------------------------------------------------

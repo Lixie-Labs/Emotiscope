@@ -190,7 +190,7 @@ function parse_message(message){
 			});
 		}
 		else if(command_type == "menu_toggles_ready"){
-			console.log("DATA SYNC COMPLETE!");
+			//console.log("DATA SYNC COMPLETE!");
 			ping_server();
 			setInterval(check_pong_timeout, 100);
 			render_controls();
@@ -198,12 +198,12 @@ function parse_message(message){
 			set_ui_locked_state(false);
 		}
 		else if(command_type == "noise_cal_ready"){
-			console.log("NOISE CAL COMPLETE!");
+			//console.log("NOISE CAL COMPLETE!");
 			hide_page('page_calibration');
 			set_ui_locked_state(false);
 		}
 		else if(command_type == "debug_recording_ready"){
-			console.log("DEBUG RECORDING COMPLETE!");
+			//console.log("DEBUG RECORDING COMPLETE!");
 			hide_page('page_calibration');
 			set_ui_locked_state(false);
 		}
@@ -230,7 +230,7 @@ function parse_message(message){
 			touch_vals[1] = parseInt(command_data[2]);
 			touch_vals[2] = parseInt(command_data[3]);
 
-			console.log(`TOUCH VALS: ${touch_vals}`);
+			//console.log(`TOUCH VALS: ${touch_vals}`);
 
 			got_touch_vals = true;
 		}
@@ -311,7 +311,7 @@ function send_menu_toggle_change(toggle_name){
 }
 
 function transmit(message){
-	console.log(`TX: ${message}`);
+	//console.log(`TX: ${message}`);
 	//document.getElementById("device_preview").innerHTML = message;
 	ws.send(message);
 }
@@ -335,12 +335,12 @@ function setup_header_logo_touch() {
 			trigger_vibration(100);
 
 			if(standby_mode == false){
-				console.log("ENTERING STANDBY");
+				//console.log("ENTERING STANDBY");
 				standby_mode = true;
 				document.getElementById("header_logo").style.color = "#5495d761";
 			}
 			else if(standby_mode == true){
-				console.log("EXITING STANDBY");
+				//console.log("EXITING STANDBY");
 				standby_mode = false;
 				document.getElementById("header_logo").style.color = "var(--primary)";
 			}
@@ -379,12 +379,12 @@ function setup_device_icon_touch() {
 			trigger_vibration(100);
 
 			if(standby_mode == false){
-				console.log("ENTERING STANDBY");
+				//console.log("ENTERING STANDBY");
 				standby_mode = true;
 				document.getElementById("header_logo").style.color = "#5495d761";
 			}
 			else if(standby_mode == true){
-				console.log("EXITING STANDBY");
+				//console.log("EXITING STANDBY");
 				standby_mode = false;
 				document.getElementById("header_logo").style.color = "var(--primary)";
 			}
@@ -442,7 +442,7 @@ function open_websockets_connection_to_device(){
 
 	ws.onmessage = function(event) {
 		if(event.data != "pong"){
-			console.log(`RX: ${event.data}`);
+			//console.log(`RX: ${event.data}`);
 		}
 		//document.getElementById("device_preview").innerHTML = event.data;
 		parse_message(event.data);

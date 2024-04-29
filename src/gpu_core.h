@@ -47,13 +47,13 @@ void run_gpu() {
 	// If silence is detected, show a blue debug LED
 	// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});
 
-	apply_background();
+	apply_background(configuration.background);
 
 	// Apply an incandescent LUT to reduce harsh blue tones
 	apply_blue_light_filter(configuration.blue_filter);  // (leds.h)
 
 	if( EMOTISCOPE_ACTIVE == true && configuration.screensaver == true){
-		//run_screensaver();
+		run_screensaver();
 	}
 
 	// Restrict CRGBF values to 0.0-1.0 range
@@ -67,7 +67,7 @@ void run_gpu() {
 		run_standby();
 	}
 
-	//render_touches();  // (touch.h)
+	render_touches();  // (touch.h)
 
 	draw_ui_overlay();
 	
@@ -96,7 +96,7 @@ void run_gpu() {
 	// Apply white balance
 	//multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
 
-	apply_frame_blending( sqrt(sqrt( clip_float(fmax(configuration.softness, sqrt(lpf_drag))) )) * 0.40 + 0.59 );
+	apply_frame_blending( configuration.softness );
 
 	apply_gamma_correction();
 

@@ -3,7 +3,7 @@ let retry_count = 0;
 const base_delay = 250;
 
 function fetch_and_redirect() {
-	console.log("fetch");
+	console.log("fetch_and_redirect()");
 	const target_url = 'https://app.emotiscope.rocks/discovery/';
 
 	fetch(target_url, { redirect: 'follow' })

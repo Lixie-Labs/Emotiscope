@@ -9,9 +9,12 @@
 // 32-bit color input
 extern CRGBF leds[NUM_LEDS];
 
+// Remapped to floating 8-bit range
+extern CRGBF leds_scaled[NUM_LEDS];
+
 CRGBF dither_error[NUM_LEDS];
 
-// 8-bit color output
+// True 8-bit color output
 static uint8_t raw_led_data[NUM_LEDS*3];
 
 rmt_channel_handle_t tx_chan_a = NULL;
@@ -178,19 +181,18 @@ void init_rmt_driver() {
 }
 
 void quantize_color_error(bool temporal_dithering){
+	memcpy(leds_scaled, leds, NUM_LEDS * sizeof(CRGBF));
+	dsps_mulc_f32_ansi((float*)leds, (float*)leds_scaled, NUM_LEDS*3, 255.0, 1, 1);
+
 	if(temporal_dithering == true){
 		for (uint16_t i = 0; i < NUM_LEDS; i++) {
-			float leds_r_scaled = leds[i].r * 255;
-			float leds_g_scaled = leds[i].g * 255;
-			float leds_b_scaled = leds[i].b * 255;
-			
-			raw_led_data[3*i+1] = (uint8_t)(leds_r_scaled);
-			raw_led_data[3*i+0] = (uint8_t)(leds_g_scaled);
-			raw_led_data[3*i+2] = (uint8_t)(leds_b_scaled);
+			raw_led_data[3*i+1] = (uint8_t)(leds_scaled[i].r);
+			raw_led_data[3*i+0] = (uint8_t)(leds_scaled[i].g);
+			raw_led_data[3*i+2] = (uint8_t)(leds_scaled[i].b);
 
-			float new_error_r = leds_r_scaled - raw_led_data[3*i+1];
-			float new_error_g = leds_g_scaled - raw_led_data[3*i+0];
-			float new_error_b = leds_b_scaled - raw_led_data[3*i+2];
+			float new_error_r = leds_scaled[i].r - raw_led_data[3*i+1];
+			float new_error_g = leds_scaled[i].g - raw_led_data[3*i+0];
+			float new_error_b = leds_scaled[i].b - raw_led_data[3*i+2];
 
 			const float dither_error_threshold = 0.055;
 			if(new_error_r >= dither_error_threshold){ dither_error[i].r += new_error_r; }
@@ -204,9 +206,9 @@ void quantize_color_error(bool temporal_dithering){
 	}
 	else{
 		for (uint16_t i = 0; i < NUM_LEDS; i++) {
-			raw_led_data[3*i+1] = (uint8_t)(leds[i].r * 255);
-			raw_led_data[3*i+0] = (uint8_t)(leds[i].g * 255);
-			raw_led_data[3*i+2] = (uint8_t)(leds[i].b * 255);
+			raw_led_data[3*i+1] = round(leds_scaled[i].r);
+			raw_led_data[3*i+0] = round(leds_scaled[i].g);
+			raw_led_data[3*i+2] = round(leds_scaled[i].b);
 		}
 	}
 }
@@ -219,13 +221,13 @@ IRAM_ATTR void transmit_leds() {
 	// Clear the 8-bit buffer	
 	memset(raw_led_data, 0, NUM_LEDS*3);
 
-	// Quantize the floating point color to 8-bit with dithering
+	// Quantize the floating point color to 8-bit with temporal dithering
 	//
-	// This allows the 8-bit LEDs to emulate the look of a higher bit-depth using persistence of vision tricks
-	// The contents of the floating point CRGBF "leds" array are downsampled into the in alternating ways hundreds of
-	// time 
+	// This allows the 8-bit LEDs to emulate the look of a higher bit-depth using Persistence of Vision
+	// The contents of the floating point CRGBF "leds" array are downsampled into pseudo-random 8-bit
+	// dither patterns hundreds of times per second. Your eyes see these patterns as a smooth, higher
+	// dynamic range image with deeper color reproduction.
 	quantize_color_error(configuration.temporal_dithering);
-	//add_noise();
 
 	// Get to safety, THE PHOTONS ARE COMING!!!
 	if(filesystem_ready == true){

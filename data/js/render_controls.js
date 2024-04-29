@@ -27,7 +27,7 @@ function title_case(input_string) {
 }
 
 function trigger_vibration(length_ms) {
-	console.log("~~~~~~~~~~~~~buzz~~~~~~~~~~~~~");
+	//console.log("~~~~~~~~~~~~~buzz~~~~~~~~~~~~~");
     // Check if the Vibrate API is supported in the navigator
     if ("vibrate" in navigator) {
         // Trigger vibration for the specified length
@@ -52,7 +52,7 @@ function render_modes(){
 
 	let current_mode = document.getElementById("current_mode");
 	let current_mode_name = modes[configuration.current_mode]; 
-	console.log("CURRENT MODE: "+current_mode_name);
+	//console.log("CURRENT MODE: "+current_mode_name);
 	current_mode.innerHTML = current_mode_name;
 }
 
@@ -96,7 +96,7 @@ function render_menu_toggles(){
 		let toggle_name = menu_toggles[i].name;
 		let toggle_value = configuration[toggle_name];
 
-		console.log("TOGGLE: "+toggle_name+" VALUE: "+toggle_value);
+		//console.log("TOGGLE: "+toggle_name+" VALUE: "+toggle_value);
 		
 		if(toggle_value == true){
 			out_html += `<div class="menu_item buzz" onclick="set_menu_toggle_state('${toggle_name}', false);">`;
@@ -227,7 +227,7 @@ function toggle_fullscreen() {
         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
             document.documentElement.msRequestFullscreen();
         }
-        console.log("Going fullscreen.");
+        //console.log("Going fullscreen.");
     } else {
         // Exit fullscreen
         if (document.exitFullscreen) {
@@ -239,13 +239,13 @@ function toggle_fullscreen() {
         } else if (document.msExitFullscreen) { // IE/Edge
             document.msExitFullscreen();
         }
-        console.log("Exiting fullscreen.");
+        //console.log("Exiting fullscreen.");
     }
 }
 
 
 function render_controls(){
-	console.log("render_controls()");
+	//console.log("render_controls()");
 	init_setting_gallery_snapping();
 	render_modes();
 
@@ -281,12 +281,12 @@ function check_and_attach_buzz_listeners() {
 let setting_gallery = document.getElementById("setting_gallery");
 setting_gallery.addEventListener('touchstart', function(){
 	trigger_vibration(5);
-	console.log("snapping_off");
+	//console.log("snapping_off");
 	magnetic_snapping_enabled = false;
 });
 setting_gallery.addEventListener('touchend', function(){
 	trigger_vibration(5);
-	console.log("snapping_on");
+	//console.log("snapping_on");
 	magnetic_snapping_enabled = true;
 });
 

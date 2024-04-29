@@ -35,6 +35,8 @@ CRGBF BLACK = {0.0, 0.0, 0.0};
 
 CRGBF leds[NUM_LEDS]; // 32-bit image buffer
 
+CRGBF leds_scaled[NUM_LEDS]; // scaled up to 8-bit range, but still floating point
+
 CRGBF leds_temp[NUM_LEDS]; // for temporary copies of the image buffer (scaling)
 
 CRGBF leds_last[NUM_LEDS];
@@ -245,15 +247,17 @@ CRGBF hsv(float h, float s, float v) {
 }
 
 void apply_blue_light_filter(float mix) {
-	multiply_CRGBF_array_by_LUT(
-		leds,
-		{
-			incandescent_lookup.r * mix + (1.0 - mix),
-			incandescent_lookup.g * mix + (1.0 - mix),
-			incandescent_lookup.b * mix + (1.0 - mix)
-		},
-		NUM_LEDS
-	);
+	if(mix > 0.0){
+		multiply_CRGBF_array_by_LUT(
+			leds,
+			{
+				incandescent_lookup.r * mix + (1.0 - mix),
+				incandescent_lookup.g * mix + (1.0 - mix),
+				incandescent_lookup.b * mix + (1.0 - mix)
+			},
+			NUM_LEDS
+		);
+	}
 
 	/*
 	float mix_inv = 1.0 - mix;
@@ -444,7 +448,7 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
     float spread_brightness = 1.0 / fmax(position_distance * NUM_LEDS, 1.0); // Ensure minimum spread
 
     // Draw the line representing the motion blur
-    draw_line(layer, prev_position, position, color, (spread_brightness*spread_brightness) * opacity);
+    draw_line_fuzzed(layer, prev_position, position, color, (spread_brightness) * (opacity * 1.0));
 }
 
 void update_auto_color(){
@@ -487,11 +491,15 @@ void render_debug_value() {
 
 void apply_frame_blending(float blend_amount){
 	static CRGBF previous_frame[NUM_LEDS];
+	extern float lpf_drag;
+
+	blend_amount = sqrt(sqrt( clip_float(fmax(blend_amount, sqrt(lpf_drag))) )) * 0.40 + 0.59;
+	scale_CRGBF_array_by_constant(previous_frame, blend_amount, NUM_LEDS);
 
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
-		leds[i].r = max(leds[i].r, previous_frame[i].r*blend_amount);
-		leds[i].g = max(leds[i].g, previous_frame[i].g*blend_amount);
-		leds[i].b = max(leds[i].b, previous_frame[i].b*blend_amount);
+		leds[i].r = max(leds[i].r, previous_frame[i].r);
+		leds[i].g = max(leds[i].g, previous_frame[i].g);
+		leds[i].b = max(leds[i].b, previous_frame[i].b);
 	}
 
 	memcpy(previous_frame, leds, sizeof(CRGBF) * NUM_LEDS);
@@ -578,6 +586,10 @@ void apply_brightness() {
 float get_color_range_hue(float progress){
 	float color_range = configuration.color_range;
 	
+	if(color_range == 0.0){
+		return configuration.color;
+	}
+	
 	if(configuration.reverse_color_range == true){
 		color_range *= -1.0;
 		return (1.0-configuration.color) + (color_range * progress);
@@ -587,42 +599,45 @@ float get_color_range_hue(float progress){
 	}
 }
 
-void apply_background(){
-	float background_level = configuration.background * 0.25; // Max 25% brightness
+void apply_background(float background_level){
+	background_level *= 0.25; // Max 25% brightness
 
-	if(configuration.mirror_mode == false){
-		for(uint16_t i = 0; i < NUM_LEDS; i++){
-			float progress = num_leds_float_lookup[i];
-			CRGBF background_color = hsv(
-				get_color_range_hue(progress),
-				configuration.saturation,
-				1.0
-			);
+	if(background_level > 0.0){
+		if(configuration.mirror_mode == false){
+			for(uint16_t i = 0; i < NUM_LEDS; i++){
+				float progress = num_leds_float_lookup[i];
+				CRGBF background_color = hsv(
+					get_color_range_hue(progress),
+					configuration.saturation,
+					1.0
+				);
 
-			leds_temp[i] = background_color;
+				leds_temp[i] = background_color;
+			}
 		}
-	}
-	else{
-		for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
-			float progress = num_leds_float_lookup[i << 1];
-			CRGBF background_color = hsv(
-				get_color_range_hue(progress),
-				configuration.saturation,
-				1.0
-			);
-			
-			int16_t left_index = 63-i;
-			int16_t right_index = 64+i;
+		else{
+			for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
+				float progress = num_leds_float_lookup[i << 1];
+				CRGBF background_color = hsv(
+					get_color_range_hue(progress),
+					configuration.saturation,
+					1.0
+				);
+				
+				int16_t left_index = 63-i;
+				int16_t right_index = 64+i;
 
-			leds_temp[left_index] = background_color;
-			leds_temp[right_index] = background_color;
+				leds_temp[left_index] = background_color;
+				leds_temp[right_index] = background_color;
+			}
 		}
-	}
 
-	// Apply background to the main buffer
-	scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
-	scale_CRGBF_array_by_constant(leds, 1.0 - background_level, NUM_LEDS);
-	add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
+		// Apply background to the main buffer
+		scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
+		scale_CRGBF_array_by_constant(leds, 1.0 - background_level, NUM_LEDS);
+		add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
+
+	}
 }
 
 void clear_display(float keep = 0.0){
