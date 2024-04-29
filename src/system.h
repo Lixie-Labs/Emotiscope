@@ -12,6 +12,9 @@
 
 volatile bool EMOTISCOPE_ACTIVE = true;
 
+char serial_buffer[256];
+uint16_t serial_buffer_index = 0;
+
 void init_serial(uint32_t baud_rate) {
 	// Artificial 10-second boot up wait time if needed
 	//for(uint16_t i = 0; i < 10; i++){ printf("WAITING FOR %d SECONDS...\n", 10-i); delay(1000); }
@@ -21,7 +24,29 @@ void init_serial(uint32_t baud_rate) {
 	
 	extern uint8_t HARDWARE_VERSION;
 
+	memset(serial_buffer, 0, 256);
+
 	Serial.begin(baud_rate);
+}
+
+void check_serial() {
+	extern bool queue_command(char* command, uint8_t length, uint8_t client_slot);
+
+	while(Serial.available() > 0){
+		char c = Serial.read();
+		if(c == '\n'){
+			printf("Serial command received: %s\n", serial_buffer);
+			queue_command(serial_buffer, serial_buffer_index, 255);
+			serial_buffer_index = 0;
+		}
+		else if(c == '\r'){
+			// Do nothing, \r is stupid
+		}
+		else{
+			serial_buffer[serial_buffer_index] = c;
+			serial_buffer_index++;
+		}
+	}
 }
 
 void init_system() {
@@ -41,7 +66,7 @@ void init_system() {
 	extern void init_floating_point_lookups();
 
 	init_hardware_version_pins();       // (hardware_version.h)
-	init_serial(2000000);				// (system.h)
+	init_serial(921600);				// (system.h)
 	init_filesystem();                  // (filesystem.h)
 	init_configuration();               // (configuration.h)
 	init_i2s_microphone();				// (microphone.h)

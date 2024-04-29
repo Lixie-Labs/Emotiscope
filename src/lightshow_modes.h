@@ -35,8 +35,8 @@ lightshow_mode lightshow_modes[] = {
 	{ "Bloom",           &draw_bloom         }, // 6
 	{ "Neutral",         &draw_neutral       }, // 7
 
-	{ "debug",           &draw_debug         }, // 8
-	{ "presets",         &draw_presets       }, // 9
+	//{ "debug",           &draw_debug         }, // 8
+	//{ "presets",         &draw_presets       }, // 9
 };
 
 const uint16_t NUM_LIGHTSHOW_MODES = sizeof(lightshow_modes) / sizeof(lightshow_mode);
