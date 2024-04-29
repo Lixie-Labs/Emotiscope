@@ -11,7 +11,7 @@ void draw_bloom() {
 
 	if(configuration.mirror_mode == true){
 		for(uint16_t i = 0; i < NUM_LEDS>>1; i++){
-			float progress = float(i) / (NUM_LEDS >> 1);
+			float progress = num_leds_float_lookup[i<<1];
 			float novelty_pixel = clip_float(novelty_image[i]*1.0);
 			CRGBF col = hsv(
 				get_color_range_hue(progress),
@@ -24,7 +24,7 @@ void draw_bloom() {
 	}
 	else{
 		for(uint16_t i = 0; i < NUM_LEDS; i++){
-			float progress = float(i) / (NUM_LEDS);
+			float progress = num_leds_float_lookup[i];
 			float novelty_pixel = clip_float(novelty_image[i]*2.0);
 			CRGBF col = hsv(
 				get_color_range_hue(progress),

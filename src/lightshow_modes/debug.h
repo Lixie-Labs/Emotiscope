@@ -16,7 +16,7 @@ void draw_debug_novelty(){
 
 void draw_debug(){
 	for(uint16_t i = 0; i < 64; i++){
-		float progress = float(i) / 64;
+		float progress = num_leds_float_lookup[i<<1];
 		leds[i] = hsv(
 			get_color_range_hue(progress),
 			1.0,

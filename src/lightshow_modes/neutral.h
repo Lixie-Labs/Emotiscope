@@ -1,7 +1,7 @@
 void draw_neutral() {
 	if(configuration.mirror_mode == true){ // Mirror mode
 		for (uint16_t i = 0; i < (NUM_LEDS >> 1); i++) {
-			float progress = float(i) / (NUM_LEDS >> 1);
+			float progress = num_leds_float_lookup[i<<1];
 			CRGBF color = hsv(
 				get_color_range_hue(progress), 
 				configuration.saturation,
@@ -14,7 +14,7 @@ void draw_neutral() {
 	}
 	else{ // Non mirror
 		for (uint16_t i = 0; i < NUM_LEDS; i++) {
-			float progress = float(i) / NUM_LEDS;
+			float progress = num_leds_float_lookup[i];
 			CRGBF color = hsv(
 				get_color_range_hue(progress), 
 				configuration.saturation,

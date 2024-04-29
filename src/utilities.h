@@ -16,6 +16,34 @@
 #define TOTAL_NOISE_SAMPLES 666 // and the devil laughs
 uint8_t noise_samples[TOTAL_NOISE_SAMPLES];
 
+float num_leds_float_lookup[NUM_LEDS];
+float num_freqs_float_lookup[NUM_FREQS];
+float num_tempi_float_lookup[NUM_TEMPI];
+
+void init_num_leds_float_lookup(){
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		num_leds_float_lookup[i] = i / (float)NUM_LEDS;
+	}
+}
+
+void init_num_freqs_float_lookup(){
+	for(uint16_t i = 0; i < NUM_FREQS; i++){
+		num_freqs_float_lookup[i] = i / (float)NUM_FREQS;
+	}
+}
+
+void init_num_tempi_float_lookup(){
+	for(uint16_t i = 0; i < NUM_TEMPI; i++){
+		num_tempi_float_lookup[i] = i / (float)NUM_TEMPI;
+	}
+}
+
+void init_floating_point_lookups(){
+	init_num_leds_float_lookup();
+	init_num_freqs_float_lookup();
+	init_num_tempi_float_lookup();
+}
+
 void init_noise_samples(){
 	for(uint16_t i = 0; i < TOTAL_NOISE_SAMPLES; i++){
 		noise_samples[i] = esp_random() & 1;

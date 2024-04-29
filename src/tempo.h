@@ -349,11 +349,11 @@ void update_novelty() {
 
 		float current_novelty = 0.0;
 		for (uint16_t i = 0; i < NUM_FREQS; i++) {
-			float new_mag = spectrogram_smooth[i];	 // sqrt(sqrt(frequencies[i].magnitude));
+			float new_mag = spectrogram_smooth[i];
 			frequencies_musical[i].novelty = max(0.0f, new_mag - frequencies_musical[i].magnitude_last);
-			frequencies_musical[i].magnitude_last = new_mag;
-
 			current_novelty += frequencies_musical[i].novelty;
+
+			frequencies_musical[i].magnitude_last = new_mag;
 		}
 		current_novelty /= float(NUM_FREQS);
 
@@ -401,27 +401,26 @@ void update_tempi_phase(float delta) {
 	interlacing_field = !interlacing_field;
 
 	tempi_power_sum = 0.00000001;
+
 	// Iterate over all tempi to smooth them and calculate the power sum
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		//if((tempo_bin % 2 == 0) == interlacing_field){
-			float progress = float(tempo_bin) / NUM_TEMPI;
+		// Load the magnitude
+		float tempi_magnitude = tempi[tempo_bin].magnitude;
 
-			// Load the magnitude
-			float tempi_magnitude = tempi[tempo_bin].magnitude;
+		// Smooth it
+		tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
+		tempi_power_sum += tempi_smooth[tempo_bin];
 
-			// Smooth it
-			tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
-			tempi_power_sum += tempi_smooth[tempo_bin];
-
-			sync_beat_phase(tempo_bin, delta);
-		//}
+		sync_beat_phase(tempo_bin, delta);
 	}
 
 	// Measure contribution factor of each tempi, calculate confidence level
 	float max_contribution = 0.000001;
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		float contribution = tempi_smooth[tempo_bin] / tempi_power_sum;
-		max_contribution = max(contribution, max_contribution);
+		max_contribution = max(
+			tempi_smooth[tempo_bin] / tempi_power_sum,
+			max_contribution
+		);
 	}
 
 	tempo_confidence = max_contribution;

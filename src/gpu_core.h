@@ -53,7 +53,7 @@ void run_gpu() {
 	apply_blue_light_filter(configuration.blue_filter);  // (leds.h)
 
 	if( EMOTISCOPE_ACTIVE == true && configuration.screensaver == true){
-		run_screensaver();
+		//run_screensaver();
 	}
 
 	// Restrict CRGBF values to 0.0-1.0 range
@@ -67,7 +67,7 @@ void run_gpu() {
 		run_standby();
 	}
 
-	render_touches();  // (touch.h)
+	//render_touches();  // (touch.h)
 
 	draw_ui_overlay();
 	

@@ -21,9 +21,9 @@
 #include "lightshow_modes/analog.h"
 #include "lightshow_modes/waveform.h"
 #include "lightshow_modes/neutral.h"
-//#include "lightshow_modes/neurons.h"
 
 #include "lightshow_modes/debug.h"
+#include "lightshow_modes/presets.h"
 
 lightshow_mode lightshow_modes[] = {
 	{ "Analog",          &draw_analog        }, // 0
@@ -34,9 +34,9 @@ lightshow_mode lightshow_modes[] = {
 	{ "Hype",            &draw_hype          }, // 5
 	{ "Bloom",           &draw_bloom         }, // 6
 	{ "Neutral",         &draw_neutral       }, // 7
-	//{ "Neurons",         &draw_neurons       }, // 8
 
-	{ "Debug",           &draw_debug         },
+	{ "debug",           &draw_debug         }, // 8
+	{ "presets",         &draw_presets       }, // 9
 };
 
 const uint16_t NUM_LIGHTSHOW_MODES = sizeof(lightshow_modes) / sizeof(lightshow_mode);
@@ -53,6 +53,12 @@ int16_t set_lightshow_mode_by_name(char* name){
 	uint16_t num_modes = sizeof(lightshow_modes) / sizeof(lightshow_mode);
 	for(uint16_t i = 0; i < num_modes; i++){
 		if( strcmp(name, lightshow_modes[i].name) == 0 ){
+
+			// "presets" is a special mode that is not a real mode, but an animation that plays when the presets menu is open
+			if( strcmp(lightshow_modes[i].name, "presets") == 0 ){
+				// DO EXTRA STEPS FOR PRESETS MENU MODE HERE
+			}
+
 			// Found a matching mode
 			configuration.current_mode = i;
 

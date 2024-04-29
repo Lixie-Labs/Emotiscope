@@ -1,3 +1,6 @@
+// It won't void any kind of stupid warranty, but things will *definitely* break at this point if you change this number.
+#define NUM_LEDS ( 128 )
+
 #define NUM_FREQS ( 64 ) // Number of Goertzel instances running in parallel
 #define MAX_WEBSOCKET_CLIENTS ( 4 ) // Max simultaneous remote controls allowed at one time
 

@@ -245,18 +245,24 @@ CRGBF hsv(float h, float s, float v) {
 }
 
 void apply_blue_light_filter(float mix) {
-	uint32_t t_start_cycles = ESP.getCycleCount();
+	multiply_CRGBF_array_by_LUT(
+		leds,
+		{
+			incandescent_lookup.r * mix + (1.0 - mix),
+			incandescent_lookup.g * mix + (1.0 - mix),
+			incandescent_lookup.b * mix + (1.0 - mix)
+		},
+		NUM_LEDS
+	);
 
+	/*
 	float mix_inv = 1.0 - mix;
 	save_leds_to_temp();
 	multiply_CRGBF_array_by_LUT(leds_temp, incandescent_lookup, NUM_LEDS);
 	scale_CRGBF_array_by_constant(leds_temp, mix, NUM_LEDS);
 	scale_CRGBF_array_by_constant(leds, mix_inv, NUM_LEDS);
 	add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
-
-	uint32_t t_end_cycles = ESP.getCycleCount();
-	volatile uint32_t t_total_cycles = t_end_cycles - t_start_cycles;
-
+	*/
 }
 
 void save_leds_to_last() {
@@ -264,11 +270,11 @@ void save_leds_to_last() {
 }
 
 CRGBF mix(CRGBF color_1, CRGBF color_2, float amount) {
-	CRGBF out_color = {
-		color_1.r * (1.0 - amount) + color_2.r * (amount),
-		color_1.g * (1.0 - amount) + color_2.g * (amount),
-		color_1.b * (1.0 - amount) + color_2.b * (amount),
-	};
+	CRGBF out_color = { 0,0,0 };
+
+	dsps_mulc_f32_ae32(&color_1.r, &color_1.r, 3, (1.0 - amount), 1, 1);
+	dsps_mulc_f32_ae32(&color_2.r, &color_2.r, 3, (amount), 1, 1);
+	dsps_add_f32(&color_1.r, &color_2.r, &out_color.r, 3, 1, 1, 1);
 
 	return out_color;
 }
@@ -575,8 +581,12 @@ void apply_brightness() {
 }
 
 float get_color_range_hue(float progress){
-	const float range_directions[2] = {1.0, -1.0};
-	float color_range = configuration.color_range * (1.0*range_directions[configuration.invert_color_range]);
+	float color_range = configuration.color_range;
+	
+	if(configuration.invert_color_range == true){
+		color_range *= -1.0;
+	}
+
 	return configuration.color + (color_range * progress);
 }
 
@@ -584,42 +594,38 @@ void apply_background(){
 	float background_level = configuration.background * 0.25; // Max 25% brightness
 
 	if(configuration.mirror_mode == false){
-		float background_inv = (1.0-background_level);
 		for(uint16_t i = 0; i < NUM_LEDS; i++){
-			float progress = float(i) / NUM_LEDS;
+			float progress = num_leds_float_lookup[i];
 			CRGBF background_color = hsv(
 				get_color_range_hue(progress),
 				configuration.saturation,
-				background_level
+				1.0
 			);
 
-			leds[i].r = leds[i].r * background_inv + background_color.r;
-			leds[i].g = leds[i].g * background_inv + background_color.g;
-			leds[i].b = leds[i].b * background_inv + background_color.b;
+			leds_temp[i] = background_color;
 		}
 	}
 	else{
-		float background_inv = (1.0-background_level);
 		for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
-			float progress = float(i) / (NUM_LEDS>>1);
+			float progress = num_leds_float_lookup[i << 1];
 			CRGBF background_color = hsv(
 				get_color_range_hue(progress),
 				configuration.saturation,
-				background_level
+				1.0
 			);
 			
 			int16_t left_index = 63-i;
 			int16_t right_index = 64+i;
 
-			leds[left_index].r = leds[left_index].r * background_inv + background_color.r;
-			leds[left_index].g = leds[left_index].g * background_inv + background_color.g;
-			leds[left_index].b = leds[left_index].b * background_inv + background_color.b;
-
-			leds[right_index].r = leds[right_index].r * background_inv + background_color.r;
-			leds[right_index].g = leds[right_index].g * background_inv + background_color.g;
-			leds[right_index].b = leds[right_index].b * background_inv + background_color.b;
+			leds_temp[left_index] = background_color;
+			leds_temp[right_index] = background_color;
 		}
 	}
+
+	// Apply background to the main buffer
+	scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
+	scale_CRGBF_array_by_constant(leds, 1.0 - background_level, NUM_LEDS);
+	add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
 }
 
 void clear_display(float keep = 0.0){
