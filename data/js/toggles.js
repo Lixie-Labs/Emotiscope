@@ -12,6 +12,19 @@ function set_toggle_state(toggle_name, toggle_state){
 	}
 }
 
+function toggle_toggle(toggle_name){
+	for(let id in configuration){
+		if(toggle_name == id){
+			set_toggle_state(toggle_name, !configuration[id]);
+			configuration[id] = !configuration[id];
+			trigger_vibration(20);
+			let resulting_value = configuration[id] ? 1 : 0;
+
+			transmit(`set|${toggle_name}|${resulting_value}`);
+		}
+	}   
+}
+
 function set_toggles(){
 	// Find all elements with the class 'toggle_track'
 	var toggle_tracks = document.querySelectorAll('.toggle_track');

@@ -88,8 +88,8 @@ function render_toggles(){
 		let toggle_name = toggles[i].name;
 		let toggle_value = configuration[toggle_name];
 
-		out_html += `<span class="toggle">`;
-		out_html += 	`<div class="toggle_label buzz" onclick="show_setting_information('${toggle_name}');">`;
+		out_html += `<span class="toggle" onclick="toggle_toggle('${toggle_name}')">`;
+		out_html += 	`<div class="toggle_label buzz" onclick="show_setting_information('${toggle_name}'); ">`;
 		out_html += 		`${toggle_name.toUpperCase().replace(/_/g," ")}`;
 		out_html +=		`</div>`;
 		out_html +=		`<div class="toggle_track" id="${toggle_name}"></div>`;

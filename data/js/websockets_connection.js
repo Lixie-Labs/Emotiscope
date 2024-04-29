@@ -318,7 +318,7 @@ function send_menu_toggle_change(toggle_name){
 }
 
 function transmit(message){
-	//console.log(`TX: ${message}`);
+	console.log(`TX: ${message}`);
 	//document.getElementById("device_preview").innerHTML = message;
 	ws.send(message);
 }
