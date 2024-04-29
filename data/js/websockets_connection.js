@@ -150,8 +150,15 @@ function parse_message(message){
 			modes = [];
 		}
 		else if(command_type == "new_mode"){
-			let mode_name = command_data[1];
-			modes.push(mode_name);
+			let mode_index = parseInt(command_data[1]);
+			let mode_type  = parseInt(command_data[2]);
+			let mode_name  = command_data[3];
+
+			modes.push({
+				"mode_index":mode_index,
+				"mode_type":mode_type,
+				"mode_name":mode_name
+			});
 		}
 		else if(command_type == "clear_sliders"){
 			sliders = [];

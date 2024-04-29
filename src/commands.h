@@ -240,9 +240,11 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("clear_modes", com.origin_client_slot);
 
 			uint16_t num_modes = sizeof(lightshow_modes) / sizeof(lightshow_mode);
-			for(uint16_t i = 0; i < num_modes; i++){
+			for(uint16_t mode_index = 0; mode_index < num_modes; mode_index++){
 				char command_string[40];
-				snprintf(command_string, 40, "new_mode|%s", lightshow_modes[i].name);
+				uint8_t mode_type = (uint8_t)lightshow_modes[mode_index].type;
+
+				snprintf(command_string, 40, "new_mode|%d|%d|%s", mode_index, mode_type, lightshow_modes[mode_index].name);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 

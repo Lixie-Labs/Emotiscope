@@ -11,6 +11,8 @@
 // Functions for outputting computed data in beautiful fashion to the LEDs based on which mode is selected
 
 // The individual drawing functions for each mode are defined in these files:
+
+// ACTIVE MODES
 #include "lightshow_modes/spectrum.h"
 #include "lightshow_modes/octave.h"
 #include "lightshow_modes/metronome.h"
@@ -20,20 +22,24 @@
 #include "lightshow_modes/bloom.h"
 #include "lightshow_modes/analog.h"
 #include "lightshow_modes/waveform.h"
+
+// INACTIVE MODES
 #include "lightshow_modes/neutral.h"
 
+// SYSTEM MODES
 #include "lightshow_modes/debug.h"
 #include "lightshow_modes/presets.h"
 
 lightshow_mode lightshow_modes[] = {
-	{ "Analog",          &draw_analog        }, // 0
-	{ "Spectrum",        &draw_spectrum      }, // 1
-	{ "Octave",          &draw_octave        }, // 2
-	{ "Metronome",       &draw_metronome     }, // 3
-	{ "Spectronome",     &draw_spectronome   }, // 4
-	{ "Hype",            &draw_hype          }, // 5
-	{ "Bloom",           &draw_bloom         }, // 6
-	{ "Neutral",         &draw_neutral       }, // 7
+	{ "Analog",          LIGHTSHOW_TYPE_ACTIVE,    &draw_analog        },
+	{ "Spectrum",        LIGHTSHOW_TYPE_ACTIVE,    &draw_spectrum      },
+	{ "Octave",          LIGHTSHOW_TYPE_ACTIVE,    &draw_octave        },
+	{ "Metronome",       LIGHTSHOW_TYPE_ACTIVE,    &draw_metronome     },
+	{ "Spectronome",     LIGHTSHOW_TYPE_ACTIVE,    &draw_spectronome   },
+	{ "Hype",            LIGHTSHOW_TYPE_ACTIVE,    &draw_hype          },
+	{ "Bloom",           LIGHTSHOW_TYPE_ACTIVE,    &draw_bloom         },
+
+	{ "Neutral",         LIGHTSHOW_TYPE_NEUTRAL,   &draw_neutral       },
 
 	//{ "debug",           &draw_debug         }, // 8
 	//{ "presets",         &draw_presets       }, // 9
@@ -53,11 +59,6 @@ int16_t set_lightshow_mode_by_name(char* name){
 	uint16_t num_modes = sizeof(lightshow_modes) / sizeof(lightshow_mode);
 	for(uint16_t i = 0; i < num_modes; i++){
 		if( strcmp(name, lightshow_modes[i].name) == 0 ){
-
-			// "presets" is a special mode that is not a real mode, but an animation that plays when the presets menu is open
-			if( strcmp(lightshow_modes[i].name, "presets") == 0 ){
-				// DO EXTRA STEPS FOR PRESETS MENU MODE HERE
-			}
 
 			// Found a matching mode
 			configuration.current_mode = i;

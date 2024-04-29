@@ -13,13 +13,13 @@
 </head>
 <body>
 		<div id="header">
-			<span onclick="show_page('page_menu');" class="buzz">
+			<span onclick="show_page('page_menu','menu');" class="buzz">
 				<img id="left_header_item" src="svg/menu.svg" class="header_icon tint_accent"/>
 			</span>
 
 			<span id="header_logo" class="buzz">emotiscope</span>
 
-			<span onclick="show_page('page_info');" class="buzz">
+			<span onclick="show_page('page_info','about');" class="buzz">
 				<img src="svg/info.svg" class="footer_icon tint_accent"/>
 			</span>
 		</div>
@@ -48,11 +48,11 @@
 		<!--<div id="mode_bin"></div>-->
 
 		<div id="footer">
-			<span onclick="show_page('page_calibration');" class="buzz">
+			<span onclick="show_page('page_calibration', 'audio calibration');" class="buzz">
 				<img id="right_header_item" src="svg/microphone.svg" class="header_icon tint_accent"/>
 			</span>
 
-			<span onclick="show_page('page_modes');" style="margin-bottom: 30px;">
+			<span onclick="show_page('page_modes', 'light modes');" style="margin-bottom: 30px;">
 				<span id="current_mode" class="buzz">LOADING</span>
 			</span>
 
@@ -68,7 +68,6 @@
 				</span>
 			
 				<img src="svg/lixielabs.svg" style="height: 120px;"/>
-				<div class="page_title">ABOUT</div>
 				<div class="page_paragraph">
 					Emotiscope was developed<br>by <a href="https://github.com/connornishijima">Connor Nishijima</a> for <a href="https://lixielabs.com/">Lixie Labs</a><br>(2023-2024)
 				</div>
@@ -139,7 +138,6 @@
 			<!-- Via white noise broadcasted from JS in web-app, measure (and compensate for) the frequency response of both the speaker and mic -->
 			<!-- Calibration should result in equal representation of all bins in the DFT when white noise is played afterward -->
 			<!-- When calibration starts, white noise should fade in for 0.5 seconds, be measured for 2 seconds, then fade out for 0.5 seconds -->
-			<div class="page_title">CALIBRATION</div>
 			<div class="page_paragraph">
 				<button onclick="start_noise_calibration();" class="buzz">REMOVE BACKGROUND NOISE</button>
 				<!--
@@ -154,17 +152,22 @@
 				<img src="svg/close.svg" class="footer_icon tint_accent" />
 			</span>
 
-			<div class="page_title">PRESETS</div>
 			<div class="page_paragraph">
 				THIS IS UNFINISHED CONTENT
 			</div>
 		</div>
 
 		<div id="page_modes">
-			<div class="page_title">LIGHT MODE</div>
-			
-			<!-- TODO: Long press mode buttons to reveal description -->
-			<div id="mode_bin"></div>
+			<div class="modes_half_wrap">
+				<div class="modes_half">
+					<div class="mode_title">active</div>
+					<div id="active_mode_bin"></div>
+				</div>
+				<div class="modes_half">
+					<div class="mode_title">inactive</div>
+					<div id="inactive_mode_bin"></div>
+				</div>
+			</div>
 			
 			<span onclick="hide_page('page_modes');" class="icon_bottom_center buzz">
 				<img src="svg/close.svg" class="footer_icon tint_accent"/>

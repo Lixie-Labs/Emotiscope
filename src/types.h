@@ -1,5 +1,19 @@
 #define MAX_COMMAND_LENGTH (256)
 
+// enum that stores three types: active, neutral, system
+// no classes allowed in C, so we use enums to store types
+enum lightshow_mode_type_t {
+	LIGHTSHOW_TYPE_ACTIVE,
+	LIGHTSHOW_TYPE_NEUTRAL,
+	LIGHTSHOW_TYPE_SYSTEM
+};
+
+struct lightshow_mode {
+	char name[32];
+	lightshow_mode_type_t type;
+	void (*draw)();
+};
+
 struct command {
 	char command[MAX_COMMAND_LENGTH];
 	uint8_t origin_client_slot;
@@ -26,11 +40,6 @@ struct CRGBF {	// A bit like FastLED with floating point color channels that
 struct fx_dot {	 // Used to draw dots with subpixel precision and motion blur
 	float position = 0.5;
 	float position_past = 0.5;
-};
-
-struct lightshow_mode {
-	char name[32];
-	void (*draw)();
 };
 
 struct slider {

@@ -42,16 +42,26 @@ function trigger_vibration(length_ms) {
 }
 
 function render_modes(){
-	let mode_bin = document.getElementById("mode_bin");
-	mode_bin.innerHTML = "";
+	let active_mode_bin    = document.getElementById("active_mode_bin");
+	let inactive_mode_bin  = document.getElementById("inactive_mode_bin");
+	active_mode_bin.innerHTML   = "";
+	inactive_mode_bin.innerHTML = "";
+
 	for(let i in modes){
-		let mode_name = modes[i];
+		let mode_name = modes[i].mode_name;
+		let mode_type = modes[i].mode_type;
 		let mode_button = `<div class="mode_button buzz" onclick="set_mode('${mode_name}'); hide_page('page_modes');">${mode_name}</div>`;
-		mode_bin.innerHTML += mode_button;
+
+		if(mode_type == 0){
+			active_mode_bin.innerHTML   += mode_button;
+		}
+		else if(mode_type == 1){
+			inactive_mode_bin.innerHTML += mode_button;
+		}
 	}
 
 	let current_mode = document.getElementById("current_mode");
-	let current_mode_name = modes[configuration.current_mode]; 
+	let current_mode_name = modes[configuration.current_mode].mode_name; 
 	//console.log("CURRENT MODE: "+current_mode_name);
 	current_mode.innerHTML = current_mode_name;
 }
