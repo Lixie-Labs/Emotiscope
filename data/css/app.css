@@ -274,8 +274,7 @@ body{
 }
 
 .mode_title{
-	font-size: 24px;
-    font-weight: bold;
+	font-size: 20px;
     margin-bottom: 20px;
     text-align: center;
     border-bottom: 2px solid var(--secondary);
