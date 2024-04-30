@@ -25,8 +25,8 @@ void run_standby(){
 		incandescent_lookup.b * incandescent_lookup.b,
 	};
 
-	if(standby_brightness > 0.00001){
-		standby_brightness *= 0.999;
+	if(standby_brightness > 0.0001){
+		standby_brightness *= 0.9975;
 		lpf_drag = 1.0;
 
 		draw_dot(leds, SLEEP_1, dot_color,     dot_pos, dot_brightness);

@@ -294,8 +294,8 @@ void init_web_server() {
 			String etagStr(file.getLastWrite(), 10);
 
 			PsychicFileResponse response(request, file, path);
-			response.addHeader("Cache-Control", "public, max-age=31536000");
-			//response.addHeader("ETag", etagStr.c_str());
+			response.addHeader("Cache-Control", "public, max-age=900");
+			response.addHeader("ETag", etagStr.c_str());
 			result = response.send();
 			file.close();
 		}

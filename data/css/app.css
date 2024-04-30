@@ -199,7 +199,7 @@ body{
     justify-content: center;
 	opacity: 0.0;
 	pointer-events: none;
-    transition: opacity 0.25s ease-in-out;
+    transition: opacity 0.15s ease-in-out;
 	flex-direction: column;
 	position: absolute;
     top: 0%;
@@ -216,7 +216,7 @@ body{
     justify-content: center;
     opacity: 0.0;
     pointer-events: none;
-    transition: opacity 0.25s ease-in-out;
+    transition: opacity 0.15s ease-in-out;
     flex-direction: row;
     position: absolute;
     top: 0%;
