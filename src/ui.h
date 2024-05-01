@@ -45,7 +45,8 @@ void draw_ui_overlay(){
 	// Handle scaling / time
 
 	if(t_now_ms - last_ui_update_ms >= UI_HOLD_TIME_MS){
-		if(slider_touch_active == false){
+		if(slider_touch_active == false || (t_now_ms - last_ui_update_ms >= 10000)){
+			slider_touch_active = false;
 			overlay_size_target = 0.0;
 		}
 	}

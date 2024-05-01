@@ -15,6 +15,8 @@ volatile bool EMOTISCOPE_ACTIVE = true;
 char serial_buffer[256];
 uint16_t serial_buffer_index = 0;
 
+uint32_t last_command_time = 0;
+
 void init_serial(uint32_t baud_rate) {
 	// Artificial 10-second boot up wait time if needed
 	//for(uint16_t i = 0; i < 10; i++){ printf("WAITING FOR %d SECONDS...\n", 10-i); delay(1000); }
@@ -37,10 +39,12 @@ void check_serial() {
 		if(c == '\n'){
 			printf("Serial command received: %s\n", serial_buffer);
 			queue_command(serial_buffer, serial_buffer_index, 255);
+			memset(serial_buffer, 0, 256);
 			serial_buffer_index = 0;
 		}
 		else if(c == '\r'){
 			// Do nothing, \r is stupid
+			printf("DUMB \\r RECEIVED\n");
 		}
 		else{
 			serial_buffer[serial_buffer_index] = c;

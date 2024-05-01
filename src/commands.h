@@ -10,7 +10,7 @@ uint16_t commands_queued = 0;
 extern float clip_float(float input);
 extern int16_t set_lightshow_mode_by_name(char* name);
 extern void transmit_to_client_in_slot(char* message, uint8_t client_slot);
-extern void reboot_into_wifi_config_mode();
+extern void reboot_into_wifi_config_mode();;
 
 // Function to return the selected index as a null-terminated string with custom delimiter
 // The result is stored in the provided buffer
@@ -308,13 +308,13 @@ void parse_command(uint32_t t_now_ms, command com) {
 			unrecognized_command_error(substring);
 		}
 	}
-	else if (fastcmp(substring, "reset")) {
+	else if (fastcmp(substring, "reboot")) {
 		transmit_to_client_in_slot("disconnect_immediately", com.origin_client_slot);
-		printf("Device was instructed to soft-reset! Please wait...\n");
+		printf("Device was instructed to reboot! Please wait...\n");
 		delay(100);
 		ESP.restart();
 	}
-	else if (fastcmp(substring, "wifi_config_reboot")) {
+	else if (fastcmp(substring, "reboot_wifi_config")) {
 		transmit_to_client_in_slot("disconnect_immediately", com.origin_client_slot);
 		printf("Device was instructed to reboot into WiFi config mode! Please wait...\n");
 		reboot_into_wifi_config_mode();

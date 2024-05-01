@@ -65,7 +65,7 @@ void reboot_into_wifi_config_mode() {
 void discovery_check_in() {
 	static uint32_t next_discovery_check_in_time = 0;
 	static uint8_t attempt_count = 0;  // Keep track of the current attempt count
-	uint32_t t_now_ms = millis();
+	//uint32_t t_now_ms = millis();
 
 	if (t_now_ms >= next_discovery_check_in_time) {
 		// Check Wi-Fi connection status
@@ -148,7 +148,7 @@ void init_websocket_clients() {
 
 bool welcome_websocket_client(PsychicWebSocketClient client) {
 	bool client_welcome_status = true;
-	uint32_t t_now_ms = millis();
+	//uint32_t t_now_ms = millis();
 
 	uint16_t current_client_count = 0;
 	int16_t first_open_slot = -1;

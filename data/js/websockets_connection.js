@@ -161,6 +161,10 @@ function parse_message(message){
 			});
 		}
 		else if(command_type == "clear_sliders"){
+			// Force close UI if it's open
+			transmit(`touch_end`);
+			transmit(`slider_touch_end`);
+			
 			sliders = [];
 		}
 		else if(command_type == "new_slider"){
