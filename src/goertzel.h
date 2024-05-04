@@ -173,25 +173,6 @@ void median_filter(float* spectrogram_column) {
 	memcpy(spectrogram_column, output, sizeof(output));
 }
 
-float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
-	if (noise_calibration_wait_frames_remaining == 0) {
-		if (noise_calibration_active_frames_remaining == 0) {
-			float output_magnitude = fmax(input_magnitude - noise_spectrum[bin], 0.0f);
-			return output_magnitude;
-		}
-		else {
-			if (input_magnitude*1.1 > noise_spectrum[bin]) {
-				noise_spectrum[bin] = input_magnitude*1.1;
-			}
-
-			return input_magnitude;
-		}
-	}
-	else{
-		return input_magnitude;
-	}
-}
-
 float calculate_magnitude_of_bin(uint16_t bin_number) {
 	float magnitude;
 	float magnitude_squared;
@@ -240,9 +221,26 @@ void calculate_magnitudes() {
 		const uint16_t NUM_AVERAGE_SAMPLES = 6;
 
 		static float magnitudes_raw[NUM_FREQS];
+		static float magnitudes_noise_filtered[NUM_FREQS];
 		static float magnitudes_avg[NUM_AVERAGE_SAMPLES][NUM_FREQS];
 		static float magnitudes_smooth[NUM_FREQS];
 		static float max_val_smooth = 0.0;
+
+		static float noise_history[10][NUM_FREQS];
+		static float noise_floor[NUM_FREQS];
+		static uint8_t noise_history_index = 0;
+		static uint32_t last_noise_spectrum_log = 0;
+
+		if(t_now_ms - last_noise_spectrum_log >= 1000){
+			last_noise_spectrum_log = t_now_ms;
+
+			noise_history_index++;
+			if(noise_history_index >= 10){
+				noise_history_index = 0;
+			}
+
+			memcpy(noise_history[noise_history_index], magnitudes_raw, sizeof(float) * NUM_FREQS);
+		}
 
 		static uint32_t iter = 0;
 		iter++;
@@ -257,14 +255,24 @@ void calculate_magnitudes() {
 			if ((i % 2 == 0) == interlacing_frame_field) {
 				// Get raw magnitude of frequency
 				magnitudes_raw[i] = calculate_magnitude_of_bin(i);  // fast_mode enabled (downsampled audio)
-				magnitudes_raw[i] = collect_and_filter_noise(magnitudes_raw[i], i);
+
+				float avg_val = 0.0;
+				for(uint8_t j = 0; j < 10; j++){
+					avg_val += noise_history[j][i];
+				}
+				avg_val /= 10.0;
+				//avg_val *= 1.05;
+
+				noise_floor[i] = noise_floor[i] * 0.99 + avg_val * 0.01;
+
+				magnitudes_noise_filtered[i] = max(magnitudes_raw[i] - noise_floor[i], 0.0f);
 			}
 
 			// Store raw magnitude
-			frequencies_musical[i].magnitude_full_scale = magnitudes_raw[i];
+			frequencies_musical[i].magnitude_full_scale = magnitudes_noise_filtered[i];
 
 			// Add raw magnitude to moving average array
-			magnitudes_avg[iter % NUM_AVERAGE_SAMPLES][i] = magnitudes_raw[i];
+			magnitudes_avg[iter % NUM_AVERAGE_SAMPLES][i] = magnitudes_noise_filtered[i];
 
 			// Sum up current moving average and divide
 			float magnitudes_avg_result = 0.0;
@@ -309,8 +317,8 @@ void calculate_magnitudes() {
 		}
 
 		// Set a minimum "floor" to auto-range for, below this we don't auto-range anymore
-		if (max_val_smooth < 0.001) {
-			max_val_smooth = 0.001;
+		if (max_val_smooth < 0.0025) {
+			max_val_smooth = 0.0025;
 		}
 
 		// Calculate auto-ranging scale

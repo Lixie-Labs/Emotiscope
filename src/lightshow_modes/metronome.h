@@ -49,7 +49,14 @@ void draw_metronome() {
 			if(sine > 1.0){ sine = 1.0; }
 			else if(sine < -1.0){ sine = -1.0; }
 
-			float metronome_width = 0.5; // Too wide of a show can be distracting, 50% is enough for the effect
+			float metronome_width;
+			if(configuration.mirror_mode == true){
+				metronome_width = 0.5;
+			}
+			else{
+				metronome_width = 1.0;
+			}
+
 			float dot_pos = clip_float( sine * (0.5*(sqrt(sqrt(contribution))) * metronome_width) + 0.5 );
 
 			float opacity = sqrt(contribution);
@@ -61,7 +68,7 @@ void draw_metronome() {
 			);
 
 			if(configuration.mirror_mode == true){
-				dot_pos -= 0.25;
+				dot_pos -= 0.5;
 			}
 
 			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity*0.5);
