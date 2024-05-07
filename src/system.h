@@ -1,14 +1,16 @@
-//---------------------------------------------------------
-//                      _                            _
-//                     | |                          | |
-//  ___   _   _   ___  | |_    ___   _ __ ___       | |__
-// / __| | | | | / __| | __|  / _ \ | '_ ` _ \      | '_ \ 
-// \__ \ | |_| | \__ \ | |_  |  __/ | | | | | |  _  | | | |
-// |___/  \__, | |___/  \__|  \___| |_| |_| |_| (_) |_| |_|
-//         __/ |
-//        |___/
-//
-// Foundational functions like UART initialization
+/*
+--------------------------------------------------------
+                     _                            _
+                    | |                          | |
+ ___   _   _   ___  | |_    ___   _ __ ___       | |__
+/ __| | | | | / __| | __|  / _ \ | '_ ` _ \      | '_ \ 
+\__ \ | |_| | \__ \ | |_  |  __/ | | | | | |  _  | | | |
+|___/  \__, | |___/  \__|  \___| |_| |_| |_| (_) |_| |_|
+        __/ |
+       |___/
+
+Foundational functions like UART initialization
+*/
 
 volatile bool EMOTISCOPE_ACTIVE = true;
 
@@ -21,19 +23,14 @@ void init_serial(uint32_t baud_rate) {
 	// Artificial 10-second boot up wait time if needed
 	//for(uint16_t i = 0; i < 10; i++){ printf("WAITING FOR %d SECONDS...\n", 10-i); delay(1000); }
 
-	// Get the ESP-IDF version
-    const char* idf_version = esp_get_idf_version();
-	
-	extern uint8_t HARDWARE_VERSION;
-
 	memset(serial_buffer, 0, 256);
 
 	Serial.begin(baud_rate);
 }
 
 void check_serial() {
-	extern bool queue_command(char* command, uint8_t length, uint8_t client_slot);
-
+	extern bool queue_command(const char* command, uint16_t length, uint8_t client_slot);
+	
 	while(Serial.available() > 0){
 		char c = Serial.read();
 		if(c == '\n'){

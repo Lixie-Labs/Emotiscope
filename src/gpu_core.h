@@ -1,20 +1,20 @@
-// -------------------------------------------------------------------------
-//                                                                    _
-//                                                                   | |
-//   __ _   _ __    _   _             ___    ___    _ __    ___      | |__
-//  / _` | | '_ \  | | | |           / __|  / _ \  | '__|  / _ \     | '_ \ 
-// | (_| | | |_) | | |_| |          | (__  | (_) | | |    |  __/  _  | | | |
-//  \__, | | .__/   \__,_|           \___|  \___/  |_|     \___| (_) |_| |_|
-//   __/ | | |              ______
-//  |___/  |_|             |______|
-//
-// Main loop of the GPU core (Core 0)
+/*
+-------------------------------------------------------------------------
+                                                                   _
+                                                                  | |
+  __ _   _ __    _   _             ___    ___    _ __    ___      | |__
+ / _` | | '_ \  | | | |           / __|  / _ \  | '__|  / _ \     | '_ \ 
+| (_| | | |_) | | |_| |          | (__  | (_) | | |    |  __/  _  | | | |
+ \__, | | .__/   \__,_|           \___|  \___/  |_|     \___| (_) |_| |_|
+  __/ | | |              ______
+ |___/  |_|             |______|
+
+Main loop of the GPU core (Core 0)
+*/
 
 float lpf_drag = 0.0;
 
 void run_gpu() {
-	uint32_t t_start_cycles = ESP.getCycleCount();
-
 	// Get the current time in microseconds and milliseconds
 	static uint32_t t_last_us = micros();
 
@@ -106,7 +106,4 @@ void run_gpu() {
 
 	// Update the FPS_GPU variable
 	watch_gpu_fps();  // (system.h)
-
-	uint32_t t_end_cycles = ESP.getCycleCount();
-	volatile uint32_t gpu_total_cycles = t_end_cycles - t_start_cycles;
 }

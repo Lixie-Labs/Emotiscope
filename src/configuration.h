@@ -149,22 +149,22 @@ void sync_configuration_to_client() {
 
 	// screensaver
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|screensaver|int|%li", configuration.screensaver);
+	snprintf(config_item_buffer, 120, "new_config|screensaver|int|%d", configuration.screensaver);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// temporal_dithering
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|temporal_dithering|int|%li", configuration.temporal_dithering);
+	snprintf(config_item_buffer, 120, "new_config|temporal_dithering|int|%d", configuration.temporal_dithering);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// reverse_color_range
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|reverse_color_range|int|%li", configuration.reverse_color_range);
+	snprintf(config_item_buffer, 120, "new_config|reverse_color_range|int|%d", configuration.reverse_color_range);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// auto_color_cycle
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|auto_color_cycle|int|%li", configuration.auto_color_cycle);
+	snprintf(config_item_buffer, 120, "new_config|auto_color_cycle|int|%d", configuration.auto_color_cycle);
 	websocket_handler.sendAll(config_item_buffer);
 
 	websocket_handler.sendAll("config_ready");
@@ -227,7 +227,7 @@ bool load_noise_spectrum() {
 	else {
 		// Ensure the noise_spectrum array is sized properly
 		if (file.size() != sizeof(float) * NUM_FREQS) {
-			printf("Noise spectrum size does not match expected size! (%lu != %lu)\n", file.size(), sizeof(float) * NUM_FREQS);
+			printf("Noise spectrum size does not match expected size! (%zu != %zu)\n", file.size(), sizeof(float) * NUM_FREQS);
 			file.close();
 			return false;
 		}

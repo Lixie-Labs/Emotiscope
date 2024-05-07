@@ -10,7 +10,7 @@ void clear_toggles() {
 	toggles_active = 0;
 }
 
-bool register_toggle(char* name) {
+bool register_toggle(const char* name) {
 	bool register_success = false;
 	for (uint16_t i = 0; i < MAX_TOGGLES; i++) {
 		if (toggles[i].name[0] == 0) {	// Unoccupied slot

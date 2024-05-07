@@ -10,7 +10,7 @@ void clear_menu_toggles() {
 	menu_toggles_active = 0;
 }
 
-bool register_menu_toggle(char* name) {
+bool register_menu_toggle(const char* name) {
 	bool register_success = false;
 	for (uint16_t i = 0; i < MAX_MENU_TOGGLES; i++) {
 		if (menu_toggles[i].name[0] == 0) {	// Unoccupied slot

@@ -1,15 +1,17 @@
-// -----------------------------------------------------------------
-//                                 _                  _       _
-//                                | |                | |     | |
-//    __ _    ___     ___   _ __  | |_   ____   ___  | |     | |__
-//   / _` |  / _ \   / _ \ | '__| | __| |_  /  / _ \ | |     | '_ \ 
-//  | (_| | | (_) | |  __/ | |    | |_   / /  |  __/ | |  _  | | | |
-//   \__, |  \___/   \___| |_|     \__| /___|  \___| |_| (_) |_| |_|
-//    __/ |
-//   |___/
-//
-// Functions related to the computation and post-processing of the Goertzel Algorithm to compute DFT
-// https://en.wikipedia.org/wiki/Goertzel_algorithm
+/*
+-----------------------------------------------------------------
+                                _                  _       _
+                               | |                | |     | |
+   __ _    ___     ___   _ __  | |_   ____   ___  | |     | |__
+  / _` |  / _ \   / _ \ | '__| | __| |_  /  / _ \ | |     | '_ \
+ | (_| | | (_) | |  __/ | |    | |_   / /  |  __/ | |  _  | | | |
+  \__, |  \___/   \___| |_|     \__| /___|  \___| |_| (_) |_| |_|
+   __/ |
+  |___/
+
+Functions related to the computation and post-processing of the Goertzel Algorithm to compute DFT
+https://en.wikipedia.org/wiki/Goertzel_algorithm
+*/
 
 #define TWOPI   6.28318530
 #define FOURPI 12.56637061
@@ -76,7 +78,7 @@ void init_goertzel(uint16_t frequency_slot, float frequency, float bandwidth) {
 	float k = (int)(0.5 + ((frequencies_musical[frequency_slot].block_size * frequencies_musical[frequency_slot].target_freq) / SAMPLE_RATE));
 	float w = (2.0 * PI * k) / frequencies_musical[frequency_slot].block_size;
 	float cosine = cos(w);
-	float sine = sin(w);
+	//float sine = sin(w); // Unused since phase info is not needed
 	frequencies_musical[frequency_slot].coeff = 2.0 * cosine;
 }
 
@@ -114,7 +116,7 @@ void init_window_lookup() {
     float sigma = 0.8; // For gaussian window
 
     for (uint16_t i = 0; i < 2048; i++) {
-        float ratio = i / 2047.0;
+        //float ratio = i / 2047.0; // Not used for Gaussian Window
 
         float n_minus_halfN = i - 2048 / 2;
         float gaussian_weighing_factor = exp(-0.5 * pow((n_minus_halfN / (sigma * 2048 / 2)), 2));
@@ -251,8 +253,8 @@ void calculate_magnitudes() {
 		float max_val = 0.0;
 		// Iterate over all target frequencies
 		for (uint16_t i = 0; i < NUM_FREQS; i++) {
-			bool interlace_line = i % 2;
-			if ((i % 2 == 0) == interlacing_frame_field) {
+			bool interlace_field_now = ((i % 2) == 0);
+			if (interlace_field_now == interlacing_frame_field) {
 				// Get raw magnitude of frequency
 				magnitudes_raw[i] = calculate_magnitude_of_bin(i);  // fast_mode enabled (downsampled audio)
 

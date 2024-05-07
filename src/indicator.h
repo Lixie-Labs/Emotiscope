@@ -50,15 +50,15 @@ void init_indicator_light(){
 		.intr_type      = LEDC_INTR_DISABLE,
         .timer_sel      = LEDC_TIMER,        
         .duty           = 0, // Set duty to 0%
-        .hpoint         = 0
+        .hpoint         = 0,
+		.flags = {
+			.output_invert = 1,
+		},
     };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
 }
 
 void run_indicator_light(){
-	static uint32_t last_blink = -1000;
-	static bool blink_state = 0;
-
 	if(app_touch_active == true){
 		indicator_brightness_target = 1.0;
 	}

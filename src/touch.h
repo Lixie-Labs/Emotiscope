@@ -66,7 +66,6 @@ void study_pin(){
 }
 
 void read_touch(){
-	static uint8_t current_pin = 0;
 	static uint8_t iter = 0;
 
 	iter++;
@@ -178,7 +177,6 @@ void render_touches(){
 
 	float left_touch_value = touch_pins[TOUCH_LEFT].touch_value;
 	if(left_touch_value > touch_pins[TOUCH_LEFT].ambient){
-		float opacity = 0.0;
 		if(left_touch_value < touch_pins[TOUCH_LEFT].threshold){
 			float distance = (left_touch_value - touch_pins[TOUCH_LEFT].ambient) / (touch_pins[TOUCH_LEFT].threshold - touch_pins[TOUCH_LEFT].ambient);
 			left_distance_smooth = left_distance_smooth * 0.9 + distance * 0.1;
@@ -218,7 +216,6 @@ void render_touches(){
 
 	float right_touch_value = touch_pins[TOUCH_RIGHT].touch_value;
 	if(right_touch_value > touch_pins[TOUCH_RIGHT].ambient){
-		float opacity = 0.0;
 		if(right_touch_value < touch_pins[TOUCH_RIGHT].threshold){
 			float distance = (right_touch_value - touch_pins[TOUCH_RIGHT].ambient) / (touch_pins[TOUCH_RIGHT].threshold - touch_pins[TOUCH_RIGHT].ambient);
 			right_distance_smooth = right_distance_smooth * 0.9 + distance * 0.1;
@@ -259,7 +256,6 @@ void render_touches(){
 	// Center touch is drawn using the center 64 LEDs
 	float center_touch_value = touch_pins[TOUCH_CENTER].touch_value;
 	if(center_touch_value > touch_pins[TOUCH_CENTER].ambient){
-		float opacity = 0.0;
 		if(center_touch_value < touch_pins[TOUCH_CENTER].threshold){
 			float distance = (center_touch_value - touch_pins[TOUCH_CENTER].ambient) / (touch_pins[TOUCH_CENTER].threshold - touch_pins[TOUCH_CENTER].ambient);
 			center_distance_smooth = center_distance_smooth * 0.9 + distance * 0.1;

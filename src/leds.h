@@ -1,13 +1,15 @@
-// ------------------------------------
-//  _              _             _
-// | |            | |           | |
-// | |   ___    __| |  ___      | |__
-// | |  / _ \  / _` | / __|     | '_ \ 
-// | | |  __/ | (_| | \__ \  _  | | | |
-// |_|  \___|  \__,_| |___/ (_) |_| |_|
-//
-// Functions for manipulating and updating WS2812Bs using a custom
-// floating-point "CRGBF" format.
+/*
+------------------------------------
+ _              _             _
+| |            | |           | |
+| |   ___    __| |  ___      | |__
+| |  / _ \  / _` | / __|     | '_ \ 
+| | |  __/ | (_| | \__ \  _  | | | |
+|_|  \___|  \__,_| |___/ (_) |_| |_|
+
+Functions for manipulating and updating WS2812Bs using a custom
+floating-point "CRGBF" format.
+*/
 
 #define DATA_PIN_1 13
 #define DATA_PIN_2 12
@@ -251,9 +253,9 @@ void apply_blue_light_filter(float mix) {
 		multiply_CRGBF_array_by_LUT(
 			leds,
 			{
-				incandescent_lookup.r * mix + (1.0 - mix),
-				incandescent_lookup.g * mix + (1.0 - mix),
-				incandescent_lookup.b * mix + (1.0 - mix)
+				float(incandescent_lookup.r * mix + (1.0 - mix)),
+				float(incandescent_lookup.g * mix + (1.0 - mix)),
+				float(incandescent_lookup.b * mix + (1.0 - mix))
 			},
 			NUM_LEDS
 		);

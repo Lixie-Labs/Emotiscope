@@ -1,13 +1,15 @@
-// ------------------------------------------------------------
-//          _     _   _   _   _     _                    _
-//         | |   (_) | | (_) | |   (_)                  | |
-//  _   _  | |_   _  | |  _  | |_   _    ___   ___      | |__
-// | | | | | __| | | | | | | | __| | |  / _ \ / __|     | '_ \ 
-// | |_| | | |_  | | | | | | | |_  | | |  __/ \__ \  _  | | | |
-//  \__,_|  \__| |_| |_| |_|  \__| |_|  \___| |___/ (_) |_| |_|
-//
-// Custom math functions for things like array manipulation
-// and system diagnostics like free stack/heap
+/*
+------------------------------------------------------------
+         _     _   _   _   _     _                    _
+        | |   (_) | | (_) | |   (_)                  | |
+ _   _  | |_   _  | |  _  | |_   _    ___   ___      | |__
+| | | | | __| | | | | | | | __| | |  / _ \ / __|     | '_ \ 
+| |_| | | |_  | | | | | | | |_  | | |  __/ \__ \  _  | | | |
+ \__,_|  \__| |_| |_| |_|  \__| |_|  \___| |___/ (_) |_| |_|
+
+Custom math functions for things like array manipulation
+and system diagnostics like free stack/heap
+*/
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -73,7 +75,7 @@ void fetch_substring(char* input_buffer, char delimiter, uint8_t fetch_index){
 	}
 }
 
-void broadcast(char* message){
+void broadcast(const char* message){
 	extern PsychicWebSocketHandler websocket_handler;
 	websocket_handler.sendAll(message);
 	//printf("%s\n", message);

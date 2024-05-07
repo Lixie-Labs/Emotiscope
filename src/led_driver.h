@@ -45,8 +45,6 @@ typedef struct {
     uint32_t resolution; /*!< Encoder resolution, in Hz */
 } led_strip_encoder_config_t;
 
-static const char *TAG = "led_encoder";
-
 void init_random_dither_error(){
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
 		dither_error[i].r = random(0, 255) / 255.0;
@@ -107,8 +105,6 @@ static esp_err_t rmt_led_strip_encoder_reset(rmt_encoder_t *encoder){
 }
 
 esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder_a, rmt_encoder_handle_t *ret_encoder_b){
-    esp_err_t ret = ESP_OK;
-
 	strip_encoder_a.base.encode = rmt_encode_led_strip;
     strip_encoder_a.base.del    = rmt_del_led_strip_encoder;
     strip_encoder_a.base.reset  = rmt_led_strip_encoder_reset;
@@ -147,8 +143,12 @@ void init_rmt_driver() {
 		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.intr_priority = 99,
-		.flags = { .with_dma = 0 },
-		//.flags = { .invert_out = 1, .with_dma = 0 }, // For level shifter
+		.flags = {
+			.invert_out   = 0,
+			.with_dma     = 0,
+			.io_loop_back = 0,
+        	.io_od_mode   = 0
+		},
 	};
 
 	rmt_tx_channel_config_t tx_chan_b_config = {
@@ -158,8 +158,12 @@ void init_rmt_driver() {
 		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.intr_priority = 99,
-		.flags = { .with_dma = 0 },
-		//.flags = { .invert_out = 1, .with_dma = 0 },
+		.flags = {
+			.invert_out   = 0,
+			.with_dma     = 0,
+			.io_loop_back = 0,
+        	.io_od_mode   = 0
+		},
 	};
 
 	printf("rmt_new_tx_channel\n");

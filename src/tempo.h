@@ -1,16 +1,16 @@
-// -----------------------------------------------------
-//   _                                            _
-//  | |                                          | |
-//  | |_    ___   _ __ ___    _ __     ___       | |__
-//  | __|  / _ \ | '_ ` _ \  | '_ \   / _ \      | '_ \ 
-//  | |_  |  __/ | | | | | | | |_) | | (_) |  _  | | | |
-//   \__|  \___| |_| |_| |_| | .__/   \___/  (_) |_| |_|
-//                           | |
-//                           |_|
-//
-// Functions related to the computation of possible tempi in music
+/*
+-----------------------------------------------------
+  _                                            _
+ | |                                          | |
+ | |_    ___   _ __ ___    _ __     ___       | |__
+ | __|  / _ \ | '_ ` _ \  | '_ \   / _ \      | '_ \ 
+ | |_  |  __/ | | | | | | | |_) | | (_) |  _  | | | |
+  \__|  \___| |_| |_| |_| | .__/   \___/  (_) |_| |_|
+                          | |
+                          |_|
 
-//--------------------------------------------
+Functions related to the computation of possible tempi in music
+*/
 
 bool silence_detected = true;
 float silence_level = 1.0;
@@ -140,13 +140,11 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float window_pos = 0.0;
 
 		for (uint16_t i = 0; i < block_size; i++) {
-			float progress = float(i) / block_size;
 			float sample_novelty = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample = (sample_novelty + sample_vu) / 2.0;
-			//sample *= sample;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 

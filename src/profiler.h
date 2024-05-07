@@ -11,7 +11,7 @@
 #define PROFILER_PRINT_INTERVAL_MS \
 	(5000)	// How long should data be gathered every period
 
-extern void broadcast(char *message);
+extern void broadcast(const char *message);
 extern void print_websocket_clients(uint32_t t_now_ms);
 extern char mac_str[18];
 
@@ -41,29 +41,29 @@ inline bool fastcmp_func_name(const char* input_a, const char* input_b){
 template<typename MeasureFunc> // used for lambdas
 float measure_execution(MeasureFunc func) {
 	volatile uint32_t dummy = 1; // Volatile dummy variable to prevent loop optimization
-    uint32_t t_start_us = ESP.getCycleCount();
+	uint32_t t_start_us = ESP.getCycleCount();
 
 	// Execute the lambda eight times to get an average
-	func(); dummy += dummy;
-	func(); dummy += dummy;
-	func(); dummy += dummy;
-	func(); dummy += dummy;
-	func(); dummy += dummy;
-	func(); dummy += dummy;
-	func(); dummy += dummy;
-	func(); dummy += dummy;
+	func(); dummy = dummy + dummy;
+	func(); dummy = dummy + dummy;
+	func(); dummy = dummy + dummy;
+	func(); dummy = dummy + dummy;
+	func(); dummy = dummy + dummy;
+	func(); dummy = dummy + dummy;
+	func(); dummy = dummy + dummy;
+	func(); dummy = dummy + dummy;
 
-    uint32_t t_end_us = ESP.getCycleCount();
-    uint32_t total_time_us = t_end_us - t_start_us;
+	uint32_t t_end_us = ESP.getCycleCount();
+	uint32_t total_time_us = t_end_us - t_start_us;
 
 	// Use the dummy variable in a way that does not affect the function's outcome
-    // but prevents the compiler from optimizing the dummy operation away
-    if (dummy == UINT32_MAX) {
-        printf("This will never happen: %lu\n", dummy);
-    }
-    
-    // Return the average execution time per iteration in microseconds as a float
-    return (static_cast<float>(total_time_us) / 8) / 240; // divided 8 (averaging), then by (CPU MHz), to get sub-microsecond resolution
+	// but prevents the compiler from optimizing the dummy operation away
+	if (dummy == UINT32_MAX) {
+		printf("This will never happen: %lu\n", dummy);
+	}
+	
+	// Return the average execution time per iteration in microseconds as a float
+	return (static_cast<float>(total_time_us) / 8) / 240; // divided 8 (averaging), then by (CPU MHz), to get sub-microsecond resolution
 }
 
 int16_t find_matching_profiler_entry_index(const char *func_name) {
@@ -181,11 +181,11 @@ void print_system_info() {
 		char stat_buffer[64] = { 0 };
 		
 		memset(stat_buffer, 0, 64);
-		snprintf(stat_buffer, 64, "fps_cpu|%li", int16_t(FPS_CPU));
+		snprintf(stat_buffer, 64, "fps_cpu|%d", int16_t(FPS_CPU));
 		broadcast(stat_buffer);
 
 		memset(stat_buffer, 0, 64);
-		snprintf(stat_buffer, 64, "fps_gpu|%li", int16_t(FPS_GPU));
+		snprintf(stat_buffer, 64, "fps_gpu|%d", int16_t(FPS_GPU));
 		broadcast(stat_buffer);
 
 		memset(stat_buffer, 0, 64);

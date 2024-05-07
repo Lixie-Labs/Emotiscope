@@ -9,7 +9,7 @@ uint16_t commands_queued = 0;
 
 extern float clip_float(float input);
 extern int16_t set_lightshow_mode_by_name(char* name);
-extern void transmit_to_client_in_slot(char* message, uint8_t client_slot);
+extern void transmit_to_client_in_slot(const char* message, uint8_t client_slot);
 extern void reboot_into_wifi_config_mode();;
 
 // Function to return the selected index as a null-terminated string with custom delimiter
@@ -241,10 +241,10 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			uint16_t num_modes = sizeof(lightshow_modes) / sizeof(lightshow_mode);
 			for(uint16_t mode_index = 0; mode_index < num_modes; mode_index++){
-				char command_string[40];
+				char command_string[128];
 				uint8_t mode_type = (uint8_t)lightshow_modes[mode_index].type;
 
-				snprintf(command_string, 40, "new_mode|%d|%d|%s", mode_index, mode_type, lightshow_modes[mode_index].name);
+				snprintf(command_string, 128, "new_mode|%d|%d|%.64s", mode_index, mode_type, lightshow_modes[mode_index].name);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 
@@ -255,8 +255,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("clear_sliders", com.origin_client_slot);
 
 			for(uint16_t i = 0; i < sliders_active; i++){
-				char command_string[80];
-				snprintf(command_string, 80, "new_slider|%s|%.3f|%.3f|%.3f", sliders[i].name, sliders[i].slider_min, sliders[i].slider_max, sliders[i].slider_step);
+				char command_string[128];
+				snprintf(command_string, 128, "new_slider|%s|%.3f|%.3f|%.3f", sliders[i].name, sliders[i].slider_min, sliders[i].slider_max, sliders[i].slider_step);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 
@@ -268,8 +268,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("clear_toggles", com.origin_client_slot);
 
 			for(uint16_t i = 0; i < toggles_active; i++){
-				char command_string[80];
-				snprintf(command_string, 80, "new_toggle|%s", toggles[i].name);
+				char command_string[128];
+				snprintf(command_string, 128, "new_toggle|%s", toggles[i].name);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 
@@ -281,8 +281,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("clear_menu_toggles", com.origin_client_slot);
 
 			for(uint16_t i = 0; i < menu_toggles_active; i++){
-				char command_string[80];
-				snprintf(command_string, 80, "new_menu_toggle|%s", menu_toggles[i].name);
+				char command_string[128];
+				snprintf(command_string, 128, "new_menu_toggle|%s", menu_toggles[i].name);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 
@@ -291,15 +291,15 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 		// If getting touch values
 		else if (fastcmp(substring, "touch_vals")) {
-			char command_string[80];
-			snprintf(command_string, 80, "touch_vals|%lu|%lu|%lu", uint32_t(touch_pins[0].touch_value), uint32_t(touch_pins[1].touch_value), uint32_t(touch_pins[2].touch_value));
+			char command_string[128];
+			snprintf(command_string, 128, "touch_vals|%lu|%lu|%lu", uint32_t(touch_pins[0].touch_value), uint32_t(touch_pins[1].touch_value), uint32_t(touch_pins[2].touch_value));
 			transmit_to_client_in_slot(command_string, com.origin_client_slot);
 		}
 
 		// If getting version number
 		else if (fastcmp(substring, "version")) {
-			char command_string[80];
-			snprintf(command_string, 80, "version|%d.%d.%d", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH);
+			char command_string[128];
+			snprintf(command_string, 128, "version|%d.%d.%d", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH);
 			transmit_to_client_in_slot(command_string, com.origin_client_slot);
 		}
 
@@ -386,7 +386,7 @@ void process_command_queue() {
 	}
 }
 
-bool queue_command(char* command, uint8_t length, uint8_t client_slot) {
+bool queue_command(const char* command, uint16_t length, uint8_t client_slot) {
 	if (length < MAX_COMMAND_LENGTH) {
 		if (commands_queued < COMMAND_QUEUE_SLOTS - 1) {
 			memset(command_queue[commands_queued].command, 0, MAX_COMMAND_LENGTH);

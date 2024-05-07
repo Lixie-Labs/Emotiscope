@@ -13,7 +13,7 @@ void clear_sliders() {
 	sliders_active = 0;
 }
 
-bool register_slider(char* name, float slider_min, float slider_max, float slider_step) {
+bool register_slider(const char* name, float slider_min, float slider_max, float slider_step) {
 	bool register_success = false;
 	for (uint16_t i = 0; i < MAX_SLIDERS; i++) {
 		if (sliders[i].name[0] == 0) {	// Unoccupied slot

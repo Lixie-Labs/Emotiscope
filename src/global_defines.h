@@ -23,6 +23,6 @@ const char* wtf_error_message_tail   = "----------------------------------------
 
 inline void wtf_error(){
 	printf("%s\n", wtf_error_message_header);
-	printf("FILE: %s *NEAR* THIS LINE: %li\n", __FILE__, __LINE__ ); // If I inline this function, will this line number roughly match where this function was called from?
+	printf("FILE: %s *NEAR* THIS LINE: %d\n", __FILE__, __LINE__ ); // If I inline this function, will this line number roughly match where this function was called from?
 	printf("%s\n", wtf_error_message_tail);
 }

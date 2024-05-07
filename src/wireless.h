@@ -100,7 +100,7 @@ void discovery_check_in() {
 					uint32_t backoff_delay = INITIAL_BACKOFF_MS * (1 << attempt_count);	 // Calculate the backoff delay
 					next_discovery_check_in_time = t_now_ms + backoff_delay;			 // Schedule the next attempt
 					attempt_count++;													 // Increment the attempt count
-					printf("Retrying with backoff delay of %ums.\n", backoff_delay);
+					printf("Retrying with backoff delay of %lums.\n", backoff_delay);
 				}
 				else {
 					printf("Couldn't reach server in time, will try again in a few minutes.\n");
@@ -210,7 +210,7 @@ void check_if_websocket_client_still_present(uint16_t client_slot) {
 	}
 }
 
-void transmit_to_client_in_slot(char *message, uint8_t client_slot) {
+void transmit_to_client_in_slot(const char *message, uint8_t client_slot) {
 	PsychicWebSocketClient *client = get_client_in_slot(client_slot);
 	if (client != NULL) {
 		client->sendMessage(message);
@@ -255,7 +255,7 @@ void init_web_server() {
 				return request->reply(400);
 			}
 
-			printf("GOT NEW WIFI CONFIG: '%s|%s'\n", ssid, pass);
+			printf("GOT NEW WIFI CONFIG: '%s|%s'\n", ssid.c_str(), pass.c_str());
 			update_network_credentials(ssid, pass);
 
 			return result;
@@ -287,7 +287,7 @@ void init_web_server() {
 			path += request->url();
 		}
 
-		printf("HTTP GET %s\n", request->url());
+		printf("HTTP GET %s\n", request->url().c_str());
 
 		File file = LittleFS.open(path);
 		if (file) {
