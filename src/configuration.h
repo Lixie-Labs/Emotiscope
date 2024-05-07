@@ -7,7 +7,7 @@
 
 Preferences preferences; // NVS storage for configuration
 
-extern lightshow_mode lightshow_modes[];
+extern light_mode light_modes[];
 extern PsychicWebSocketHandler websocket_handler;
 
 volatile bool wifi_config_mode = false;

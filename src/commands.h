@@ -170,7 +170,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			// Get mode name
 			fetch_substring(com.command, '|', 2);
 
-			int16_t mode_index = set_lightshow_mode_by_name(substring);
+			int16_t mode_index = set_light_mode_by_name(substring);
 			if(mode_index == -1){
 				unrecognized_command_error(substring);
 			}
@@ -239,12 +239,12 @@ void parse_command(uint32_t t_now_ms, command com) {
 		else if (fastcmp(substring, "modes")) {
 			transmit_to_client_in_slot("clear_modes", com.origin_client_slot);
 
-			uint16_t num_modes = sizeof(lightshow_modes) / sizeof(lightshow_mode);
+			uint16_t num_modes = sizeof(light_modes) / sizeof(light_mode);
 			for(uint16_t mode_index = 0; mode_index < num_modes; mode_index++){
 				char command_string[128];
-				uint8_t mode_type = (uint8_t)lightshow_modes[mode_index].type;
+				uint8_t mode_type = (uint8_t)light_modes[mode_index].type;
 
-				snprintf(command_string, 128, "new_mode|%d|%d|%.64s", mode_index, mode_type, lightshow_modes[mode_index].name);
+				snprintf(command_string, 128, "new_mode|%d|%d|%.64s", mode_index, mode_type, light_modes[mode_index].name);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 

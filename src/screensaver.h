@@ -14,7 +14,7 @@ bool inactive = false;
 
 void run_screensaver(){
 	if(configuration.screensaver == false){ return; }
-	if(lightshow_modes[configuration.current_mode].type != LIGHTSHOW_TYPE_ACTIVE){ return; }
+	if(light_modes[configuration.current_mode].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
 	
 	float mag_sum = 0;
 	for(uint16_t i = 0; i < NUM_FREQS; i++){

@@ -9,40 +9,45 @@
 //              Released under the GPLv3 License
 //
 // ############################################################################
-// ## GETTING STARTED #########################################################
+// ## FOREWORD ################################################################
 // 
 // Welcome to the Emotiscope Engine. This is firmware which: 
 // 
 // - Logs raw audio data from the microphone into buffers
-// - Detects frequencies in the audio using the Goertzel algorithm
+// - Detects frequencies in the audio using many Goertzel filters
 // - Detects the BPM of music
 // - Syncronizes to the beats of said music
 // - Checks the touch sensors for input
 // - Hosts an HTTP server for a web app
 // - Talks to that web app over a high speed ws:// connection
 // - Stores settings in flash memory
-// - Draws custom light show modes to the LEDs in real-time
-// - Drives those 128 LEDs with a custom RMT driver at high frame rates
-// - Supports over-the-air firmware updates
+// - Draws custom light show modes to the LEDs which react to music
+//   in real-time with a variety of effects
 // - Runs the indicator light
 // - Runs the screensaver
+// - Applies a blue-light filter to the LEDs
+// - Applies gamma correction to the LEDs
+// - Applies error-diffusion temporal dithering to the LEDs
+// - Drives those 128 LEDs with a custom RMT driver at high frame rates
+// - Supports over-the-air firmware updates
 // - And much more
 //
 // It's quite a large project, and it's all running on a dual core
 // ESP32-S3. (240 MHz CPU with 520 KB of RAM)
 //
-// This is main file everything else branches from, and it's where the
-// two cores are started. The first core runs the graphics (Core 0) and
-// the second core runs the audio and web server (Core 1).
+// This is the main file everything else branches from, and it's where
+// the two cores are started. The first core runs the graphics (Core 0)
+// and the second core runs the audio and web server (Core 1).
 //
 // If you enjoy this product or code, please consider supporting me on
 // GitHub. I'm a solo developer and I put a lot of time and effort into
 // making Emotiscope the best that it can be. Your support helps me
 // continue to develop and improve the Emotiscope Engine.
 //
-// DONATE:
-// https://github.com/sponsors/connornishijima
-
+//                                  DONATE:
+//                                  https://github.com/sponsors/connornishijima
+//
+//                                               - Connor Nishijima, @lixielabs
 
 // ############################################################################
 // ## SOFTWARE VERSION ########################################################
@@ -93,7 +98,7 @@
 #include "audio_debug.h" // ........ Print audio data over UART
 #include "screensaver.h" // ........ Colorful dots play on screen when no audio is present
 #include "standby.h" // ............ Handles sleep/wake + animations
-#include "lightshow_modes.h" // .... Definition and handling of lightshow modes
+#include "light_modes.h" // ........ Definition and handling of light modes
 #include "commands.h" // ........... Queuing and parsing of commands recieved
 #include "wireless.h" // ........... Communication with your network and the web-app
 #include "ota.h" // ................ Over-the-air firmware updates

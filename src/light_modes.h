@@ -15,52 +15,52 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 // The individual drawing functions for each mode are defined in these files:
 
 // ACTIVE MODES
-#include "lightshow_modes/spectrum.h"
-#include "lightshow_modes/octave.h"
-#include "lightshow_modes/metronome.h"
-#include "lightshow_modes/spectronome.h"
-#include "lightshow_modes/hype.h"
-#include "lightshow_modes/plot.h"
-#include "lightshow_modes/bloom.h"
-#include "lightshow_modes/analog.h"
-#include "lightshow_modes/waveform.h"
+#include "light_modes/spectrum.h"
+#include "light_modes/octave.h"
+#include "light_modes/metronome.h"
+#include "light_modes/spectronome.h"
+#include "light_modes/hype.h"
+#include "light_modes/plot.h"
+#include "light_modes/bloom.h"
+#include "light_modes/analog.h"
+#include "light_modes/waveform.h"
 
 // INACTIVE MODES
-#include "lightshow_modes/neutral.h"
+#include "light_modes/neutral.h"
 
 // SYSTEM MODES
-#include "lightshow_modes/debug.h"
-#include "lightshow_modes/presets.h"
+#include "light_modes/debug.h"
+#include "light_modes/presets.h"
 
-lightshow_mode lightshow_modes[] = {
-	{ "Analog",          LIGHTSHOW_TYPE_ACTIVE,    &draw_analog        },
-	{ "Spectrum",        LIGHTSHOW_TYPE_ACTIVE,    &draw_spectrum      },
-	{ "Octave",          LIGHTSHOW_TYPE_ACTIVE,    &draw_octave        },
-	{ "Metronome",       LIGHTSHOW_TYPE_ACTIVE,    &draw_metronome     },
-	{ "Spectronome",     LIGHTSHOW_TYPE_ACTIVE,    &draw_spectronome   },
-	{ "Hype",            LIGHTSHOW_TYPE_ACTIVE,    &draw_hype          },
-	{ "Bloom",           LIGHTSHOW_TYPE_ACTIVE,    &draw_bloom         },
+light_mode light_modes[] = {
+	{ "Analog",          LIGHT_MODE_TYPE_ACTIVE,    &draw_analog        },
+	{ "Spectrum",        LIGHT_MODE_TYPE_ACTIVE,    &draw_spectrum      },
+	{ "Octave",          LIGHT_MODE_TYPE_ACTIVE,    &draw_octave        },
+	{ "Metronome",       LIGHT_MODE_TYPE_ACTIVE,    &draw_metronome     },
+	{ "Spectronome",     LIGHT_MODE_TYPE_ACTIVE,    &draw_spectronome   },
+	{ "Hype",            LIGHT_MODE_TYPE_ACTIVE,    &draw_hype          },
+	{ "Bloom",           LIGHT_MODE_TYPE_ACTIVE,    &draw_bloom         },
 
-	{ "Neutral",         LIGHTSHOW_TYPE_NEUTRAL,   &draw_neutral       },
+	{ "Neutral",         LIGHT_MODE_TYPE_INACTIVE,  &draw_neutral       },
 
 	//{ "debug",           &draw_debug         }, // 8
 	//{ "presets",         &draw_presets       }, // 9
 };
 
-const uint16_t NUM_LIGHTSHOW_MODES = sizeof(lightshow_modes) / sizeof(lightshow_mode);
+const uint16_t NUM_LIGHT_MODES = sizeof(light_modes) / sizeof(light_mode);
 
 extern float lpf_drag; // Used for fade transition
 
-// Lightshow Modes can be summoned by their string name shown in the UI
-// This string is compared to the lightshow_modes[] table to derive a
+// Light Modes can be summoned by their string name shown in the UI
+// This string is compared to the light_modes[] table to derive a
 // pointer to that mode's drawing function. Then, transition_to_new_mode()
 // handles the switch
-int16_t set_lightshow_mode_by_name(char* name){
+int16_t set_light_mode_by_name(char* name){
 	int16_t mode_index = -1;
 
-	uint16_t num_modes = sizeof(lightshow_modes) / sizeof(lightshow_mode);
+	uint16_t num_modes = sizeof(light_modes) / sizeof(light_mode);
 	for(uint16_t i = 0; i < num_modes; i++){
-		if( strcmp(name, lightshow_modes[i].name) == 0 ){
+		if( strcmp(name, light_modes[i].name) == 0 ){
 
 			// Found a matching mode
 			configuration.current_mode = i;
@@ -76,7 +76,7 @@ int16_t set_lightshow_mode_by_name(char* name){
 
 void increment_mode(){
 	int16_t new_mode = configuration.current_mode + 1;
-	configuration.current_mode = new_mode % NUM_LIGHTSHOW_MODES;
+	configuration.current_mode = new_mode % NUM_LIGHT_MODES;
 	lpf_drag = 1.0; // Causes slow fade using low pass filtered image
 	save_config_delayed();
 }

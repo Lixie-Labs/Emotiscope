@@ -454,7 +454,7 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 }
 
 void update_auto_color(){
-	if(lightshow_modes[configuration.current_mode].type != LIGHTSHOW_TYPE_ACTIVE){ return; }
+	if(light_modes[configuration.current_mode].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
 
 	static float color_momentum = 0.0;
 	if(configuration.auto_color_cycle == true){
