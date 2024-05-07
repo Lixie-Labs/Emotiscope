@@ -15,6 +15,9 @@
 // Number of Goertzel instances running in parallel
 #define NUM_FREQS ( 64 ) 
 
+// How many characters a command can have
+#define MAX_COMMAND_LENGTH (256) 
+
 // Max simultaneous remote controls allowed at one time
 #define MAX_WEBSOCKET_CLIENTS ( 4 )
 
