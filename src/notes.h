@@ -18,7 +18,7 @@ https://community.platformio.org/t/how-to-use-jtag-built-in-debugger-of-the-esp3
 https://community.platformio.org/t/cannot-run-builtin-debugger-on-esp32-s3-board/36384/9
 
 ##################################################################################################################################################
-The ASCII art generator for the headers https://patorjk.com/software/taag/#p=display&f=Big
+The ASCII art generator for the headers https://patorjk.com/software/taag/#p=display&f=Slant&t=notes.h
 
 ##################################################################################################################################################
 ESP-DSP lets you sqrt() an entire array at once, but I'm not sure if there's a SIMD "ae32" version, just an ANSI one
