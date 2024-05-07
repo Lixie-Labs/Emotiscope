@@ -1,0 +1,48 @@
+
+	--- Emotiscope Engine 1.1 Changelog -----------------------------------------------------
+	
+	- Added toggles:
+		
+		- Reverse Color Range
+		- Auto Color Cycle
+	
+	- Split modes into two categories:
+	
+		- "ACTIVE":   modes which react to music
+		- "INACTIVE": modes that do not
+		
+	- Cleaned up console.log() calls in web-app
+	
+	- Toggles are now tappable
+	
+	- Added "Magic Touch" effect
+	
+	- Added new Softness algorithm based on frame blending instead of LPFs
+	
+	- Faster substring calculation for websockets commands
+	
+	- Added automated noise calibration based on "fatigue"
+	
+	- Added new temporal dithering algorithm based on error diffusion and RNG
+	
+	- Gamma correction is now the *last* step of the visual pipeline, everything is Linear RGB until just before quantization
+	
+	- Fixed HSV desaturation algorithm
+	
+	- Added Auto Color Cycling function
+	
+	- Added floating point lookup tables for common operations ( float fade = float(i) / NUM_LEDS )
+	
+	- Split Hype mode into odd and even tempi, rendering two dots instead of one
+	
+	- Screensaver no longer plays when Inactive Modes are used
+	
+	- Decreased time that Emotiscope shows the sleep mode animation
+	
+	- Emotiscope now responds to 96 different tempi, up from 64
+	
+	- Needle UI was made smaller (25% of screen vs. 50%)
+	
+	- Needle UI closes itself automatically after inactivity if no close command arrives
+	
+	- Reduced web-app cache length from one year to 15 minutes (oops!)

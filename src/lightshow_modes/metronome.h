@@ -1,37 +1,3 @@
-// Function to shape a linear input to a positive half sine wave
-float linear_to_half_sine(float x) {
-    // Ensure the input is clamped between 0.0 and 1.0
-    if (x < 0.0) x = 0.0;
-    if (x > 1.0) x = 1.0;
-
-    // Scale the input from [0, 1] to [0, PI] for a half sine wave
-    float scaled_input = x * M_PI;
-
-    // Compute the sine, which will be in the range [-1, 1]
-    // No need to adjust the output range because we're only interested in the positive half
-    float half_sine_output = sin(scaled_input);
-
-    return half_sine_output;
-}
-
-float linear_to_half_sine_hold(float x) {
-    // Return 0.0 for inputs outside the range [0.25, 0.75]
-    if (x < 0.25 || x > 0.75) {
-        return 0.0;
-    }
-
-    // Normalize the input from [0.25, 0.75] to [0, 1] for sine computation
-    float normalized_input = (x - 0.25) / 0.5;
-
-    // Scale the normalized input from [0, 1] to [0, PI] for a half sine wave
-    float scaled_input = normalized_input * M_PI;
-
-    // Compute the sine for the scaled input
-    float half_sine_output = sin(scaled_input);
-
-    return half_sine_output;
-}
-
 void draw_metronome() {
 	static uint32_t iter = 0;
 	iter++;

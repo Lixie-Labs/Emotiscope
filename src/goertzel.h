@@ -256,6 +256,7 @@ void calculate_magnitudes() {
 				// Get raw magnitude of frequency
 				magnitudes_raw[i] = calculate_magnitude_of_bin(i);  // fast_mode enabled (downsampled audio)
 
+				// Noise filtering ------------------------------------------------------------------
 				float avg_val = 0.0;
 				for(uint8_t j = 0; j < 10; j++){
 					avg_val += noise_history[j][i];
@@ -266,6 +267,7 @@ void calculate_magnitudes() {
 				noise_floor[i] = noise_floor[i] * 0.99 + avg_val * 0.01;
 
 				magnitudes_noise_filtered[i] = max(magnitudes_raw[i] - noise_floor[i], 0.0f);
+				// ----------------------------------------------------------------------------------
 			}
 
 			// Store raw magnitude

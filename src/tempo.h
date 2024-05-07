@@ -157,7 +157,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float imag = (q2 * tempi[tempo_bin].sine);
 
 		// Calculate phase
-		tempi[tempo_bin].phase = (unwrap_phase(atan2(imag, real)) + (PI * BEAT_SHIFT_PERCENT));
+		tempi[tempo_bin].phase = ((atan2(imag, real)) + (PI * BEAT_SHIFT_PERCENT));
 		
 		if (tempi[tempo_bin].phase > PI) {
 			tempi[tempo_bin].phase -= (2 * PI);
