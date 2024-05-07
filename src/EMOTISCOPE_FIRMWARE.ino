@@ -9,16 +9,53 @@
 //              Released under the GPLv3 License
 //
 // ############################################################################
+// ## GETTING STARTED #########################################################
+// 
+// Welcome to the Emotiscope Engine. This is firmware which: 
+// 
+// - Logs raw audio data from the microphone into buffers
+// - Detects frequencies in the audio using the Goertzel algorithm
+// - Detects the BPM of music
+// - Syncronizes to the beats of said music
+// - Checks the touch sensors for input
+// - Hosts an HTTP server for a web app
+// - Talks to that web app over a high speed ws:// connection
+// - Stores settings in flash memory
+// - Draws custom light show modes to the LEDs in real-time
+// - Drives those 128 LEDs with a custom RMT driver at high frame rates
+// - Supports over-the-air firmware updates
+// - Runs the indicator light
+// - Runs the screensaver
+// - And much more
+//
+// It's quite a large project, and it's all running on a dual core
+// ESP32-S3. (240 MHz CPU with 520 KB of RAM)
+//
+// This is main file everything else branches from, and it's where the
+// two cores are started. The first core runs the graphics (Core 0) and
+// the second core runs the audio and web server (Core 1).
+//
+// If you enjoy this product or code, please consider supporting me on
+// GitHub. I'm a solo developer and I put a lot of time and effort into
+// making Emotiscope the best that it can be. Your support helps me
+// continue to develop and improve the Emotiscope Engine.
+//
+// DONATE:
+// https://github.com/sponsors/connornishijima
+
+
+// ############################################################################
 // ## SOFTWARE VERSION ########################################################
 
 #define SOFTWARE_VERSION_MAJOR ( 1 )
 #define SOFTWARE_VERSION_MINOR ( 1 )
 #define SOFTWARE_VERSION_PATCH ( 0 )
 
+
 // ############################################################################
 // ## DEPENDENCIES ############################################################
 
-// External dependencies
+// External dependencies ------------------------------------------------------
 //#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-rc1 ESP32 board def yet, and I need the IDF 5.x for this madness to even work. I cobbled my own RMT LED driver for now for non-blocking frame transmission.
 #include <PsychicHttp.h> // ........ Handling the web-app HTTP and WS
 #include <HTTPClient.h> // ......... Used to make POST requests to the device discovery server
@@ -31,7 +68,7 @@
 #include <esp_dsp.h> // ............ Fast SIMD-style array math
 #include <esp_wifi.h> // ........... WiFi, but like - the hardware side of it
 
-// Internal dependencies
+// Internal dependencies ------------------------------------------------------
 #include "global_defines.h" // ..... Compile-time configuration
 #include "hardware_version.h" // ... Baked into the PCB are 4 pins that define the hardware version in binary
 #include "types.h" // .............. typedefs for things like CRGBFs
@@ -61,13 +98,14 @@
 #include "wireless.h" // ........... Communication with your network and the web-app
 #include "ota.h" // ................ Over-the-air firmware updates
 
-// Loops
+// Loops ---------------------------------------------------------------------
 #include "cpu_core.h" // Audio
 #include "gpu_core.h" // Video
 #include "web_core.h" // Wireless
 
 // Development Notes
 //#include "notes.h"
+
 
 // ############################################################################
 // ## CODE ####################################################################
