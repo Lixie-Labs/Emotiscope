@@ -19,7 +19,7 @@
 // ## DEPENDENCIES ############################################################
 
 // External dependencies
-//#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-alpha ESP32 board def yet, and I need the IDF 5.1.2 for this madness to even work. I cobbled my own RMT LED driver for now for non-blocking frame transmission.
+//#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-rc1 ESP32 board def yet, and I need the IDF 5.x for this madness to even work. I cobbled my own RMT LED driver for now for non-blocking frame transmission.
 #include <PsychicHttp.h> // ........ Handling the web-app HTTP and WS
 #include <HTTPClient.h> // ......... Used to make POST requests to the device discovery server
 #include <ESPmDNS.h> // ............ Used for "emotiscope.local" domain name
@@ -67,7 +67,7 @@
 #include "web_core.h" // Wireless
 
 // Development Notes
-#include "notes.h"
+//#include "notes.h"
 
 // ############################################################################
 // ## CODE ####################################################################
