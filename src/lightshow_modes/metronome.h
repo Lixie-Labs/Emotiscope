@@ -25,7 +25,7 @@ void draw_metronome() {
 
 			float dot_pos = clip_float( sine * (0.5*(sqrt(sqrt(contribution))) * metronome_width) + 0.5 );
 
-			float opacity = sqrt(contribution);
+			float opacity = (sqrt(contribution));
 
 			CRGBF dot_color = hsv(
 				get_color_range_hue(progress),
@@ -34,13 +34,13 @@ void draw_metronome() {
 			);
 
 			if(configuration.mirror_mode == true){
-				dot_pos -= 0.5;
+				dot_pos += 0.25;
 			}
 
-			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity*0.5);
+			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity);
 
 			if(configuration.mirror_mode == true){
-				draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity*0.5);
+				draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity);
 			}
 		}
 		else{

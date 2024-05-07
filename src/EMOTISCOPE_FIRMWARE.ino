@@ -39,6 +39,7 @@
 #include "sliders.h" // ............ Handles sliders that appear in the web app
 #include "toggles.h" // ............ Handles toggles that appear in the web app
 #include "menu_toggles.h" // ....... Toggles that appear in the main menu
+#include "menu_dropdowns.h" // ..... Drop-downs that appear in the main menu
 #include "filesystem.h" // ......... LittleFS functions
 #include "configuration.h" // ...... Storing and retreiving your settings
 #include "utilities.h" // .......... Custom generic math functions

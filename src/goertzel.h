@@ -17,7 +17,7 @@ https://en.wikipedia.org/wiki/Goertzel_algorithm
 #define FOURPI 12.56637061
 #define SIXPI  18.84955593
 
-#define BOTTOM_NOTE 24	// THESE ARE IN QUARTER-STEPS, NOT HALF-STEPS! That's 24 notes to an octave
+#define BOTTOM_NOTE 12	// THESE ARE IN QUARTER-STEPS, NOT HALF-STEPS! That's 24 notes to an octave
 #define NOTE_STEP 2 // Use half-steps anyways
 
 #define NOISE_CALIBRATION_WAIT_FRAMES   256
@@ -326,7 +326,7 @@ void calculate_magnitudes() {
 		}
 
 		// Calculate auto-ranging scale
-		float autoranger_scale = 1.0 / (max_val_smooth);
+		float autoranger_scale = 1.0 / (max_val_smooth*0.75);
 
 		// Iterate over all frequencies
 		for (uint16_t i = 0; i < NUM_FREQS; i++) {

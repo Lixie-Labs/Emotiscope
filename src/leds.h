@@ -445,12 +445,12 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
     float prev_position = fx_dots[fx_dots_slot].position;
     fx_dots[fx_dots_slot].position = position;
 
-    // Calculate distance moved and adjust brightness spread accordingly
-    float position_distance = fabs(position - prev_position);
-    float spread_brightness = 1.0 / fmax(position_distance * NUM_LEDS, 1.0); // Ensure minimum spread
+    // Calculate distance moved and adjust brightness of spread accordingly
+    float position_difference = fabs(position - prev_position);
+    float spread_area = fmax(position_difference * NUM_LEDS, 1.0f);
 
     // Draw the line representing the motion blur
-    draw_line(layer, prev_position, position, color, (spread_brightness) * (opacity * 1.0));
+    draw_line(layer, prev_position, position, color, (1.0 / spread_area) * opacity);
 }
 
 void update_auto_color(){
@@ -469,6 +469,42 @@ void update_auto_color(){
 
 		configuration.color += color_momentum*0.05;
 	}
+}
+
+void apply_phosphor_decay(float strength){
+	static CRGBF phosphor_decay[NUM_LEDS];
+	static bool first_run = true;
+
+	if(first_run){
+		first_run = false;
+		memcpy(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
+		return;
+	}
+
+	strength = 1.0-strength;
+	strength *= 0.05;
+
+	strength = max(strength, 0.001f);
+
+	//float strength_r = strength * incandescent_lookup.r;
+	//float strength_g = strength * incandescent_lookup.g;
+	//float strength_b = strength * incandescent_lookup.b;
+
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		float change_r = leds[i].r - phosphor_decay[i].r;
+		float change_g = leds[i].g - phosphor_decay[i].g;
+		float change_b = leds[i].b - phosphor_decay[i].b;
+
+		if(change_r < -strength){ change_r = -strength; }
+		if(change_g < -strength){ change_g = -strength; }
+		if(change_b < -strength){ change_b = -strength; }
+
+		leds[i].r = clip_float(phosphor_decay[i].r + change_r);
+		leds[i].g = clip_float(phosphor_decay[i].g + change_g);
+		leds[i].b = clip_float(phosphor_decay[i].b + change_b);
+	}
+
+	memcpy(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
 }
 
 void render_debug_value() {

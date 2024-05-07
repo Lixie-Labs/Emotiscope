@@ -10,7 +10,7 @@
 #define NUM_TEMPI (96) // TEMPO_LOW to TEMPO_HIGH
 #define BEAT_SHIFT_PERCENT (0.16)
 
-#define TEMPO_LOW (32) // BPM
+#define TEMPO_LOW (48) // BPM
 #define TEMPO_HIGH (TEMPO_LOW + NUM_TEMPI)
 
 uint8_t HARDWARE_VERSION = 0;

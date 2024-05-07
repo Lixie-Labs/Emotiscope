@@ -141,10 +141,10 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 
 		for (uint16_t i = 0; i < block_size; i++) {
 			float sample_novelty = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
-			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
-			float sample = (sample_novelty + sample_vu) / 2.0;
+			//float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
+			//float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample * window_lookup[uint32_t(window_pos)]);
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 
@@ -155,7 +155,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float imag = (q2 * tempi[tempo_bin].sine);
 
 		// Calculate phase
-		tempi[tempo_bin].phase = ((atan2(imag, real)) + (PI * BEAT_SHIFT_PERCENT));
+		tempi[tempo_bin].phase = atan2(imag, real) + (PI * BEAT_SHIFT_PERCENT);
 		
 		if (tempi[tempo_bin].phase > PI) {
 			tempi[tempo_bin].phase -= (2 * PI);
