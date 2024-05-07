@@ -52,7 +52,7 @@ void init_indicator_light(){
         .duty           = 0, // Set duty to 0%
         .hpoint         = 0,
 		.flags = {
-			.output_invert = 1,
+			.output_invert = 0,
 		},
     };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
@@ -66,7 +66,6 @@ void run_indicator_light(){
 		if (connection_status == WL_CONNECTED) {
 			indicator_brightness_target = INDICATOR_RESTING_BRIGHTNESS;
 
-			// if blinks == 0, toggle the indicator target on and off every blink_interval_ms. Only modify the indicator duty cycle if blink_state == true
 			if(device_touch_active == true){
 				indicator_brightness_target = 1.0;
 			}

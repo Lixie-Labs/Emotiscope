@@ -16,21 +16,17 @@ void run_standby(){
 	standby_breath *= standby_breath;
 	float dot_pos = standby_breath * 0.5 + 0.5;
 
-	float dot_brightness = 0.6 + (standby_breath*standby_breath)*0.4;
+	float dot_brightness = 0.6 + (standby_breath)*0.4;
 	dot_brightness *= standby_brightness;
 
-	CRGBF dot_color = {
-		incandescent_lookup.r * incandescent_lookup.r,
-		incandescent_lookup.g * incandescent_lookup.g,
-		incandescent_lookup.b * incandescent_lookup.b,
-	};
+	CRGBF dot_color = incandescent_lookup;
 
 	if(standby_brightness > 0.0001){
 		standby_brightness *= 0.9975;
 		lpf_drag = 1.0;
 
-		draw_dot(leds, SLEEP_1, dot_color,     dot_pos, dot_brightness);
-		draw_dot(leds, SLEEP_2, dot_color, 1.0-dot_pos, dot_brightness);
+		draw_dot(leds, SLEEP_1, dot_color,     dot_pos, sqrt(dot_brightness));
+		draw_dot(leds, SLEEP_2, dot_color, 1.0-dot_pos, sqrt(dot_brightness));
 	}
 }
 

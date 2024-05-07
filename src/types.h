@@ -125,13 +125,15 @@ struct websocket_client {
 // Stores the state of capacitive touch pins
 struct touch_pin {
 	uint8_t pin;
-	uint32_t threshold;
-	uint32_t ambient;
 	uint32_t touch_start;
 	uint32_t touch_end;
 	bool touch_active;
 	bool hold_active;
+
 	float touch_value;
+	float ambient_threshold;
+	float touch_threshold;
+	float touch_history[50]; // 5 seconds at 10 FPS
 };
 
 // Stores all of Emotiscope's configurable settings
@@ -149,12 +151,6 @@ struct config {
 	bool screensaver;
 	bool temporal_dithering;
 	float vu_floor;
-	uint32_t ambient_left_threshold;
-	uint32_t ambient_center_threshold;
-	uint32_t ambient_right_threshold;
-	uint32_t touch_left_threshold;
-	uint32_t touch_center_threshold;
-	uint32_t touch_right_threshold;
 	bool auto_color_cycle;
 	bool reverse_color_range;
 };

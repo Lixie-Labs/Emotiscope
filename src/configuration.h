@@ -67,6 +67,7 @@ void load_config(){
 	// VU Floor
 	configuration.vu_floor = preferences.getFloat("vu_floor", 0.00);
 
+	/*
 	// Ambient Left Threshold
 	configuration.ambient_left_threshold = preferences.getULong("al_threshold", 33000);
 
@@ -84,6 +85,8 @@ void load_config(){
 
 	// Touch Right Threshold
 	configuration.touch_right_threshold = preferences.getULong("tr_threshold", 64000*2);
+
+	*/
 
 	// Reverse Color
 	configuration.reverse_color_range = preferences.getBool("reverse_color", false);
@@ -185,12 +188,15 @@ bool save_config() {
 	preferences.putBool("screensaver", configuration.screensaver);
 	preferences.putBool("dithering", configuration.temporal_dithering);
 	preferences.putFloat("vu_floor", configuration.vu_floor);
+	/*
 	preferences.putULong("al_threshold", configuration.ambient_left_threshold);
 	preferences.putULong("ac_threshold", configuration.ambient_center_threshold);
 	preferences.putULong("ar_threshold", configuration.ambient_right_threshold);
 	preferences.putULong("tl_threshold", configuration.touch_left_threshold);
 	preferences.putULong("tc_threshold", configuration.touch_center_threshold);
 	preferences.putULong("tr_threshold", configuration.touch_right_threshold);
+	*/
+
 	preferences.putBool("reverse_color", configuration.reverse_color_range);
 	preferences.putBool("auto_color", configuration.auto_color_cycle);
 

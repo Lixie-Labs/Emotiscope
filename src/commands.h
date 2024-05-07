@@ -182,6 +182,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 
 		else if (fastcmp(substring, "touch_thresholds")){
+			/*
 			// Get ambient threshold values
 			fetch_substring(com.command, '|', 2);
 			uint32_t ambient_left_threshold = atol(substring);
@@ -215,6 +216,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			printf("Ambient thresholds set to: %lu | %lu | %lu\n", configuration.ambient_left_threshold, configuration.ambient_center_threshold, configuration.ambient_right_threshold);
 			printf("Touch thresholds set to:   %lu | %lu | %lu\n", configuration.touch_left_threshold, configuration.touch_center_threshold, configuration.touch_right_threshold);
+			*/
 		}
 		else{
 			unrecognized_command_error(substring);
