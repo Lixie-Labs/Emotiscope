@@ -470,13 +470,19 @@ button{
 
 #setting_gallery{
 	//background-color: #f00;
-    width: 100%;
-    max-width: 100%;
-    height: calc(100% - 330px);
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-bottom: 20px;
-    padding-top: 40px;       
+	width: 100%;
+	max-width: 100%;
+	height: calc(100% - 300px);
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding-bottom: 20px;
+	padding-top: 10px;
+}
+
+@media screen and (orientation: landscape) {
+	#setting_gallery{
+		height: calc(100% - 150px);
+	}
 }
 
 .slider, .toggle{
@@ -562,6 +568,15 @@ button{
     color: var(--accent);
     flex-direction: column;
     position: relative;
+	max-width: 340px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+@media screen and (orientation: landscape) {
+	#device_preview{
+		display: none;
+	}
 }
 
 #device_nickname{

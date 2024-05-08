@@ -259,13 +259,13 @@ void init_web_server() {
 		String path = "";
 
 		if(request->url() == "/"){
-			path += "/index.html";
-		}
-		else if(request->url() == "/wifi-setup"){
-			path += "/index.html";
+			path += "/remote.html";
 		}
 		else if(request->url() == "/remote"){
 			path += "/remote.html";
+		}
+		else if(request->url() == "/wifi-setup"){
+			path += "/index.html";
 		}
 		else{
 			path += request->url();
