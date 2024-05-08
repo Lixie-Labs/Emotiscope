@@ -241,21 +241,31 @@ void init_web_server() {
    		return request->reply(mac_str);
 	});
 
-	server.on("/save-wifi", HTTP_POST, [](PsychicRequest *request) {
-		if(wifi_config_mode == true){
-			String ssid = request->getParam("ssid")->value();
-			String pass = request->getParam("pass")->value();
+	server.on("/save-wifi", HTTP_GET, [](PsychicRequest *request) {
+		esp_err_t result = ESP_OK;
+		String ssid = "";
+		String pass = "";
 
-			printf("GOT NEW WIFI CONFIG: '%s|%s'\n", ssid.c_str(), pass.c_str());
-
-			update_network_credentials(ssid, pass);
-
-			return request->reply(200);
+		if(request->hasParam("ssid") == true){
+			ssid += request->getParam("ssid")->value();
 		}
 		else{
-			printf("Can't access WIFI config endpoint outside of config AP mode for security reasons!\n");
+			printf("MISSING SSID PARAM!\n");
 			return request->reply(400);
 		}
+		
+		if(request->hasParam("pass") == true){
+			pass += request->getParam("pass")->value();
+		}
+		else{
+			printf("MISSING PASS PARAM!\n");
+			return request->reply(400);
+		}
+
+		printf("GOT NEW WIFI CONFIG: '%s|%s'\n", ssid.c_str(), pass.c_str());
+		update_network_credentials(ssid, pass);
+
+		return result;
 	});
 
 	server.on("/*", HTTP_GET, [](PsychicRequest *request) {
@@ -269,7 +279,7 @@ void init_web_server() {
 		fetch_substring(url, '?', 0);
 
 		if(fastcmp(substring, "/")){
-			path += "/remote.html";
+			path += "/index.html";
 			//path += WEB_VERSION;
 		}
 		else if(fastcmp(substring, "/remote")){
@@ -285,7 +295,7 @@ void init_web_server() {
 			//path += WEB_VERSION;
 		}
 
-		printf("HTTP GET %s\n", path);
+		printf("HTTP GET %s\n", path.c_str());
 
 		File file = LittleFS.open(path);
 		if (file) {
@@ -349,8 +359,27 @@ void init_web_server() {
 	web_server_ready = true;
 }
 
+void get_mac(){
+	// Define a variable to hold the MAC address
+	uint8_t mac_address[6]; // MAC address is 6 bytes
+
+	// Retrieve the MAC address of the device
+	WiFi.macAddress(mac_address);
+
+	// Format the MAC address into the char array
+	snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+		mac_address[0], mac_address[1], mac_address[2],
+		mac_address[3], mac_address[4], mac_address[5]);
+
+	// Print the MAC address string
+	printf("MAC Address: %s\n", mac_str);
+}
+
 void init_wifi() {
 	if(wifi_config_mode == true){
+		WiFi.begin("testnet", "testpass");
+		get_mac();
+
 		WiFi.softAP("Emotiscope Setup");
 		dns_server.start(53, "*", WiFi.softAPIP());
 
@@ -364,23 +393,11 @@ void init_wifi() {
 		network_connection_attempts = 0;
 		WiFi.begin(wifi_ssid, wifi_pass); 
 		printf("Started connection attempt to %s...\n", wifi_ssid);
+
+		get_mac();
 	}
 
 	esp_wifi_set_ps(WIFI_PS_NONE);
-
-	// Define a variable to hold the MAC address
-	uint8_t mac_address[6]; // MAC address is 6 bytes
-
-	// Retrieve the MAC address of the device
-	WiFi.macAddress(mac_address);
-
-	// Format the MAC address into the char array
-	snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
-			mac_address[0], mac_address[1], mac_address[2],
-			mac_address[3], mac_address[4], mac_address[5]);
-
-	// Print the MAC address string
-	printf("MAC Address: %s\n", mac_str);
 }
 
 void handle_wifi() {

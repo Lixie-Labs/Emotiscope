@@ -203,7 +203,7 @@ void read_touch(){
 
 		save_config_delayed();
 	}
-	else if(touch_pins[TOUCH_LEFT].hold_active == true && touch_pins[TOUCH_RIGHT].hold_active == true){ // both hands held
+	else if(touch_pins[TOUCH_LEFT].touch_active == true && touch_pins[TOUCH_RIGHT].touch_active == true){ // both hands held
 		//printf("BOTH HANDS HELD\n");
 		configuration.mirror_mode = !configuration.mirror_mode;
 

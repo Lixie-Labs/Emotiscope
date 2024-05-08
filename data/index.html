@@ -36,29 +36,15 @@
 		function update_wifi_credentials(){
 			let ssid = document.getElementById("ssid").value;
 			let pass = document.getElementById("pass").value;
-		
-			let wifi_endpoint = "/save-wifi";
-			let data = {
-				ssid: ssid,
-				pass: pass
-			};
-		
-			fetch(wifi_endpoint, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json; charset=UTF-8'
-				},
-				body: JSON.stringify(data)
-			})
-			.then(response => {
-				if (!response.ok) {
-					throw new Error('Network response was not ok');
-				}
-				window.location.href = "https://app.emotiscope.rocks/";
-			})
-			.catch(error => {
-				console.error('There was been a problem with update_wifi_credentials:', error);
-			});
+
+			// URL encode the ssid and pass
+			ssid = encodeURIComponent(ssid);
+			pass = encodeURIComponent(pass);
+
+			let wifi_endpoint = "/save-wifi?ssid="+ssid+"&pass="+pass;
+			fetch(wifi_endpoint);
+
+			window.location.href = "https://app.emotiscope.rocks/";
 		}
 	</script>
 </body>
