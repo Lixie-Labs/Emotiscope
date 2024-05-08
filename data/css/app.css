@@ -503,6 +503,7 @@ button{
     justify-content: center;
     align-content: end;
     flex-wrap: wrap;
+	white-space: pre-wrap;
 }
 
 .slider_track, .toggle_track{
