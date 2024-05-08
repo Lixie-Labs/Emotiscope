@@ -23,7 +23,7 @@ void run_standby(){
 
 	if(standby_brightness > 0.0001){
 		standby_brightness *= 0.9975;
-		lpf_drag = 1.0;
+		lpf_drag = 0.999;
 
 		draw_dot(leds, SLEEP_1, dot_color,     dot_pos, sqrt(dot_brightness));
 		draw_dot(leds, SLEEP_2, dot_color, 1.0-dot_pos, sqrt(dot_brightness));
@@ -36,5 +36,5 @@ void toggle_standby(){
 	standby_brightness = 1.0;
 	standby_breath = 0.0;
 
-	lpf_drag = 1.0;	
+	lpf_drag = 0.999;	
 }

@@ -46,3 +46,5 @@
 	- Needle UI closes itself automatically after inactivity if no close command arrives
 	
 	- Reduced web-app cache length from one year to 15 minutes (oops!)
+
+	- Touch is now calculated using moving averages, no longer needing manual calibration

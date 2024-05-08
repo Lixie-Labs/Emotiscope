@@ -62,9 +62,19 @@ void read_touch(){
 		touch_readings[t] = touch_readings[t] * 0.9 + raw_touch_value * 0.1; // Smooth the input
 	}
 
+	if(t_now_ms < 5000){
+		for(uint8_t t = 0; t < 3; t++){
+			for(uint8_t i = 0; i < 50; i++){
+				touch_pins[t].touch_history[i] = touch_readings[t];
+			}
+		}
+	}
+
 	if (t_now_ms - last_touch_read_time >= 100) {
 		for(uint8_t t = 0; t < 3; t++){
-			touch_pins[t].touch_history[touch_history_index] = touch_readings[t];
+			if(touch_pins[t].touch_active == false){
+				touch_pins[t].touch_history[touch_history_index] = touch_readings[t];
+			}
 		}
 
 		last_touch_read_time = t_now_ms;
