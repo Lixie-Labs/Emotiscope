@@ -233,41 +233,25 @@ void init_web_server() {
 		return response.send();
 	});
 
-	server.on("/save-wifi", HTTP_GET, [](PsychicRequest *request) {
-		if(wifi_config_mode == true){
-			esp_err_t result = ESP_OK;
-			String ssid = "";
-			String pass = "";
+	server.on("/mac", HTTP_GET, [](PsychicRequest *request) {
+   		return request->reply(mac_str);
+	});
 
-			if(request->hasParam("ssid") == true){
-				ssid += request->getParam("ssid")->value();
-			}
-			else{
-				printf("MISSING SSID PARAM!\n");
-				return request->reply(400);
-			}
-			
-			if(request->hasParam("pass") == true){
-				pass += request->getParam("pass")->value();
-			}
-			else{
-				printf("MISSING PASS PARAM!\n");
-				return request->reply(400);
-			}
+	server.on("/save-wifi", HTTP_POST, [](PsychicRequest *request) {
+		if(wifi_config_mode == true){
+			String ssid = request->getParam("ssid")->value();
+			String pass = request->getParam("pass")->value();
 
 			printf("GOT NEW WIFI CONFIG: '%s|%s'\n", ssid.c_str(), pass.c_str());
+
 			update_network_credentials(ssid, pass);
 
-			return result;
+			return request->reply(200);
 		}
 		else{
 			printf("Can't access WIFI config endpoint outside of config AP mode for security reasons!\n");
 			return request->reply(400);
 		}
-	});
-
-	server.on("/mac", HTTP_GET, [](PsychicRequest *request) {
-   		return request->reply(mac_str);
 	});
 
 	server.on("/*", HTTP_GET, [](PsychicRequest *request) {

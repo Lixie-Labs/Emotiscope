@@ -29,6 +29,7 @@ body{
 	-webkit-user-select: none; /* Safari */
 	-ms-user-select: none; /* IE 10 and IE 11 */
 	user-select: none; /* Standard syntax */
+	height: 100%;
 }
 
 .horizontal_separator{
@@ -53,6 +54,7 @@ body{
     transition: opacity 0.15s ease-in-out;
 	background-color: rgba(var(--background), 0.75);
     backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 	z-index: 999 !important;
 }
 
@@ -70,6 +72,7 @@ body{
     transition: opacity 0.15s ease-in-out;
 	background-color: rgba(var(--background), 0.0);
     backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 	z-index: 50 !important;
 }
 
@@ -88,6 +91,7 @@ body{
     left: 0%;
 	background-color: rgba(var(--background), 0.45);
     backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 }
 
 #page_menu{
@@ -103,6 +107,7 @@ body{
     left: 0%;
 	background-color: rgba(var(--background), 0.45);
     backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 	z-index: 15;
 }
 
@@ -175,6 +180,7 @@ body{
     left: 0%;
     background-color: rgba(var(--background), 0.45);
     backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 }
 
 #page_wifi_config{
@@ -189,6 +195,7 @@ body{
     left: 0%;
     background-color: rgba(var(--background), 0.45);
     backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 }
 
 #page_presets{
@@ -206,6 +213,7 @@ body{
     left: 0%;
 	background-color: rgba(var(--background), 0.45);
     backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 }
 
 #page_modes{
@@ -223,6 +231,7 @@ body{
     left: 0%;
     background-color: rgba(var(--background), 0.45);
     backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 	z-index: 99;
 }
 
@@ -384,6 +393,7 @@ button{
 	border:2px solid var(--accent);
 	z-index:50;
 	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(12px);
 	text-align: center;
 	pointer-events: none;
 	opacity:0.0;
@@ -414,6 +424,7 @@ button{
 	border:2px solid var(--accent);
 	z-index:50;
 	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(12px);
 	text-align: center;
 	pointer-events: none;
 	opacity:0.0;

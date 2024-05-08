@@ -1,6 +1,6 @@
 // Get the base URL of the current page
-const base_url = window.location.origin;
-let mac_str = "";
+var base_url = window.location.origin;
+var mac_str = "";
 
 function get_mac_string(){
 	// Fetch the text result from the /mac endpoint
