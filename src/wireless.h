@@ -5,6 +5,8 @@
 
 #define DISCOVERY_SERVER_URL "https://app.emotiscope.rocks/discovery/"
 
+String WEB_VERSION = "";
+
 const IPAddress ap_ip(192, 168, 4, 1); // IP address for the ESP32-S3 in AP mode
 const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32-S3 IP
 const IPAddress ap_subnet(255, 255, 255, 0); // Subnet mask for the WiFi network
@@ -222,6 +224,8 @@ void init_web_server() {
 
 	server.listen(80);
 
+	WEB_VERSION = "?v=" + String(SOFTWARE_VERSION_MAJOR) + "." + String(SOFTWARE_VERSION_MINOR) + "." + String(SOFTWARE_VERSION_PATCH);
+
 	//server.serveStatic("/", LittleFS, "/");
 
 	server.on("/ws", &websocket_handler);
@@ -258,20 +262,30 @@ void init_web_server() {
 		esp_err_t result = ESP_OK;
 		String path = "";
 
-		if(request->url() == "/"){
+		char url[128] = { 0 };
+		request->url().toCharArray(url, 128);
+
+		// Remove queries
+		fetch_substring(url, '?', 0);
+
+		if(fastcmp(substring, "/")){
 			path += "/remote.html";
+			//path += WEB_VERSION;
 		}
-		else if(request->url() == "/remote"){
+		else if(fastcmp(substring, "/remote")){
 			path += "/remote.html";
+			//path += WEB_VERSION;
 		}
-		else if(request->url() == "/wifi-setup"){
+		else if(fastcmp(substring, "/wifi-setup")){
 			path += "/index.html";
+			//path += WEB_VERSION;
 		}
 		else{
-			path += request->url();
+			path += substring;
+			//path += WEB_VERSION;
 		}
 
-		printf("HTTP GET %s\n", request->url().c_str());
+		printf("HTTP GET %s\n", path);
 
 		File file = LittleFS.open(path);
 		if (file) {
@@ -336,21 +350,6 @@ void init_web_server() {
 }
 
 void init_wifi() {
-	// Define a variable to hold the MAC address
-	uint8_t mac_address[6]; // MAC address is 6 bytes
-
-	// Retrieve the MAC address of the device
-	WiFi.macAddress(mac_address);
-	//esp_read_mac(mac_address, ESP_MAC_WIFI_STA); // Use ESP_MAC_WIFI_STA for station interface
-
-	// Format the MAC address into the char array
-	snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
-			mac_address[0], mac_address[1], mac_address[2],
-			mac_address[3], mac_address[4], mac_address[5]);
-
-	// Print the MAC address string
-	printf("MAC Address: %s\n", mac_str);
-
 	if(wifi_config_mode == true){
 		WiFi.softAP("Emotiscope Setup");
 		dns_server.start(53, "*", WiFi.softAPIP());
@@ -363,14 +362,25 @@ void init_wifi() {
 	}
 	else {
 		network_connection_attempts = 0;
-		WiFi.begin(wifi_ssid, wifi_pass);  // Start the WiFi connection with the
-										// SSID and password parsed in configuration.h
+		WiFi.begin(wifi_ssid, wifi_pass); 
 		printf("Started connection attempt to %s...\n", wifi_ssid);
-
-		// TODO: Fetch and print the MAC address in the app and wifi setup page
 	}
 
 	esp_wifi_set_ps(WIFI_PS_NONE);
+
+	// Define a variable to hold the MAC address
+	uint8_t mac_address[6]; // MAC address is 6 bytes
+
+	// Retrieve the MAC address of the device
+	WiFi.macAddress(mac_address);
+
+	// Format the MAC address into the char array
+	snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+			mac_address[0], mac_address[1], mac_address[2],
+			mac_address[3], mac_address[4], mac_address[5]);
+
+	// Print the MAC address string
+	printf("MAC Address: %s\n", mac_str);
 }
 
 void handle_wifi() {

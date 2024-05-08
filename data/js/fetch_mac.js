@@ -24,7 +24,16 @@ function get_mac_string(){
 		});
 }
 
-window.addEventListener('DOMContentLoaded', (event) => {
-	get_mac_string();
-	setTimeout(get_mac_string, 10000);
-});
+(function() {
+    var first_load = true;
+
+    // Register the touch event listeners on page load
+    document.addEventListener('APP_LOADED', function() {	
+		if(first_load == true){
+			first_load = false;
+			console.log("APP_LOADED fetch_mac.js");
+			get_mac_string();
+			setTimeout(get_mac_string, 10000);
+		}
+	});
+})();

@@ -440,6 +440,11 @@ function reconnect_websockets(){
 }
 
 function open_websockets_connection_to_device(){
+	device_ip = window.location.hostname;
+	connection_start_time = performance.now();
+	connection_pending = true;
+	setInterval(check_connection_timeout, 100);
+
 	console.log("CONNECTING TO "+device_ip);
 	ws = new WebSocket("ws://"+device_ip+":80/ws");
 	document.getElementById("device_nickname").innerHTML = device_ip;
@@ -476,8 +481,18 @@ function open_websockets_connection_to_device(){
 	};
 }
 
-// Register the touch event listeners on page load
-document.addEventListener('DOMContentLoaded', function() {
-    setup_header_logo_touch();
-	setup_device_icon_touch();
-});
+(function() {
+    var first_load = true;
+
+    // Register the touch event listeners on page load
+    document.addEventListener('APP_LOADED', function() {	
+        if(first_load == true){
+            first_load = false;
+            console.log("APP_LOADED websockets_connection.js");
+            setup_header_logo_touch();
+            setup_device_icon_touch();
+
+			open_websockets_connection_to_device();
+        }
+    });
+})();
