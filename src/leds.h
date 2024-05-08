@@ -450,7 +450,7 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
     float spread_area = fmax(position_difference * NUM_LEDS, 1.0f);
 
     // Draw the line representing the motion blur
-    draw_line(layer, prev_position, position, color, (1.0 / spread_area) * opacity);
+    draw_line(layer, prev_position, position, color, (1.0) * opacity);
 }
 
 void update_auto_color(){

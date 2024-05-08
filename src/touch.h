@@ -62,7 +62,7 @@ void read_touch(){
 		touch_readings[t] = touch_readings[t] * 0.9 + raw_touch_value * 0.1; // Smooth the input
 	}
 
-	if (t_now_ms - last_touch_read_time >= 150) {
+	if (t_now_ms - last_touch_read_time >= 100) {
 		for(uint8_t t = 0; t < 3; t++){
 			touch_pins[t].touch_history[touch_history_index] = touch_readings[t];
 		}

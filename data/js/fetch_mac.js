@@ -25,5 +25,6 @@ function get_mac_string(){
 }
 
 window.addEventListener('DOMContentLoaded', (event) => {
-	setTimeout(get_mac_string, 100);
+	get_mac_string();
+	setTimeout(get_mac_string, 10000);
 });
