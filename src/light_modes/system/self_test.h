@@ -22,6 +22,9 @@ void draw_self_test(){
 		else if(t_now_ms - test_start_time < 4000){
 			fill_color( leds, NUM_LEDS, {0.0, 0.0, 0.5} );
 		}
+		else if(t_now_ms - test_start_time < 5000){
+			fill_color( leds, NUM_LEDS, {0.25, 0.25, 0.25} );
+		}
 		else{
 			fill_color( leds, NUM_LEDS, {0.0, 0.0, 0.0} );
 			self_test_step = SELF_TEST_STEP_COMPLETE;

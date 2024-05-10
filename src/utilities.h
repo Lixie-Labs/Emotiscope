@@ -150,7 +150,7 @@ void shift_array_left(float* array, uint16_t array_size, uint16_t shift_amount) 
 	}
 }
 
-float clip_float(float input) { return min(1.0f, max(0.0f, input)); }
+inline float clip_float(float input) { return min(1.0f, max(0.0f, input)); }
 
 // Fast approximation of the square root using Newton-Raphson method
 float fast_sqrt(float number) {

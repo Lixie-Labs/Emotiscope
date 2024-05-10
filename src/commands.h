@@ -129,7 +129,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			// Get saturation value
 			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
-			configuration.saturation = setting_value;
+			configuration.saturation = sqrt(clip_float(setting_value));
 
 			//update_ui(UI_NEEDLE_EVENT, configuration.saturation);
 		}
@@ -362,6 +362,15 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else{
 			transmit_to_client_in_slot("no_updates", com.origin_client_slot);
+		}
+	}
+	else if (fastcmp(substring, "self_test")) {
+		if(t_now_ms >= 1000){ // Wait 1 second before checking boot button
+			if(self_test_step == SELF_TEST_INACTIVE){ // Self test is not already running
+				printf("SELF TEST TRIGGERED FROM APP, BEGINNING SELF TEST\n");
+				EMOTISCOPE_ACTIVE = true; // Wake if needed
+				trigger_self_test(); // Begin self test
+			}
 		}
 	}
 	else if (fastcmp(substring, "perform_update")) {

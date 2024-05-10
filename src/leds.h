@@ -216,50 +216,32 @@ CRGBF desaturate(struct CRGBF input_color, float amount) {
 
 CRGBF hsv(float h, float s, float v) {
 	CRGBF return_val;
-	//profile_function([&]() {
-		s = sqrt(s);
-		
-		/*
-		uint8_t dither_bits = (get_random_bit() << 1) | get_random_bit();
-		const float dither_table[4] = {0.00, 0.33, 0.66, 1.00};
-		const float dither_amount = 1 / 32.0;
-		float dither = dither_table[dither_bits] * dither_amount;
-		h += dither;
-		*/
+	profile_function([&]() {
+		// Normalize hue to range [0, 1]
+		h = fmodf(h, 1.0f);
+		if (h < 0.0f) h += 1.0f;
 
-		while (h > 1.0f) h -= 1.0f;
-		while (h < 0.0f) h += 1.0f;
-
-		v = clip_float(v);
+		v = clip_float(v); // Ensure v is within the range [0.0, 1.0]
 		float c = v * s; // Chroma
 		float h_prime = h * 6.0f;
 		float x = c * (1.0f - fabsf(fmodf(h_prime, 2.0f) - 1.0f));
 		float m = v - c;
 
-		float r, g, b;
-		if (h_prime >= 0.0f && h_prime < 1.0f) {
-			r = c; g = x; b = 0.0f;
-		} else if (h_prime >= 1.0f && h_prime < 2.0f) {
-			r = x; g = c; b = 0.0f;
-		} else if (h_prime >= 2.0f && h_prime < 3.0f) {
-			r = 0.0f; g = c; b = x;
-		} else if (h_prime >= 3.0f && h_prime < 4.0f) {
-			r = 0.0f; g = x; b = c;
-		} else if (h_prime >= 4.0f && h_prime < 5.0f) {
-			r = x; g = 0.0f; b = c;
-		} else {
-			r = c; g = 0.0f; b = x;
+		float r = 0.0f, g = 0.0f, b = 0.0f;
+		int sector = (int)h_prime;
+		switch (sector) {
+			case 0: r = c; g = x; break;
+			case 1: r = x; g = c; break;
+			case 2: g = c; b = x; break;
+			case 3: g = x; b = c; break;
+			case 4: r = x; b = c; break;
+			case 5: r = c; b = x; break;
 		}
 
-		CRGBF col = {r + m, g + m, b + m};
+		r += m; g += m; b += m;
 
-		// Clamp colors to max value
-		col.r = fminf(col.r, 1.0f);
-		col.g = fminf(col.g, 1.0f);
-		col.b = fminf(col.b, 1.0f);
-
-		return_val = col;
-	//}, __func__);
+		return_val = (CRGBF){r, g, b};
+	}, __func__);
 
 	return return_val;
 }
