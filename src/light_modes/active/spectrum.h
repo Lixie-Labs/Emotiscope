@@ -10,8 +10,8 @@ void draw_spectrum() {
 				mag
 			);
 
-			leds[63-i] = color;
-			leds[64+i] = color;
+			leds[ (NUM_LEDS>>1)    + i] = color;
+			leds[((NUM_LEDS>>1)-1) - i] = color;
 		}
 	}
 	// Non mirror

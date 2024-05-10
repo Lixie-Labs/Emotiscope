@@ -224,8 +224,8 @@ void render_touches(){
 				glow_hue = 0.060;
 			}
 
-			for(uint32_t i = 0; i < 32; i++){
-				float progress = (float)i / 31.0;
+			for(uint32_t i = 0; i < (NUM_LEDS>>2); i++){
+				float progress = (float)i / ((NUM_LEDS>>2)-1);
 				float brightness = (1.0-progress) * (sqrt(touch_pins[TOUCH_LEFT].touch_value));
 				CRGBF glow_col = hsv(glow_hue, 1.0, brightness*0.5);
 
@@ -239,8 +239,8 @@ void render_touches(){
 				glow_hue = 0.060;
 			}
 
-			for(uint32_t i = 0; i < 32; i++){
-				float progress = (float)i / 31.0;
+			for(uint32_t i = 0; i < (NUM_LEDS>>2); i++){
+				float progress = (float)i / ((NUM_LEDS>>2)-1);
 				float brightness = (1.0-progress) * (sqrt(touch_pins[TOUCH_RIGHT].touch_value));
 				CRGBF glow_col = hsv(glow_hue, 1.0, brightness*0.5);
 
@@ -255,8 +255,8 @@ void render_touches(){
 				glow_hue = 0.060;
 			}
 
-			for(int i = 32; i < 96; i++){
-				float progress = 1.0 - (abs(i - 64) / 32.0);
+			for(int i = (NUM_LEDS>>2); i < ((NUM_LEDS>>2)*3); i++){
+				float progress = 1.0 - (abs(i - (NUM_LEDS>>1)) / float(NUM_LEDS>>2));
 				float brightness = (progress) * (sqrt(touch_pins[TOUCH_CENTER].touch_value));
 				CRGBF glow_col = hsv(glow_hue, 1.0, brightness*0.5);
 

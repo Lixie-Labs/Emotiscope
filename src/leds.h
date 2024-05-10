@@ -183,7 +183,7 @@ void fill_color(CRGBF* layer, uint16_t length, CRGBF color){
 
 void clip_leds() {
 	// Loop unroll for speed
-	for (uint16_t i = 0; i < NUM_LEDS; i += 4) {
+	for (uint16_t i = 0; i < NUM_LEDS; i += 2) {
 		leds[i + 0].r = clip_float(leds[i + 0].r);
 		leds[i + 0].g = clip_float(leds[i + 0].g);
 		leds[i + 0].b = clip_float(leds[i + 0].b);
@@ -191,14 +191,6 @@ void clip_leds() {
 		leds[i + 1].r = clip_float(leds[i + 1].r);
 		leds[i + 1].g = clip_float(leds[i + 1].g);
 		leds[i + 1].b = clip_float(leds[i + 1].b);
-
-		leds[i + 2].r = clip_float(leds[i + 2].r);
-		leds[i + 2].g = clip_float(leds[i + 2].g);
-		leds[i + 2].b = clip_float(leds[i + 2].b);
-
-		leds[i + 3].r = clip_float(leds[i + 3].r);
-		leds[i + 3].g = clip_float(leds[i + 3].g);
-		leds[i + 3].b = clip_float(leds[i + 3].b);
 	}
 }
 
@@ -560,7 +552,6 @@ void apply_box_blur(CRGBF* pixels, uint16_t num_pixels, int kernel_size) {
     CRGBF temp_pixels[num_pixels];
     memset(temp_pixels, 0, sizeof(temp_pixels));
 
-    // Apply box blur to each pixel within the first 64 pixels
     for (int i = 0; i < num_pixels; ++i) {
         int valid_kernel_pixels = 0;
         CRGBF sum = {0.0f, 0.0f, 0.0f};
@@ -677,8 +668,8 @@ void apply_background(float background_level){
 						1.0
 					);
 					
-					int16_t left_index = 63-i;
-					int16_t right_index = 64+i;
+					int16_t left_index  = ((NUM_LEDS>>1)-1) - i;
+					int16_t right_index = ((NUM_LEDS>>1))   + i;
 
 					leds_temp[left_index] = background_color;
 					leds_temp[right_index] = background_color;

@@ -13,25 +13,25 @@ void draw_bloom() {
 		for(uint16_t i = 0; i < NUM_LEDS>>1; i++){
 			float progress = num_leds_float_lookup[i<<1];
 			float novelty_pixel = clip_float(novelty_image[i]*1.0);
-			CRGBF col = hsv(
+			CRGBF color = hsv(
 				get_color_range_hue(progress),
 				configuration.saturation,
 				novelty_pixel
 			);
-			leds[64+i] = col;
-			leds[63-i] = col;
+			leds[ (NUM_LEDS>>1)    + i] = color;
+			leds[((NUM_LEDS>>1)-1) - i] = color;
 		}
 	}
 	else{
 		for(uint16_t i = 0; i < NUM_LEDS; i++){
 			float progress = num_leds_float_lookup[i];
 			float novelty_pixel = clip_float(novelty_image[i]*2.0);
-			CRGBF col = hsv(
+			CRGBF color = hsv(
 				get_color_range_hue(progress),
 				configuration.saturation,
 				novelty_pixel
 			);
-			leds[i] = col;
+			leds[i] = color;
 		}
 	}
 
