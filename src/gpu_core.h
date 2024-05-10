@@ -77,8 +77,8 @@ void run_gpu() {
 		// This is a super hacky way to fake a true fade transition between modes
 		lpf_drag *= 0.9975;
 
-		if(lpf_drag < screensaver_mix*0.95){
-			lpf_drag = screensaver_mix*0.95;
+		if(lpf_drag < screensaver_mix*0.8){
+			lpf_drag = screensaver_mix*0.8;
 		}
 		
 		// Apply a low pass filter to every color channel of every pixel on every frame

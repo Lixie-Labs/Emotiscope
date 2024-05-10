@@ -24,6 +24,7 @@ void init_serial(uint32_t baud_rate) {
 	//for(uint16_t i = 0; i < 10; i++){ printf("WAITING FOR %d SECONDS...\n", 10-i); delay(1000); }
 
 	memset(serial_buffer, 0, 256);
+	uint16_t serial_buffer_index = 0;
 
 	Serial.begin(baud_rate);
 }
@@ -31,8 +32,11 @@ void init_serial(uint32_t baud_rate) {
 void check_serial() {
 	extern bool queue_command(const char* command, uint16_t length, uint8_t client_slot);
 	
-	while(Serial.available() > 0){
+	if(Serial.available() > 0){
 		char c = Serial.read();
+
+		printf("READ CHAR: %c\n", c);
+
 		if(c == '\n'){
 			printf("Serial command received: %s\n", serial_buffer);
 			queue_command(serial_buffer, serial_buffer_index, 255);

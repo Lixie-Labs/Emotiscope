@@ -50,7 +50,7 @@ void run_cpu() {
 
 		read_touch();
 
-		//check_serial();
+		check_serial();
 
 		check_boot_button();
 
