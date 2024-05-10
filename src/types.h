@@ -18,6 +18,15 @@ enum light_mode_type_t {
 	LIGHT_MODE_TYPE_SYSTEM
 };
 
+enum self_test_steps_t {
+	SELF_TEST_INACTIVE,
+	SELF_TEST_STEP_START,
+	SELF_TEST_STEP_LED,
+	SELF_TEST_STEP_AUDIO,
+	SELF_TEST_STEP_TOUCH,
+	SELF_TEST_STEP_COMPLETE
+};
+
 // Light Modes are stored in a struct with a name, type, and draw function
 struct light_mode {
 	char name[32]; // ............ What the mode is called

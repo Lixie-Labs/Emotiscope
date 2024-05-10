@@ -7,15 +7,15 @@
 #define LED_DATA_2_PIN ( 17 )
 
 // 32-bit color input
-extern CRGBF leds[NUM_LEDS];
+extern CRGBF leds[ NUM_LEDS ];
 
 // Remapped to floating 8-bit range
-extern CRGBF leds_scaled[NUM_LEDS];
+extern CRGBF leds_scaled[ NUM_LEDS ];
 
-CRGBF dither_error[NUM_LEDS];
+CRGBF dither_error[ NUM_LEDS ];
 
 // True 8-bit color output
-static uint8_t raw_led_data[NUM_LEDS*3];
+static uint8_t raw_led_data[ NUM_LEDS*3 ];
 
 rmt_channel_handle_t tx_chan_a = NULL;
 rmt_channel_handle_t tx_chan_b = NULL;
@@ -26,11 +26,11 @@ uint32_t lfsr = 0xACE1u;  // Initial seed for LFSR
 const uint32_t polynomial = 0x10000000u;  // Polynomial for LFSR
 
 typedef struct {
-    rmt_encoder_t base;
-    rmt_encoder_t *bytes_encoder;
-    rmt_encoder_t *copy_encoder;
-    int state;
-    rmt_symbol_word_t reset_code;
+    rmt_encoder_t		base;
+    rmt_encoder_t		*bytes_encoder;
+    rmt_encoder_t		*copy_encoder;
+    int 				state;
+    rmt_symbol_word_t	reset_code;
 } rmt_led_strip_encoder_t;
 
 rmt_led_strip_encoder_t strip_encoder_a;
@@ -38,51 +38,69 @@ rmt_led_strip_encoder_t strip_encoder_b;
 
 rmt_transmit_config_t tx_config = {
 	.loop_count = 0,  // no transfer loop
-	.flags = { .eot_level = 0, .queue_nonblocking = 0 }
+	.flags      = {
+		.eot_level         = 0,
+		.queue_nonblocking = 0,
+	},
 };
 
 typedef struct {
-    uint32_t resolution; /*!< Encoder resolution, in Hz */
+    uint32_t resolution; /* Encoder resolution, in Hz */
 } led_strip_encoder_config_t;
 
 void init_random_dither_error(){
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
-		dither_error[i].r = random(0, 255) / 255.0;
-		dither_error[i].g = random(0, 255) / 255.0;
-		dither_error[i].b = random(0, 255) / 255.0;
+		dither_error[ i ].r = random( 0, 255 ) / 255.0;
+		dither_error[ i ].g = random( 0, 255 ) / 255.0;
+		dither_error[ i ].b = random( 0, 255 ) / 255.0;
 	}
 }
 
 IRAM_ATTR static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size, rmt_encode_state_t *ret_state){
-    rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
-    rmt_encoder_handle_t bytes_encoder = led_encoder->bytes_encoder;
-    rmt_encoder_handle_t copy_encoder = led_encoder->copy_encoder;
-    rmt_encode_state_t session_state = RMT_ENCODING_RESET;
-    rmt_encode_state_t state = RMT_ENCODING_RESET;
+    rmt_led_strip_encoder_t *led_encoder = __containerof( encoder, rmt_led_strip_encoder_t, base );
+    rmt_encoder_handle_t   bytes_encoder = led_encoder->bytes_encoder;
+    rmt_encoder_handle_t    copy_encoder = led_encoder->copy_encoder;
+    rmt_encode_state_t     session_state = RMT_ENCODING_RESET;
+    rmt_encode_state_t             state = RMT_ENCODING_RESET;
+
     size_t encoded_symbols = 0;
-    switch (led_encoder->state) {
-    case 0: // send RGB data
-        encoded_symbols += bytes_encoder->encode(bytes_encoder, channel, primary_data, data_size, &session_state);
-        if (session_state & RMT_ENCODING_COMPLETE) {
-            led_encoder->state = 1; // switch to next state when current encoding session finished
-        }
-        if (session_state & RMT_ENCODING_MEM_FULL) {
-            state = (rmt_encode_state_t)(state | (uint32_t)RMT_ENCODING_MEM_FULL);
-            goto out; // yield if there's no free space for encoding artifacts
-        }
-    // fall-through
-    case 1: // send reset code
-        encoded_symbols += copy_encoder->encode(copy_encoder, channel, &led_encoder->reset_code,
-                                                sizeof(led_encoder->reset_code), &session_state);
-        if (session_state & RMT_ENCODING_COMPLETE) {
-            led_encoder->state = RMT_ENCODING_RESET; // back to the initial encoding session
-			state = (rmt_encode_state_t)(state | (uint32_t)RMT_ENCODING_COMPLETE);
-        }
-        if (session_state & RMT_ENCODING_MEM_FULL) {
-			state = (rmt_encode_state_t)(state | (uint32_t)RMT_ENCODING_MEM_FULL);
-            goto out; // yield if there's no free space for encoding artifacts
-        }
-    }
+
+    switch ( led_encoder->state ) {
+		case 0: // send RGB data
+			encoded_symbols += bytes_encoder->encode(
+				bytes_encoder,
+				channel,
+				primary_data,
+				data_size,
+				&session_state
+			);
+
+			if ( session_state & RMT_ENCODING_COMPLETE ) {
+				led_encoder->state = 1; // switch to next state when current encoding session finished
+			}
+			if ( session_state & RMT_ENCODING_MEM_FULL ) {
+				state = (rmt_encode_state_t)( state | (uint32_t)RMT_ENCODING_MEM_FULL );
+				goto out; // yield if there's no free space for encoding artifacts
+			}
+		// fall-through
+		case 1: // send reset code
+			encoded_symbols += copy_encoder->encode(
+				copy_encoder,
+				channel,
+				&led_encoder->reset_code,
+				sizeof( led_encoder->reset_code ),
+				&session_state
+			);
+
+			if (session_state & RMT_ENCODING_COMPLETE) {
+				led_encoder->state = RMT_ENCODING_RESET; // back to the initial encoding session
+				state = (rmt_encode_state_t)(state | (uint32_t)RMT_ENCODING_COMPLETE);
+			}
+			if (session_state & RMT_ENCODING_MEM_FULL) {
+				state = (rmt_encode_state_t)(state | (uint32_t)RMT_ENCODING_MEM_FULL);
+				goto out; // yield if there's no free space for encoding artifacts
+			}
+	}
 out:
     *ret_state = state;
     return encoded_symbols;
@@ -218,24 +236,26 @@ void quantize_color_error(bool temporal_dithering){
 }
 
 IRAM_ATTR void transmit_leds() {
-	// Wait here if previous frame transmission has not yet completed
-	rmt_tx_wait_all_done(tx_chan_a, portMAX_DELAY);
-	rmt_tx_wait_all_done(tx_chan_b, portMAX_DELAY);
+	profile_function([&]() {
+		// Wait here if previous frame transmission has not yet completed
+		rmt_tx_wait_all_done( tx_chan_a, portMAX_DELAY );
+		rmt_tx_wait_all_done( tx_chan_b, portMAX_DELAY );
 
-	// Clear the 8-bit buffer	
-	memset(raw_led_data, 0, NUM_LEDS*3);
+		// Clear the 8-bit buffer	
+		memset( raw_led_data, 0, NUM_LEDS*3 );
 
-	// Quantize the floating point color to 8-bit with temporal dithering
-	//
-	// This allows the 8-bit LEDs to emulate the look of a higher bit-depth using Persistence of Vision
-	// The contents of the floating point CRGBF "leds" array are downsampled into pseudo-random 8-bit
-	// dither patterns hundreds of times per second. Your eyes see these patterns as a smooth, higher
-	// dynamic range image with deeper color reproduction.
-	quantize_color_error(configuration.temporal_dithering);
+		// Quantize the floating point color to 8-bit with temporal dithering
+		//
+		// This allows the 8-bit LEDs to emulate the look of a higher bit-depth using Persistence of Vision
+		// The contents of the floating point CRGBF "leds" array are downsampled into pseudo-random 8-bit
+		// dither patterns hundreds of times per second. Your eyes see these patterns as a smooth, higher
+		// dynamic range image with deeper color reproduction.
+		quantize_color_error( configuration.temporal_dithering );
 
-	// Get to safety, THE PHOTONS ARE COMING!!!
-	if(filesystem_ready == true){
-		rmt_transmit(tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config);
-		rmt_transmit(tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config);
-	}
+		// Get to safety, THE PHOTONS ARE COMING!!!
+		if( filesystem_ready == true ){
+			rmt_transmit( tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config );
+			rmt_transmit( tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config );
+		}
+	}, __func__);
 }

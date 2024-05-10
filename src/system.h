@@ -50,8 +50,28 @@ void check_serial() {
 	}
 }
 
+void init_boot_button() {
+	pinMode(0, INPUT_PULLUP);
+}
+
+void check_boot_button(){
+	extern void trigger_self_test();
+	extern self_test_steps_t self_test_step;
+
+	if(t_now_ms >= 1000){ // Wait 1 second before checking boot button
+		if(digitalRead(0) == LOW){ // Boot button is pressed
+			if(self_test_step == SELF_TEST_INACTIVE){ // Self test is not already running
+				printf("BOOT BUTTON PRESSED, BEGINNING SELF TEST\n");
+				EMOTISCOPE_ACTIVE = true; // Wake if needed
+				trigger_self_test(); // Begin self test
+			}
+		}
+	}
+}
+
 void init_system() {
 	extern void init_hardware_version_pins(); // (hardware_version.h)
+	extern void init_light_mode_list();       // (light_modes.h)
 	extern void init_leds();
 	extern void init_i2s_microphone();
 	extern void init_window_lookup();
@@ -68,6 +88,7 @@ void init_system() {
 
 	init_hardware_version_pins();       // (hardware_version.h)
 	init_serial(921600);				// (system.h)
+	init_light_mode_list();             // (light_modes.h)
 	init_filesystem();                  // (filesystem.h)
 	init_configuration();               // (configuration.h)
 	init_i2s_microphone();				// (microphone.h)
@@ -80,6 +101,7 @@ void init_system() {
 	init_wifi();                        // (wireless.h)
 	init_noise_samples();               // (utilities.h)
 	init_floating_point_lookups();      // (utilities.h)
+	init_boot_button();                 // (system.h)
 
 	// Load sliders 
 	load_sliders_relevant_to_mode(configuration.current_mode);

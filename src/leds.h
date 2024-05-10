@@ -122,24 +122,29 @@ void load_leds_from_temp() {
 // (64 are musical notes, the other 64 are tempi)
 //
 void multiply_CRGBF_array_by_LUT(CRGBF* input, CRGBF LUT, uint16_t array_length) {
-	float* ptr = (float*)input;
+	//profile_function([&]() {
+		float* ptr = (float*)input;
+		dsps_mulc_f32_ae32(ptr + 0, ptr + 0, array_length, LUT.r, 3, 3);
+		dsps_mulc_f32_ae32(ptr + 1, ptr + 1, array_length, LUT.g, 3, 3);
+		dsps_mulc_f32_ae32(ptr + 2, ptr + 2, array_length, LUT.b, 3, 3);
+	//}, __func__);
 
-	dsps_mulc_f32_ae32(ptr + 0, ptr + 0, array_length, LUT.r, 3, 3);
-	dsps_mulc_f32_ae32(ptr + 1, ptr + 1, array_length, LUT.g, 3, 3);
-	dsps_mulc_f32_ae32(ptr + 2, ptr + 2, array_length, LUT.b, 3, 3);
 }
 
 void scale_CRGBF_array_by_constant(CRGBF* input, float scale_value, uint16_t array_length) {
-	float* ptr = (float*)input;
-	dsps_mulc_f32_ae32(ptr, ptr, array_length * 3, scale_value, 1, 1);
+	//profile_function([&]() {
+		float* ptr = (float*)input;
+		dsps_mulc_f32_ae32(ptr, ptr, array_length * 3, scale_value, 1, 1);
+	//}, __func__);
 }
 
 void add_CRGBF_arrays(CRGBF* a, CRGBF* b, uint16_t array_length) {
-	float* ptr_a = (float*)a;
-	float* ptr_b = (float*)b;
+	//profile_function([&]() {
+		float* ptr_a = (float*)a;
+		float* ptr_b = (float*)b;
 
-	// Stores result in "a" array
-	dsps_add_f32(ptr_a, ptr_b, ptr_a, array_length * 3, 1, 1, 1);
+		dsps_add_f32(ptr_a, ptr_b, ptr_a, array_length * 3, 1, 1, 1);
+	//}, __func__);
 }
 
 void smooth_led_output(float blend_strength) {
@@ -167,6 +172,12 @@ void smooth_led_output(float blend_strength) {
 	}
 	else {
 		memcpy(leds_smooth, leds, sizeof(CRGBF) * NUM_LEDS);
+	}
+}
+
+void fill_color(CRGBF* layer, uint16_t length, CRGBF color){
+	for(uint16_t i = 0; i < length; i++){
+		layer[i] = color;
 	}
 }
 
@@ -204,62 +215,69 @@ CRGBF desaturate(struct CRGBF input_color, float amount) {
 }
 
 CRGBF hsv(float h, float s, float v) {
-	s = sqrt(s);
-	
-	/*
-	uint8_t dither_bits = (get_random_bit() << 1) | get_random_bit();
-	const float dither_table[4] = {0.00, 0.33, 0.66, 1.00};
-	const float dither_amount = 1 / 32.0;
-	float dither = dither_table[dither_bits] * dither_amount;
-	h += dither;
-	*/
+	CRGBF return_val;
+	//profile_function([&]() {
+		s = sqrt(s);
+		
+		/*
+		uint8_t dither_bits = (get_random_bit() << 1) | get_random_bit();
+		const float dither_table[4] = {0.00, 0.33, 0.66, 1.00};
+		const float dither_amount = 1 / 32.0;
+		float dither = dither_table[dither_bits] * dither_amount;
+		h += dither;
+		*/
 
-	while (h > 1.0f) h -= 1.0f;
-	while (h < 0.0f) h += 1.0f;
+		while (h > 1.0f) h -= 1.0f;
+		while (h < 0.0f) h += 1.0f;
 
-	v = clip_float(v);
-	float c = v * s; // Chroma
-	float h_prime = h * 6.0f;
-	float x = c * (1.0f - fabsf(fmodf(h_prime, 2.0f) - 1.0f));
-	float m = v - c;
+		v = clip_float(v);
+		float c = v * s; // Chroma
+		float h_prime = h * 6.0f;
+		float x = c * (1.0f - fabsf(fmodf(h_prime, 2.0f) - 1.0f));
+		float m = v - c;
 
-	float r, g, b;
-	if (h_prime >= 0.0f && h_prime < 1.0f) {
-		r = c; g = x; b = 0.0f;
-	} else if (h_prime >= 1.0f && h_prime < 2.0f) {
-		r = x; g = c; b = 0.0f;
-	} else if (h_prime >= 2.0f && h_prime < 3.0f) {
-		r = 0.0f; g = c; b = x;
-	} else if (h_prime >= 3.0f && h_prime < 4.0f) {
-		r = 0.0f; g = x; b = c;
-	} else if (h_prime >= 4.0f && h_prime < 5.0f) {
-		r = x; g = 0.0f; b = c;
-	} else {
-		r = c; g = 0.0f; b = x;
-	}
+		float r, g, b;
+		if (h_prime >= 0.0f && h_prime < 1.0f) {
+			r = c; g = x; b = 0.0f;
+		} else if (h_prime >= 1.0f && h_prime < 2.0f) {
+			r = x; g = c; b = 0.0f;
+		} else if (h_prime >= 2.0f && h_prime < 3.0f) {
+			r = 0.0f; g = c; b = x;
+		} else if (h_prime >= 3.0f && h_prime < 4.0f) {
+			r = 0.0f; g = x; b = c;
+		} else if (h_prime >= 4.0f && h_prime < 5.0f) {
+			r = x; g = 0.0f; b = c;
+		} else {
+			r = c; g = 0.0f; b = x;
+		}
 
-	CRGBF col = {r + m, g + m, b + m};
+		CRGBF col = {r + m, g + m, b + m};
 
-	// Clamp colors to max value
-	col.r = fminf(col.r, 1.0f);
-	col.g = fminf(col.g, 1.0f);
-	col.b = fminf(col.b, 1.0f);
+		// Clamp colors to max value
+		col.r = fminf(col.r, 1.0f);
+		col.g = fminf(col.g, 1.0f);
+		col.b = fminf(col.b, 1.0f);
 
-	return col;
+		return_val = col;
+	//}, __func__);
+
+	return return_val;
 }
 
 void apply_blue_light_filter(float mix) {
-	if(mix > 0.0){
-		multiply_CRGBF_array_by_LUT(
-			leds,
-			{
-				float(incandescent_lookup.r * mix + (1.0 - mix)),
-				float(incandescent_lookup.g * mix + (1.0 - mix)),
-				float(incandescent_lookup.b * mix + (1.0 - mix))
-			},
-			NUM_LEDS
-		);
-	}
+	profile_function([&]() {
+		if(mix > 0.0){
+			multiply_CRGBF_array_by_LUT(
+				leds,
+				{
+					float(incandescent_lookup.r * mix + (1.0 - mix)),
+					float(incandescent_lookup.g * mix + (1.0 - mix)),
+					float(incandescent_lookup.b * mix + (1.0 - mix))
+				},
+				NUM_LEDS
+			);
+		}
+	}, __func__);
 
 	/*
 	float mix_inv = 1.0 - mix;
@@ -454,21 +472,23 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 }
 
 void update_auto_color(){
-	if(light_modes[configuration.current_mode].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
+	profile_function([&]() {
+		if(light_modes[configuration.current_mode].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
 
-	static float color_momentum = 0.0;
-	if(configuration.auto_color_cycle == true){
-		float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1];
-		novelty = novelty*novelty*novelty*novelty*novelty*novelty;
+		static float color_momentum = 0.0;
+		if(configuration.auto_color_cycle == true){
+			float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1];
+			novelty = novelty*novelty*novelty*novelty*novelty*novelty;
 
-		color_momentum *= 0.95;
-		color_momentum = fmax(color_momentum, novelty);
-		if(color_momentum > 0.1){
-			color_momentum = 0.1;
+			color_momentum *= 0.95;
+			color_momentum = fmax(color_momentum, novelty);
+			if(color_momentum > 0.1){
+				color_momentum = 0.1;
+			}
+
+			configuration.color += color_momentum*0.05;
 		}
-
-		configuration.color += color_momentum*0.05;
-	}
+	}, __func__ );
 }
 
 void apply_phosphor_decay(float strength){
@@ -589,16 +609,18 @@ void apply_box_blur(CRGBF* pixels, uint16_t num_pixels, int kernel_size) {
 }
 
 void apply_image_lpf(float cutoff_frequency) {
-	float alpha = 1.0 - expf(-6.28318530718 * cutoff_frequency / FPS_GPU);
-	float alpha_inv = 1.0 - alpha;
+	profile_function([&]() {
+		float alpha = 1.0 - expf(-6.28318530718 * cutoff_frequency / FPS_GPU);
+		float alpha_inv = 1.0 - alpha;
 
-	// Crasy fast SIMD-style math possible with the S3
-	scale_CRGBF_array_by_constant(leds, alpha, NUM_LEDS);
-	scale_CRGBF_array_by_constant(leds_last, alpha_inv, NUM_LEDS);
+		// Crasy fast SIMD-style math possible with the S3
+		scale_CRGBF_array_by_constant(leds, alpha, NUM_LEDS);
+		scale_CRGBF_array_by_constant(leds_last, alpha_inv, NUM_LEDS);
 
-	add_CRGBF_arrays(leds, leds_last, NUM_LEDS);
+		add_CRGBF_arrays(leds, leds_last, NUM_LEDS);
 
-	memcpy(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
+		memcpy(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
+	}, __func__);
 }
 
 void apply_gamma_correction_to_color(CRGBF* color, float gamma) {
@@ -614,79 +636,90 @@ void apply_gamma_correction_to_color(CRGBF* color, float gamma) {
 }
 
 void apply_gamma_correction() {
-	dsps_mul_f32_ae32((float*)leds, (float*)leds, (float*)leds, NUM_LEDS*3, 1, 1, 1);
+	profile_function([&]() {
+		dsps_mul_f32_ae32((float*)leds, (float*)leds, (float*)leds, NUM_LEDS*3, 1, 1, 1);
+	}, __func__);
 }
 
 void apply_brightness() {
-	float brightness_val = 0.3+configuration.brightness*0.7;
+	profile_function([&]() {
+		float brightness_val = 0.3+configuration.brightness*0.7;
 
-	scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
+		scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
+	}, __func__);
 }
 
 float get_color_range_hue(float progress){
-	float color_range = configuration.color_range;
-	
-	if(color_range == 0.0){
-		return configuration.color;
-	}
-	
-	if(configuration.reverse_color_range == true){
-		color_range *= -1.0;
-		return (1.0-configuration.color) + (color_range * progress);
-	}
-	else{
-		return configuration.color + (color_range * progress);
-	}
+	float return_val;
+	profile_function([&]() {
+		float color_range = configuration.color_range;
+		
+		if(color_range == 0.0){
+			return_val = configuration.color;
+		}	
+		else if(configuration.reverse_color_range == true){
+			color_range *= -1.0;
+			return_val = (1.0-configuration.color) + (color_range * progress);
+		}
+		else{
+			return_val = configuration.color + (color_range * progress);
+		}
+	}, __func__);
+
+	return return_val;
 }
 
 void apply_background(float background_level){
-	background_level *= 0.25; // Max 25% brightness
+	profile_function([&]() {
+		background_level *= 0.25; // Max 25% brightness
 
-	if(background_level > 0.0){
-		if(configuration.mirror_mode == false){
-			for(uint16_t i = 0; i < NUM_LEDS; i++){
-				float progress = num_leds_float_lookup[i];
-				CRGBF background_color = hsv(
-					get_color_range_hue(progress),
-					configuration.saturation,
-					1.0
-				);
+		if(background_level > 0.0){
+			if(configuration.mirror_mode == false){
+				for(uint16_t i = 0; i < NUM_LEDS; i++){
+					float progress = num_leds_float_lookup[i];
+					CRGBF background_color = hsv(
+						get_color_range_hue(progress),
+						configuration.saturation,
+						1.0
+					);
 
-				leds_temp[i] = background_color;
+					leds_temp[i] = background_color;
+				}
 			}
-		}
-		else{
-			for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
-				float progress = num_leds_float_lookup[i << 1];
-				CRGBF background_color = hsv(
-					get_color_range_hue(progress),
-					configuration.saturation,
-					1.0
-				);
-				
-				int16_t left_index = 63-i;
-				int16_t right_index = 64+i;
+			else{
+				for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
+					float progress = num_leds_float_lookup[i << 1];
+					CRGBF background_color = hsv(
+						get_color_range_hue(progress),
+						configuration.saturation,
+						1.0
+					);
+					
+					int16_t left_index = 63-i;
+					int16_t right_index = 64+i;
 
-				leds_temp[left_index] = background_color;
-				leds_temp[right_index] = background_color;
+					leds_temp[left_index] = background_color;
+					leds_temp[right_index] = background_color;
+				}
 			}
+
+			// Apply background to the main buffer
+			scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
+			scale_CRGBF_array_by_constant(leds, 1.0 - background_level, NUM_LEDS);
+			add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
 		}
-
-		// Apply background to the main buffer
-		scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
-		scale_CRGBF_array_by_constant(leds, 1.0 - background_level, NUM_LEDS);
-		add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
-
-	}
+	}, __func__);
 }
 
 void clear_display(float keep = 0.0){
-	if(keep == 0.0){
-		memset(leds, 0, sizeof(CRGBF)*NUM_LEDS);
-	}
-	else{
-		scale_CRGBF_array_by_constant(leds, keep, NUM_LEDS);	
-	}
+	profile_function([&]() {
+		if(keep == 0.0){
+			memset(leds, 0, sizeof(CRGBF)*NUM_LEDS);
+		}
+		else{
+			scale_CRGBF_array_by_constant(leds, keep, NUM_LEDS);	
+		}
+	}, __func__);
 }
 
 void fade_display(){

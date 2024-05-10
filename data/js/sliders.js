@@ -80,9 +80,9 @@ function track_sliders() {
 
                 if (data.tracking_allowed) {
                     // Prevent default behavior for dragging (scroll) only for touch events
-					if (!isMouseEvent) {
+					//if (!isMouseEvent) {
 						event.preventDefault();
-					}
+					//}
 
 					var id = data.target_div.getAttribute('id');
 

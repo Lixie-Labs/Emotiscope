@@ -1,9 +1,8 @@
 // UNCOMMENT THIS TO ENABLE IT
-//#define PROFILER_ENABLED  // Slows down the system, but allows watching how much
-// total time each function takes up
+#define PROFILER_ENABLED  // Slows down the system, but allows watching how much total time each function takes up
 
 #define PROFILER_SINGLE_SHOT \
-	(true)	 // Count only the most recent run or all runs since last print?
+	(false)	 // Count only the most recent run or all runs since last print?
 
 #define PROFILER_HITS \
 	(false)	 // Count the usage of a function instead of its execution time
@@ -144,20 +143,22 @@ void watch_cpu_fps() {
 }
 
 void watch_gpu_fps() {
-	uint32_t us_now = micros();
-	static uint32_t last_call;
-	static uint8_t average_index = 0;
-	average_index++;
+	profile_function([&]() {
+		uint32_t us_now = micros();
+		static uint32_t last_call;
+		static uint8_t average_index = 0;
+		average_index++;
 
-	uint32_t elapsed_us = us_now - last_call;
-	FPS_GPU_SAMPLES[average_index % 16] = 1000000.0 / float(elapsed_us);
+		uint32_t elapsed_us = us_now - last_call;
+		FPS_GPU_SAMPLES[average_index % 16] = 1000000.0 / float(elapsed_us);
 
-	last_call = us_now;
+		last_call = us_now;
+	}, __func__ );
 }
 
 void print_system_info() {
 	static uint32_t next_print_ms = 0;
-	const uint16_t print_interval_ms = 5000;
+	const uint16_t print_interval_ms = 2000;
 
 	if (t_now_ms >= next_print_ms) {
 		next_print_ms += print_interval_ms;

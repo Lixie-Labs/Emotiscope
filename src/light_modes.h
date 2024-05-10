@@ -15,24 +15,26 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 // The individual drawing functions for each mode are defined in these files:
 
 // ACTIVE MODES
-#include "light_modes/spectrum.h"
-#include "light_modes/octave.h"
-#include "light_modes/metronome.h"
-#include "light_modes/spectronome.h"
-#include "light_modes/hype.h"
-#include "light_modes/plot.h"
-#include "light_modes/bloom.h"
-#include "light_modes/analog.h"
-#include "light_modes/waveform.h"
+#include "light_modes/active/analog.h"
+#include "light_modes/active/spectrum.h"
+#include "light_modes/active/octave.h"
+#include "light_modes/active/metronome.h"
+#include "light_modes/active/spectronome.h"
+#include "light_modes/active/hype.h"
+#include "light_modes/active/bloom.h"
 
 // INACTIVE MODES
-#include "light_modes/neutral.h"
+#include "light_modes/inactive/neutral.h"
 
 // SYSTEM MODES
-#include "light_modes/debug.h"
-#include "light_modes/presets.h"
+#include "light_modes/system/self_test.h"
+#include "light_modes/system/presets.h"
+
+uint16_t NUM_LIGHT_MODES = 0;
+int16_t queued_light_mode_index = 0;
 
 light_mode light_modes[] = {
+	// Active Modes
 	{ "Analog",          LIGHT_MODE_TYPE_ACTIVE,    &draw_analog        },
 	{ "Spectrum",        LIGHT_MODE_TYPE_ACTIVE,    &draw_spectrum      },
 	{ "Octave",          LIGHT_MODE_TYPE_ACTIVE,    &draw_octave        },
@@ -41,145 +43,79 @@ light_mode light_modes[] = {
 	{ "Hype",            LIGHT_MODE_TYPE_ACTIVE,    &draw_hype          },
 	{ "Bloom",           LIGHT_MODE_TYPE_ACTIVE,    &draw_bloom         },
 
+	// Inactive Modes
 	{ "Neutral",         LIGHT_MODE_TYPE_INACTIVE,  &draw_neutral       },
+
+	// System Modes
+	{ "Self Test",       LIGHT_MODE_TYPE_SYSTEM,    &draw_self_test     },
 
 	//{ "debug",           &draw_debug         }, // 8
 	//{ "presets",         &draw_presets       }, // 9
 };
 
-const uint16_t NUM_LIGHT_MODES = sizeof(light_modes) / sizeof(light_mode);
-
 extern float lpf_drag; // Used for fade transition
+
+void init_light_mode_list(){
+	uint16_t num_light_modes_raw = sizeof(light_modes) / sizeof(light_mode);
+	NUM_LIGHT_MODES = 0;
+
+	// Count the non-system light modes
+	for(uint16_t i = 0; i < num_light_modes_raw; i++){
+		if(light_modes[i].type != LIGHT_MODE_TYPE_SYSTEM){
+			NUM_LIGHT_MODES++;
+		}
+	}
+}
+
+void set_light_mode_by_index(uint16_t mode_index){
+	configuration.current_mode = mode_index;
+	lpf_drag = 1.0; // Causes slow fade using low pass filtered image
+	save_config_delayed();
+}
+
+int16_t get_light_mode_index_by_name(const char* name){
+	uint16_t num_modes = sizeof(light_modes) / sizeof(light_mode);
+	for(uint16_t i = 0; i < num_modes; i++){
+		if( strcmp(name, light_modes[i].name) == 0 ){
+			// Found match
+			return i;
+		}
+	}	
+
+	// Found no matches?
+	return -1;
+}
 
 // Light Modes can be summoned by their string name shown in the UI
 // This string is compared to the light_modes[] table to derive a
 // pointer to that mode's drawing function. Then, transition_to_new_mode()
 // handles the switch
-int16_t set_light_mode_by_name(char* name){
-	int16_t mode_index = -1;
-
-	uint16_t num_modes = sizeof(light_modes) / sizeof(light_mode);
-	for(uint16_t i = 0; i < num_modes; i++){
-		if( strcmp(name, light_modes[i].name) == 0 ){
-
-			// Found a matching mode
-			configuration.current_mode = i;
-
-			lpf_drag = 1.0; // Causes slow fade using low pass filtered image
-			mode_index = i;
-			break;
-		}
-	}
+int16_t set_light_mode_by_name(const char* name){
+	int16_t mode_index = get_light_mode_index_by_name(name);
+	set_light_mode_by_index(mode_index);
 
 	return mode_index;
 }
 
 void increment_mode(){
-	int16_t new_mode = configuration.current_mode + 1;
-	configuration.current_mode = new_mode % NUM_LIGHT_MODES;
-	lpf_drag = 1.0; // Causes slow fade using low pass filtered image
-	save_config_delayed();
+	int16_t next_mode_index = (configuration.current_mode + 1) % NUM_LIGHT_MODES;
+	set_light_mode_by_index(next_mode_index);
 }
 
-
-
-
-
-
-
-
-
-/*
-
-void draw_tempi() {
-	uint16_t profiler_index = start_function_timing(__func__);
-	memset(leds, 0, sizeof(CRGBF) * NUM_LEDS);
-
-	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		float tempi_magnitude = tempi[tempo_bin].magnitude;
-		CRGBF tempi_color = {0.0, tempi_magnitude * tempi_magnitude, 0.0};
-		leds[tempo_bin] = tempi_color;
-	}
-
-	end_function_timing(profiler_index);
+void enter_queued_light_mode(){
+	set_light_mode_by_index(queued_light_mode_index);
 }
 
-void draw_novelty_curve() {
-	uint16_t profiler_index = start_function_timing(__func__);
-	memset(leds, 0, sizeof(CRGBF) * NUM_LEDS);
-
-	for (uint16_t i = 0; i < NUM_LEDS; i++) {
-		float value = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - NUM_LEDS) + i];
-
-		CRGBF novelty_color = {value * value, 0.0, 0.0};
-		leds[i] = novelty_color;
-	}
-
-	end_function_timing(profiler_index);
+void queue_light_mode_by_name(const char* name){
+	queued_light_mode_index = get_light_mode_index_by_name(name);
 }
 
-void draw_novelty_curve_full() {
-	uint16_t profiler_index = start_function_timing(__func__);
-	memset(leds, 0, sizeof(CRGBF) * NUM_LEDS);
-
-	uint16_t multiple = NOVELTY_HISTORY_LENGTH / NUM_LEDS;
-
-	for (uint16_t i = 0; i < NUM_LEDS; i++) {
-		float max_val = 0.0;
-		for (uint16_t m = 0; m < multiple; m++) {
-			float value = novelty_curve_normalized[i * multiple + m];
-			max_val = max(max_val, value);
-		}
-
-		CRGBF novelty_color = {max_val * max_val, 0.0, 0.0};
-		leds[i] = novelty_color;
-	}
-
-	end_function_timing(profiler_index);
+void queue_light_mode_by_index(uint16_t mode_index){
+	queued_light_mode_index = mode_index;
 }
 
-void draw_waveform(bool add_mode) {
-	uint16_t profiler_index = start_function_timing(__func__);
-	const uint8_t NUM_AVERAGE_SAMPLES = 16;
-	static float smoothed_waveform[NUM_LEDS];
-
-	if (add_mode == false) {
-		memset(leds, 0, sizeof(CRGBF) * NUM_LEDS);	// Clear the display
-	}
-
-	if (!waveform_locked) {
-		float max_val = 0.000001;
-		for (uint16_t i = 0; i < NUM_LEDS; i++) {
-			float sample_sum = 0.0;
-			for (uint8_t a = 0; a < NUM_AVERAGE_SAMPLES; a++) {
-				uint16_t index = ((8192 - 1) - (NUM_LEDS * NUM_AVERAGE_SAMPLES)) + (NUM_LEDS * a) + i;
-				float sample = clip_float(sample_history[index]);
-				sample_sum += sample;
-			}
-
-			smoothed_waveform[i] = sample_sum / float(NUM_AVERAGE_SAMPLES);
-			max_val = max(max_val, smoothed_waveform[i]);
-		}
-
-		max_val = max(max_val, 0.1f);
-
-		float auto_scale = 1.0 / max_val;
-
-		for (uint16_t i = 0; i < NUM_LEDS; i++) {
-			smoothed_waveform[i] *= auto_scale;
-		}
-	}
-
-	for (uint16_t i = 0; i < NUM_LEDS >> 1; i++) {
-		float sample = smoothed_waveform[i];
-		sample = sample * sample * sample;
-		sample = sample * 0.98 + 0.02;
-
-		leds[64 + i] = {0.0, sample, 0.0};
-		leds[63 - i] = {0.0, sample, 0.0};
-	}
-
-	end_function_timing(profiler_index);
+void trigger_self_test(){
+	queue_light_mode_by_index( configuration.current_mode ); // Save current mode to return to
+	self_test_step = SELF_TEST_STEP_START; // Set the self test to starting state
+	set_light_mode_by_name("Self Test"); // Jump to self test mode
 }
-
-*/

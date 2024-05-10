@@ -49,72 +49,74 @@ uint16_t find_closest_tempo_bin(float target_bpm) {
 }
 
 void init_tempo_goertzel_constants() {
-	for (uint16_t i = 0; i < NUM_TEMPI; i++) {
-		float progress = float(i) / NUM_TEMPI;
-		float tempi_range = TEMPO_HIGH - TEMPO_LOW;
-		float tempo = tempi_range * progress + TEMPO_LOW;
+	profile_function([&]() {
+		for (uint16_t i = 0; i < NUM_TEMPI; i++) {
+			float progress = float(i) / NUM_TEMPI;
+			float tempi_range = TEMPO_HIGH - TEMPO_LOW;
+			float tempo = tempi_range * progress + TEMPO_LOW;
 
-		tempi_bpm_values_hz[i] = tempo / 60.0;
-		//Serial.print("TEMPO HZ:");
-		//Serial.println(tempi_bpm_values_hz[i]);
-	}
-
-	for (uint16_t i = 0; i < NUM_TEMPI; i++) {
-		tempi[i].target_tempo_hz = tempi_bpm_values_hz[i];
-
-		float neighbor_left;
-		float neighbor_right;
-
-		if (i == 0) {
-			neighbor_left = tempi_bpm_values_hz[i];
-			neighbor_right = tempi_bpm_values_hz[i + 1];
-		}
-		else if (i == NUM_TEMPI - 1) {
-			neighbor_left = tempi_bpm_values_hz[i - 1];
-			neighbor_right = tempi_bpm_values_hz[i];
-		}
-		else {
-			neighbor_left = tempi_bpm_values_hz[i - 1];
-			neighbor_right = tempi_bpm_values_hz[i + 1];
+			tempi_bpm_values_hz[i] = tempo / 60.0;
+			//Serial.print("TEMPO HZ:");
+			//Serial.println(tempi_bpm_values_hz[i]);
 		}
 
-		float neighbor_left_distance_hz = fabs(neighbor_left - tempi[i].target_tempo_hz);
-		float neighbor_right_distance_hz = fabs(neighbor_right - tempi[i].target_tempo_hz);
-		float max_distance_hz = 0;
+		for (uint16_t i = 0; i < NUM_TEMPI; i++) {
+			tempi[i].target_tempo_hz = tempi_bpm_values_hz[i];
 
-		if (neighbor_left_distance_hz > max_distance_hz) {
-			max_distance_hz = neighbor_left_distance_hz;
+			float neighbor_left;
+			float neighbor_right;
+
+			if (i == 0) {
+				neighbor_left = tempi_bpm_values_hz[i];
+				neighbor_right = tempi_bpm_values_hz[i + 1];
+			}
+			else if (i == NUM_TEMPI - 1) {
+				neighbor_left = tempi_bpm_values_hz[i - 1];
+				neighbor_right = tempi_bpm_values_hz[i];
+			}
+			else {
+				neighbor_left = tempi_bpm_values_hz[i - 1];
+				neighbor_right = tempi_bpm_values_hz[i + 1];
+			}
+
+			float neighbor_left_distance_hz = fabs(neighbor_left - tempi[i].target_tempo_hz);
+			float neighbor_right_distance_hz = fabs(neighbor_right - tempi[i].target_tempo_hz);
+			float max_distance_hz = 0;
+
+			if (neighbor_left_distance_hz > max_distance_hz) {
+				max_distance_hz = neighbor_left_distance_hz;
+			}
+			if (neighbor_right_distance_hz > max_distance_hz) {
+				max_distance_hz = neighbor_right_distance_hz;
+			}
+
+			tempi[i].block_size = NOVELTY_LOG_HZ / (max_distance_hz*0.5);
+
+			if (tempi[i].block_size > NOVELTY_HISTORY_LENGTH) {
+				tempi[i].block_size = NOVELTY_HISTORY_LENGTH;
+			}
+
+			//Serial.print("TEMPI ");
+			//Serial.print(i);
+			//Serial.print(" BLOCK SIZE: ");
+			//Serial.println(tempi[i].block_size);
+
+			float k = (int)(0.5 + ((tempi[i].block_size * tempi[i].target_tempo_hz) / NOVELTY_LOG_HZ));
+			float w = (2.0 * PI * k) / tempi[i].block_size;
+			tempi[i].cosine = cos(w);
+			tempi[i].sine = sin(w);
+			tempi[i].coeff = 2.0 * tempi[i].cosine;
+
+			tempi[i].window_step = 4096.0 / tempi[i].block_size;
+
+			// tempi[i].target_tempo_hz *= 0.5;
+
+			// float radians_per_second = (PI * (tempi[i].target_tempo_hz));
+			tempi[i].phase_radians_per_reference_frame = ((2.0 * PI * tempi[i].target_tempo_hz) / float(REFERENCE_FPS));
+
+			tempi[i].phase_inverted = false;
 		}
-		if (neighbor_right_distance_hz > max_distance_hz) {
-			max_distance_hz = neighbor_right_distance_hz;
-		}
-
-		tempi[i].block_size = NOVELTY_LOG_HZ / (max_distance_hz*0.5);
-
-		if (tempi[i].block_size > NOVELTY_HISTORY_LENGTH) {
-			tempi[i].block_size = NOVELTY_HISTORY_LENGTH;
-		}
-
-		//Serial.print("TEMPI ");
-		//Serial.print(i);
-		//Serial.print(" BLOCK SIZE: ");
-		//Serial.println(tempi[i].block_size);
-
-		float k = (int)(0.5 + ((tempi[i].block_size * tempi[i].target_tempo_hz) / NOVELTY_LOG_HZ));
-		float w = (2.0 * PI * k) / tempi[i].block_size;
-		tempi[i].cosine = cos(w);
-		tempi[i].sine = sin(w);
-		tempi[i].coeff = 2.0 * tempi[i].cosine;
-
-		tempi[i].window_step = 4096.0 / tempi[i].block_size;
-
-		// tempi[i].target_tempo_hz *= 0.5;
-
-		// float radians_per_second = (PI * (tempi[i].target_tempo_hz));
-		tempi[i].phase_radians_per_reference_frame = ((2.0 * PI * tempi[i].target_tempo_hz) / float(REFERENCE_FPS));
-
-		tempi[i].phase_inverted = false;
-	}
+	}, __func__ );
 }
 
 float unwrap_phase(float phase) {
@@ -284,142 +286,156 @@ void update_tempo() {
 }
 
 void log_novelty(float input) {
-	shift_array_left(novelty_curve, NOVELTY_HISTORY_LENGTH, 1);
-	novelty_curve[NOVELTY_HISTORY_LENGTH - 1] = input;
+	profile_function([&]() {
+		shift_array_left(novelty_curve, NOVELTY_HISTORY_LENGTH, 1);
+		novelty_curve[NOVELTY_HISTORY_LENGTH - 1] = input;
+	}, __func__ );
 }
 
 void log_vu(float input) {
-	static float last_input = input;
-	float positive_difference = max(input - last_input, 0.0f);
-	shift_array_left(vu_curve, NOVELTY_HISTORY_LENGTH, 1);
-	vu_curve[NOVELTY_HISTORY_LENGTH - 1] = positive_difference;
+	profile_function([&]() {
+		static float last_input = input;
+		float positive_difference = max(input - last_input, 0.0f);
+		shift_array_left(vu_curve, NOVELTY_HISTORY_LENGTH, 1);
+		vu_curve[NOVELTY_HISTORY_LENGTH - 1] = positive_difference;
 
-	last_input = input;
+		last_input = input;
+	}, __func__ );
 }
 
 void reduce_tempo_history(float reduction_amount) {
-	float reduction_amount_inv = 1.0 - reduction_amount;
+	profile_function([&]() {
+		float reduction_amount_inv = 1.0 - reduction_amount;
 
-	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i++) {
-		novelty_curve[i] = max(novelty_curve[i] * reduction_amount_inv, 0.00001f);	// never go full zero
-		vu_curve[i]      = max(     vu_curve[i] * reduction_amount_inv, 0.00001f);
-	}
+		for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i++) {
+			novelty_curve[i] = max(novelty_curve[i] * reduction_amount_inv, 0.00001f);	// never go full zero
+			vu_curve[i]      = max(     vu_curve[i] * reduction_amount_inv, 0.00001f);
+		}
+	}, __func__ );
 }
 
 void check_silence(float current_novelty) {
-	float min_val = 1.0;
-	float max_val = 0.0;
-	for (uint16_t i = 0; i < 128; i++) {
-		float recent_novelty = novelty_curve_normalized[(NOVELTY_HISTORY_LENGTH - 1 - 128) + i];
-		recent_novelty = min(0.5f, recent_novelty) * 2.0;
+	profile_function([&]() {
+		float min_val = 1.0;
+		float max_val = 0.0;
+		for (uint16_t i = 0; i < 128; i++) {
+			float recent_novelty = novelty_curve_normalized[(NOVELTY_HISTORY_LENGTH - 1 - 128) + i];
+			recent_novelty = min(0.5f, recent_novelty) * 2.0;
 
-		float scaled_value = sqrt(recent_novelty);
-		max_val = max(max_val, scaled_value);
-		min_val = min(min_val, scaled_value);
-	}
-	float novelty_contrast = fabs(max_val - min_val);
-	float silence_level_raw = 1.0 - novelty_contrast;
+			float scaled_value = sqrt(recent_novelty);
+			max_val = max(max_val, scaled_value);
+			min_val = min(min_val, scaled_value);
+		}
+		float novelty_contrast = fabs(max_val - min_val);
+		float silence_level_raw = 1.0 - novelty_contrast;
 
-	silence_level = max(0.0f, silence_level_raw - 0.5f) * 2.0;
-	if (silence_level_raw > 0.5) {
-		silence_detected = true;
-		reduce_tempo_history(silence_level * 0.10);
-	}
-	else {
-		silence_level = 0.0;
-		silence_detected = false;
-	}
+		silence_level = max(0.0f, silence_level_raw - 0.5f) * 2.0;
+		if (silence_level_raw > 0.5) {
+			silence_detected = true;
+			reduce_tempo_history(silence_level * 0.10);
+		}
+		else {
+			silence_level = 0.0;
+			silence_detected = false;
+		}
 
-	// rendered_debug_value = silence_level;
+		// rendered_debug_value = silence_level;
+	}, __func__ );
 }
 
 void update_novelty() {
-	static uint32_t next_update = t_now_us;
+	profile_function([&]() {
+		static uint32_t next_update = t_now_us;
 
-	const float update_interval_hz = NOVELTY_LOG_HZ;
-	const uint32_t update_interval_us = 1000000 / update_interval_hz;
+		const float update_interval_hz = NOVELTY_LOG_HZ;
+		const uint32_t update_interval_us = 1000000 / update_interval_hz;
 
-	if (t_now_us >= next_update) {
-		next_update += update_interval_us;
+		if (t_now_us >= next_update) {
+			next_update += update_interval_us;
 
-		static uint32_t iter = 0;
-		iter++;
+			static uint32_t iter = 0;
+			iter++;
 
-		float current_novelty = 0.0;
-		for (uint16_t i = 0; i < NUM_FREQS; i++) {
-			float new_mag = spectrogram_smooth[i];
-			frequencies_musical[i].novelty = max(0.0f, new_mag - frequencies_musical[i].magnitude_last);
-			current_novelty += frequencies_musical[i].novelty;
+			float current_novelty = 0.0;
+			for (uint16_t i = 0; i < NUM_FREQS; i++) {
+				float new_mag = spectrogram_smooth[i];
+				frequencies_musical[i].novelty = max(0.0f, new_mag - frequencies_musical[i].magnitude_last);
+				current_novelty += frequencies_musical[i].novelty;
 
-			frequencies_musical[i].magnitude_last = new_mag;
+				frequencies_musical[i].magnitude_last = new_mag;
+			}
+			current_novelty /= float(NUM_FREQS);
+
+			check_silence(current_novelty);
+
+			log_novelty(log1p(current_novelty));
+
+			log_vu(vu_max);
+			vu_max = 0.000001;
 		}
-		current_novelty /= float(NUM_FREQS);
-
-		check_silence(current_novelty);
-
-		log_novelty(log1p(current_novelty));
-
-		log_vu(vu_max);
-		vu_max = 0.000001;
-	}
+	}, __func__ );
 }
 
 void sync_beat_phase(uint16_t tempo_bin, float delta) {
-	float push = (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
+	profile_function([&]() {
+		float push = (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
 
-	tempi[tempo_bin].phase += push;
+		tempi[tempo_bin].phase += push;
 
-	if (tempi[tempo_bin].phase > PI) {
-		tempi[tempo_bin].phase -= (2 * PI);
-		
-		tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
-	}
-	else if (tempi[tempo_bin].phase < -PI) {
-		tempi[tempo_bin].phase += (2 * PI);
+		if (tempi[tempo_bin].phase > PI) {
+			tempi[tempo_bin].phase -= (2 * PI);
+			
+			tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
+		}
+		else if (tempi[tempo_bin].phase < -PI) {
+			tempi[tempo_bin].phase += (2 * PI);
 
-		tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
-	}
+			tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
+		}
 
-	/*
-	float walk_divider = 200.0;
-	float sync_distance = fabs(tempi[tempo_bin].phase - tempi[tempo_bin].phase_target);
-	if (tempi[tempo_bin].phase > tempi[tempo_bin].phase_target) {
-		tempi[tempo_bin].phase -= (sync_distance / walk_divider);
-	}
-	else if (tempi[tempo_bin].phase < tempi[tempo_bin].phase_target) {
-		tempi[tempo_bin].phase += (sync_distance / walk_divider);
-	}
-	*/
+		/*
+		float walk_divider = 200.0;
+		float sync_distance = fabs(tempi[tempo_bin].phase - tempi[tempo_bin].phase_target);
+		if (tempi[tempo_bin].phase > tempi[tempo_bin].phase_target) {
+			tempi[tempo_bin].phase -= (sync_distance / walk_divider);
+		}
+		else if (tempi[tempo_bin].phase < tempi[tempo_bin].phase_target) {
+			tempi[tempo_bin].phase += (sync_distance / walk_divider);
+		}
+		*/
 
-	tempi[tempo_bin].beat = sin(tempi[tempo_bin].phase);
+		tempi[tempo_bin].beat = sin(tempi[tempo_bin].phase);
+	}, __func__ );
 }
 
 void update_tempi_phase(float delta) {
-	static bool interlacing_field = 0;
-	interlacing_field = !interlacing_field;
+	profile_function([&]() {
+		static bool interlacing_field = 0;
+		interlacing_field = !interlacing_field;
 
-	tempi_power_sum = 0.00000001;
+		tempi_power_sum = 0.00000001;
 
-	// Iterate over all tempi to smooth them and calculate the power sum
-	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		// Load the magnitude
-		float tempi_magnitude = tempi[tempo_bin].magnitude;
+		// Iterate over all tempi to smooth them and calculate the power sum
+		for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
+			// Load the magnitude
+			float tempi_magnitude = tempi[tempo_bin].magnitude;
 
-		// Smooth it
-		tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
-		tempi_power_sum += tempi_smooth[tempo_bin];
+			// Smooth it
+			tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
+			tempi_power_sum += tempi_smooth[tempo_bin];
 
-		sync_beat_phase(tempo_bin, delta);
-	}
+			sync_beat_phase(tempo_bin, delta);
+		}
 
-	// Measure contribution factor of each tempi, calculate confidence level
-	float max_contribution = 0.000001;
-	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		max_contribution = max(
-			tempi_smooth[tempo_bin] / tempi_power_sum,
-			max_contribution
-		);
-	}
+		// Measure contribution factor of each tempi, calculate confidence level
+		float max_contribution = 0.000001;
+		for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
+			max_contribution = max(
+				tempi_smooth[tempo_bin] / tempi_power_sum,
+				max_contribution
+			);
+		}
 
-	tempo_confidence = max_contribution;
+		tempo_confidence = max_contribution;
+	}, __func__ );
 }
