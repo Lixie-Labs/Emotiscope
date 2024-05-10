@@ -1,5 +1,5 @@
 // UNCOMMENT THIS TO ENABLE IT
-#define PROFILER_ENABLED  // Slows down the system, but allows watching how much total time each function takes up
+//#define PROFILER_ENABLED  // Slows down the system, but allows watching how much total time each function takes up
 
 #define PROFILER_SINGLE_SHOT \
 	(false)	 // Count only the most recent run or all runs since last print?

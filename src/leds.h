@@ -216,7 +216,7 @@ CRGBF desaturate(struct CRGBF input_color, float amount) {
 
 CRGBF hsv(float h, float s, float v) {
 	CRGBF return_val;
-	profile_function([&]() {
+	//profile_function([&]() {
 		// Normalize hue to range [0, 1]
 		h = fmodf(h, 1.0f);
 		if (h < 0.0f) h += 1.0f;
@@ -241,7 +241,7 @@ CRGBF hsv(float h, float s, float v) {
 		r += m; g += m; b += m;
 
 		return_val = (CRGBF){r, g, b};
-	}, __func__);
+	//}, __func__);
 
 	return return_val;
 }
@@ -633,7 +633,7 @@ void apply_brightness() {
 
 float get_color_range_hue(float progress){
 	float return_val;
-	profile_function([&]() {
+	//profile_function([&]() {
 		float color_range = configuration.color_range;
 		
 		if(color_range == 0.0){
@@ -646,7 +646,7 @@ float get_color_range_hue(float progress){
 		else{
 			return_val = configuration.color + (color_range * progress);
 		}
-	}, __func__);
+	//}, __func__);
 
 	return return_val;
 }
