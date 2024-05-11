@@ -177,7 +177,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			else{
 				load_sliders_relevant_to_mode(mode_index);
 				load_toggles_relevant_to_mode(mode_index);
-				transmit_to_client_in_slot("mode_selected", com.origin_client_slot);
+				broadcast("reload_config");
 			}
 		}
 		else{
@@ -286,7 +286,10 @@ void parse_command(uint32_t t_now_ms, command com) {
 	else if (fastcmp(substring, "button_tap")) {
 		printf("REMOTE TAP TRIGGER\n");
 		if(EMOTISCOPE_ACTIVE == true){
-			increment_mode();
+			int16_t next_mode_index = increment_mode();
+			load_sliders_relevant_to_mode(next_mode_index);
+			load_toggles_relevant_to_mode(next_mode_index);
+			broadcast("reload_config");
 		}
 		else{
 			toggle_standby();
@@ -335,6 +338,12 @@ void parse_command(uint32_t t_now_ms, command com) {
 				trigger_self_test(); // Begin self test
 			}
 		}
+	}
+	else if(fastcmp(substring, "increment_mode")){
+		int16_t next_mode_index = increment_mode();
+		load_sliders_relevant_to_mode(next_mode_index);
+		load_toggles_relevant_to_mode(next_mode_index);
+		broadcast("reload_config");
 	}
 	else if (fastcmp(substring, "start_debug_recording")) {
 		audio_recording_index = 0;

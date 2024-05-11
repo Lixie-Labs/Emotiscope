@@ -21,7 +21,7 @@ volatile bool slider_touch_active = false;
 volatile bool device_touch_active = false;
 
 extern void toggle_standby();
-extern void increment_mode();
+extern int16_t increment_mode();
 extern uint8_t hold_blinks_queued;
 extern bool hold_blink_state;
 
@@ -165,6 +165,7 @@ void read_touch(){
 						else if(touch_pins[t].pin == TOUCH_CENTER_PIN){
 							if(EMOTISCOPE_ACTIVE == true){
 								increment_mode();
+								broadcast("reload_config");
 								save_config_delayed();
 							}
 							else{

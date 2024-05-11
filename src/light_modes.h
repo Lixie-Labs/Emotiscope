@@ -97,9 +97,11 @@ int16_t set_light_mode_by_name(const char* name){
 	return mode_index;
 }
 
-void increment_mode(){
+int16_t increment_mode(){
 	int16_t next_mode_index = (configuration.current_mode + 1) % NUM_LIGHT_MODES;
 	set_light_mode_by_index(next_mode_index);
+
+	return next_mode_index;
 }
 
 void enter_queued_light_mode(){

@@ -142,11 +142,11 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float window_pos = 0.0;
 
 		for (uint16_t i = 0; i < block_size; i++) {
-			float sample_novelty = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
-			//float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
+			//float sample_novelty = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
+			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			//float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_vu * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 
