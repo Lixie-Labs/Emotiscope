@@ -1,6 +1,6 @@
 // Get the base URL of the current page
-const base_url = window.location.origin;
-let mac_str = "";
+var base_url = window.location.origin;
+var mac_str = "";
 
 function get_mac_string(){
 	// Fetch the text result from the /mac endpoint
@@ -24,4 +24,16 @@ function get_mac_string(){
 		});
 }
 
-get_mac_string();
+(function() {
+    var first_load = true;
+
+    // Register the touch event listeners on page load
+    document.addEventListener('APP_LOADED', function() {	
+		if(first_load == true){
+			first_load = false;
+			console.log("APP_LOADED fetch_mac.js");
+			get_mac_string();
+			setTimeout(get_mac_string, 10000);
+		}
+	});
+})();

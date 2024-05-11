@@ -1,19 +1,81 @@
-// ------------------------------------------------------------
-//          _     _   _   _   _     _                    _
-//         | |   (_) | | (_) | |   (_)                  | |
-//  _   _  | |_   _  | |  _  | |_   _    ___   ___      | |__
-// | | | | | __| | | | | | | | __| | |  / _ \ / __|     | '_ \ 
-// | |_| | | |_  | | | | | | | |_  | | |  __/ \__ \  _  | | | |
-//  \__,_|  \__| |_| |_| |_|  \__| |_|  \___| |___/ (_) |_| |_|
-//
-// Custom math functions for things like array manipulation
-// and system diagnostics like free stack/heap
+/*
+------------------------------------------------------------
+         _     _   _   _   _     _                    _
+        | |   (_) | | (_) | |   (_)                  | |
+ _   _  | |_   _  | |  _  | |_   _    ___   ___      | |__
+| | | | | __| | | | | | | | __| | |  / _ \ / __|     | '_ \ 
+| |_| | | |_  | | | | | | | |_  | | |  __/ \__ \  _  | | | |
+ \__,_|  \__| |_| |_| |_|  \__| |_|  \___| |___/ (_) |_| |_|
+
+Custom math functions for things like array manipulation
+and system diagnostics like free stack/heap
+*/
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_heap_caps.h>
 
-void broadcast(char* message){
+#define TOTAL_NOISE_SAMPLES 666 // and the devil laughs
+uint8_t noise_samples[TOTAL_NOISE_SAMPLES];
+
+float num_leds_float_lookup[NUM_LEDS];
+float num_freqs_float_lookup[NUM_FREQS];
+float num_tempi_float_lookup[NUM_TEMPI];
+
+char substring[128];
+
+void init_num_leds_float_lookup(){
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		num_leds_float_lookup[i] = i / (float)NUM_LEDS;
+	}
+}
+
+void init_num_freqs_float_lookup(){
+	for(uint16_t i = 0; i < NUM_FREQS; i++){
+		num_freqs_float_lookup[i] = i / (float)NUM_FREQS;
+	}
+}
+
+void init_num_tempi_float_lookup(){
+	for(uint16_t i = 0; i < NUM_TEMPI; i++){
+		num_tempi_float_lookup[i] = i / (float)NUM_TEMPI;
+	}
+}
+
+void init_floating_point_lookups(){
+	init_num_leds_float_lookup();
+	init_num_freqs_float_lookup();
+	init_num_tempi_float_lookup();
+}
+
+void init_noise_samples(){
+	for(uint16_t i = 0; i < TOTAL_NOISE_SAMPLES; i++){
+		noise_samples[i] = esp_random() & 1;
+	}
+}
+
+void fetch_substring(char* input_buffer, char delimiter, uint8_t fetch_index){
+	memset(substring, 0, 128);
+	int16_t input_length = strlen(input_buffer);
+
+	for(uint16_t i = 0; i < input_length; i++){
+		if(fetch_index == 0){
+			for(uint16_t j = i; j <= input_length; j++){
+				if(input_buffer[j] == delimiter || input_buffer[j] == '\0'){
+					memcpy(substring, input_buffer + i, j-i);
+					return;
+				}
+			}
+			return;
+		}
+
+		if(input_buffer[i] == delimiter){
+			fetch_index--;
+		}
+	}
+}
+
+void broadcast(const char* message){
 	extern PsychicWebSocketHandler websocket_handler;
 	websocket_handler.sendAll(message);
 	//printf("%s\n", message);
@@ -32,6 +94,17 @@ float linear_to_tri(float input) {
         // Scale down the second half
         return 2.0f * (1.0f - input);
     }
+}
+
+inline bool get_random_bit(){
+	static uint16_t position = 0;
+	position++;
+
+	if(position >= TOTAL_NOISE_SAMPLES){
+		position = 0;
+	}
+
+	return noise_samples[position];
 }
 
 // Can return a value between two array indices with linear interpolation
@@ -77,7 +150,7 @@ void shift_array_left(float* array, uint16_t array_size, uint16_t shift_amount) 
 	}
 }
 
-float clip_float(float input) { return min(1.0f, max(0.0f, input)); }
+inline float clip_float(float input) { return min(1.0f, max(0.0f, input)); }
 
 // Fast approximation of the square root using Newton-Raphson method
 float fast_sqrt(float number) {
@@ -97,39 +170,6 @@ float fast_sqrt(float number) {
 	}
 
 	return x;
-}
-
-// Function to perform autocorrelation using a given pattern of 128 samples within a larger data set
-// Searches for the best correlation within 512 shift positions
-// Returns the shift value where the pattern has the highest correlation
-int autocorrelate_with_pattern(const float* data, unsigned int data_length, const float* pattern, unsigned int pattern_length) {
-	// Check if the data array and pattern array are of sufficient length
-	if (data_length < 128 || pattern_length != 128 || data_length < pattern_length + 512) {
-		return -1;	// Error: Arrays not of correct length or data array not long enough for 512 shifts
-	}
-
-	unsigned int max_shifts = data_length - pattern_length;
-	float correlations[max_shifts];
-	for (unsigned int i = 0; i < max_shifts; i++) {
-		correlations[i] = 0.0f;
-		for (unsigned int j = 0; j < pattern_length; j++) {
-			if (i + j < data_length) {
-				correlations[i] += data[i + j] * pattern[j];
-			}
-		}
-	}
-
-	// Find the peak (maximum correlation) within the first 512 shifts
-	int max_shift = 0;
-	float max_correlation = correlations[0];
-	for (unsigned int shift = 1; shift < 512 && shift < max_shifts; shift++) {
-		if (correlations[shift] > max_correlation) {
-			max_correlation = correlations[shift];
-			max_shift = shift;
-		}
-	}
-
-	return max_shift;
 }
 
 inline bool fastcmp(char* input_a, char* input_b){
@@ -171,13 +211,10 @@ void low_pass_filter(float* input_array, uint16_t num_samples, uint16_t sample_r
     float rc = 1.0f / (2.0f * M_PI * cutoff_frequency);
     float alpha = 1.0f / (1.0f + (sample_rate * rc));
 
-    // Temporary variable to hold intermediate filter results
-    float filtered_value;
-
     // Apply the filter multiple times based on filter_order
     for (uint8_t order = 0; order < filter_order; ++order) {
         // Initialize the first filtered value
-        filtered_value = input_array[0];
+        float filtered_value = input_array[0];
 
         // Start filtering from the second sample
         for (uint16_t n = 1; n < num_samples; ++n) {
@@ -201,4 +238,9 @@ float fixed_interpolate(uint8_t value_a, uint8_t value_b, uint8_t factor) {
     // Convert to float and scale back by dividing by 255*255, which is the maximum possible value
     // Since we're dividing by a constant, this can be optimized by the compiler
     return weighted_sum / 65025.0f; // 255*255 = 65025
+}
+
+float fast_tanh(float x) {
+    float x2 = x * x;
+    return x * (27.0f + x2) / (27.0f + 9.0f * x2);
 }

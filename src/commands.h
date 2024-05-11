@@ -9,8 +9,8 @@ uint16_t commands_queued = 0;
 
 extern float clip_float(float input);
 extern int16_t set_lightshow_mode_by_name(char* name);
-extern void transmit_to_client_in_slot(char* message, uint8_t client_slot);
-extern void reboot_into_wifi_config_mode();
+extern void transmit_to_client_in_slot(const char* message, uint8_t client_slot);
+extern void reboot_into_wifi_config_mode();;
 
 // Function to return the selected index as a null-terminated string with custom delimiter
 // The result is stored in the provided buffer
@@ -63,18 +63,17 @@ void unrecognized_command_error(char* command){
 
 void parse_command(uint32_t t_now_ms, command com) {
 	//printf("Parsing command: '%s'\n", com.command);
-	// Buffer to store results from get_index
-    char substring[MAX_COMMAND_LENGTH];
-
-	// Get command type
-	load_substring_from_split_index(com.command, 0, substring, sizeof(substring));
+	
+    fetch_substring(com.command, '|', 0);
+	//printf("command type: %s\n", substring);
 
 	if (fastcmp(substring, "set")) {
 		// Get setting name
-		load_substring_from_split_index(com.command, 1, substring, sizeof(substring));
+		fetch_substring(com.command, '|', 1);
+		
 		if (fastcmp(substring, "brightness")) {
 			// Get brightness value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = clip_float(atof(substring));
 			configuration.brightness = setting_value;
 
@@ -82,7 +81,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "softness")) {
 			// Get softness value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.softness = setting_value;
 
@@ -90,7 +89,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "speed")) {
 			// Get speed value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.speed = setting_value;
 
@@ -98,7 +97,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "color")) {
 			// Get color value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = clip_float(atof(substring));
 			configuration.color = setting_value;
 
@@ -106,21 +105,21 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "mirror_mode")) {
 			// Get mirror_mode value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			bool setting_value = (bool)atoi(substring);
 			configuration.mirror_mode = setting_value;
 		}
-		else if (fastcmp(substring, "blue_filter")) {
-			// Get blue_filter value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+		else if (fastcmp(substring, "warmth")) {
+			// Get warmth value
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
-			configuration.blue_filter = setting_value;
+			configuration.warmth = setting_value;
 
-			update_ui(UI_NEEDLE_EVENT, configuration.blue_filter);
+			update_ui(UI_NEEDLE_EVENT, configuration.warmth);
 		}
 		else if (fastcmp(substring, "color_range")) {
 			// Get color_range value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.color_range = setting_value;
 
@@ -128,15 +127,15 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "saturation")) {
 			// Get saturation value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
-			configuration.saturation = setting_value;
+			configuration.saturation = sqrt(clip_float(setting_value));
 
 			//update_ui(UI_NEEDLE_EVENT, configuration.saturation);
 		}
 		else if (fastcmp(substring, "background")) {
 			// Get background value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
 			configuration.background = setting_value;
 
@@ -144,50 +143,42 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else if (fastcmp(substring, "screensaver")) {
 			// Get screensaver value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			bool setting_value = (bool)atoi(substring);
 			configuration.screensaver = setting_value;
 		}
 		else if (fastcmp(substring, "temporal_dithering")){
 			// Get temporal_dithering value
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 			bool setting_value = (bool)atoi(substring);
 			configuration.temporal_dithering = setting_value;
+		}
+		else if (fastcmp(substring, "reverse_color_range")){
+			// Get reverse_color_range value
+			fetch_substring(com.command, '|', 2);
+			bool setting_value = (bool)atoi(substring);
+			configuration.reverse_color_range = setting_value;
+		}
+		else if (fastcmp(substring, "auto_color_cycle")){
+			// Get auto_color_cycle value
+			fetch_substring(com.command, '|', 2);
+			bool setting_value = (bool)atoi(substring);
+			configuration.auto_color_cycle = setting_value;
 		}
 
 		else if (fastcmp(substring, "mode")) {
 			// Get mode name
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
+			fetch_substring(com.command, '|', 2);
 
-			int16_t mode_index = set_lightshow_mode_by_name(substring);
+			int16_t mode_index = set_light_mode_by_name(substring);
 			if(mode_index == -1){
 				unrecognized_command_error(substring);
 			}
 			else{
 				load_sliders_relevant_to_mode(mode_index);
 				load_toggles_relevant_to_mode(mode_index);
-				transmit_to_client_in_slot("mode_selected", com.origin_client_slot);
+				broadcast("reload_config");
 			}
-		}
-
-		else if (fastcmp(substring, "touch_thresholds")){
-			// Get touch threshold values
-			load_substring_from_split_index(com.command, 2, substring, sizeof(substring));
-			uint32_t touch_left_threshold = atol(substring);
-			load_substring_from_split_index(com.command, 3, substring, sizeof(substring));
-			uint32_t touch_center_threshold = atol(substring);
-			load_substring_from_split_index(com.command, 4, substring, sizeof(substring));
-			uint32_t touch_right_threshold = atol(substring);
-
-			configuration.touch_left_threshold = touch_left_threshold;
-			configuration.touch_center_threshold = touch_center_threshold;
-			configuration.touch_right_threshold = touch_right_threshold;
-
-			touch_pins[TOUCH_LEFT].threshold   = configuration.touch_left_threshold;
-			touch_pins[TOUCH_CENTER].threshold = configuration.touch_center_threshold;
-			touch_pins[TOUCH_RIGHT].threshold  = configuration.touch_right_threshold;
-
-			printf("Touch thresholds set to: %lu | %lu | %lu\n", configuration.touch_left_threshold, configuration.touch_center_threshold, configuration.touch_right_threshold);
 		}
 		else{
 			unrecognized_command_error(substring);
@@ -198,8 +189,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 	}
 	else if (fastcmp(substring, "get")) {
 		// Name of thing to get
-		load_substring_from_split_index(com.command, 1, substring, sizeof(substring));
-
+		fetch_substring(com.command, '|', 1);
+		
 		// If getting configuration struct contents
 		if (fastcmp(substring, "config")) {
 			// Wake on command
@@ -212,10 +203,12 @@ void parse_command(uint32_t t_now_ms, command com) {
 		else if (fastcmp(substring, "modes")) {
 			transmit_to_client_in_slot("clear_modes", com.origin_client_slot);
 
-			uint16_t num_modes = sizeof(lightshow_modes) / sizeof(lightshow_mode);
-			for(uint16_t i = 0; i < num_modes; i++){
-				char command_string[40];
-				snprintf(command_string, 40, "new_mode|%s", lightshow_modes[i].name);
+			uint16_t num_modes = sizeof(light_modes) / sizeof(light_mode);
+			for(uint16_t mode_index = 0; mode_index < num_modes; mode_index++){
+				char command_string[128];
+				uint8_t mode_type = (uint8_t)light_modes[mode_index].type;
+
+				snprintf(command_string, 128, "new_mode|%d|%d|%.64s", mode_index, mode_type, light_modes[mode_index].name);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 
@@ -226,8 +219,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("clear_sliders", com.origin_client_slot);
 
 			for(uint16_t i = 0; i < sliders_active; i++){
-				char command_string[80];
-				snprintf(command_string, 80, "new_slider|%s|%.3f|%.3f|%.3f", sliders[i].name, sliders[i].slider_min, sliders[i].slider_max, sliders[i].slider_step);
+				char command_string[128];
+				snprintf(command_string, 128, "new_slider|%s|%.3f|%.3f|%.3f", sliders[i].name, sliders[i].slider_min, sliders[i].slider_max, sliders[i].slider_step);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 
@@ -239,8 +232,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("clear_toggles", com.origin_client_slot);
 
 			for(uint16_t i = 0; i < toggles_active; i++){
-				char command_string[80];
-				snprintf(command_string, 80, "new_toggle|%s", toggles[i].name);
+				char command_string[128];
+				snprintf(command_string, 128, "new_toggle|%s", toggles[i].name);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 
@@ -252,8 +245,8 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("clear_menu_toggles", com.origin_client_slot);
 
 			for(uint16_t i = 0; i < menu_toggles_active; i++){
-				char command_string[80];
-				snprintf(command_string, 80, "new_menu_toggle|%s", menu_toggles[i].name);
+				char command_string[128];
+				snprintf(command_string, 128, "new_menu_toggle|%s", menu_toggles[i].name);
 				transmit_to_client_in_slot(command_string, com.origin_client_slot);
 			}
 
@@ -262,15 +255,15 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 		// If getting touch values
 		else if (fastcmp(substring, "touch_vals")) {
-			char command_string[80];
-			snprintf(command_string, 80, "touch_vals|%lu|%lu|%lu", uint32_t(touch_pins[0].touch_value), uint32_t(touch_pins[1].touch_value), uint32_t(touch_pins[2].touch_value));
+			char command_string[128];
+			snprintf(command_string, 128, "touch_vals|%lu|%lu|%lu", uint32_t(touch_pins[0].touch_value), uint32_t(touch_pins[1].touch_value), uint32_t(touch_pins[2].touch_value));
 			transmit_to_client_in_slot(command_string, com.origin_client_slot);
 		}
 
 		// If getting version number
 		else if (fastcmp(substring, "version")) {
-			char command_string[80];
-			snprintf(command_string, 80, "version|%d.%d.%d", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH);
+			char command_string[128];
+			snprintf(command_string, 128, "version|%d.%d.%d", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH);
 			transmit_to_client_in_slot(command_string, com.origin_client_slot);
 		}
 
@@ -279,24 +272,24 @@ void parse_command(uint32_t t_now_ms, command com) {
 			unrecognized_command_error(substring);
 		}
 	}
-	else if (fastcmp(substring, "reset")) {
+	else if (fastcmp(substring, "reboot")) {
 		transmit_to_client_in_slot("disconnect_immediately", com.origin_client_slot);
-		printf("Device was instructed to soft-reset! Please wait...\n");
+		printf("Device was instructed to reboot! Please wait...\n");
 		delay(100);
 		ESP.restart();
 	}
-	else if (fastcmp(substring, "wifi_config_reboot")) {
+	else if (fastcmp(substring, "reboot_wifi_config")) {
 		transmit_to_client_in_slot("disconnect_immediately", com.origin_client_slot);
 		printf("Device was instructed to reboot into WiFi config mode! Please wait...\n");
 		reboot_into_wifi_config_mode();
 	}
-	else if (fastcmp(substring, "noise_cal")) {
-		start_noise_calibration();
-	}
 	else if (fastcmp(substring, "button_tap")) {
 		printf("REMOTE TAP TRIGGER\n");
 		if(EMOTISCOPE_ACTIVE == true){
-			increment_mode();
+			int16_t next_mode_index = increment_mode();
+			load_sliders_relevant_to_mode(next_mode_index);
+			load_toggles_relevant_to_mode(next_mode_index);
+			broadcast("reload_config");
 		}
 		else{
 			toggle_standby();
@@ -337,6 +330,21 @@ void parse_command(uint32_t t_now_ms, command com) {
 		extern void perform_update(int16_t client_slot);
 		perform_update(com.origin_client_slot);
 	}
+	else if (fastcmp(substring, "self_test")) {
+		if(t_now_ms >= 1000){ // Wait 1 second before checking boot button
+			if(self_test_step == SELF_TEST_INACTIVE){ // Self test is not already running
+				printf("SELF TEST TRIGGERED FROM APP, BEGINNING SELF TEST\n");
+				EMOTISCOPE_ACTIVE = true; // Wake if needed
+				trigger_self_test(); // Begin self test
+			}
+		}
+	}
+	else if(fastcmp(substring, "increment_mode")){
+		int16_t next_mode_index = increment_mode();
+		load_sliders_relevant_to_mode(next_mode_index);
+		load_toggles_relevant_to_mode(next_mode_index);
+		broadcast("reload_config");
+	}
 	else if (fastcmp(substring, "start_debug_recording")) {
 		audio_recording_index = 0;
 		memset(audio_debug_recording, 0, sizeof(int16_t)*MAX_AUDIO_RECORDING_SAMPLES);
@@ -357,9 +365,10 @@ void process_command_queue() {
 	}
 }
 
-bool queue_command(char* command, uint8_t length, uint8_t client_slot) {
+bool queue_command(const char* command, uint16_t length, uint8_t client_slot) {
 	if (length < MAX_COMMAND_LENGTH) {
 		if (commands_queued < COMMAND_QUEUE_SLOTS - 1) {
+			memset(command_queue[commands_queued].command, 0, MAX_COMMAND_LENGTH);
 			memcpy(command_queue[commands_queued].command, command, length);
 			command_queue[commands_queued].origin_client_slot = client_slot;
 			commands_queued += 1;

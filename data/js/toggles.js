@@ -1,15 +1,28 @@
 function set_toggle_state(toggle_name, toggle_state){
 	if(toggle_state == true){
-		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 36px)";
+		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 56px)";
 		document.getElementById(toggle_name+"_handle").style.backgroundColor = "#5897ce";
 		document.getElementById(toggle_name).style.border = "2px solid #5897ce";
 	}
 	else if(toggle_state == false){
 		let offset = document.getElementById(toggle_name).offsetHeight - 70;
-		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 36px + "+offset+"px)";
+		document.getElementById(toggle_name+"_handle").style.top = "calc(-100% + 56px + "+offset+"px)";
 		document.getElementById(toggle_name+"_handle").style.backgroundColor = "#5d5d5d";
 		document.getElementById(toggle_name).style.border = "2px solid #5d5d5d";
 	}
+}
+
+function toggle_toggle(toggle_name){
+	for(let id in configuration){
+		if(toggle_name == id){
+			set_toggle_state(toggle_name, !configuration[id]);
+			configuration[id] = !configuration[id];
+			trigger_vibration(20);
+			let resulting_value = configuration[id] ? 1 : 0;
+
+			transmit(`set|${toggle_name}|${resulting_value}`);
+		}
+	}   
 }
 
 function set_toggles(){
@@ -20,13 +33,13 @@ function set_toggles(){
 	toggle_tracks.forEach(function(toggle_track) {
 		// Get the 'id' attribute of the current element
 		var id = toggle_track.getAttribute('id');
-		console.log("ID: "+id);
-		console.log(configuration);
+		//console.log("ID: "+id);
+		//console.log(configuration);
 
 		try{
 			// Use the 'id' to access the corresponding value in the 'configuration' JSON
 			var value = configuration[id];
-			console.log('Value for', id, ':', value);
+			//console.log('Value for', id, ':', value);
 
 			for(let i in toggles){
 				let toggle = toggles[i];
@@ -38,7 +51,7 @@ function set_toggles(){
 			}    
 		} catch(e) {
 			// Log a message if there's no configuration for the current 'id'
-			console.log('No value found for', id);
+			//console.log('No value found for', id);
 		}
 	});
 }
@@ -47,7 +60,7 @@ function track_toggles() {
     const touch_start_data_toggles = new Map(); // To store initial data for each touch
 
     function start_tracking_toggle(event) {
-		console.log("snapping off");
+		//console.log("snapping off");
 		magnetic_snapping_enabled = false;
 
         Array.from(event.touches).forEach(touch => {
@@ -118,9 +131,9 @@ function track_toggles() {
     }
 
     function stop_tracking_toggle(event) {
-		console.log(configuration);
+		//console.log(configuration);
 
-		console.log("snapping on");
+		//console.log("snapping on");
 		magnetic_snapping_enabled = true;
 
         Array.from(event.changedTouches).forEach(touch => {

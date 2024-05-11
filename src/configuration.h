@@ -7,7 +7,7 @@
 
 Preferences preferences; // NVS storage for configuration
 
-extern lightshow_mode lightshow_modes[];
+extern light_mode light_modes[];
 extern PsychicWebSocketHandler websocket_handler;
 
 volatile bool wifi_config_mode = false;
@@ -40,8 +40,8 @@ void load_config(){
 	// Color Range
 	configuration.color_range = preferences.getFloat("color_range", 0.00);
 
-	// Blue Filter
-	configuration.blue_filter = preferences.getFloat("blue_filter", 0.00);
+	// Warmth
+	configuration.warmth = preferences.getFloat("warmth", 0.50);
 
 	// Speed
 	configuration.speed = preferences.getFloat("speed", 0.75);
@@ -67,14 +67,11 @@ void load_config(){
 	// VU Floor
 	configuration.vu_floor = preferences.getFloat("vu_floor", 0.00);
 
-	// Touch Left Threshold
-	configuration.touch_left_threshold = preferences.getULong("tl_threshold", 33000*2);
+	// Reverse Color
+	configuration.reverse_color_range = preferences.getBool("reverse_color", false);
 
-	// Touch Center Threshold
-	configuration.touch_center_threshold = preferences.getULong("tc_threshold", 95000*2);
-
-	// Touch Right Threshold
-	configuration.touch_right_threshold = preferences.getULong("tr_threshold", 64000*2);
+	// Auto Color Cycling
+	configuration.auto_color_cycle = preferences.getBool("auto_color", false);
 }
 
 void sync_configuration_to_client() {
@@ -112,9 +109,9 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|mirror_mode|int|%d", configuration.mirror_mode);
 	websocket_handler.sendAll(config_item_buffer);
 
-	// blue_filter
+	// warmth
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|blue_filter|float|%.3f", configuration.blue_filter);
+	snprintf(config_item_buffer, 120, "new_config|warmth|float|%.3f", configuration.warmth);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// color_range
@@ -134,12 +131,22 @@ void sync_configuration_to_client() {
 
 	// screensaver
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|screensaver|int|%li", configuration.screensaver);
+	snprintf(config_item_buffer, 120, "new_config|screensaver|int|%d", configuration.screensaver);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// temporal_dithering
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|temporal_dithering|int|%li", configuration.temporal_dithering);
+	snprintf(config_item_buffer, 120, "new_config|temporal_dithering|int|%d", configuration.temporal_dithering);
+	websocket_handler.sendAll(config_item_buffer);
+
+	// reverse_color_range
+	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|reverse_color_range|int|%d", configuration.reverse_color_range);
+	websocket_handler.sendAll(config_item_buffer);
+
+	// auto_color_cycle
+	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|auto_color_cycle|int|%d", configuration.auto_color_cycle);
 	websocket_handler.sendAll(config_item_buffer);
 
 	websocket_handler.sendAll("config_ready");
@@ -151,7 +158,7 @@ bool save_config() {
 	preferences.putFloat("softness",   configuration.softness);
 	preferences.putFloat("color", configuration.color);
 	preferences.putFloat("color_range", configuration.color_range);
-	preferences.putFloat("blue_filter", configuration.blue_filter);
+	preferences.putFloat("warmth", configuration.warmth);
 	preferences.putFloat("speed", configuration.speed);
 	preferences.putFloat("saturation", configuration.saturation);
 	preferences.putFloat("background", configuration.background);
@@ -160,9 +167,8 @@ bool save_config() {
 	preferences.putBool("screensaver", configuration.screensaver);
 	preferences.putBool("dithering", configuration.temporal_dithering);
 	preferences.putFloat("vu_floor", configuration.vu_floor);
-	preferences.putULong("tl_threshold", configuration.touch_left_threshold);
-	preferences.putULong("tc_threshold", configuration.touch_center_threshold);
-	preferences.putULong("tr_threshold", configuration.touch_right_threshold);
+	preferences.putBool("reverse_color", configuration.reverse_color_range);
+	preferences.putBool("auto_color", configuration.auto_color_cycle);
 
 	return true;
 }
@@ -197,7 +203,7 @@ bool load_noise_spectrum() {
 	else {
 		// Ensure the noise_spectrum array is sized properly
 		if (file.size() != sizeof(float) * NUM_FREQS) {
-			printf("Noise spectrum size does not match expected size! (%lu != %lu)\n", file.size(), sizeof(float) * NUM_FREQS);
+			printf("Noise spectrum size does not match expected size! (%zu != %zu)\n", file.size(), sizeof(float) * NUM_FREQS);
 			file.close();
 			return false;
 		}

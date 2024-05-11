@@ -27,7 +27,7 @@ function title_case(input_string) {
 }
 
 function trigger_vibration(length_ms) {
-	console.log("~~~~~~~~~~~~~buzz~~~~~~~~~~~~~");
+	//console.log("~~~~~~~~~~~~~buzz~~~~~~~~~~~~~");
     // Check if the Vibrate API is supported in the navigator
     if ("vibrate" in navigator) {
         // Trigger vibration for the specified length
@@ -42,17 +42,27 @@ function trigger_vibration(length_ms) {
 }
 
 function render_modes(){
-	let mode_bin = document.getElementById("mode_bin");
-	mode_bin.innerHTML = "";
+	let active_mode_bin    = document.getElementById("active_mode_bin");
+	let inactive_mode_bin  = document.getElementById("inactive_mode_bin");
+	active_mode_bin.innerHTML   = "";
+	inactive_mode_bin.innerHTML = "";
+
 	for(let i in modes){
-		let mode_name = modes[i];
+		let mode_name = modes[i].mode_name;
+		let mode_type = modes[i].mode_type;
 		let mode_button = `<div class="mode_button buzz" onclick="set_mode('${mode_name}'); hide_page('page_modes');">${mode_name}</div>`;
-		mode_bin.innerHTML += mode_button;
+
+		if(mode_type == 0){
+			active_mode_bin.innerHTML   += mode_button;
+		}
+		else if(mode_type == 1){
+			inactive_mode_bin.innerHTML += mode_button;
+		}
 	}
 
 	let current_mode = document.getElementById("current_mode");
-	let current_mode_name = modes[configuration.current_mode]; 
-	console.log("CURRENT MODE: "+current_mode_name);
+	let current_mode_name = modes[configuration.current_mode].mode_name; 
+	//console.log("CURRENT MODE: "+current_mode_name);
 	current_mode.innerHTML = current_mode_name;
 }
 
@@ -79,11 +89,11 @@ function render_toggles(){
 		let toggle_value = configuration[toggle_name];
 
 		out_html += `<span class="toggle">`;
-		out_html += 	`<div class="toggle_label buzz" onclick="show_setting_information('${toggle_name}');">`;
-		out_html += 		`${toggle_name.toUpperCase().replace("_"," ")}`;
+		out_html += 	`<div class="toggle_label buzz" onclick="show_setting_information('${toggle_name}'); ">`;
+		out_html += 		`${toggle_name.toUpperCase().replace(/_/g," ")}`;
 		out_html +=		`</div>`;
-		out_html +=		`<div class="toggle_track" id="${toggle_name}"></div>`;
-		out_html +=		`<div class="toggle_handle" id="${toggle_name}_handle"></div>`;
+		out_html +=		`<div class="toggle_track" id="${toggle_name}" onclick="toggle_toggle('${toggle_name}')"></div>`;
+		out_html +=		`<div class="toggle_handle" id="${toggle_name}_handle" onclick="toggle_toggle('${toggle_name}')"></div>`;
 		out_html += `</span>`;
 	}
 	toggle_container.innerHTML += out_html;
@@ -96,7 +106,7 @@ function render_menu_toggles(){
 		let toggle_name = menu_toggles[i].name;
 		let toggle_value = configuration[toggle_name];
 
-		console.log("TOGGLE: "+toggle_name+" VALUE: "+toggle_value);
+		//console.log("TOGGLE: "+toggle_name+" VALUE: "+toggle_value);
 		
 		if(toggle_value == true){
 			out_html += `<div class="menu_item buzz" onclick="set_menu_toggle_state('${toggle_name}', false);">`;
@@ -227,7 +237,7 @@ function toggle_fullscreen() {
         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
             document.documentElement.msRequestFullscreen();
         }
-        console.log("Going fullscreen.");
+        //console.log("Going fullscreen.");
     } else {
         // Exit fullscreen
         if (document.exitFullscreen) {
@@ -239,13 +249,13 @@ function toggle_fullscreen() {
         } else if (document.msExitFullscreen) { // IE/Edge
             document.msExitFullscreen();
         }
-        console.log("Exiting fullscreen.");
+        //console.log("Exiting fullscreen.");
     }
 }
 
 
 function render_controls(){
-	console.log("render_controls()");
+	//console.log("render_controls()");
 	init_setting_gallery_snapping();
 	render_modes();
 
@@ -278,41 +288,40 @@ function check_and_attach_buzz_listeners() {
     buzz_elements.forEach(attach_buzz_listeners_to_element);
 }
 
-let setting_gallery = document.getElementById("setting_gallery");
-setting_gallery.addEventListener('touchstart', function(){
-	trigger_vibration(5);
-	console.log("snapping_off");
-	magnetic_snapping_enabled = false;
-});
-setting_gallery.addEventListener('touchend', function(){
-	trigger_vibration(5);
-	console.log("snapping_on");
-	magnetic_snapping_enabled = true;
-});
+(function() {
+    var first_load = true;
 
-/*
-document.getRootNode().addEventListener('touchstart', function(){
-	trigger_vibration(10);
-});
+    // Register the touch event listeners on page load
+    document.addEventListener('APP_LOADED', function() {	
+        if(first_load == true){
+            first_load = false;
+			console.log("APP_LOADED render_controls.js");
 
-document.getRootNode().addEventListener('touchend', function(){
-	trigger_vibration(5);
-});
-*/
+			let setting_gallery = document.getElementById("setting_gallery");
+			setting_gallery.addEventListener('touchstart', function(){
+				trigger_vibration(5);
+				//console.log("snapping_off");
+				magnetic_snapping_enabled = false;
+			});
+			setting_gallery.addEventListener('touchend', function(){
+				trigger_vibration(5);
+				//console.log("snapping_on");
+				magnetic_snapping_enabled = true;
+			});
 
-// Initialize the listener on page load
-window.addEventListener('DOMContentLoaded', function(){
-	document.addEventListener('touchstart', function(){
-		transmit("touch_start");
-	}, { passive: true });
-	document.addEventListener('touchend', function(){
-		transmit("touch_end");
-	}, { passive: true });
+			document.addEventListener('touchstart', function(){
+				transmit("touch_start");
+			}, { passive: true });
+			document.addEventListener('touchend', function(){
+				transmit("touch_end");
+			}, { passive: true });
 
-	window.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
+			window.addEventListener('contextmenu', function(e) {
+				e.preventDefault();
+			});
+
+			// Periodically check for new '.buzz' elements every 100ms
+			setInterval(check_and_attach_buzz_listeners, 100);
+		}
     });
-
-	// Periodically check for new '.buzz' elements every 100ms
-	setInterval(check_and_attach_buzz_listeners, 100);
-});
+})();

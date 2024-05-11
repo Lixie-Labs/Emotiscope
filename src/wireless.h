@@ -5,6 +5,8 @@
 
 #define DISCOVERY_SERVER_URL "https://app.emotiscope.rocks/discovery/"
 
+String WEB_VERSION = "";
+
 const IPAddress ap_ip(192, 168, 4, 1); // IP address for the ESP32-S3 in AP mode
 const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32-S3 IP
 const IPAddress ap_subnet(255, 255, 255, 0); // Subnet mask for the WiFi network
@@ -65,7 +67,7 @@ void reboot_into_wifi_config_mode() {
 void discovery_check_in() {
 	static uint32_t next_discovery_check_in_time = 0;
 	static uint8_t attempt_count = 0;  // Keep track of the current attempt count
-	uint32_t t_now_ms = millis();
+	//uint32_t t_now_ms = millis();
 
 	if (t_now_ms >= next_discovery_check_in_time) {
 		// Check Wi-Fi connection status
@@ -100,7 +102,7 @@ void discovery_check_in() {
 					uint32_t backoff_delay = INITIAL_BACKOFF_MS * (1 << attempt_count);	 // Calculate the backoff delay
 					next_discovery_check_in_time = t_now_ms + backoff_delay;			 // Schedule the next attempt
 					attempt_count++;													 // Increment the attempt count
-					printf("Retrying with backoff delay of %ums.\n", backoff_delay);
+					printf("Retrying with backoff delay of %lums.\n", backoff_delay);
 				}
 				else {
 					printf("Couldn't reach server in time, will try again in a few minutes.\n");
@@ -148,7 +150,7 @@ void init_websocket_clients() {
 
 bool welcome_websocket_client(PsychicWebSocketClient client) {
 	bool client_welcome_status = true;
-	uint32_t t_now_ms = millis();
+	//uint32_t t_now_ms = millis();
 
 	uint16_t current_client_count = 0;
 	int16_t first_open_slot = -1;
@@ -210,7 +212,7 @@ void check_if_websocket_client_still_present(uint16_t client_slot) {
 	}
 }
 
-void transmit_to_client_in_slot(char *message, uint8_t client_slot) {
+void transmit_to_client_in_slot(const char *message, uint8_t client_slot) {
 	PsychicWebSocketClient *client = get_client_in_slot(client_slot);
 	if (client != NULL) {
 		client->sendMessage(message);
@@ -221,6 +223,8 @@ void init_web_server() {
 	server.config.max_uri_handlers = 20;  // maximum number of .on() calls
 
 	server.listen(80);
+
+	WEB_VERSION = "?v=" + String(SOFTWARE_VERSION_MAJOR) + "." + String(SOFTWARE_VERSION_MINOR) + "." + String(SOFTWARE_VERSION_PATCH);
 
 	//server.serveStatic("/", LittleFS, "/");
 
@@ -233,69 +237,73 @@ void init_web_server() {
 		return response.send();
 	});
 
-	server.on("/save-wifi", HTTP_GET, [](PsychicRequest *request) {
-		if(wifi_config_mode == true){
-			esp_err_t result = ESP_OK;
-			String ssid = "";
-			String pass = "";
-
-			if(request->hasParam("ssid") == true){
-				ssid += request->getParam("ssid")->value();
-			}
-			else{
-				printf("MISSING SSID PARAM!\n");
-				return request->reply(400);
-			}
-			
-			if(request->hasParam("pass") == true){
-				pass += request->getParam("pass")->value();
-			}
-			else{
-				printf("MISSING PASS PARAM!\n");
-				return request->reply(400);
-			}
-
-			printf("GOT NEW WIFI CONFIG: '%s|%s'\n", ssid, pass);
-			update_network_credentials(ssid, pass);
-
-			return result;
-		}
-		else{
-			printf("Can't access WIFI config endpoint outside of config AP mode for security reasons!\n");
-			return request->reply(400);
-		}
-	});
-
 	server.on("/mac", HTTP_GET, [](PsychicRequest *request) {
    		return request->reply(mac_str);
+	});
+
+	server.on("/save-wifi", HTTP_GET, [](PsychicRequest *request) {
+		esp_err_t result = ESP_OK;
+		String ssid = "";
+		String pass = "";
+
+		if(request->hasParam("ssid") == true){
+			ssid += request->getParam("ssid")->value();
+		}
+		else{
+			printf("MISSING SSID PARAM!\n");
+			return request->reply(400);
+		}
+		
+		if(request->hasParam("pass") == true){
+			pass += request->getParam("pass")->value();
+		}
+		else{
+			printf("MISSING PASS PARAM!\n");
+			return request->reply(400);
+		}
+
+		printf("GOT NEW WIFI CONFIG: '%s|%s'\n", ssid.c_str(), pass.c_str());
+		update_network_credentials(ssid, pass);
+
+		return result;
 	});
 
 	server.on("/*", HTTP_GET, [](PsychicRequest *request) {
 		esp_err_t result = ESP_OK;
 		String path = "";
 
-		if(request->url() == "/"){
+		char url[128] = { 0 };
+		request->url().toCharArray(url, 128);
+
+		// Remove queries
+		fetch_substring(url, '?', 0);
+
+		if(fastcmp(substring, "/")){
 			path += "/index.html";
+			//path += WEB_VERSION;
 		}
-		else if(request->url() == "/wifi-setup"){
-			path += "/index.html";
-		}
-		else if(request->url() == "/remote"){
+		else if(fastcmp(substring, "/remote")){
 			path += "/remote.html";
+			//path += WEB_VERSION;
+		}
+		else if(fastcmp(substring, "/wifi-setup")){
+			path += "/index.html";
+			//path += WEB_VERSION;
 		}
 		else{
-			path += request->url();
+			path += substring;
+			//path += WEB_VERSION;
 		}
 
-		printf("HTTP GET %s\n", request->url());
+		printf("HTTP GET %s\n", path.c_str());
 
 		File file = LittleFS.open(path);
 		if (file) {
 			String etagStr(file.getLastWrite(), 10);
 
 			PsychicFileResponse response(request, file, path);
-			response.addHeader("Cache-Control", "public, max-age=31536000");
-			//response.addHeader("ETag", etagStr.c_str());
+			response.addHeader("Cache-Control", "public, max-age=900");
+			response.addHeader("ETag", etagStr.c_str());
 			result = response.send();
 			file.close();
 		}
@@ -351,23 +359,27 @@ void init_web_server() {
 	web_server_ready = true;
 }
 
-void init_wifi() {
+void get_mac(){
 	// Define a variable to hold the MAC address
 	uint8_t mac_address[6]; // MAC address is 6 bytes
 
 	// Retrieve the MAC address of the device
 	WiFi.macAddress(mac_address);
-	//esp_read_mac(mac_address, ESP_MAC_WIFI_STA); // Use ESP_MAC_WIFI_STA for station interface
 
 	// Format the MAC address into the char array
 	snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
-			mac_address[0], mac_address[1], mac_address[2],
-			mac_address[3], mac_address[4], mac_address[5]);
+		mac_address[0], mac_address[1], mac_address[2],
+		mac_address[3], mac_address[4], mac_address[5]);
 
 	// Print the MAC address string
 	printf("MAC Address: %s\n", mac_str);
+}
 
+void init_wifi() {
 	if(wifi_config_mode == true){
+		WiFi.begin("testnet", "testpass");
+		get_mac();
+
 		WiFi.softAP("Emotiscope Setup");
 		dns_server.start(53, "*", WiFi.softAPIP());
 
@@ -379,11 +391,10 @@ void init_wifi() {
 	}
 	else {
 		network_connection_attempts = 0;
-		WiFi.begin(wifi_ssid, wifi_pass);  // Start the WiFi connection with the
-										// SSID and password parsed in configuration.h
+		WiFi.begin(wifi_ssid, wifi_pass); 
 		printf("Started connection attempt to %s...\n", wifi_ssid);
 
-		// TODO: Fetch and print the MAC address in the app and wifi setup page
+		get_mac();
 	}
 
 	esp_wifi_set_ps(WIFI_PS_NONE);

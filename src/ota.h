@@ -104,6 +104,8 @@ bool check_update(){
 	else {
 		printf("FAILED TO FETCH LATEST VERSION NUMBER\n");
 		printf("HTTP CODE: %d\n", http_code);
+
+		return false;
 	}
 }
 

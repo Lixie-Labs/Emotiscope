@@ -17,46 +17,47 @@ float ui_needle_position_raw = 0.0;
 float ui_needle_position = 0.0;
 
 void draw_ui_overlay(){
-	// -----------------------------
-	// Blur background
-	apply_box_blur(leds, (NUM_LEDS>>1)*overlay_size, 13);
+	profile_function([&]() {
+		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
 
-	// -----------------------------
-	// Darken background
-	draw_line(leds, 0, 0.5*overlay_size, {0,0,0}, 0.9*overlay_size);
+		if(overlay_size >= 0.01){
+			// -----------------------------
+			// Blur background
+			apply_box_blur(leds, (NUM_LEDS>>2)*overlay_size, 13);
 
-	// -----------------------------
-	// Draw UI
-	if(last_update_type == UI_NEEDLE_EVENT){
-		CRGBF back_color = hsv(0.870, 1.0, 0.05);
-		draw_line(leds, 0, ui_needle_position*0.5*overlay_size, back_color, 0.98*overlay_size);
-	
-		CRGBF dot_color = hsv(0.814, 1.0, 1.0);
-		for(uint16_t i = 0; i < 5; i++){
-			draw_dot(leds, UI_1+i, dot_color, 0 + ((0.5/4.0)*i)*overlay_size, overlay_size*0.15);
+			// -----------------------------
+			// Darken background
+			draw_line(leds, 0, 0.25*overlay_size, {0,0,0}, 0.9*overlay_size);
+
+			// -----------------------------
+			// Draw UI
+			if(last_update_type == UI_NEEDLE_EVENT){
+				CRGBF back_color = hsv(0.870, 1.0, 0.05);
+				draw_line(leds, 0, ui_needle_position*0.25*overlay_size, back_color, 0.98*overlay_size);
+			
+				CRGBF dot_color = hsv(0.814, 1.0, 1.0);
+				for(uint16_t i = 0; i < 3; i++){
+					draw_dot(leds, UI_1+i, dot_color, (overlay_size*0.25)*(0.5*i), overlay_size*0.08);
+				}
+
+				draw_dot(leds, UI_NEEDLE, incandescent_lookup, ui_needle_position*0.25*overlay_size, overlay_size);
+			}
 		}
-		
-		CRGBF gamma_corrected = {
-			incandescent_lookup.r*incandescent_lookup.r,
-			incandescent_lookup.g*incandescent_lookup.g,
-			incandescent_lookup.b*incandescent_lookup.b,
-		};
 
-		draw_dot(leds, UI_NEEDLE, gamma_corrected, ui_needle_position*0.5*overlay_size, overlay_size);
-	}
+		// -----------------------------
+		// Handle scaling / time
 
-	// -----------------------------
-	// Handle scaling / time
-
-	if(t_now_ms - last_ui_update_ms >= UI_HOLD_TIME_MS){
-		if(slider_touch_active == false){
-			overlay_size_target = 0.0;
+		if(t_now_ms - last_ui_update_ms >= UI_HOLD_TIME_MS){
+			if(slider_touch_active == false || (t_now_ms - last_ui_update_ms >= 10000)){
+				slider_touch_active = false;
+				overlay_size_target = 0.0;
+			}
 		}
-	}
 
-	overlay_size = overlay_size_target * 0.05 + overlay_size * 0.95;
+		overlay_size = overlay_size_target * 0.05 + overlay_size * 0.95;
 
-	ui_needle_position = ui_needle_position*0.75 + ui_needle_position_raw *0.25;
+		ui_needle_position = ui_needle_position*0.75 + ui_needle_position_raw *0.25;
+	}, __func__);
 }
 
 void update_ui(ui_update_event update_type, float new_value = 0.0){

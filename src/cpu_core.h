@@ -1,14 +1,16 @@
-// ------------------------------------------------------------------------
-//                                                                   _
-//                                                                  | |
-//   ___   _ __    _   _             ___    ___    _ __    ___      | |__
-//  / __| | '_ \  | | | |           / __|  / _ \  | '__|  / _ \     | '_ \ 
-// | (__  | |_) | | |_| |          | (__  | (_) | | |    |  __/  _  | | | |
-//  \___| | .__/   \__,_|           \___|  \___/  |_|     \___| (_) |_| |_|
-//        | |              ______
-//        |_|             |______|
-//
-// Main loop of the CPU core (Core 1)
+/*
+------------------------------------------------------------------------
+                                                                  _
+                                                                 | |
+  ___   _ __    _   _             ___    ___    _ __    ___      | |__
+ / __| | '_ \  | | | |           / __|  / _ \  | '__|  / _ \     | '_ \ 
+| (__  | |_) | | |_| |          | (__  | (_) | | |    |  __/  _  | | | |
+ \___| | .__/   \__,_|           \___|  \___/  |_|     \___| (_) |_| |_|
+       | |              ______
+       |_|             |______|
+
+Main loop of the CPU core (Core 1)
+*/
 
 void run_cpu() {
 	profile_function([&]() {
@@ -29,9 +31,9 @@ void run_cpu() {
 
 		// Calculate the magnitudes of the currently studied frequency set
 		calculate_magnitudes();  // (goertzel.h)
-		get_chromagram();
+		get_chromagram();        // (goertzel.h)
 
-		run_vu();
+		run_vu(); // (vu.h)
 
 		//printf("update_tempo() = %.4fus\n", measure_execution([&]() {
 		// Log novelty and calculate the most probable tempi
@@ -47,6 +49,10 @@ void run_cpu() {
 		// print_audio_data();
 
 		read_touch();
+
+		check_serial();
+
+		check_boot_button();
 
 		//neural_network_feed_forward();
 

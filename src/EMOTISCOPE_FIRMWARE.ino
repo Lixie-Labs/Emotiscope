@@ -9,17 +9,59 @@
 //              Released under the GPLv3 License
 //
 // ############################################################################
+// ## FOREWORD ################################################################
+// 
+// Welcome to the Emotiscope Engine. This is firmware which: 
+// 
+// - Logs raw audio data from the microphone into buffers
+// - Detects frequencies in the audio using many Goertzel filters
+// - Detects the BPM of music
+// - Syncronizes to the beats of said music
+// - Checks the touch sensors for input
+// - Hosts an HTTP server for a web app
+// - Talks to that web app over a high speed ws:// connection
+// - Stores settings in flash memory
+// - Draws custom light show modes to the LEDs which react to music
+//   in real-time with a variety of effects
+// - Runs the indicator light
+// - Runs the screensaver
+// - Applies a blue-light filter to the LEDs
+// - Applies gamma correction to the LEDs
+// - Applies error-diffusion temporal dithering to the LEDs
+// - Drives those 128 LEDs with a custom RMT driver at high frame rates
+// - Supports over-the-air firmware updates
+// - And much more
+//
+// It's quite a large project, and it's all running on a dual core
+// ESP32-S3. (240 MHz CPU with 520 KB of RAM)
+//
+// This is the main file everything else branches from, and it's where
+// the two cores are started. The first core runs the graphics (Core 0)
+// and the second core runs the audio and web server (Core 1).
+//
+// If you enjoy this product or code, please consider supporting me on
+// GitHub. I'm a solo developer and I put a lot of time and effort into
+// making Emotiscope the best that it can be. Your support helps me
+// continue to develop and improve the Emotiscope Engine.
+//
+//                                  DONATE:
+//                                  https://github.com/sponsors/connornishijima
+//
+//                                               - Connor Nishijima, @lixielabs
+
+// ############################################################################
 // ## SOFTWARE VERSION ########################################################
 
 #define SOFTWARE_VERSION_MAJOR ( 1 )
-#define SOFTWARE_VERSION_MINOR ( 0 )
+#define SOFTWARE_VERSION_MINOR ( 1 )
 #define SOFTWARE_VERSION_PATCH ( 0 )
+
 
 // ############################################################################
 // ## DEPENDENCIES ############################################################
 
-// External dependencies
-//#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-alpha ESP32 board def yet, and I need the IDF 5.1.2 for this madness to even work. I cobbled my own RMT LED driver for now for non-blocking frame transmission.
+// External dependencies ------------------------------------------------------
+//#include <FastLED.h> // .......... You've served me well, but you're not compatible with the 3.0.0-rc1 ESP32 board def yet, and I need the IDF 5.x for this madness to even work. I cobbled my own RMT LED driver for now for non-blocking frame transmission.
 #include <PsychicHttp.h> // ........ Handling the web-app HTTP and WS
 #include <HTTPClient.h> // ......... Used to make POST requests to the device discovery server
 #include <ESPmDNS.h> // ............ Used for "emotiscope.local" domain name
@@ -31,7 +73,7 @@
 #include <esp_dsp.h> // ............ Fast SIMD-style array math
 #include <esp_wifi.h> // ........... WiFi, but like - the hardware side of it
 
-// Internal dependencies
+// Internal dependencies ------------------------------------------------------
 #include "global_defines.h" // ..... Compile-time configuration
 #include "hardware_version.h" // ... Baked into the PCB are 4 pins that define the hardware version in binary
 #include "types.h" // .............. typedefs for things like CRGBFs
@@ -39,6 +81,7 @@
 #include "sliders.h" // ............ Handles sliders that appear in the web app
 #include "toggles.h" // ............ Handles toggles that appear in the web app
 #include "menu_toggles.h" // ....... Toggles that appear in the main menu
+#include "menu_dropdowns.h" // ..... Drop-downs that appear in the main menu
 #include "filesystem.h" // ......... LittleFS functions
 #include "configuration.h" // ...... Storing and retreiving your settings
 #include "utilities.h" // .......... Custom generic math functions
@@ -55,18 +98,19 @@
 #include "audio_debug.h" // ........ Print audio data over UART
 #include "screensaver.h" // ........ Colorful dots play on screen when no audio is present
 #include "standby.h" // ............ Handles sleep/wake + animations
-#include "lightshow_modes.h" // .... Definition and handling of lightshow modes
+#include "light_modes.h" // ........ Definition and handling of light modes
 #include "commands.h" // ........... Queuing and parsing of commands recieved
 #include "wireless.h" // ........... Communication with your network and the web-app
 #include "ota.h" // ................ Over-the-air firmware updates
 
-// Loops
+// Loops ---------------------------------------------------------------------
 #include "cpu_core.h" // Audio
 #include "gpu_core.h" // Video
 #include "web_core.h" // Wireless
 
 // Development Notes
-#include "notes.h"
+//#include "notes.h"
+
 
 // ############################################################################
 // ## CODE ####################################################################
@@ -90,5 +134,5 @@ void setup() {
 	init_system();
 
 	// Start the second core as a dedicated webserver
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 0, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 0, NULL, 0);
 }

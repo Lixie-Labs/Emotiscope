@@ -50,44 +50,50 @@ void init_indicator_light(){
 		.intr_type      = LEDC_INTR_DISABLE,
         .timer_sel      = LEDC_TIMER,        
         .duty           = 0, // Set duty to 0%
-        .hpoint         = 0
+        .hpoint         = 0,
+		.flags = {
+			.output_invert = 0,
+		},
     };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
 }
 
 void run_indicator_light(){
-	static uint32_t last_blink = -1000;
-	static bool blink_state = 0;
-
-	if(app_touch_active == true){
-		indicator_brightness_target = 1.0;
-	}
-	else{
-		if (connection_status == WL_CONNECTED) {
-			indicator_brightness_target = INDICATOR_RESTING_BRIGHTNESS;
-
-			// if blinks == 0, toggle the indicator target on and off every blink_interval_ms. Only modify the indicator duty cycle if blink_state == true
-			if(device_touch_active == true){
+	extern self_test_steps_t self_test_step;
+	
+	profile_function([&]() {
+		if(self_test_step == SELF_TEST_INACTIVE){
+			if(app_touch_active == true){
 				indicator_brightness_target = 1.0;
 			}
-		}
-		else{
-			if(t_now_ms - last_status_blink >= STATUS_BLINK_INTERVAL_MS){
-				status_blink_state = !status_blink_state;
+			else{
+				if (connection_status == WL_CONNECTED) {
+					indicator_brightness_target = INDICATOR_RESTING_BRIGHTNESS;
 
-				indicator_brightness_target = status_blink_state;
-				indicator_brightness = status_blink_state;
-
-				last_status_blink = t_now_ms;
+					if(device_touch_active == true){
+						indicator_brightness_target = 1.0;
+					}
+				}
+				else{
+					if(t_now_ms - last_status_blink >= STATUS_BLINK_INTERVAL_MS){
+						status_blink_state = !status_blink_state;
+						indicator_brightness_target = (float)status_blink_state;
+						indicator_brightness = (float)status_blink_state;
+						last_status_blink = t_now_ms;
+					}
+				}
 			}
 		}
-	}
+		else{ // Full brightness during test
+			indicator_brightness_target = 1.0;
+		}
 
-	indicator_brightness = (indicator_brightness_target * 0.075) + indicator_brightness * 0.925;
+		indicator_brightness = (indicator_brightness_target * 0.075) + indicator_brightness * 0.925;
 
-	float output_brightness = clip_float(indicator_brightness*indicator_brightness+standby_breath)*standby_brightness*standby_brightness;
-	output_brightness = output_brightness * (1.0-INDICATOR_MIN_BRIGHTNESS) + INDICATOR_MIN_BRIGHTNESS;
+		float output_brightness = clip_float(indicator_brightness*indicator_brightness+standby_breath)*standby_brightness*standby_brightness;
+		output_brightness = output_brightness * (1.0-INDICATOR_MIN_BRIGHTNESS) + INDICATOR_MIN_BRIGHTNESS;
 
-	ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_MAX_DUTY * output_brightness);
-	ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
+		ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_MAX_DUTY * output_brightness);
+		ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
+	}, __func__);
 }

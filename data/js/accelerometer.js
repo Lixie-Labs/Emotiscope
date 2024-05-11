@@ -21,10 +21,22 @@ function check_device_orientation(event) {
 	}
 }
 
-// Add an event listener for device orientation changes
-if (window.DeviceOrientationEvent) {
-	document.getElementById("accelerometer").innerHTML = "Device Orientation API supported";
-	window.addEventListener("deviceorientation", check_device_orientation, true);
-} else {
-	document.getElementById("accelerometer").innerHTML = "Device Orientation API not supported";
-}	
+(function() {
+    var first_load = true;
+
+    // Register the touch event listeners on page load
+    document.addEventListener('APP_LOADED', function() {
+		if(first_load == true){
+            first_load = false;
+            console.log("APP_LOADED accelerometer.js");
+			
+			// Add an event listener for device orientation changes
+			if (window.DeviceOrientationEvent) {
+				document.getElementById("accelerometer").innerHTML = "Device Orientation API supported";
+				window.addEventListener("deviceorientation", check_device_orientation, true);
+			} else {
+				document.getElementById("accelerometer").innerHTML = "Device Orientation API not supported";
+			}
+		}
+	});
+})();

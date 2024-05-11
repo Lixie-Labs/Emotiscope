@@ -22,7 +22,7 @@ void list_dir(File dir, uint8_t levels) {
 			list_dir(file, levels + 1);
 		}
 		else {
-			printf("\t\t%ld\n", file.size());
+			printf("\t\t%zu\n", file.size());
 		}
 		file.close();
 	}

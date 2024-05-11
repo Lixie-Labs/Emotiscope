@@ -10,7 +10,7 @@ void clear_toggles() {
 	toggles_active = 0;
 }
 
-bool register_toggle(char* name) {
+bool register_toggle(const char* name) {
 	bool register_success = false;
 	for (uint16_t i = 0; i < MAX_TOGGLES; i++) {
 		if (toggles[i].name[0] == 0) {	// Unoccupied slot
@@ -27,29 +27,7 @@ bool register_toggle(char* name) {
 void load_toggles_relevant_to_mode(int16_t mode_index) {
 	clear_toggles();
 
-	if (mode_index == 0) {  // Analog
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 1) {  // Spectrum
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 2) {  // Octave
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 3) {  // Metronome
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 4) {  // Spectrum + Beat
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 5) {  // Hype
-		register_toggle("mirror_mode");
-	}
-	else if (mode_index == 6) {  // Bloom
-		register_toggle("mirror_mode");
-	}
-
-	else{
-		wtf_error();
-	}
+	register_toggle("mirror_mode");
+	register_toggle("reverse_color_range");
+	register_toggle("auto_color_cycle");
 }

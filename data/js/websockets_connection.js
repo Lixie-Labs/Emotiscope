@@ -33,12 +33,12 @@ let touch_high = [
 got_touch_vals = true;
 
 let auto_response_table = {
-	"welcome":"get|config",
-	"config_ready":"get|modes",
-	"modes_ready":"get|sliders",
+	"welcome"      :"get|config",
+	"config_ready" :"get|modes",
+	"modes_ready"  :"get|sliders",
 	"sliders_ready":"get|toggles",
 	"toggles_ready":"get|menu_toggles",
-	"mode_selected":"get|config",
+	"reload_config":"get|config",
 };
 
 function check_connection_timeout(){
@@ -150,10 +150,21 @@ function parse_message(message){
 			modes = [];
 		}
 		else if(command_type == "new_mode"){
-			let mode_name = command_data[1];
-			modes.push(mode_name);
+			let mode_index = parseInt(command_data[1]);
+			let mode_type  = parseInt(command_data[2]);
+			let mode_name  = command_data[3];
+
+			modes.push({
+				"mode_index":mode_index,
+				"mode_type":mode_type,
+				"mode_name":mode_name
+			});
 		}
 		else if(command_type == "clear_sliders"){
+			// Force close UI if it's open
+			transmit(`touch_end`);
+			transmit(`slider_touch_end`);
+			
 			sliders = [];
 		}
 		else if(command_type == "new_slider"){
@@ -190,7 +201,7 @@ function parse_message(message){
 			});
 		}
 		else if(command_type == "menu_toggles_ready"){
-			console.log("DATA SYNC COMPLETE!");
+			//console.log("DATA SYNC COMPLETE!");
 			ping_server();
 			setInterval(check_pong_timeout, 100);
 			render_controls();
@@ -198,12 +209,12 @@ function parse_message(message){
 			set_ui_locked_state(false);
 		}
 		else if(command_type == "noise_cal_ready"){
-			console.log("NOISE CAL COMPLETE!");
+			//console.log("NOISE CAL COMPLETE!");
 			hide_page('page_calibration');
 			set_ui_locked_state(false);
 		}
 		else if(command_type == "debug_recording_ready"){
-			console.log("DEBUG RECORDING COMPLETE!");
+			//console.log("DEBUG RECORDING COMPLETE!");
 			hide_page('page_calibration');
 			set_ui_locked_state(false);
 		}
@@ -230,7 +241,7 @@ function parse_message(message){
 			touch_vals[1] = parseInt(command_data[2]);
 			touch_vals[2] = parseInt(command_data[3]);
 
-			console.log(`TOUCH VALS: ${touch_vals}`);
+			//console.log(`TOUCH VALS: ${touch_vals}`);
 
 			got_touch_vals = true;
 		}
@@ -295,6 +306,10 @@ function set_mode(mode_name){
 	transmit(`set|mode|${mode_name}`);
 }
 
+function increment_mode(){
+	transmit(`increment_mode`);
+}
+
 function send_slider_change(slider_name){
 	let new_value = document.getElementById(slider_name).value;
 	transmit(`set|${slider_name}|${new_value}`);
@@ -316,58 +331,9 @@ function transmit(message){
 	ws.send(message);
 }
 
-// Function to transmit events
-//function transmit(event_name) {
-//    console.log(event_name); // Replace this with the actual implementation
-//}
-
-// Function to handle touch events on the header logo
-function setup_header_logo_touch() {
-    const header_logo = document.getElementById('header_logo');
-    let touch_timer = null;
-    let touch_active = false;
-
-    header_logo.addEventListener('touchstart', function(e) {
-        if (touch_active) return; // Ignore if another touch is already active
-        touch_active = true;
-        touch_timer = setTimeout(function() {
-            transmit('button_hold');
-			trigger_vibration(100);
-
-			if(standby_mode == false){
-				console.log("ENTERING STANDBY");
-				standby_mode = true;
-				document.getElementById("header_logo").style.color = "#5495d761";
-			}
-			else if(standby_mode == true){
-				console.log("EXITING STANDBY");
-				standby_mode = false;
-				document.getElementById("header_logo").style.color = "var(--primary)";
-			}
-
-            touch_timer = null; // Clear the timer once the function is called
-        }, 500); // Set timeout for 500ms
-    });
-
-    header_logo.addEventListener('touchend', function(e) {
-        if (touch_timer) {
-            clearTimeout(touch_timer); // Clear the timer if the touch ends before 500ms
-            transmit('button_tap');
-
-			var num_modes = modes.length;
-			let next_mode = (configuration.current_mode + 1) % num_modes;
-			configuration.current_mode = next_mode;
-			let next_mode_name = modes[next_mode]; 
-			document.getElementById("current_mode").innerHTML = next_mode_name;
-
-        }
-        touch_active = false; // Allow new touches
-    });
-}
-
 // Function to handle touch events on the device icon
-function setup_device_icon_touch() {
-    const device_icon = document.getElementById('device_icon');
+function setup_top_touch_listener(div_id) {
+    const device_icon = document.getElementById(div_id);
     let touch_timer = null;
     let touch_active = false;
 
@@ -379,12 +345,12 @@ function setup_device_icon_touch() {
 			trigger_vibration(100);
 
 			if(standby_mode == false){
-				console.log("ENTERING STANDBY");
+				//console.log("ENTERING STANDBY");
 				standby_mode = true;
 				document.getElementById("header_logo").style.color = "#5495d761";
 			}
 			else if(standby_mode == true){
-				console.log("EXITING STANDBY");
+				//console.log("EXITING STANDBY");
 				standby_mode = false;
 				document.getElementById("header_logo").style.color = "var(--primary)";
 			}
@@ -398,12 +364,10 @@ function setup_device_icon_touch() {
             clearTimeout(touch_timer); // Clear the timer if the touch ends before 500ms
             transmit('button_tap');
 
-			var num_modes = modes.length;
-			let next_mode = (configuration.current_mode + 1) % num_modes;
-			configuration.current_mode = next_mode;
-			let next_mode_name = modes[next_mode]; 
-			document.getElementById("current_mode").innerHTML = next_mode_name;
-
+			if(standby_mode == true){
+				standby_mode = false;
+				document.getElementById("header_logo").style.color = "var(--primary)";
+			}
         }
         touch_active = false; // Allow new touches
     });
@@ -429,6 +393,11 @@ function reconnect_websockets(){
 }
 
 function open_websockets_connection_to_device(){
+	device_ip = window.location.hostname;
+	connection_start_time = performance.now();
+	connection_pending = true;
+	setInterval(check_connection_timeout, 100);
+
 	console.log("CONNECTING TO "+device_ip);
 	ws = new WebSocket("ws://"+device_ip+":80/ws");
 	document.getElementById("device_nickname").innerHTML = device_ip;
@@ -442,7 +411,7 @@ function open_websockets_connection_to_device(){
 
 	ws.onmessage = function(event) {
 		if(event.data != "pong"){
-			console.log(`RX: ${event.data}`);
+			//console.log(`RX: ${event.data}`);
 		}
 		//document.getElementById("device_preview").innerHTML = event.data;
 		parse_message(event.data);
@@ -465,8 +434,18 @@ function open_websockets_connection_to_device(){
 	};
 }
 
-// Register the touch event listeners on page load
-document.addEventListener('DOMContentLoaded', function() {
-    setup_header_logo_touch();
-	setup_device_icon_touch();
-});
+(function() {
+    var first_load = true;
+
+    // Register the touch event listeners on page load
+    document.addEventListener('APP_LOADED', function() {	
+        if(first_load == true){
+            first_load = false;
+            console.log("APP_LOADED websockets_connection.js");
+			setup_top_touch_listener("header_logo");
+			setup_top_touch_listener("device_icon");
+
+			open_websockets_connection_to_device();
+        }
+    });
+})();
