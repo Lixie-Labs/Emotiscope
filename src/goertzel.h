@@ -108,7 +108,7 @@ void init_goertzel_constants_musical() {
 			fabs(frequencies_musical[i].target_freq - neighbor_left),
 			fabs(frequencies_musical[i].target_freq - neighbor_right));
 
-		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 3.0);
+		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 4.0);
 	}
 }
 

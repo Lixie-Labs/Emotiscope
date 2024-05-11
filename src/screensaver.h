@@ -51,7 +51,7 @@ void run_screensaver(){
 		}
 
 		if(screensaver_mix > 0.001){
-			scale_CRGBF_array_by_constant(leds, 1.0-(screensaver_mix), NUM_LEDS);
+			scale_CRGBF_array_by_constant(leds, 1.0-(screensaver_mix*screensaver_mix), NUM_LEDS);
 
 			const float push_val = 0.005;
 			CRGBF screensaver_colors[4] = {
@@ -69,7 +69,7 @@ void run_screensaver(){
 			
 			for(uint16_t i = 0; i < 4; i++){
 				sine_positions[i] += push_val+(0.0001*i);
-				draw_dot(leds, SCREENSAVER_1 + i, screensaver_colors[i], sin(sine_positions[i]) * (0.5*screensaver_mix) + 0.5, screensaver_mix);
+				draw_dot(leds, SCREENSAVER_1 + i, screensaver_colors[i], sin(sine_positions[i]) * (0.5*screensaver_mix) + 0.5, screensaver_mix*screensaver_mix);
 			}
 		}
 	}, __func__);
