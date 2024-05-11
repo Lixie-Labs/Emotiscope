@@ -436,7 +436,7 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 
     // Calculate distance moved and adjust brightness of spread accordingly
     float position_difference = fabs(position - prev_position);
-    float spread_area = fmax(position_difference * NUM_LEDS, 1.0f);
+    float spread_area = fmaxf( (sqrt(position_difference)) * NUM_LEDS, 1.0f );
 
     // Draw the line representing the motion blur
     draw_line(layer, prev_position, position, color, (1.0) * opacity);
@@ -452,7 +452,7 @@ void update_auto_color(){
 			novelty = novelty*novelty*novelty*novelty*novelty*novelty;
 
 			color_momentum *= 0.95;
-			color_momentum = fmax(color_momentum, novelty);
+			color_momentum = fmaxf(color_momentum, novelty);
 			if(color_momentum > 0.1){
 				color_momentum = 0.1;
 			}
@@ -524,14 +524,10 @@ void apply_frame_blending(float blend_amount){
 	static CRGBF previous_frame[NUM_LEDS];
 	extern float lpf_drag;
 
-	blend_amount = sqrt(sqrt( clip_float(fmax(blend_amount, sqrt(lpf_drag))) )) * 0.40 + 0.59;
+	blend_amount = sqrt(sqrt( clip_float(fmaxf(blend_amount, sqrt(lpf_drag))) )) * 0.40 + 0.59;
+	scale_CRGBF_array_by_constant(leds, 1.0-blend_amount, NUM_LEDS);
 	scale_CRGBF_array_by_constant(previous_frame, blend_amount, NUM_LEDS);
-
-	for(uint16_t i = 0; i < NUM_LEDS; i++){
-		leds[i].r = max(leds[i].r, previous_frame[i].r);
-		leds[i].g = max(leds[i].g, previous_frame[i].g);
-		leds[i].b = max(leds[i].b, previous_frame[i].b);
-	}
+	add_CRGBF_arrays(leds, previous_frame, NUM_LEDS);
 
 	memcpy(previous_frame, leds, sizeof(CRGBF) * NUM_LEDS);
 }

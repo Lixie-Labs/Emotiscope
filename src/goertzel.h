@@ -108,7 +108,7 @@ void init_goertzel_constants_musical() {
 			fabs(frequencies_musical[i].target_freq - neighbor_left),
 			fabs(frequencies_musical[i].target_freq - neighbor_right));
 
-		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 4.0);
+		init_goertzel(i, frequencies_musical[i].target_freq, neighbor_distance_hz * 3.0);
 	}
 }
 
@@ -116,19 +116,18 @@ void init_window_lookup() {
     float sigma = 0.8; // For gaussian window
 
     for (uint16_t i = 0; i < 2048; i++) {
-        //float ratio = i / 2047.0; // Not used for Gaussian Window
-
-        float n_minus_halfN = i - 2048 / 2;
-        float gaussian_weighing_factor = exp(-0.5 * pow((n_minus_halfN / (sigma * 2048 / 2)), 2));
+        float ratio = i / 2047.0; // Not used for Gaussian Window
 
         // Hamming window
-        //float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
+        float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
 
         // Blackman-Harris window
         //float weighing_factor = 0.3635819 - (0.4891775 * cos(TWOPI * ratio)) + (0.1365995 * cos(FOURPI * ratio)) - (0.0106411 * cos(SIXPI * ratio));
 
         // Gaussian window
-        float weighing_factor = gaussian_weighing_factor;
+        //float n_minus_halfN = i - 2048 / 2;
+        //float gaussian_weighing_factor = exp(-0.5 * pow((n_minus_halfN / (sigma * 2048 / 2)), 2));
+        //float weighing_factor = gaussian_weighing_factor;
 
         window_lookup[i] = weighing_factor;
         window_lookup[4095 - i] = weighing_factor; // Mirror the value for the second half
@@ -220,7 +219,7 @@ void calculate_magnitudes() {
 	profile_function([&]() {
 		magnitudes_locked = true;
 
-		const uint16_t NUM_AVERAGE_SAMPLES = 6;
+		const uint16_t NUM_AVERAGE_SAMPLES = 2;
 
 		static float magnitudes_raw[NUM_FREQS];
 		static float magnitudes_noise_filtered[NUM_FREQS];
@@ -326,7 +325,7 @@ void calculate_magnitudes() {
 		}
 
 		// Calculate auto-ranging scale
-		float autoranger_scale = 1.0 / (max_val_smooth*0.75);
+		float autoranger_scale = 1.0 / (max_val_smooth);
 
 		// Iterate over all frequencies
 		for (uint16_t i = 0; i < NUM_FREQS; i++) {
