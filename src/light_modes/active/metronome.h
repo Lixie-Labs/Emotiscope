@@ -8,8 +8,8 @@ void draw_metronome() {
 
 		float contribution = (tempi_magnitude / tempi_power_sum) * tempi_magnitude;
 
-		if(contribution > 0.00001){
-			float sine = sin(tempi[tempo_bin].phase + (PI*0.5));
+		if(contribution >= 0.00005){
+			float sine = sin( tempi[tempo_bin].phase + (PI*0.5) );
 			//sine *= 2.0;
 
 			if(sine > 1.0){ sine = 1.0; }
@@ -48,8 +48,8 @@ void draw_metronome() {
 			fx_dots[NUM_RESERVED_DOTS + tempo_bin * 2 + 0].position = 0.5;
 
 			if(configuration.mirror_mode == true){
-				fx_dots[NUM_RESERVED_DOTS + tempo_bin * 2 + 0].position = 0.25;
-				fx_dots[NUM_RESERVED_DOTS + tempo_bin * 2 + 1].position = 0.75;
+				fx_dots[NUM_RESERVED_DOTS + tempo_bin * 2 + 0].position = 0.75;
+				fx_dots[NUM_RESERVED_DOTS + tempo_bin * 2 + 1].position = 0.25;
 			}
 		}
 	}

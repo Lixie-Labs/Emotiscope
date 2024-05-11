@@ -239,3 +239,8 @@ float fixed_interpolate(uint8_t value_a, uint8_t value_b, uint8_t factor) {
     // Since we're dividing by a constant, this can be optimized by the compiler
     return weighted_sum / 65025.0f; // 255*255 = 65025
 }
+
+float fast_tanh(float x) {
+    float x2 = x * x;
+    return x * (27.0f + x2) / (27.0f + 9.0f * x2);
+}

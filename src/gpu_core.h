@@ -39,6 +39,8 @@ void run_gpu() {
 		// Update auto color cycling
 		update_auto_color();  // (leds.h)
 
+		run_indicator_light();
+
 		// RUN THE CURRENT MODE
 		// ------------------------------------------------------------
 
@@ -50,27 +52,19 @@ void run_gpu() {
 
 		apply_background(configuration.background);
 
-		// Apply an incandescent LUT to reduce harsh blue tones
-		apply_blue_light_filter(configuration.blue_filter);  // (leds.h)
+		draw_ui_overlay();  // (ui.h)
 
 		if( EMOTISCOPE_ACTIVE == true && configuration.screensaver == true){
 			run_screensaver();
 		}
 
-		// Restrict CRGBF values to 0.0-1.0 range
-		clip_leds();  // (leds.h)
-
 		apply_brightness();
 
-		run_indicator_light();
+		render_touches();  // (touch.h)
 
 		if( EMOTISCOPE_ACTIVE == false ){
 			run_standby();
 		}
-
-		render_touches();  // (touch.h)
-
-		draw_ui_overlay();
 		
 		// This value decays itself non linearly toward zero all the time, 
 		// *really* slowing down the LPF when it's set to 1.0.
@@ -80,7 +74,7 @@ void run_gpu() {
 		if(lpf_drag < screensaver_mix*0.8){
 			lpf_drag = screensaver_mix*0.8;
 		}
-		
+
 		// Apply a low pass filter to every color channel of every pixel on every frame
 		// at hundreds of frames per second
 		// 
@@ -92,14 +86,17 @@ void run_gpu() {
 		lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
 		apply_image_lpf(lpf_cutoff_frequency);
 
+		clip_leds();
+		//apply_tonemapping();
+
 		//apply_frame_blending( configuration.softness );
+		//apply_phosphor_decay( configuration.softness );
 
-		//apply_phosphor_decay(configuration.softness);
-
-		clip_leds();  // (leds.h)
+		// Apply an incandescent LUT to reduce harsh blue tones
+		apply_warmth( configuration.warmth );  // (leds.h)
 
 		// Apply white balance
-		//multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
+		multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
 
 		apply_gamma_correction();
 

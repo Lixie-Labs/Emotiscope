@@ -6,6 +6,7 @@ float standby_breath = 0.0;
 
 void run_standby(){
 	profile_function([&]() {
+		
 		static uint32_t led = 0;
 		led++;
 

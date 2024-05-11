@@ -150,7 +150,7 @@ struct config {
 	float brightness;
 	float softness; 
 	float color;
-	float blue_filter;
+	float warmth;
 	float color_range;
 	float speed;
 	float saturation;

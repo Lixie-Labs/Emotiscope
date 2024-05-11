@@ -218,6 +218,8 @@ void read_touch(){
 
 void render_touches(){
 	profile_function([&]() {
+		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+
 		if(touch_pins[TOUCH_LEFT].touch_value > 0.001){
 			float glow_hue = 0.870;
 			if(touch_pins[TOUCH_LEFT].touch_value >= 1.0){

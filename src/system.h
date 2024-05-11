@@ -24,7 +24,7 @@ void init_serial(uint32_t baud_rate) {
 	//for(uint16_t i = 0; i < 10; i++){ printf("WAITING FOR %d SECONDS...\n", 10-i); delay(1000); }
 
 	memset(serial_buffer, 0, 256);
-	uint16_t serial_buffer_index = 0;
+	serial_buffer_index = 0;
 
 	Serial.begin(baud_rate);
 }

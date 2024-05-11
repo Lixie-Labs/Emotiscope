@@ -40,8 +40,8 @@ void load_config(){
 	// Color Range
 	configuration.color_range = preferences.getFloat("color_range", 0.00);
 
-	// Blue Filter
-	configuration.blue_filter = preferences.getFloat("blue_filter", 0.00);
+	// Warmth
+	configuration.warmth = preferences.getFloat("warmth", 0.50);
 
 	// Speed
 	configuration.speed = preferences.getFloat("speed", 0.75);
@@ -66,27 +66,6 @@ void load_config(){
 
 	// VU Floor
 	configuration.vu_floor = preferences.getFloat("vu_floor", 0.00);
-
-	/*
-	// Ambient Left Threshold
-	configuration.ambient_left_threshold = preferences.getULong("al_threshold", 33000);
-
-	// Ambient Center Threshold
-	configuration.ambient_center_threshold = preferences.getULong("ac_threshold", 95000);
-
-	// Ambient Right Threshold
-	configuration.ambient_right_threshold = preferences.getULong("ar_threshold", 64000);
-
-	// Touch Left Threshold
-	configuration.touch_left_threshold = preferences.getULong("tl_threshold", 33000*2);
-
-	// Touch Center Threshold
-	configuration.touch_center_threshold = preferences.getULong("tc_threshold", 95000*2);
-
-	// Touch Right Threshold
-	configuration.touch_right_threshold = preferences.getULong("tr_threshold", 64000*2);
-
-	*/
 
 	// Reverse Color
 	configuration.reverse_color_range = preferences.getBool("reverse_color", false);
@@ -130,9 +109,9 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|mirror_mode|int|%d", configuration.mirror_mode);
 	websocket_handler.sendAll(config_item_buffer);
 
-	// blue_filter
+	// warmth
 	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|blue_filter|float|%.3f", configuration.blue_filter);
+	snprintf(config_item_buffer, 120, "new_config|warmth|float|%.3f", configuration.warmth);
 	websocket_handler.sendAll(config_item_buffer);
 
 	// color_range
@@ -179,7 +158,7 @@ bool save_config() {
 	preferences.putFloat("softness",   configuration.softness);
 	preferences.putFloat("color", configuration.color);
 	preferences.putFloat("color_range", configuration.color_range);
-	preferences.putFloat("blue_filter", configuration.blue_filter);
+	preferences.putFloat("warmth", configuration.warmth);
 	preferences.putFloat("speed", configuration.speed);
 	preferences.putFloat("saturation", configuration.saturation);
 	preferences.putFloat("background", configuration.background);
@@ -188,15 +167,6 @@ bool save_config() {
 	preferences.putBool("screensaver", configuration.screensaver);
 	preferences.putBool("dithering", configuration.temporal_dithering);
 	preferences.putFloat("vu_floor", configuration.vu_floor);
-	/*
-	preferences.putULong("al_threshold", configuration.ambient_left_threshold);
-	preferences.putULong("ac_threshold", configuration.ambient_center_threshold);
-	preferences.putULong("ar_threshold", configuration.ambient_right_threshold);
-	preferences.putULong("tl_threshold", configuration.touch_left_threshold);
-	preferences.putULong("tc_threshold", configuration.touch_center_threshold);
-	preferences.putULong("tr_threshold", configuration.touch_right_threshold);
-	*/
-
 	preferences.putBool("reverse_color", configuration.reverse_color_range);
 	preferences.putBool("auto_color", configuration.auto_color_cycle);
 

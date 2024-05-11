@@ -20,7 +20,7 @@ floating-point "CRGBF" format.
 
 #define MAX_DOTS 384
 
-CRGBF WHITE_BALANCE = { 1.0, 0.75, 0.60 };
+CRGBF WHITE_BALANCE = { 1.0, 0.9375, 0.84 };
 
 typedef enum {
 	UI_1, UI_2, UI_3, UI_4, UI_5, UI_6, UI_7, UI_8, UI_9, UI_10,
@@ -213,7 +213,7 @@ CRGBF hsv(float h, float s, float v) {
 		h = fmodf(h, 1.0f);
 		if (h < 0.0f) h += 1.0f;
 
-		v = clip_float(v); // Ensure v is within the range [0.0, 1.0]
+		//v = clip_float(v); // Ensure v is within the range [0.0, 1.0]
 		float c = v * s; // Chroma
 		float h_prime = h * 6.0f;
 		float x = c * (1.0f - fabsf(fmodf(h_prime, 2.0f) - 1.0f));
@@ -238,29 +238,24 @@ CRGBF hsv(float h, float s, float v) {
 	return return_val;
 }
 
-void apply_blue_light_filter(float mix) {
+void apply_warmth(float mix) {
 	profile_function([&]() {
+		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+
+		float mix_inv = 1.0 - mix;
+
 		if(mix > 0.0){
 			multiply_CRGBF_array_by_LUT(
 				leds,
-				{
-					float(incandescent_lookup.r * mix + (1.0 - mix)),
-					float(incandescent_lookup.g * mix + (1.0 - mix)),
-					float(incandescent_lookup.b * mix + (1.0 - mix))
+				(CRGBF){
+					incandescent_lookup.r * mix + mix_inv,
+					incandescent_lookup.g * mix + mix_inv,
+					incandescent_lookup.b * mix + mix_inv
 				},
 				NUM_LEDS
 			);
 		}
 	}, __func__);
-
-	/*
-	float mix_inv = 1.0 - mix;
-	save_leds_to_temp();
-	multiply_CRGBF_array_by_LUT(leds_temp, incandescent_lookup, NUM_LEDS);
-	scale_CRGBF_array_by_constant(leds_temp, mix, NUM_LEDS);
-	scale_CRGBF_array_by_constant(leds, mix_inv, NUM_LEDS);
-	add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
-	*/
 }
 
 void save_leds_to_last() {
@@ -329,9 +324,11 @@ CRGBF add(CRGBF color_1, CRGBF color_2, float add_amount = 1.0) {
 		color_1.b + color_2.b * (add_amount),
 	};
 
+	/*
 	out_color.r = min(1.0f, out_color.r);
 	out_color.g = min(1.0f, out_color.g);
 	out_color.b = min(1.0f, out_color.b);
+	*/
 
 	return out_color;
 }
@@ -493,9 +490,9 @@ void apply_phosphor_decay(float strength){
 		if(change_g < -strength){ change_g = -strength; }
 		if(change_b < -strength){ change_b = -strength; }
 
-		leds[i].r = clip_float(phosphor_decay[i].r + change_r);
-		leds[i].g = clip_float(phosphor_decay[i].g + change_g);
-		leds[i].b = clip_float(phosphor_decay[i].b + change_b);
+		leds[i].r = (phosphor_decay[i].r + change_r);
+		leds[i].g = (phosphor_decay[i].g + change_g);
+		leds[i].b = (phosphor_decay[i].b + change_b);
 	}
 
 	memcpy(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
@@ -616,6 +613,8 @@ void apply_gamma_correction() {
 
 void apply_brightness() {
 	profile_function([&]() {
+		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+
 		float brightness_val = 0.3+configuration.brightness*0.7;
 
 		scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
@@ -644,6 +643,7 @@ float get_color_range_hue(float progress){
 
 void apply_background(float background_level){
 	profile_function([&]() {
+		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
 		background_level *= 0.25; // Max 25% brightness
 
 		if(background_level > 0.0){
@@ -678,7 +678,7 @@ void apply_background(float background_level){
 
 			// Apply background to the main buffer
 			scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
-			scale_CRGBF_array_by_constant(leds, 1.0 - background_level, NUM_LEDS);
+			//scale_CRGBF_array_by_constant(leds, 1.0 - background_level, NUM_LEDS);
 			add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
 		}
 	}, __func__);
@@ -697,4 +697,23 @@ void clear_display(float keep = 0.0){
 
 void fade_display(){
 	scale_CRGBF_array_by_constant(leds, configuration.softness, NUM_LEDS);
+}
+
+float soft_clip_hdr(float input) {
+    if (input < 0.75) {
+        // Linear function: output is the same as input for values less than 0.75
+        return input;
+    } else {
+        // Non-linear function: transforms input values >= 0.75 to soft clipped values between 0.75 and 1.0
+        float t = (input - 0.75) * 4.0;  // Scale input to enhance the soft clipping curve effect
+        return 0.75 + 0.25 * tanh(t);    // Use hyperbolic tangent to provide a soft transition to 1.0
+    }
+}
+
+void apply_tonemapping() {
+	for (uint16_t i = 0; i < NUM_LEDS; i++) {
+		leds[i].r = soft_clip_hdr(leds[i].r);
+		leds[i].g = soft_clip_hdr(leds[i].g);
+		leds[i].b = soft_clip_hdr(leds[i].b);
+	}
 }

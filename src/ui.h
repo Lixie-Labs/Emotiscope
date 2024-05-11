@@ -18,6 +18,8 @@ float ui_needle_position = 0.0;
 
 void draw_ui_overlay(){
 	profile_function([&]() {
+		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+
 		if(overlay_size >= 0.01){
 			// -----------------------------
 			// Blur background

@@ -109,13 +109,13 @@ void parse_command(uint32_t t_now_ms, command com) {
 			bool setting_value = (bool)atoi(substring);
 			configuration.mirror_mode = setting_value;
 		}
-		else if (fastcmp(substring, "blue_filter")) {
-			// Get blue_filter value
+		else if (fastcmp(substring, "warmth")) {
+			// Get warmth value
 			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
-			configuration.blue_filter = setting_value;
+			configuration.warmth = setting_value;
 
-			update_ui(UI_NEEDLE_EVENT, configuration.blue_filter);
+			update_ui(UI_NEEDLE_EVENT, configuration.warmth);
 		}
 		else if (fastcmp(substring, "color_range")) {
 			// Get color_range value
@@ -179,44 +179,6 @@ void parse_command(uint32_t t_now_ms, command com) {
 				load_toggles_relevant_to_mode(mode_index);
 				transmit_to_client_in_slot("mode_selected", com.origin_client_slot);
 			}
-		}
-
-		else if (fastcmp(substring, "touch_thresholds")){
-			/*
-			// Get ambient threshold values
-			fetch_substring(com.command, '|', 2);
-			uint32_t ambient_left_threshold = atol(substring);
-			fetch_substring(com.command, '|', 3);
-			uint32_t ambient_center_threshold = atol(substring);
-			fetch_substring(com.command, '|', 4);
-			uint32_t ambient_right_threshold = atol(substring);
-			// Get touch threshold values
-			fetch_substring(com.command, '|', 5);
-			uint32_t touch_left_threshold = atol(substring);
-			fetch_substring(com.command, '|', 6);
-			uint32_t touch_center_threshold = atol(substring);
-			fetch_substring(com.command, '|', 7);
-			uint32_t touch_right_threshold = atol(substring);
-
-			configuration.ambient_left_threshold = ambient_left_threshold;
-			configuration.ambient_center_threshold = ambient_center_threshold;
-			configuration.ambient_right_threshold = ambient_right_threshold;
-
-			configuration.touch_left_threshold = touch_left_threshold;
-			configuration.touch_center_threshold = touch_center_threshold;
-			configuration.touch_right_threshold = touch_right_threshold;
-
-			touch_pins[TOUCH_LEFT].threshold   = configuration.touch_left_threshold;
-			touch_pins[TOUCH_CENTER].threshold = configuration.touch_center_threshold;
-			touch_pins[TOUCH_RIGHT].threshold  = configuration.touch_right_threshold;
-
-			touch_pins[TOUCH_LEFT].ambient   = configuration.ambient_left_threshold;
-			touch_pins[TOUCH_CENTER].ambient = configuration.ambient_center_threshold;
-			touch_pins[TOUCH_RIGHT].ambient  = configuration.ambient_right_threshold;
-
-			printf("Ambient thresholds set to: %lu | %lu | %lu\n", configuration.ambient_left_threshold, configuration.ambient_center_threshold, configuration.ambient_right_threshold);
-			printf("Touch thresholds set to:   %lu | %lu | %lu\n", configuration.touch_left_threshold, configuration.touch_center_threshold, configuration.touch_right_threshold);
-			*/
 		}
 		else{
 			unrecognized_command_error(substring);
@@ -321,9 +283,6 @@ void parse_command(uint32_t t_now_ms, command com) {
 		printf("Device was instructed to reboot into WiFi config mode! Please wait...\n");
 		reboot_into_wifi_config_mode();
 	}
-	else if (fastcmp(substring, "noise_cal")) {
-		start_noise_calibration();
-	}
 	else if (fastcmp(substring, "button_tap")) {
 		printf("REMOTE TAP TRIGGER\n");
 		if(EMOTISCOPE_ACTIVE == true){
@@ -364,6 +323,10 @@ void parse_command(uint32_t t_now_ms, command com) {
 			transmit_to_client_in_slot("no_updates", com.origin_client_slot);
 		}
 	}
+	else if (fastcmp(substring, "perform_update")) {
+		extern void perform_update(int16_t client_slot);
+		perform_update(com.origin_client_slot);
+	}
 	else if (fastcmp(substring, "self_test")) {
 		if(t_now_ms >= 1000){ // Wait 1 second before checking boot button
 			if(self_test_step == SELF_TEST_INACTIVE){ // Self test is not already running
@@ -372,10 +335,6 @@ void parse_command(uint32_t t_now_ms, command com) {
 				trigger_self_test(); // Begin self test
 			}
 		}
-	}
-	else if (fastcmp(substring, "perform_update")) {
-		extern void perform_update(int16_t client_slot);
-		perform_update(com.origin_client_slot);
 	}
 	else if (fastcmp(substring, "start_debug_recording")) {
 		audio_recording_index = 0;
