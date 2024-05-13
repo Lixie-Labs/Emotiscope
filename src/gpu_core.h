@@ -60,11 +60,11 @@ void run_gpu() {
 
 		apply_brightness();
 
-		render_touches();  // (touch.h)
-
 		if( EMOTISCOPE_ACTIVE == false ){
 			run_standby();
 		}
+
+		render_touches();  // (touch.h)
 		
 		// This value decays itself non linearly toward zero all the time, 
 		// *really* slowing down the LPF when it's set to 1.0.
@@ -84,12 +84,12 @@ void run_gpu() {
 		// The DMA and SIMD-style stuff inside the ESP32-S3 is some pretty crazy shit.
 		float lpf_cutoff_frequency = 0.5 + (1.0-(sqrt(configuration.softness)))*14.5;
 		lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
-		//apply_image_lpf(lpf_cutoff_frequency);
+		apply_image_lpf(lpf_cutoff_frequency);
 
 		//clip_leds();
 		apply_tonemapping();
 
-		apply_frame_blending( configuration.softness );
+		//apply_frame_blending( configuration.softness );
 		//apply_phosphor_decay( configuration.softness );
 
 		// Apply an incandescent LUT to reduce harsh blue tones
@@ -97,6 +97,8 @@ void run_gpu() {
 
 		// Apply white balance
 		multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
+
+		apply_master_brightness();
 
 		apply_gamma_correction();
 

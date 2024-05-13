@@ -20,10 +20,10 @@ void draw_hype() {
 
 	float beat_color_odd  = beat_sum_odd;
 	float beat_color_even = beat_sum_even;
-	beat_sum_odd  = sqrt(beat_color_odd);
-	beat_sum_even = sqrt(beat_color_even);
+	beat_sum_odd  = sqrt(sqrt(beat_color_odd));
+	beat_sum_even = sqrt(sqrt(beat_color_even));
 
-	float strength = sqrt(sqrt(tempo_confidence));
+	float strength = sqrt(tempo_confidence);
 
 	CRGBF dot_color_odd  = hsv(
 		get_color_range_hue(beat_color_odd),
@@ -41,11 +41,11 @@ void draw_hype() {
 		beat_sum_even *= 0.5;
 	}
 
-	draw_dot(leds, NUM_RESERVED_DOTS + 0, dot_color_odd,  1.0-beat_sum_odd,  0.1 + 0.9*strength);
-	draw_dot(leds, NUM_RESERVED_DOTS + 1, dot_color_even, 1.0-beat_sum_even, 0.1 + 0.9*strength);
+	draw_dot(leds, NUM_RESERVED_DOTS + 0, dot_color_odd,  1.0-beat_sum_odd,  0.1 + 0.8*strength);
+	draw_dot(leds, NUM_RESERVED_DOTS + 1, dot_color_even, 1.0-beat_sum_even, 0.1 + 0.8*strength);
 
 	if(configuration.mirror_mode == true){
-		draw_dot(leds, NUM_RESERVED_DOTS + 2, dot_color_odd,  beat_sum_odd,  0.1 + 0.9*strength);
-		draw_dot(leds, NUM_RESERVED_DOTS + 3, dot_color_even, beat_sum_even, 0.1 + 0.9*strength);
+		draw_dot(leds, NUM_RESERVED_DOTS + 2, dot_color_odd,  beat_sum_odd,  0.1 + 0.8*strength);
+		draw_dot(leds, NUM_RESERVED_DOTS + 3, dot_color_even, beat_sum_even, 0.1 + 0.8*strength);
 	}
 }

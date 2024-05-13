@@ -357,7 +357,6 @@ void calculate_magnitudes() {
 void start_noise_calibration() {
 	Serial.println("Starting noise cal...");
 	memset(noise_spectrum, 0, sizeof(float) * NUM_FREQS);
-	configuration.vu_floor = 0.0;
 	noise_calibration_wait_frames_remaining = NOISE_CALIBRATION_WAIT_FRAMES;
 	noise_calibration_active_frames_remaining = NOISE_CALIBRATION_ACTIVE_FRAMES;
 }

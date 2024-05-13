@@ -448,7 +448,7 @@ void update_auto_color(){
 
 		static float color_momentum = 0.0;
 		if(configuration.auto_color_cycle == true){
-			float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1];
+			float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1] * 0.75;
 			novelty = novelty*novelty*novelty*novelty*novelty*novelty;
 
 			color_momentum *= 0.95;
@@ -460,6 +460,17 @@ void update_auto_color(){
 			configuration.color += color_momentum*0.05;
 		}
 	}, __func__ );
+}
+
+void apply_master_brightness(){
+	static float master_brightness = 0.0;
+	if(t_now_ms >= 1000){
+		if(master_brightness < 1.0){
+			master_brightness += 0.001;
+		}
+	}
+
+	scale_CRGBF_array_by_constant(leds, clip_float(master_brightness), NUM_LEDS);
 }
 
 void apply_phosphor_decay(float strength){

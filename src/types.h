@@ -159,7 +159,6 @@ struct config {
 	bool mirror_mode;
 	bool screensaver;
 	bool temporal_dithering;
-	float vu_floor;
 	bool auto_color_cycle;
 	bool reverse_color_range;
 };

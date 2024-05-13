@@ -177,7 +177,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 
 		float scale = (0.6 * progress) + 0.4;
 
-		normalized_magnitude *= scale;
+		//normalized_magnitude *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;

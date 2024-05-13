@@ -13,7 +13,7 @@ void draw_analog(){
 		);
 
 		if(configuration.mirror_mode == true){
-			dot_pos = 0.1 + dot_pos * 0.9;
+			dot_pos = 0.05 + dot_pos * 0.95;
 
 			draw_dot(leds, NUM_RESERVED_DOTS+0, dot_color, 0.5 + (dot_pos* 0.5), 1.0);
 			draw_dot(leds, NUM_RESERVED_DOTS+1, dot_color, 0.5 + (dot_pos*-0.5), 1.0);

@@ -23,7 +23,7 @@ void draw_metronome() {
 				metronome_width = 1.0;
 			}
 
-			float dot_pos = clip_float( sine * (0.5*(sqrt(sqrt(contribution))) * metronome_width) + 0.5 );
+			float dot_pos = clip_float( sine * (0.5*(sqrt((contribution))) * metronome_width) + 0.5 );
 
 			float opacity = clip_float(contribution*2.0);
 
