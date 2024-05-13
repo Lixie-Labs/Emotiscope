@@ -38,8 +38,8 @@ void run_vu(){
 		}
 		max_amplitude_now = clip_float(max_amplitude_now);
 
-		// LOG AMPLITUDE ------------------------------------------------------
-		if(t_now_ms - last_vu_log >= 500){
+		// LOG AMPLITUDE FOR NOISE REMOVAL ------------------------------------
+		if(t_now_ms - last_vu_log >= 1000){
 			last_vu_log = t_now_ms;
 			vu_log[vu_log_index] = max_amplitude_now;
 			vu_log_index = (vu_log_index + 1) % NUM_VU_LOG_SAMPLES;

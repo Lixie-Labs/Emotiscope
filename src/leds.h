@@ -462,6 +462,17 @@ void update_auto_color(){
 	}, __func__ );
 }
 
+void apply_master_brightness(){
+	static float master_brightness = 0.0;
+	if(t_now_ms >= 1000){
+		if(master_brightness < 1.0){
+			master_brightness += 0.001;
+		}
+	}
+
+	scale_CRGBF_array_by_constant(leds, clip_float(master_brightness), NUM_LEDS);
+}
+
 void apply_phosphor_decay(float strength){
 	static CRGBF phosphor_decay[NUM_LEDS];
 	static bool first_run = true;

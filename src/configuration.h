@@ -35,25 +35,25 @@ void load_config(){
 	configuration.softness = preferences.getFloat("softness", 0.25);
 
 	// Color
-	configuration.color = preferences.getFloat("color", 0.90);
+	configuration.color = preferences.getFloat("color", 0.33);
 
 	// Color Range
 	configuration.color_range = preferences.getFloat("color_range", 0.00);
 
 	// Warmth
-	configuration.warmth = preferences.getFloat("warmth", 0.50);
+	configuration.warmth = preferences.getFloat("warmth", 0.00);
 
 	// Speed
-	configuration.speed = preferences.getFloat("speed", 0.75);
+	configuration.speed = preferences.getFloat("speed", 0.50);
 
 	// Saturation
-	configuration.saturation = preferences.getFloat("saturation", 1.00);
+	configuration.saturation = preferences.getFloat("saturation", 0.75);
 
 	// Background
 	configuration.background = preferences.getFloat("background", 0.00);
 
 	// Current Mode
-	configuration.current_mode = preferences.getInt("current_mode", 0);
+	configuration.current_mode = preferences.getInt("current_mode", 1);
 
 	// Mirror Mode
 	configuration.mirror_mode = preferences.getBool("mirror_mode", true);

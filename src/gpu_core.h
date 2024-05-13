@@ -98,6 +98,8 @@ void run_gpu() {
 		// Apply white balance
 		multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );
 
+		apply_master_brightness();
+
 		apply_gamma_correction();
 
 		// Quantize the image buffer with dithering, 
