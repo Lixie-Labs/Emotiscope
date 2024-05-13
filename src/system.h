@@ -89,6 +89,7 @@ void init_system() {
 	extern void init_touch();
 	extern void init_noise_samples();
 	extern void init_floating_point_lookups();
+	extern void init_vu();
 
 	init_hardware_version_pins();       // (hardware_version.h)
 	init_serial(921600);				// (system.h)
@@ -106,6 +107,7 @@ void init_system() {
 	init_noise_samples();               // (utilities.h)
 	init_floating_point_lookups();      // (utilities.h)
 	init_boot_button();                 // (system.h)
+	init_vu();                          // (vu.h)
 
 	// Load sliders 
 	load_sliders_relevant_to_mode(configuration.current_mode);

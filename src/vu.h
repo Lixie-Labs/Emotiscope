@@ -14,6 +14,15 @@ volatile float vu_floor = 0.0;
 
 uint32_t last_vu_log = 0;
 
+void init_vu(){
+	for(uint8_t i = 0; i < NUM_VU_LOG_SAMPLES; i++){
+		vu_log[i] = 0.0;
+	}
+	for(uint8_t i = 0; i < NUM_VU_SMOOTH_SAMPLES; i++){
+		vu_smooth[i] = 0.0;
+	}
+}
+
 void run_vu(){
 	profile_function([&]() {
 		// CALCULATE AMPLITUDE ------------------------------------------------

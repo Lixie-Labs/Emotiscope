@@ -60,11 +60,11 @@ void run_gpu() {
 
 		apply_brightness();
 
-		render_touches();  // (touch.h)
-
 		if( EMOTISCOPE_ACTIVE == false ){
 			run_standby();
 		}
+
+		render_touches();  // (touch.h)
 		
 		// This value decays itself non linearly toward zero all the time, 
 		// *really* slowing down the LPF when it's set to 1.0.

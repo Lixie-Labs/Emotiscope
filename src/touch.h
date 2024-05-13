@@ -62,7 +62,7 @@ void read_touch(){
 		touch_readings[t] = touch_readings[t] * 0.9 + raw_touch_value * 0.1; // Smooth the input
 	}
 
-	if(t_now_ms < 5000){
+	if(t_now_ms < 2500){
 		for(uint8_t t = 0; t < 3; t++){
 			for(uint8_t i = 0; i < 50; i++){
 				touch_pins[t].touch_history[i] = touch_readings[t];
@@ -70,7 +70,7 @@ void read_touch(){
 		}
 	}
 
-	if (t_now_ms - last_touch_read_time >= 100) {
+	if (t_now_ms - last_touch_read_time >= 50) {
 		for(uint8_t t = 0; t < 3; t++){
 			if(touch_pins[t].touch_active == false){
 				touch_pins[t].touch_history[touch_history_index] = touch_readings[t];
@@ -205,15 +205,12 @@ void read_touch(){
 		save_config_delayed();
 	}
 	else if(touch_pins[TOUCH_LEFT].touch_active == true && touch_pins[TOUCH_RIGHT].touch_active == true){ // both hands held
-		//printf("BOTH HANDS HELD\n");
-		/*
-		configuration.mirror_mode = !configuration.mirror_mode;
-
-		touch_pins[TOUCH_LEFT].hold_active = true;
-		touch_pins[TOUCH_RIGHT].hold_active = true;
-		touch_pins[TOUCH_LEFT].touch_active = false;
-		touch_pins[TOUCH_RIGHT].touch_active = false;
-		*/
+		static uint32_t last_mirror_mode_toggle = 0;
+		if(t_now_ms - last_mirror_mode_toggle >= 1000){
+			configuration.mirror_mode = !configuration.mirror_mode;
+			save_config_delayed();
+			last_mirror_mode_toggle = t_now_ms;
+		}
 	}
 }
 
