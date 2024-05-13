@@ -113,21 +113,20 @@ void init_goertzel_constants_musical() {
 }
 
 void init_window_lookup() {
-    float sigma = 0.8; // For gaussian window
-
     for (uint16_t i = 0; i < 2048; i++) {
         float ratio = i / 2047.0; // Not used for Gaussian Window
 
         // Hamming window
-        float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
+        //float weighing_factor = 0.54 * (1.0 - cos(TWOPI * ratio));
 
         // Blackman-Harris window
         //float weighing_factor = 0.3635819 - (0.4891775 * cos(TWOPI * ratio)) + (0.1365995 * cos(FOURPI * ratio)) - (0.0106411 * cos(SIXPI * ratio));
 
         // Gaussian window
-        //float n_minus_halfN = i - 2048 / 2;
-        //float gaussian_weighing_factor = exp(-0.5 * pow((n_minus_halfN / (sigma * 2048 / 2)), 2));
-        //float weighing_factor = gaussian_weighing_factor;
+		float sigma = 0.8;
+        float n_minus_halfN = i - 2048 / 2;
+        float gaussian_weighing_factor = exp(-0.5 * pow((n_minus_halfN / (sigma * 2048 / 2)), 2));
+        float weighing_factor = gaussian_weighing_factor;
 
         window_lookup[i] = weighing_factor;
         window_lookup[4095 - i] = weighing_factor; // Mirror the value for the second half
@@ -208,7 +207,7 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 		float progress = float(bin_number) / NUM_FREQS;
 		progress *= progress;
 		progress *= progress;
-		scale = (progress * 0.995) + 0.005;
+		scale = (progress * 0.9975) + 0.0025;
 
 	}, __func__ );
 
@@ -263,7 +262,7 @@ void calculate_magnitudes() {
 					avg_val += noise_history[j][i];
 				}
 				avg_val /= 10.0;
-				//avg_val *= 1.05;
+				avg_val *= 0.90;
 
 				noise_floor[i] = noise_floor[i] * 0.99 + avg_val * 0.01;
 

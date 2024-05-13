@@ -140,7 +140,6 @@ void read_touch(){
 							}
 							else if(touch_pins[t].pin == TOUCH_CENTER_PIN){
 								toggle_standby();
-								broadcast("reload_config");
 							}
 							else if(touch_pins[t].pin == TOUCH_RIGHT_PIN){
 								// nothing
@@ -171,7 +170,6 @@ void read_touch(){
 							}
 							else{
 								toggle_standby();
-								broadcast("reload_config");
 							}
 						}
 						else if(touch_pins[t].pin == TOUCH_RIGHT_PIN){
