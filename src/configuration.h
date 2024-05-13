@@ -50,7 +50,7 @@ void load_config(){
 	configuration.saturation = preferences.getFloat("saturation", 0.75);
 
 	// Background
-	configuration.background = preferences.getFloat("background", 0.00);
+	configuration.background = preferences.getFloat("background", 0.25);
 
 	// Current Mode
 	configuration.current_mode = preferences.getInt("current_mode", 1);

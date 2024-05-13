@@ -293,7 +293,6 @@ void parse_command(uint32_t t_now_ms, command com) {
 		}
 		else{
 			toggle_standby();
-			broadcast("reload_config");
 		}
 	}
 	else if (fastcmp(substring, "button_hold")) {

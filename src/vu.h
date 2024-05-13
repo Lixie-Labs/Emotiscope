@@ -1,5 +1,5 @@
 #define NUM_VU_LOG_SAMPLES 20
-#define NUM_VU_SMOOTH_SAMPLES 6
+#define NUM_VU_SMOOTH_SAMPLES 12
 
 float vu_log[NUM_VU_LOG_SAMPLES] = { 0 };
 uint16_t vu_log_index = 0;
@@ -39,16 +39,21 @@ void run_vu(){
 		max_amplitude_now = clip_float(max_amplitude_now);
 
 		// LOG AMPLITUDE FOR NOISE REMOVAL ------------------------------------
-		if(t_now_ms - last_vu_log >= 1000){
+		if(t_now_ms < 2000){
+			memset(vu_log, max_amplitude_now, sizeof(float)*NUM_VU_LOG_SAMPLES);
+		}
+		else if(t_now_ms - last_vu_log >= 250){
 			last_vu_log = t_now_ms;
 			vu_log[vu_log_index] = max_amplitude_now;
 			vu_log_index = (vu_log_index + 1) % NUM_VU_LOG_SAMPLES;
 
 			float vu_sum = 0.0;
-			for(uint8_t i = 0; i < NUM_VU_LOG_SAMPLES; i++){
+			for(uint16_t i = 0; i < NUM_VU_LOG_SAMPLES; i++){
 				vu_sum += vu_log[i];
 			}
 			vu_floor = vu_sum / NUM_VU_LOG_SAMPLES;
+
+			vu_floor *= 0.90;
 		}
 
 		// SCALE OUTPUT -------------------------------------------------------
@@ -60,7 +65,7 @@ void run_vu(){
 		}
 		else if(max_amplitude_cap > max_amplitude_now){
 			float distance = max_amplitude_cap - max_amplitude_now;
-			max_amplitude_cap -= (distance * 0.01);
+			max_amplitude_cap -= (distance * 0.1);
 		}
 		max_amplitude_cap = clip_float(max_amplitude_cap);
 
@@ -83,6 +88,6 @@ void run_vu(){
 		vu_level = vu_sum / NUM_VU_SMOOTH_SAMPLES;
 
 		// MAX VALUE ---------------------------------------------------------
-		vu_max = max(vu_max, vu_level);
+		vu_max = fmaxf(vu_max, vu_level);
 	}, __func__);
 }
