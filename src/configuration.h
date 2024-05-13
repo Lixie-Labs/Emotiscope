@@ -64,9 +64,6 @@ void load_config(){
 	// Temporal Dithering
 	configuration.temporal_dithering = preferences.getBool("dithering", true);
 
-	// VU Floor
-	configuration.vu_floor = preferences.getFloat("vu_floor", 0.00);
-
 	// Reverse Color
 	configuration.reverse_color_range = preferences.getBool("reverse_color", false);
 
@@ -166,7 +163,6 @@ bool save_config() {
 	preferences.putBool("mirror_mode", configuration.mirror_mode);
 	preferences.putBool("screensaver", configuration.screensaver);
 	preferences.putBool("dithering", configuration.temporal_dithering);
-	preferences.putFloat("vu_floor", configuration.vu_floor);
 	preferences.putBool("reverse_color", configuration.reverse_color_range);
 	preferences.putBool("auto_color", configuration.auto_color_cycle);
 

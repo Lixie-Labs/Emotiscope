@@ -23,6 +23,7 @@
 		"compare": "cpp",
 		"span": "cpp",
 		"random": "cpp",
-		"list": "cpp"
+		"list": "cpp",
+		"limits": "cpp"
 	}
 }
