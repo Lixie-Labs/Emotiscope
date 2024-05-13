@@ -448,7 +448,7 @@ void update_auto_color(){
 
 		static float color_momentum = 0.0;
 		if(configuration.auto_color_cycle == true){
-			float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1];
+			float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1] * 0.75;
 			novelty = novelty*novelty*novelty*novelty*novelty*novelty;
 
 			color_momentum *= 0.95;

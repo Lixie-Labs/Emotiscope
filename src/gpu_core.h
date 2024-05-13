@@ -84,12 +84,12 @@ void run_gpu() {
 		// The DMA and SIMD-style stuff inside the ESP32-S3 is some pretty crazy shit.
 		float lpf_cutoff_frequency = 0.5 + (1.0-(sqrt(configuration.softness)))*14.5;
 		lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
-		//apply_image_lpf(lpf_cutoff_frequency);
+		apply_image_lpf(lpf_cutoff_frequency);
 
 		//clip_leds();
 		apply_tonemapping();
 
-		apply_frame_blending( configuration.softness );
+		//apply_frame_blending( configuration.softness );
 		//apply_phosphor_decay( configuration.softness );
 
 		// Apply an incandescent LUT to reduce harsh blue tones
