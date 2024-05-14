@@ -74,6 +74,8 @@ Light Modes have been split into two categories:
 
 Currently, only "Neutral" mode is available as an Inactive light mode, but future updates will expand upon the possibilities for non-musical, decorative light modes. Emotiscope is open-source, and I'm open to including user-submitted modes in future updates!
 
+Developer note - there's also a third type of Light Mode: "System". These aren't user accessible, and are reserved for modes which don't acknowledge user settings (brightness, color, etc.) such as the Self Test.
+
 #### Improved Tempo Range
 
 Emotiscope now responds to 96 different tempi, up from 64 in 1.0! Slower and faster songs now perform better in tempo-sensitive light modes.
@@ -106,10 +108,14 @@ It works in regular PC browsers now! It's not my favorite looking thing, but it'
 
 ----
 
-## Smaller Improvements
+## SMALLER IMPROVEMENTS:
 
-These are more technical in nature, things like UI improvements and bug fixes.
+These are more technical in nature, things like UI improvements and bug fixes. These are part of what increased Emotiscope's FPS in many areas:
 
+- Added support for custom LED strip lengths in the source code, though they still have to be divisible by two and will still come from two different GPIO.
+- Emotiscope's CRGBF image buffer is now HDR, meaning it can store values brighter than white, which are then tonemapped with a fast linear & tanh() function.
+- There is now a White Balance applied to make sure white is truly white once shown on the LEDs
+- Light Mode source code has been divided into subfolders: "active", "inactive" and "system".
 - The "Blue Filter" slider was renamed to "Warmth", but its functionality is unchanged
 - Screensaver no longer plays when Inactive Modes are used
 - Gamma correction is now the *last* step of the visual pipeline, everything is Linear RGB until just before quantization
@@ -125,3 +131,24 @@ These are more technical in nature, things like UI improvements and bug fixes.
 - The self test can also be triggered by pressing the BOOT button on Emotiscope's PCB
 - "Light-show Modes" are now just called "Light Modes"
 - VU floor (Analog Mode) is automatically calibrated similarly to the GDFT to remove background noise
+- A fuck-load of internal Emotiscope API changes in leds.h et al.
+
+## WHAT'S NEXT:
+
+That's a lot of new stuff! What's next?
+
+#### 1.1+ | The Color Update, Pt. II
+
+More active and inactive Light Modes are to come soon, bringing more innovative and fun shows to your home.
+
+#### 1.2 | The Presets Update
+
+Presets will allow you to save, name, and recall all of your current settings with a single tap! The Presets icon will take the place of the former Audio Calibration icon, and open a list of included and user-defined presets.
+
+#### For Now:
+
+I'll be taking a brief break from development after releasing this 1.1 update to avoid burn-out, and consider my options for new modes. Enjoy the new features!
+
+## SQUASH BUGS WITH ME:
+
+Thank you for your patience! Emotiscope is the biggest thing I've ever built. So far, between the hardware and the app, there's more than 10,000 lines of code. The odds are: at least one of those lines could be written incorrrectly. If you discover any bugs, please feel free to contact me to report them!
