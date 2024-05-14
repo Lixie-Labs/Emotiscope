@@ -53,7 +53,7 @@
 // ## SOFTWARE VERSION ########################################################
 
 #define SOFTWARE_VERSION_MAJOR ( 1 )
-#define SOFTWARE_VERSION_MINOR ( 1 )
+#define SOFTWARE_VERSION_MINOR ( 2 )
 #define SOFTWARE_VERSION_PATCH ( 0 )
 
 
@@ -87,6 +87,7 @@
 #include "utilities.h" // .......... Custom generic math functions
 #include "system.h" // ............. Lowest-level firmware functions
 #include "led_driver.h" // ......... Low-level LED communication, (ab)uses RMT for non-blocking output
+#include "perlin.h" // ............. Perlin noise generator
 #include "leds.h" // ............... LED dithering, effects, filters
 #include "touch.h" // .............. Handles capacitive touch input
 #include "indicator.h" // .......... Little light bulb

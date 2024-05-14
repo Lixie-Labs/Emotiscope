@@ -57,6 +57,9 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	else if (mode_index == 6) {  // Bloom
 		register_slider("speed", 0.000, 1.000, 0.001);
 	}
+	else if (mode_index == 7) {  // Perlin
+		register_slider("speed", 0.000, 1.000, 0.001);
+	}
 	else{
 		// WTF happened that got you here?
 	}

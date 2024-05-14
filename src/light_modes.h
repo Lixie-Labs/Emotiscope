@@ -22,6 +22,7 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 #include "light_modes/active/spectronome.h"
 #include "light_modes/active/hype.h"
 #include "light_modes/active/bloom.h"
+#include "light_modes/active/perlin.h"
 
 // INACTIVE MODES
 #include "light_modes/inactive/neutral.h"
@@ -42,6 +43,7 @@ light_mode light_modes[] = {
 	{ "Spectronome",     LIGHT_MODE_TYPE_ACTIVE,    &draw_spectronome   },
 	{ "Hype",            LIGHT_MODE_TYPE_ACTIVE,    &draw_hype          },
 	{ "Bloom",           LIGHT_MODE_TYPE_ACTIVE,    &draw_bloom         },
+	{ "Perlin",          LIGHT_MODE_TYPE_ACTIVE,    &draw_perlin        },
 
 	// Inactive Modes
 	{ "Neutral",         LIGHT_MODE_TYPE_INACTIVE,  &draw_neutral       },

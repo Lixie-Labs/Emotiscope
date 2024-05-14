@@ -206,10 +206,13 @@ void read_touch(){
 	}
 	else if(touch_pins[TOUCH_LEFT].touch_active == true && touch_pins[TOUCH_RIGHT].touch_active == true){ // both hands held
 		static uint32_t last_mirror_mode_toggle = 0;
-		if(t_now_ms - last_mirror_mode_toggle >= 1000){
-			configuration.mirror_mode = !configuration.mirror_mode;
-			save_config_delayed();
-			last_mirror_mode_toggle = t_now_ms;
+
+		if(EMOTISCOPE_ACTIVE){
+			if(t_now_ms - last_mirror_mode_toggle >= 1000){
+				configuration.mirror_mode = !configuration.mirror_mode;
+				save_config_delayed();
+				last_mirror_mode_toggle = t_now_ms;
+			}
 		}
 	}
 }
