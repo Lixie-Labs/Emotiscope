@@ -32,15 +32,21 @@ void draw_ui_overlay(){
 			// -----------------------------
 			// Draw UI
 			if(last_update_type == UI_NEEDLE_EVENT){
-				CRGBF back_color = hsv(0.870, 1.0, 0.05);
-				draw_line(leds, 0, ui_needle_position*0.25*overlay_size, back_color, 0.98*overlay_size);
+				//CRGBF back_color = hsv(0.870, 1.0, 0.05);
+				//draw_line(leds, 0, ui_needle_position*0.25*overlay_size, back_color, 0.98*overlay_size);
 			
 				CRGBF dot_color = hsv(0.814, 1.0, 1.0);
 				for(uint16_t i = 0; i < 3; i++){
-					draw_dot(leds, UI_1+i, dot_color, (overlay_size*0.25)*(0.5*i), overlay_size*0.08);
+					draw_dot(leds, UI_1+i, dot_color, (overlay_size*0.2)*(0.5*i), overlay_size*0.02);
 				}
 
-				draw_dot(leds, UI_NEEDLE, incandescent_lookup, ui_needle_position*0.25*overlay_size, overlay_size);
+				CRGBF needle_color = {
+					incandescent_lookup.r,
+					incandescent_lookup.g,
+					incandescent_lookup.b
+				};
+
+				draw_dot(leds, UI_NEEDLE, needle_color, ui_needle_position*0.2*overlay_size, overlay_size);
 			}
 		}
 
