@@ -16,7 +16,7 @@ DNSServer dns_server; // DNS server instance
 char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
 
 // HTTPS not working yet, PsychicHTTP can't initialize the SSL server
-bool app_enable_ssl = true;
+bool app_enable_ssl = false;
 const char server_cert[] = "-----BEGIN CERTIFICATE-----\n"
 	"MIIEIjCCAwqgAwIBAgISBH7YjHKyJu9WiS8x5r5AoQBbMA0GCSqGSIb3DQEBCwUA\n"
 	"MDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD\n"
@@ -215,6 +215,7 @@ void check_if_websocket_client_still_present(uint16_t client_slot) {
 void transmit_to_client_in_slot(const char *message, uint8_t client_slot) {
 	PsychicWebSocketClient *client = get_client_in_slot(client_slot);
 	if (client != NULL) {
+		printf("TX: %s\n", message);
 		client->sendMessage(message);
 	}
 }
@@ -224,7 +225,7 @@ void init_web_server() {
 
 	server.listen(80);
 
-	WEB_VERSION = "?v=" + String(SOFTWARE_VERSION_MAJOR) + "." + String(SOFTWARE_VERSION_MINOR) + "." + String(SOFTWARE_VERSION_PATCH);
+	//WEB_VERSION = "?v=" + String(SOFTWARE_VERSION_MAJOR) + "." + String(SOFTWARE_VERSION_MINOR) + "." + String(SOFTWARE_VERSION_PATCH);
 
 	//server.serveStatic("/", LittleFS, "/");
 
@@ -314,11 +315,12 @@ void init_web_server() {
 	});
 
 	const char *local_hostname = "emotiscope";
-	if (!MDNS.begin(local_hostname)) {
-		Serial.println("Error starting mDNS");
-		return;
+	if (MDNS.begin(local_hostname) == true) {
+		MDNS.addService("http", "tcp", 80);
 	}
-	MDNS.addService("http", "tcp", 80);
+	else{
+		Serial.println("Error starting mDNS");
+	}
 
 	websocket_handler.onOpen([](PsychicWebSocketClient *client) {
 		printf("[socket] connection #%i connected from %s\n", client->socket(), client->remoteIP().toString().c_str());
@@ -339,7 +341,7 @@ void init_web_server() {
 
 		// If it's text, it might be a command
 		if (frame_type == HTTPD_WS_TYPE_TEXT) {
-			//printf("RX: %s\n", (char *)frame->payload);
+			printf("RX: %s\n", (char *)frame->payload);
 			queue_command((char *)frame->payload, frame->len, get_slot_of_client(request->client()));
 		}
 		else {

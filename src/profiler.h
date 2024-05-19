@@ -159,7 +159,8 @@ void watch_gpu_fps() {
 void print_system_info() {
 	static uint32_t next_print_ms = 0;
 	const uint16_t print_interval_ms = 2000;
-
+	bool printing_enabled = false;
+	
 	if (t_now_ms >= next_print_ms) {
 		next_print_ms += print_interval_ms;
 
@@ -193,30 +194,32 @@ void print_system_info() {
 		snprintf(stat_buffer, 64, "heap|%lu", (uint32_t)free_heap);
 		broadcast(stat_buffer);
 
-		printf("# SYSTEM INFO ####################\n");
-		printf("CPU CORE USAGE --- %.2f%%\n", CPU_CORE_USAGE*100);
-		printf("CPU FPS ---------- %.3f\n", FPS_CPU);
-		printf("GPU FPS ---------- %.3f\n", FPS_GPU);
-		printf("Free Heap -------- %lu\n", (uint32_t)free_heap);
-		printf("Free Stack CPU --- %lu\n", (uint32_t)free_stack_cpu);
-		printf("Free Stack GPU --- %lu\n", (uint32_t)free_stack_gpu);
-		//printf("Total PSRAM ------ %lu\n", (uint32_t)ESP.getPsramSize());
-		//printf("Free PSRAM ------- %lu\n", (uint32_t)ESP.getFreePsram());
-		printf("IP Address ------- %s\n", WiFi.localIP().toString().c_str());
-		printf("MAC Address ------ %s\n", mac_str);
-		printf("\n");
-		printf("- WS CLIENTS -----------------\n");
-		if(web_server_ready == true){
-			for(uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++){
-				PsychicWebSocketClient *client = get_client_in_slot(i);
-				if (client != NULL) {
-					printf("%s\n", client->remoteIP().toString().c_str());
+		if(printing_enabled == true){
+			printf("# SYSTEM INFO ####################\n");
+			printf("CPU CORE USAGE --- %.2f%%\n", CPU_CORE_USAGE*100);
+			printf("CPU FPS ---------- %.3f\n", FPS_CPU);
+			printf("GPU FPS ---------- %.3f\n", FPS_GPU);
+			printf("Free Heap -------- %lu\n", (uint32_t)free_heap);
+			printf("Free Stack CPU --- %lu\n", (uint32_t)free_stack_cpu);
+			printf("Free Stack GPU --- %lu\n", (uint32_t)free_stack_gpu);
+			//printf("Total PSRAM ------ %lu\n", (uint32_t)ESP.getPsramSize());
+			//printf("Free PSRAM ------- %lu\n", (uint32_t)ESP.getFreePsram());
+			printf("IP Address ------- %s\n", WiFi.localIP().toString().c_str());
+			printf("MAC Address ------ %s\n", mac_str);
+			printf("\n");
+			printf("- WS CLIENTS -----------------\n");
+			if(web_server_ready == true){
+				for(uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++){
+					PsychicWebSocketClient *client = get_client_in_slot(i);
+					if (client != NULL) {
+						printf("%s\n", client->remoteIP().toString().c_str());
+					}
 				}
 			}
-		}
-		printf("------------------------------\n");
+			printf("------------------------------\n");
 
-		print_profiled_function_hits();	
-		printf("##################################\n\n");
+			print_profiled_function_hits();	
+			printf("##################################\n\n");
+		}
 	}
 }

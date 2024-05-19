@@ -1,5 +1,5 @@
 const MAX_PING_PONG_REPLY_TIME_MS = 4000;
-const MAX_CONNECTION_TIME_MS = 3000;
+const MAX_CONNECTION_TIME_MS = 10000;
 const AUTO_RECONNECT = true;
 
 let ws;
@@ -387,7 +387,7 @@ function reconnect_websockets(){
 			set_ui_locked_state(true);
 			setTimeout(function(){
 				window.location.reload();
-			}, 2000);
+			}, 500);
 		}
 	}
 }
@@ -398,8 +398,11 @@ function open_websockets_connection_to_device(){
 	connection_pending = true;
 	setInterval(check_connection_timeout, 100);
 
-	console.log("CONNECTING TO "+device_ip);
-	ws = new WebSocket("ws://"+device_ip+":80/ws");
+	websockets_server = "ws://"+device_ip+":80/ws";
+
+	console.log("CONNECTING TO WS SERVER: "+websockets_server);
+	ws = new WebSocket(websockets_server);
+
 	document.getElementById("device_nickname").innerHTML = device_ip;
 
 	ws.onopen = function(e) {

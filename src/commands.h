@@ -129,7 +129,7 @@ void parse_command(uint32_t t_now_ms, command com) {
 			// Get saturation value
 			fetch_substring(com.command, '|', 2);
 			float setting_value = atof(substring);
-			configuration.saturation = sqrt(clip_float(setting_value));
+			configuration.saturation = sqrt(sqrt(clip_float(setting_value)));
 
 			//update_ui(UI_NEEDLE_EVENT, configuration.saturation);
 		}

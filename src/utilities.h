@@ -77,8 +77,8 @@ void fetch_substring(char* input_buffer, char delimiter, uint8_t fetch_index){
 
 void broadcast(const char* message){
 	extern PsychicWebSocketHandler websocket_handler;
+	printf("TX: %s\n", message);
 	websocket_handler.sendAll(message);
-	//printf("%s\n", message);
 }
 
 float linear_to_tri(float input) {

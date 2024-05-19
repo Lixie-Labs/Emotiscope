@@ -14,15 +14,15 @@
 // Welcome to the Emotiscope Engine. This is firmware which: 
 // 
 // - Logs raw audio data from the microphone into buffers
-// - Detects frequencies in the audio using many Goertzel filters
+// - Detects frequencies in the audio using many Goertzel filters at once
 // - Detects the BPM of music
 // - Syncronizes to the beats of said music
 // - Checks the touch sensors for input
 // - Hosts an HTTP server for a web app
 // - Talks to that web app over a high speed ws:// connection
 // - Stores settings in flash memory
-// - Draws custom light show modes to the LEDs which react to music
-//   in real-time with a variety of effects
+// - Draws custom light show modes to the LEDs which react to
+//   music in real-time with a variety of effects
 // - Runs the indicator light
 // - Runs the screensaver
 // - Applies a blue-light filter to the LEDs
@@ -55,7 +55,6 @@
 #define SOFTWARE_VERSION_MAJOR ( 1 )
 #define SOFTWARE_VERSION_MINOR ( 2 )
 #define SOFTWARE_VERSION_PATCH ( 0 )
-
 
 // ############################################################################
 // ## DEPENDENCIES ############################################################

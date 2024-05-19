@@ -614,16 +614,45 @@ void apply_gamma_correction_to_color(CRGBF* color, float gamma) {
 }
 
 void apply_gamma_correction() {
+	/*
 	profile_function([&]() {
 		dsps_mul_f32_ae32((float*)leds, (float*)leds, (float*)leds, NUM_LEDS*3, 1, 1, 1);
 	}, __func__);
+	*/
+
+	static bool first_run = true;
+	if(first_run == true){
+		first_run = false;
+
+		// Generate a lookup table for gamma correction
+		//printf("gamma_correction_lookup[2048] = {");
+
+		for(uint16_t i = 0; i < 2048; i++){
+			float gamma = 1.5;
+			float corrected = powf(
+				(float)i / 2047.0,
+				gamma
+			);
+			
+			//printf("%.4f, ", corrected);
+			gamma_correction_lookup[i] = corrected;
+		}
+
+		//printf("};\n");
+	}
+
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		leds[i].r = gamma_correction_lookup[uint16_t(leds[i].r * 2047)];
+		leds[i].g = gamma_correction_lookup[uint16_t(leds[i].g * 2047)];
+		leds[i].b = gamma_correction_lookup[uint16_t(leds[i].b * 2047)];
+	}
 }
 
 void apply_brightness() {
 	profile_function([&]() {
 		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
 
-		float brightness_val = 0.3+configuration.brightness*0.7;
+		float brightness_val = 0.3 + (configuration.brightness*0.7);
 
 		scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
 	}, __func__);
@@ -686,7 +715,6 @@ void apply_background(float background_level){
 
 			// Apply background to the main buffer
 			scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
-			//scale_CRGBF_array_by_constant(leds, 1.0 - background_level, NUM_LEDS);
 			add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
 		}
 	}, __func__);
@@ -708,14 +736,14 @@ void fade_display(){
 }
 
 float soft_clip_hdr(float input) {
-    if (input < 0.75) {
-        // Linear function: output is the same as input for values less than 0.75
-        return input;
-    } else {
-        // Non-linear function: transforms input values >= 0.75 to soft clipped values between 0.75 and 1.0
-        float t = (input - 0.75) * 4.0;  // Scale input to enhance the soft clipping curve effect
-        return 0.75 + 0.25 * tanh(t);    // Use hyperbolic tangent to provide a soft transition to 1.0
-    }
+	if (input < 0.9) {
+		// Linear function: output is the same as input for values less than 0.9
+		return input;
+	} else {
+		// Non-linear function: transforms input values >= 0.9 to soft clipped values between 0.9 and 1.0
+		float t = (input - 0.9) * 10.0;  // Scale input to enhance the soft clipping curve effect
+		return 0.9 + 0.1 * tanh(t);    // Use hyperbolic tangent to provide a soft transition to 1.0
+	}
 }
 
 void apply_tonemapping() {

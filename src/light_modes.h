@@ -26,6 +26,7 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 
 // INACTIVE MODES
 #include "light_modes/inactive/neutral.h"
+#include "light_modes/inactive/starfield.h"
 
 // SYSTEM MODES
 #include "light_modes/system/self_test.h"
@@ -47,6 +48,7 @@ light_mode light_modes[] = {
 
 	// Inactive Modes
 	{ "Neutral",         LIGHT_MODE_TYPE_INACTIVE,  &draw_neutral       },
+	{ "Starfield",       LIGHT_MODE_TYPE_INACTIVE,  &draw_starfield     },
 
 	// System Modes
 	{ "Self Test",       LIGHT_MODE_TYPE_SYSTEM,    &draw_self_test     },
