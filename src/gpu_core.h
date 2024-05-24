@@ -54,7 +54,7 @@ void run_gpu() {
 
 		//scramble_image( configuration.blur * 50.0 );
 
-		apply_fast_blur( configuration.blur * 8.0 );
+		apply_fast_blur( configuration.blur * 16.0 );
 
 		draw_ui_overlay();  // (ui.h)
 

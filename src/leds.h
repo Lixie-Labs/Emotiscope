@@ -589,7 +589,29 @@ void apply_fractional_blur(CRGBF* pixels, uint16_t num_pixels, float kernel_size
 	}
 }
 
-void apply_box_blur(CRGBF* pixels, uint16_t num_pixels, int kernel_size) {
+void apply_box_blur(CRGBF* pixels, uint16_t num_pixels, int kernel_size){
+	memcpy(leds_temp, pixels, sizeof(CRGBF) * num_pixels);
+
+	for(uint16_t i = 0; i < num_pixels; i++){
+		int16_t kernel_far_left  = i - (kernel_size);
+		int16_t kernel_far_right = i + (kernel_size);
+
+		if(kernel_far_left < 0){ kernel_far_left = 0; }
+		if(kernel_far_right >= num_pixels){ kernel_far_right = num_pixels-1; }
+
+		CRGBF sum = {0.0f, 0.0f, 0.0f};
+
+		for(int16_t j = kernel_far_left; j <= kernel_far_right; j++){
+			sum = add( sum, leds_temp[j] );
+		}
+
+		pixels[i] = sum;
+	}
+
+	scale_CRGBF_array_by_constant(pixels, 1.0 / (kernel_size*2.0 + 1.0), num_pixels);
+}
+
+void apply_box_blur_old(CRGBF* pixels, uint16_t num_pixels, int kernel_size) {
     // Ensure kernel size is odd for symmetry around the central pixel
     if (kernel_size % 2 == 0) {
 		kernel_size -= 1;
@@ -828,9 +850,9 @@ void apply_fast_blur( float kernel_size ){
 		return;
 	}
 	
-	apply_box_blur( leds, NUM_LEDS, 3.0 + kernel_size );
+	apply_box_blur( leds, NUM_LEDS, kernel_size );
 
-	if(kernel_size > 1.0){
-		apply_box_blur( leds, NUM_LEDS, 3.0 + kernel_size );
+	if(kernel_size >= 1.0){
+		apply_box_blur( leds, NUM_LEDS, kernel_size );
 	}
 }
