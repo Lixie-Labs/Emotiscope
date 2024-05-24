@@ -95,6 +95,14 @@ void parse_command(uint32_t t_now_ms, command com) {
 
 			update_ui(UI_NEEDLE_EVENT, configuration.speed);
 		}
+		else if (fastcmp(substring, "blur")) {
+			// Get blur value
+			fetch_substring(com.command, '|', 2);
+			float setting_value = atof(substring);
+			configuration.blur = setting_value;
+
+			//update_ui(UI_NEEDLE_EVENT, configuration.blur);
+		}
 		else if (fastcmp(substring, "color")) {
 			// Get color value
 			fetch_substring(com.command, '|', 2);

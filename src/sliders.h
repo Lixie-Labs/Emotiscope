@@ -69,4 +69,5 @@ void load_sliders_relevant_to_mode(int16_t mode_index) {
 	register_slider("saturation",  0.000, 1.000, 0.001);
 	register_slider("warmth",      0.000, 1.000, 0.001);
 	register_slider("background",  0.000, 1.000, 0.001);
+	register_slider("blur",        0.000, 1.000, 0.001);
 }

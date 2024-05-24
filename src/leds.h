@@ -544,11 +544,55 @@ void apply_frame_blending(float blend_amount){
 	memcpy(previous_frame, leds, sizeof(CRGBF) * NUM_LEDS);
 }
 
+void apply_fractional_blur(CRGBF* pixels, uint16_t num_pixels, float kernel_size) {
+	if(kernel_size >= 0.001){
+		// Ensure kernel_size is positive
+		if (kernel_size <= 0) {
+			printf("Kernel size must be positive.\n");
+			return;
+		}
+
+		// Calculate the effective range of influence for the kernel size
+		int range = (int)ceil(kernel_size * 3); // Typically 3 standard deviations are considered
+		CRGBF temp_pixels[num_pixels];
+		memset(temp_pixels, 0, sizeof(temp_pixels));
+
+		for (int i = 0; i < num_pixels; ++i) {
+			float total_weight = 0;
+			CRGBF weighted_sum = {0.0f, 0.0f, 0.0f};
+
+			// Apply weights to the pixels in the range
+			for (int k = -range; k <= range; ++k) {
+				int pixel_index = i + k;
+				if (pixel_index < 0) pixel_index = 0;
+				if (pixel_index >= num_pixels) pixel_index = num_pixels - 1;
+
+				// Calculate the weight using a Gaussian-like function
+				float distance = fabs(k);
+				float weight = exp(-0.5 * (distance / kernel_size) * (distance / kernel_size));
+
+				weighted_sum.r += pixels[pixel_index].r * weight;
+				weighted_sum.g += pixels[pixel_index].g * weight;
+				weighted_sum.b += pixels[pixel_index].b * weight;
+
+				total_weight += weight;
+			}
+
+			// Normalize the weighted sum by the total weight
+			temp_pixels[i].r = weighted_sum.r / total_weight;
+			temp_pixels[i].g = weighted_sum.g / total_weight;
+			temp_pixels[i].b = weighted_sum.b / total_weight;
+		}
+
+		// Copy the blurred values back to the original array
+		memcpy(pixels, temp_pixels, sizeof(CRGBF) * num_pixels);
+	}
+}
+
 void apply_box_blur(CRGBF* pixels, uint16_t num_pixels, int kernel_size) {
     // Ensure kernel size is odd for symmetry around the central pixel
     if (kernel_size % 2 == 0) {
-        printf("Kernel size must be odd.\n");
-        return;
+		kernel_size -= 1;
     }
 
     int half_kernel = kernel_size / 2;
@@ -751,5 +795,42 @@ void apply_tonemapping() {
 		leds[i].r = soft_clip_hdr(leds[i].r);
 		leds[i].g = soft_clip_hdr(leds[i].g);
 		leds[i].b = soft_clip_hdr(leds[i].b);
+	}
+}
+
+void scramble_image( float distance ){
+	memset(leds_temp, 0, sizeof(CRGBF) * NUM_LEDS);
+
+	// Scramble the image
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		// Use ESP32-S3 hardware RNG to get a float between 0.0 and 1.0
+		float random_value = get_random_float();
+
+		float splat_position = (random_value - 0.5) * 2.0;
+		float splat_opacity = 1.0 - fabs(splat_position);
+
+		splat_position *= distance;
+
+		// Calculate the new index for the pixel (signed integer)
+		int16_t new_index = i + (int16_t)(splat_position);
+
+		if(new_index > 0 && new_index < NUM_LEDS){
+			// Copy the pixel to the new index
+			leds_temp[new_index] = add(leds_temp[new_index], leds[i], splat_opacity);
+		}
+	}
+
+	memcpy(leds, leds_temp, sizeof(CRGBF) * NUM_LEDS);
+}
+
+void apply_fast_blur( float kernel_size ){
+	if(kernel_size == 0.0){
+		return;
+	}
+	
+	apply_box_blur( leds, NUM_LEDS, 3.0 + kernel_size );
+
+	if(kernel_size > 1.0){
+		apply_box_blur( leds, NUM_LEDS, 3.0 + kernel_size );
 	}
 }

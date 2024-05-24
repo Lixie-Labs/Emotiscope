@@ -69,6 +69,9 @@ void load_config(){
 
 	// Auto Color Cycling
 	configuration.auto_color_cycle = preferences.getBool("auto_color", false);
+
+	// Blur
+	configuration.blur = preferences.getFloat("blur", 0.00);
 }
 
 void sync_configuration_to_client() {
@@ -146,6 +149,11 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|auto_color_cycle|int|%d", configuration.auto_color_cycle);
 	websocket_handler.sendAll(config_item_buffer);
 
+	// blur
+	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|blur|float|%.3f", configuration.blur);
+	websocket_handler.sendAll(config_item_buffer);
+
 	websocket_handler.sendAll("config_ready");
 }
 
@@ -165,6 +173,7 @@ bool save_config() {
 	preferences.putBool("dithering", configuration.temporal_dithering);
 	preferences.putBool("reverse_color", configuration.reverse_color_range);
 	preferences.putBool("auto_color", configuration.auto_color_cycle);
+	preferences.putFloat("blur", configuration.blur);
 
 	return true;
 }

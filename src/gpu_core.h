@@ -52,6 +52,10 @@ void run_gpu() {
 
 		apply_background(configuration.background);
 
+		//scramble_image( configuration.blur * 50.0 );
+
+		apply_fast_blur( configuration.blur * 8.0 );
+
 		draw_ui_overlay();  // (ui.h)
 
 		if( EMOTISCOPE_ACTIVE == true && configuration.screensaver == true){
@@ -88,6 +92,8 @@ void run_gpu() {
 
 		//clip_leds();
 		apply_tonemapping();
+
+		//apply_fractional_blur( leds, NUM_LEDS, configuration.blur * 10.0 );
 
 		//apply_frame_blending( configuration.softness );
 		//apply_phosphor_decay( configuration.softness );

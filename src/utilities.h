@@ -21,6 +21,7 @@ uint8_t noise_samples[TOTAL_NOISE_SAMPLES];
 float num_leds_float_lookup[NUM_LEDS];
 float num_freqs_float_lookup[NUM_FREQS];
 float num_tempi_float_lookup[NUM_TEMPI];
+float random_float_lookup[1024];
 
 char substring[128];
 
@@ -42,16 +43,41 @@ void init_num_tempi_float_lookup(){
 	}
 }
 
+void init_random_float_lookup(){
+	for(uint16_t i = 0; i < 1024; i++){
+		random_float_lookup[i] = esp_random() / (float)UINT32_MAX;
+	}
+}
+
 void init_floating_point_lookups(){
 	init_num_leds_float_lookup();
 	init_num_freqs_float_lookup();
 	init_num_tempi_float_lookup();
+	init_random_float_lookup();
 }
 
 void init_noise_samples(){
 	for(uint16_t i = 0; i < TOTAL_NOISE_SAMPLES; i++){
 		noise_samples[i] = esp_random() & 1;
 	}
+}
+
+float get_random_float(){
+	static float position = 0.0;
+
+	uint32_t index = uint32_t(position * 1023);
+	float push = random_float_lookup[index];
+	if(push > 0.5){
+		push += push*0.1;
+	}
+
+	position += (push*0.01);
+
+	while(position >= 1.0){
+		position -= 1.0;
+	}
+
+	return push;
 }
 
 void fetch_substring(char* input_buffer, char delimiter, uint8_t fetch_index){

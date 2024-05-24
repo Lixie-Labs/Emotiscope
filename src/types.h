@@ -161,4 +161,5 @@ struct config {
 	bool temporal_dithering;
 	bool auto_color_cycle;
 	bool reverse_color_range;
+	float blur;
 };
