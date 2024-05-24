@@ -589,67 +589,29 @@ void apply_fractional_blur(CRGBF* pixels, uint16_t num_pixels, float kernel_size
 	}
 }
 
-void apply_box_blur(CRGBF* pixels, uint16_t num_pixels, int kernel_size){
-	memcpy(leds_temp, pixels, sizeof(CRGBF) * num_pixels);
+void apply_box_blur( CRGBF* pixels, uint16_t num_pixels, int kernel_size ){
+	memcpy( leds_temp, pixels, sizeof(CRGBF) * num_pixels );
 
-	for(uint16_t i = 0; i < num_pixels; i++){
-		int16_t kernel_far_left  = i - (kernel_size);
-		int16_t kernel_far_right = i + (kernel_size);
+	for( uint16_t i = 0; i < num_pixels; i++ ){
+		int16_t kernel_far_left  = i - kernel_size;
+		int16_t kernel_far_right = i + kernel_size;
 
-		if(kernel_far_left < 0){ kernel_far_left = 0; }
-		if(kernel_far_right >= num_pixels){ kernel_far_right = num_pixels-1; }
+		int16_t kernel_far_left_clipped  = max( (int16_t)0,                (int16_t)kernel_far_left  );
+		int16_t kernel_far_right_clipped = min( (int16_t)( num_pixels-1 ), (int16_t)kernel_far_right );	
 
-		CRGBF sum = {0.0f, 0.0f, 0.0f};
+		CRGBF sum = { 0.0f, 0.0f, 0.0f };
 
 		for(int16_t j = kernel_far_left; j <= kernel_far_right; j++){
-			sum = add( sum, leds_temp[j] );
+			int16_t index = max( kernel_far_left_clipped, min( j, kernel_far_right_clipped ) );
+			sum.r += leds_temp[ index ].r;
+			sum.g += leds_temp[ index ].g;
+			sum.b += leds_temp[ index ].b;
 		}
 
-		pixels[i] = sum;
+		pixels[ i ] = sum;
 	}
 
-	scale_CRGBF_array_by_constant(pixels, 1.0 / (kernel_size*2.0 + 1.0), num_pixels);
-}
-
-void apply_box_blur_old(CRGBF* pixels, uint16_t num_pixels, int kernel_size) {
-    // Ensure kernel size is odd for symmetry around the central pixel
-    if (kernel_size % 2 == 0) {
-		kernel_size -= 1;
-    }
-
-    int half_kernel = kernel_size / 2;
-
-    // Temporary array to store blurred values
-    CRGBF temp_pixels[num_pixels];
-    memset(temp_pixels, 0, sizeof(temp_pixels));
-
-    for (int i = 0; i < num_pixels; ++i) {
-        int valid_kernel_pixels = 0;
-        CRGBF sum = {0.0f, 0.0f, 0.0f};
-
-        // Sum the colors within the kernel's range, handle edges by duplicating pixels
-        for (int k = -half_kernel; k <= half_kernel; ++k) {
-            int pixel_index = i + k;
-
-            // Handle OOB by duplicating edge pixels
-            if (pixel_index < 0) pixel_index = 0;
-            if (pixel_index >= num_pixels) pixel_index = num_pixels - 1;
-
-            sum.r += pixels[pixel_index].r;
-            sum.g += pixels[pixel_index].g;
-            sum.b += pixels[pixel_index].b;
-
-            valid_kernel_pixels++;
-        }
-
-        // Calculate the average and assign it to the temporary array
-        temp_pixels[i].r = sum.r / valid_kernel_pixels;
-        temp_pixels[i].g = sum.g / valid_kernel_pixels;
-        temp_pixels[i].b = sum.b / valid_kernel_pixels;
-    }
-
-    // Copy the blurred values back to the original array
-    memcpy(pixels, temp_pixels, sizeof(CRGBF) * num_pixels);
+	scale_CRGBF_array_by_constant( pixels, 1.0 / ( kernel_size*2.0 + 1.0 ), num_pixels );
 }
 
 void apply_image_lpf(float cutoff_frequency) {
@@ -845,14 +807,14 @@ void scramble_image( float distance ){
 	memcpy(leds, leds_temp, sizeof(CRGBF) * NUM_LEDS);
 }
 
-void apply_fast_blur( float kernel_size ){
+void apply_blur( float kernel_size ){
 	if(kernel_size == 0.0){
 		return;
 	}
 	
 	apply_box_blur( leds, NUM_LEDS, kernel_size );
 
-	if(kernel_size >= 1.0){
+	if(kernel_size >= 2.0){
 		apply_box_blur( leds, NUM_LEDS, kernel_size );
 	}
 }

@@ -341,7 +341,7 @@ void init_web_server() {
 
 		// If it's text, it might be a command
 		if (frame_type == HTTPD_WS_TYPE_TEXT) {
-			printf("RX: %s\n", (char *)frame->payload);
+			//printf("RX: %s\n", (char *)frame->payload);
 			queue_command((char *)frame->payload, frame->len, get_slot_of_client(request->client()));
 		}
 		else {
