@@ -49,7 +49,7 @@ function track_sliders() {
 
 		eventPoints.forEach(point => {
 			let id = point.target.closest('.slider_track').getAttribute('id');
-			transmit(`slider_touch_start|${id}`);
+			wstx(`slider_touch_start|${id}`);
 
 			// Store initial touch positions
 			touch_start_data.set(isMouseEvent ? 'mouse' : point.identifier, {
@@ -106,7 +106,7 @@ function track_sliders() {
 
 								if(configuration[id] != resulting_value){
 									configuration[id] = resulting_value;
-									transmit(`set|${id}|${truncate_float(resulting_value, 3)}`);
+									wstx(`set|${id}|${truncate_float(resulting_value, 3)}`);
 								}
 
 								let percentage = ((resulting_value-slider_min) / (slider_max-slider_min)) * 100.0;
@@ -129,7 +129,7 @@ function track_sliders() {
 
         if (data && data.target_div.classList.contains("slider_track")) {
             let id = data.target_div.getAttribute('id');
-            transmit(`slider_touch_end|${id}`);
+            wstx(`slider_touch_end|${id}`);
         }
 
         touch_start_data.delete(isMouseEvent ? 'mouse' : point.identifier);

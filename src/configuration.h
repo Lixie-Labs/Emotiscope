@@ -74,7 +74,7 @@ void load_config(){
 	configuration.blur = preferences.getFloat("blur", 0.00);
 
 	// Show Interface
-	configuration.show_interface = preferences.getBool("show_interface", false);
+	configuration.show_interface = preferences.getBool("show_interface", true);
 }
 
 void sync_configuration_to_client() {

@@ -53,7 +53,7 @@ void run_vu(){
 			}
 			vu_floor = vu_sum / NUM_VU_LOG_SAMPLES;
 
-			vu_floor *= 0.90;
+			vu_floor *= 0.80;
 		}
 
 		// SCALE OUTPUT -------------------------------------------------------

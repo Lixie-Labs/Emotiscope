@@ -324,6 +324,8 @@ void init_web_server() {
 
 	websocket_handler.onOpen([](PsychicWebSocketClient *client) {
 		printf("[socket] connection #%i connected from %s\n", client->socket(), client->remoteIP().toString().c_str());
+
+		/*
 		if (welcome_websocket_client(client) == true) {
 			client->sendMessage("welcome");
 		}
@@ -332,17 +334,25 @@ void init_web_server() {
 			printf("PLAYER WAS DENIED ENTRY (ROOM FULL)\n");
 			client->close();
 		}
+		*/
 	});
 
 	websocket_handler.onFrame([](PsychicWebSocketRequest *request, httpd_ws_frame *frame) {
 		// printf("[socket] #%d sent: %s\n", request->client()->socket(), (char*)frame->payload);
-
 		httpd_ws_type_t frame_type = frame->type;
 
 		// If it's text, it might be a command
 		if (frame_type == HTTPD_WS_TYPE_TEXT) {
-			//printf("RX: %s\n", (char *)frame->payload);
-			queue_command((char *)frame->payload, frame->len, get_slot_of_client(request->client()));
+			char* command = (char*)frame->payload;
+			printf("RX: %s\n", command);
+
+			if(command[0] == 'E' && command[1] == 'M' && command[2] == 'O'){
+				printf("Parsing Emotiscope State...\n");
+				//parse_emotiscope_state(command, request);
+			}
+			else{
+				parse_command(command, request);
+			}
 		}
 		else {
 			printf("UNSUPPORTED WS FRAME TYPE: %d\n", (uint8_t)frame->type);

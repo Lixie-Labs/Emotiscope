@@ -15,7 +15,6 @@
 		var scripts = [
 			"js/discovery.js",
 			"js/fetch_mac.js",
-			"js/touch_calibration.js",
 			"js/info.js",
 			"js/alerts.js",
 			"js/utilities.js",
@@ -25,7 +24,6 @@
 			"js/render_controls.js",
 			"js/websockets_connection.js",
 			"js/pages.js",
-			"js/spin_ui.js"
 		];
 	
 		var loaded_scripts = 0;
@@ -128,19 +126,19 @@
 		<div id="menu_container">
 			<div id="menu_toggles">
 			</div>
-			<div class="menu_item buzz" onclick="transmit('check_update');">
+			<div class="menu_item buzz" onclick="wstx('check_update');">
 				<span class="menu_item_label">Check Firmware Update</span>
 				<span class="menu_item_content"></span>
 			</div>
-			<div class="menu_item buzz" onclick="transmit('reboot'); set_ui_locked_state(true);">
+			<div class="menu_item buzz" onclick="wstx('reboot'); set_ui_locked_state(true);">
 				<span class="menu_item_label">Reboot Emotiscope</span>
 				<span class="menu_item_content"></span>
 			</div>
-			<div class="menu_item buzz" onclick="transmit('reboot_wifi_config'); set_ui_locked_state(true);">
+			<div class="menu_item buzz" onclick="wstx('reboot_wifi_config'); set_ui_locked_state(true);">
 				<span class="menu_item_label">Enter WiFi Config Mode</span>
 				<span class="menu_item_content"></span>
 			</div>
-			<div class="menu_item buzz" onclick="transmit('self_test');">
+			<div class="menu_item buzz" onclick="wstx('self_test');">
 				<span class="menu_item_label">Start Self Test</span>
 				<span class="menu_item_content"></span>
 			</div>

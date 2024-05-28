@@ -20,7 +20,7 @@ function toggle_toggle(toggle_name){
 			trigger_vibration(20);
 			let resulting_value = configuration[id] ? 1 : 0;
 
-			transmit(`set|${toggle_name}|${resulting_value}`);
+			wstx(`set|${toggle_name}|${resulting_value}`);
 		}
 	}   
 }
@@ -116,7 +116,7 @@ function track_toggles() {
 								if(configuration[id] != resulting_value){
 									configuration[id] = resulting_value;
 									trigger_vibration(20);
-									transmit(`set|${id}|${resulting_value}`);
+									wstx(`set|${id}|${resulting_value}`);
 								}
 
 								//let percentage = ((resulting_value-slider_min) / (slider_max-slider_min)) * 100.0;

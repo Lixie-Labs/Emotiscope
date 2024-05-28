@@ -1,0 +1,129 @@
+	E --+
+	M   +--- packet header
+	O --+
+	~ ------ chunk spacer
+	s --+
+	t   |
+	a   +--- chunk type
+	t   |
+	s --+
+	| ------ spacer
+	C --+
+	P   |
+	U   +--- stat name
+	-   |
+	F   |
+	P   |
+	S --+
+	| ------ spacer
+	2 --+
+	4   |
+	9	+--- stat value
+	.   |
+	1   |
+	2 --+
+	| ------ spacer
+	G --+
+	P   |
+	U   +--- stat name
+	-   |
+	F   |
+	P   |
+	S --+
+	| ------ spacer
+	4 --+
+	7   |
+	1	+--- stat value
+	.   |
+	3   |
+	7 --+	
+	~ ------ chunk spacer
+	c --+
+	o   |
+	n   +--- chunk type
+	f   |
+	i   |
+	g --+
+	| ------ spacer
+	b --+
+	r   |
+	i   +--- setting name
+	g   |
+	h   |
+	t   |
+	n   |
+	e   |
+	s   |
+	s --+
+	| ------ spacer
+	f --+
+	l   |
+	o   +--- setting type
+	a   |
+	t   |
+	| ------ spacer
+	0 --+
+	.   |
+	9   +--- setting value
+	9   |
+	1 --+
+	| ------ spacer
+	s --+
+	l   |
+	i   +--- ui type
+	d   |
+	e   |
+	r --+
+	| ------ spacer
+	s --+
+	o   |
+	f   +--- setting name
+	t   |
+	n   |
+	e   |
+	s   |
+	s --+
+	| ------ spacer
+	f --+
+	l   |
+	o   +--- setting type
+	a   |
+	t   |
+	| ------ spacer
+	1 --+
+	.   |
+	0   +--- setting value
+	0   |
+	0 --+
+	| ------ spacer
+	s --+
+	l   |
+	i   +--- ui type
+	d   |
+	e   |
+	r --+
+	~ ------ chunk spacer
+	m --+
+	o   |
+	d   +--- chunk type
+	e   |
+	s --+
+	| ------ spacer
+	0 ------ mode type (integer)
+	A --+
+	n   |
+	a   +--- mode name
+	l   |
+	o   |
+	g --+
+	| ------ spacer
+	0 ------ mode type (integer)
+	S --+
+	p   |
+	e   +--- mode name
+	c   |
+	t   |
+	r   |
+	u   |
+	m --+
+	~ ------ chunk spacer

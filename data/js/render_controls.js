@@ -310,10 +310,10 @@ function check_and_attach_buzz_listeners() {
 			});
 
 			document.addEventListener('touchstart', function(){
-				transmit("touch_start");
+				wstx("touch_start");
 			}, { passive: true });
 			document.addEventListener('touchend', function(){
-				transmit("touch_end");
+				wstx("touch_end");
 			}, { passive: true });
 
 			window.addEventListener('contextmenu', function(e) {
