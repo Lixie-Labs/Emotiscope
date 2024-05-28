@@ -162,4 +162,5 @@ struct config {
 	bool auto_color_cycle;
 	bool reverse_color_range;
 	float blur;
+	bool show_interface;
 };

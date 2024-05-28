@@ -28,5 +28,6 @@ void load_menu_toggles() {
 	clear_menu_toggles();
 
 	register_menu_toggle("screensaver");
+	register_menu_toggle("show_interface");
 	register_menu_toggle("temporal_dithering");
 }

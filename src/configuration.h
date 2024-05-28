@@ -72,6 +72,9 @@ void load_config(){
 
 	// Blur
 	configuration.blur = preferences.getFloat("blur", 0.00);
+
+	// Show Interface
+	configuration.show_interface = preferences.getBool("show_interface", false);
 }
 
 void sync_configuration_to_client() {
@@ -154,6 +157,11 @@ void sync_configuration_to_client() {
 	snprintf(config_item_buffer, 120, "new_config|blur|float|%.3f", configuration.blur);
 	websocket_handler.sendAll(config_item_buffer);
 
+	// show_interface
+	memset(config_item_buffer, 0, 120);
+	snprintf(config_item_buffer, 120, "new_config|show_interface|int|%d", configuration.show_interface);
+	websocket_handler.sendAll(config_item_buffer);
+
 	websocket_handler.sendAll("config_ready");
 }
 
@@ -174,6 +182,7 @@ bool save_config() {
 	preferences.putBool("reverse_color", configuration.reverse_color_range);
 	preferences.putBool("auto_color", configuration.auto_color_cycle);
 	preferences.putFloat("blur", configuration.blur);
+	preferences.putBool("show_interface", configuration.show_interface);
 
 	return true;
 }

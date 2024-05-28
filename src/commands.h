@@ -173,6 +173,12 @@ void parse_command(uint32_t t_now_ms, command com) {
 			bool setting_value = (bool)atoi(substring);
 			configuration.auto_color_cycle = setting_value;
 		}
+		else if (fastcmp(substring, "show_interface")){
+			// Get show_interface value
+			fetch_substring(com.command, '|', 2);
+			bool setting_value = (bool)atoi(substring);
+			configuration.show_interface = setting_value;
+		}
 
 		else if (fastcmp(substring, "mode")) {
 			// Get mode name
@@ -320,7 +326,6 @@ void parse_command(uint32_t t_now_ms, command com) {
 	}
 	else if (fastcmp(substring, "slider_touch_start")) {
 		slider_touch_active = true;
-		//update_ui(UI_SHOW_EVENT);
 	}
 	else if (fastcmp(substring, "slider_touch_end")) {
 		slider_touch_active = false;
