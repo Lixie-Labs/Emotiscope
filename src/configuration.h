@@ -4,6 +4,7 @@
 Preferences preferences; // NVS storage for configuration
 
 config configuration; // configuration struct to be filled by NVS or defaults on boot
+volatile bool configuration_changed = false; // flag to indicate that the configuration has been changed
 
 extern light_mode light_modes[];
 extern PsychicWebSocketHandler websocket_handler;
@@ -161,7 +162,7 @@ void load_config(){
 	strcpy(configuration.blur.name, "blur");
 	strcpy(configuration.blur.pretty_name, "Blur");	
 	strcpy(configuration.blur.type_string, "f32");
-	strcpy(configuration.blur.ui_type_string, "slider");
+	strcpy(configuration.blur.ui_type_string, "s");
 	configuration.blur.type = f32;
 	configuration.blur.ui_type = ui_type_slider;
 	configuration.blur.value.f32 = preferences.getFloat(configuration.blur.name, 0.00);
@@ -204,6 +205,7 @@ bool save_config() {
 }
 
 void save_config_delayed() {
+	configuration_changed = true;
 	last_save_request_ms = t_now_ms;
 	save_request_open = true;
 }

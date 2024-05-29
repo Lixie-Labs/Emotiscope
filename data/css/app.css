@@ -485,12 +485,14 @@ button{
 	}
 }
 
+/*
 .slider, .toggle{
     width: 28%;
     height: calc(100% - 10px);
     display: inline-block;
     overflow: hidden;
 }
+*/
 
 .slider_label, .toggle_label{
     font-size: 12px;

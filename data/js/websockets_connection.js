@@ -3,6 +3,14 @@ var ws = null;
 var attempt_to_reach_emotiscope_interval = null;
 var device_ip = null;
 
+var system_state = {
+	"stats": {},
+	"settings": {},
+	"light_modes": {},
+};
+
+var setting_gallery = [];
+
 // Function to handle touch events on the device icon
 function setup_top_touch_listener(div_id) {
     const device_icon = document.getElementById(div_id);
@@ -67,6 +75,146 @@ function increment_mode(){
 	wstx(`increment_mode`);
 }
 
+function parse_emotiscope_packet(packet){
+	let chunks = packet.split("~");
+	for( let i = 0; i < chunks.length; i++ ){
+		let chunk = chunks[i];
+		
+		if(chunk != "EMO"){
+			// First item is the chunk name
+			let chunk_name = chunk.split("|")[0];
+			// All other items are sections
+			let sections = chunk.split("|").slice(1);
+
+			if(chunk_name == "stats"){
+				let num_sections = sections.length;
+				let stat_length = 2;
+				let num_stats = num_sections / stat_length;
+
+				for( let j = 0; j < num_stats; j++ ){
+					let stat_name  = sections[j*stat_length+0];
+					let stat_value = sections[j*stat_length+1];
+
+					system_state.stats[stat_name] = stat_value;
+				}
+			}
+			else if(chunk_name == "config"){
+				let num_sections = sections.length;
+				let config_length = 4;
+				let num_config_items = num_sections / config_length;
+
+				for( let j = 0; j < num_config_items; j++ ){
+					let item_name    = sections[j*config_length+0];
+					let item_type    = sections[j*config_length+1];
+					let item_ui_type = sections[j*config_length+2];
+					let item_value   = sections[j*config_length+3];
+
+					if(item_type == "i32"){
+						item_value = parseInt(item_value);
+					}
+					else if(item_type == "u32"){
+						item_value = parseInt(item_value);
+					}
+					else if(item_type == "f32"){
+						item_value = parseFloat(item_value);
+					}
+					
+					let item_name_clean = item_name.replace(/\s+/g, '_').toLowerCase();
+					
+					// if key already exists, update the value
+					if(system_state.settings[item_name_clean]){
+						system_state.settings[item_name_clean].value = item_value;
+
+						// UPDATE SETTING HERE
+						const setting = setting_gallery.find(setting => setting.name === item_name_clean);
+						if(setting){
+							setting.value = item_value;
+						}
+					}
+
+					// otherwise, create a new key
+					else{
+						system_state.settings[item_name_clean] = {
+							"name": item_name_clean,
+							"pretty_name": item_name,
+							"type": item_type,
+							"ui_type": item_ui_type,
+							"value": item_value,
+						};
+					}
+				}
+
+				var setting_order = [
+					// Sliders
+					"Brightness",
+					"Softness",
+					"Color",
+					"Color Range",
+					"Saturation",
+					"Warmth",
+					"Background",
+					"Blur",
+					"Speed",
+
+					// Toggles
+					"Mirror Mode",
+					"Reverse Color Range",
+					"Auto Color Cycle",
+				]
+
+				// Spawn all settings not already in the gallery, in the correct order
+				for( let j = 0; j < setting_order.length; j++ ){
+					let setting_pretty_name = setting_order[j];
+
+					// if setting not already spawned
+					if(!setting_gallery.find(setting => setting.pretty_name === setting_pretty_name)){
+						try{
+							let setting_name = setting_pretty_name.replace(/\s+/g, '_').toLowerCase();
+							let setting_type = system_state.settings[setting_name].type;
+							let setting_ui_type = system_state.settings[setting_name].ui_type;
+							let setting_value = system_state.settings[setting_name].value;
+
+							const setting = new Setting(setting_name, setting_pretty_name, setting_type, setting_ui_type, setting_value);
+							setting_gallery.push(setting);
+						}
+						catch(e){
+							console.log("ERROR SPAWNING SETTING: "+setting_name+" "+e);
+						}
+					}
+				}
+
+				// Update all settings in the gallery
+				for( let j = 0; j < setting_gallery.length; j++ ){
+					setting_gallery[j].draw();
+				}
+
+				set_ui_locked_state(false);
+			}
+			else if(chunk_name == "modes"){
+				let num_sections = sections.length;
+				let mode_length = 2;
+				let num_modes = num_sections / mode_length;
+
+				for( let j = 0; j < num_modes; j++ ){
+					let mode_name = sections[j*mode_length+0];
+					let mode_type = sections[j*mode_length+1];
+
+					let mode_name_clean = mode_name.replace(/\s+/g, '_').toLowerCase();
+
+					system_state.light_modes[mode_name_clean] = {
+						"name": mode_name_clean,
+						"pretty_name": mode_name,
+						"type": mode_type,
+					};
+				}
+			}
+		}
+	}
+
+	console.log(system_state);
+	console.log(setting_gallery);
+}
+
 function wstx(message){
 	ws.send(message);
 	console.log("TX: " + message);
@@ -80,7 +228,13 @@ function wsrx(message){
 	var message_items = message.split("|");
 	var message_type = message_items[0];
 
-	if( message_type == "emotiscope" ){
+	// check if first three chars match "EMO"
+	if(message_type.substring(0, 3) == "EMO"){
+		parse_emotiscope_packet(message);
+	}
+
+	// other commands
+	else if( message_type == "emotiscope" ){
 		emotiscope_connected = true;
 		clearInterval(attempt_to_reach_emotiscope_interval);
 
@@ -90,123 +244,7 @@ function wsrx(message){
 		wstx("get|version");
 		wstx("get|config");
 	}
-	else if(message_type == "clear_config"){
-		// Clear client-side config JSON
-		configuration = {};
 
-		set_ui_locked_state(true);
-	}
-	else if(message_type == "new_config"){
-		// Append new config key to client-side config JSON
-		let config_key_name  = message_items[1];
-		let config_data_type = message_items[2];
-		let config_value_raw = message_items[3];
-		let config_value;
-
-		if(config_data_type == "string"){
-			config_value = config_value_raw;
-		}
-		else if(config_data_type == "float"){
-			config_value = parseFloat(config_value_raw);
-		}
-		else if(config_data_type == "int"){
-			config_value = parseInt(config_value_raw);
-		}
-		else{
-			console.log(`UNRECOGNIZED CONFIG DATA TYPE: ${config_data_type}`);
-		}
-
-		configuration[config_key_name] = config_value;
-	}
-	else if(message_type == "config_ready"){
-		wstx("get|modes");
-	}
-	else if(message_type == "clear_modes"){
-		modes = [];
-	}
-	else if(message_type == "new_mode"){
-		let mode_index = parseInt(message_items[1]);
-		let mode_type  = parseInt(message_items[2]);
-		let mode_name  = message_items[3];
-
-		modes.push({
-			"mode_index":mode_index,
-			"mode_type":mode_type,
-			"mode_name":mode_name
-		});
-	}
-	else if(message_type == "modes_ready"){
-		wstx("get|sliders");
-	}
-	else if(message_type == "clear_sliders"){
-		// Force close UI if it's open
-		wstx(`touch_end`);
-		wstx(`slider_touch_end`);
-		
-		sliders = [];
-	}
-	else if(message_type == "new_slider"){
-		let slider_name = message_items[1];
-		let slider_min  = parseFloat(message_items[2]);
-		let slider_max  = parseFloat(message_items[3]);
-		let slider_step = parseFloat(message_items[4]);
-
-		sliders.push({
-			"name":slider_name,
-			"min":slider_min,
-			"max":slider_max,
-			"step":slider_step
-		});
-	}
-	else if(message_type == "sliders_ready"){
-		wstx("get|toggles");
-	}
-	else if(message_type == "clear_toggles"){
-		toggles = [];
-	}
-	else if(message_type == "new_toggle"){
-		let toggle_name = message_items[1];
-
-		toggles.push({
-			"name":toggle_name
-		});
-	}
-	else if(message_type == "toggles_ready"){
-		wstx("get|menu_toggles");
-	}
-	else if(message_type == "clear_menu_toggles"){
-		menu_toggles = [];
-	}
-	else if(message_type == "new_menu_toggle"){
-		let toggle_name = message_items[1];
-
-		menu_toggles.push({
-			"name":toggle_name
-		});
-	}
-	else if(message_type == "menu_toggles_ready"){
-		//console.log("DATA SYNC COMPLETE!");
-		//ping_server();
-		//setInterval(check_pong_timeout, 100);
-		
-		render_controls();
-		set_ui_locked_state(false);
-	}
-	else if(message_type == "reload_config"){
-		wstx("get|config");
-	}
-	else if(message_type == "fps_cpu"){
-		let FPS = message_items[1];
-		document.getElementById("CPU_FPS").innerHTML = `CPU FPS: ${FPS}`;
-	}
-	else if(message_type == "fps_gpu"){
-		let FPS = message_items[1];
-		document.getElementById("GPU_FPS").innerHTML = `GPU FPS: ${FPS}`;
-	}
-	else if(message_type == "heap"){
-		let heap = message_items[1];
-		document.getElementById("HEAP").innerHTML = `HEAP: ${heap}`;
-	}
 	else if(message_type == "update_available"){
 		pongs_halted = true;
 		show_alert(
@@ -284,10 +322,6 @@ function connect_to_emotiscope() {
 
 		attempt_to_reach_emotiscope();
 		attempt_to_reach_emotiscope_interval = setInterval(attempt_to_reach_emotiscope, 250);
-
-		setInterval(function(){
-			wstx("EMO~set_config|Softness|0.250");
-		}, 5000);
 	};
 
 	ws.onmessage = function(event) {
