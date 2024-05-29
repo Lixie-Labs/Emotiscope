@@ -16,7 +16,7 @@ void draw_metronome() {
 			else if(sine < -1.0){ sine = -1.0; }
 
 			float metronome_width;
-			if(configuration.mirror_mode == true){
+			if(configuration.mirror_mode.value.u32 == true){
 				metronome_width = 0.5;
 			}
 			else{
@@ -29,17 +29,17 @@ void draw_metronome() {
 
 			CRGBF dot_color = hsv(
 				get_color_range_hue(progress),
-				configuration.saturation,
+				configuration.saturation.value.f32,
 				1.0
 			);
 
-			if(configuration.mirror_mode == true){
+			if(configuration.mirror_mode.value.u32 == true){
 				dot_pos -= 0.25;
 			}
 
 			draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 0, dot_color, dot_pos, opacity);
 
-			if(configuration.mirror_mode == true){
+			if(configuration.mirror_mode.value.u32 == true){
 				draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity);
 			}
 		}
@@ -47,7 +47,7 @@ void draw_metronome() {
 			// Put inactive dots in the middle
 			fx_dots[NUM_RESERVED_DOTS + tempo_bin * 2 + 0].position = 0.5;
 
-			if(configuration.mirror_mode == true){
+			if(configuration.mirror_mode.value.u32 == true){
 				fx_dots[NUM_RESERVED_DOTS + tempo_bin * 2 + 0].position = 0.25;
 				fx_dots[NUM_RESERVED_DOTS + tempo_bin * 2 + 1].position = 0.75;
 			}

@@ -286,7 +286,7 @@ function connect_to_emotiscope() {
 		attempt_to_reach_emotiscope_interval = setInterval(attempt_to_reach_emotiscope, 250);
 
 		setInterval(function(){
-			wstx("EMO~stats|CPU-FPS|249.12|GPU-FPS|471.37~config|brightness|float|0.991|slider|softness|float|1.000|slider~modes|0Analog|0Spectrum");
+			wstx("EMO~config|brightness|float|0.991|slider|1|softness|float|1.000|slider|1");
 		}, 500);
 	};
 

@@ -95,7 +95,6 @@
 #include "vu.h" // ................. Tracks music loudness from moment to moment
 #include "goertzel.h" // ........... GDFT or God Damn Fast Transform is implemented here
 #include "tempo.h" // .............. Comupation of (and syncronization) to the music tempo
-#include "audio_debug.h" // ........ Print audio data over UART
 #include "screensaver.h" // ........ Colorful dots play on screen when no audio is present
 #include "standby.h" // ............ Handles sleep/wake + animations
 #include "light_modes.h" // ........ Definition and handling of light modes

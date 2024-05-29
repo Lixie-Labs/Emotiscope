@@ -242,10 +242,9 @@ CRGBF hsv(float h, float s, float v) {
 
 void apply_warmth(float mix) {
 	profile_function([&]() {
-		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+		if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
 
 		float mix_inv = 1.0 - mix;
-
 		if(mix > 0.0){
 			multiply_CRGBF_array_by_LUT(
 				leds,
@@ -446,9 +445,9 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 
 void update_auto_color(){
 	profile_function([&]() {
-		if(light_modes[configuration.current_mode].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
+		if(light_modes[configuration.current_mode.value.u32].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
 
-		if(configuration.auto_color_cycle == true){
+		if(configuration.auto_color_cycle.value.u32 == true){
 			float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1] * 0.75;
 			novelty = novelty*novelty*novelty*novelty*novelty*novelty;
 
@@ -458,7 +457,7 @@ void update_auto_color(){
 				color_momentum = 0.1;
 			}
 
-			configuration.color += color_momentum*0.05;
+			configuration.color.value.f32 += color_momentum*0.05;
 		}
 	}, __func__ );
 }
@@ -678,9 +677,9 @@ void apply_gamma_correction() {
 
 void apply_brightness() {
 	profile_function([&]() {
-		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+		if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
 
-		float brightness_val = 0.3 + (configuration.brightness*0.7);
+		float brightness_val = 0.3 + (configuration.brightness.value.f32*0.7);
 
 		scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
 	}, __func__);
@@ -689,17 +688,17 @@ void apply_brightness() {
 float get_color_range_hue(float progress){
 	float return_val;
 	//profile_function([&]() {
-		float color_range = configuration.color_range;
+		float color_range = configuration.color_range.value.f32;
 		
 		if(color_range == 0.0){
-			return_val = configuration.color;
+			return_val = configuration.color.value.f32;
 		}	
-		else if(configuration.reverse_color_range == true){
+		else if(configuration.reverse_color_range.value.u32 == true){
 			color_range *= -1.0;
-			return_val = (1.0-configuration.color) + (color_range * progress);
+			return_val = (1.0-configuration.color.value.f32) + (color_range * progress);
 		}
 		else{
-			return_val = configuration.color + (color_range * progress);
+			return_val = configuration.color.value.f32 + (color_range * progress);
 		}
 	//}, __func__);
 
@@ -708,16 +707,16 @@ float get_color_range_hue(float progress){
 
 void apply_background(float background_level){
 	profile_function([&]() {
-		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+		if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
 		background_level *= 0.25; // Max 25% brightness
 
 		if(background_level > 0.0){
-			if(configuration.mirror_mode == false){
+			if(configuration.mirror_mode.value.u32 == false){
 				for(uint16_t i = 0; i < NUM_LEDS; i++){
 					float progress = num_leds_float_lookup[i];
 					CRGBF background_color = hsv(
 						get_color_range_hue(progress),
-						configuration.saturation,
+						configuration.saturation.value.f32,
 						1.0
 					);
 
@@ -729,7 +728,7 @@ void apply_background(float background_level){
 					float progress = num_leds_float_lookup[i << 1];
 					CRGBF background_color = hsv(
 						get_color_range_hue(progress),
-						configuration.saturation,
+						configuration.saturation.value.f32,
 						1.0
 					);
 					
@@ -760,7 +759,7 @@ void clear_display(float keep = 0.0){
 }
 
 void fade_display(){
-	scale_CRGBF_array_by_constant(leds, configuration.softness, NUM_LEDS);
+	scale_CRGBF_array_by_constant(leds, configuration.softness.value.f32, NUM_LEDS);
 }
 
 float soft_clip_hdr(float input) {

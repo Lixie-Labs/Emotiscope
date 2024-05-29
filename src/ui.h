@@ -18,8 +18,8 @@ float ui_needle_position = 0.0;
 
 void draw_ui_overlay(){
 	profile_function([&]() {
-		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
-		if(configuration.show_interface == false){ return; }
+		if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+		if(configuration.show_ui.value.u32 == false){ return; }
 
 		if(overlay_size >= 0.01){
 			// -----------------------------

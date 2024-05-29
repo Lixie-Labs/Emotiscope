@@ -7,7 +7,7 @@ void draw_perlin(){
 
 	static float momentum = 0.0;
 
-	float push = vu_level*vu_level*vu_level*vu_level*configuration.speed*0.1f;
+	float push = vu_level*vu_level*vu_level*vu_level*configuration.speed.value.f32*0.1f;
 
 	momentum *= 0.99;
 
@@ -30,11 +30,11 @@ void draw_perlin(){
 	dsps_mulc_f32_ae32(ptr, ptr, NUM_LEDS, 0.98, 1, 1);
 	dsps_addc_f32_ae32(ptr, ptr, NUM_LEDS, 0.02, 1, 1);
 	
-	if(configuration.mirror_mode == false){
+	if(configuration.mirror_mode.value.u32 == false){
 		for(uint16_t i = 0; i < NUM_LEDS; i++){
 			CRGBF color = hsv(
 				get_color_range_hue(perlin_image_hue[i]),
-				configuration.saturation,
+				configuration.saturation.value.f32,
 				perlin_image_lum[i]*perlin_image_lum[i]
 			);
 
@@ -45,7 +45,7 @@ void draw_perlin(){
 		for(uint16_t i = 0; i < NUM_LEDS>>1; i++){
 			CRGBF color = hsv(
 				get_color_range_hue(perlin_image_hue[i<<1]),
-				configuration.saturation,
+				configuration.saturation.value.f32,
 				perlin_image_lum[i<<1]*perlin_image_lum[i<<1]
 			);
 

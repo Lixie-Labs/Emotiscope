@@ -45,20 +45,20 @@ void run_gpu() {
 		// ------------------------------------------------------------
 
 		clear_display();
-		light_modes[configuration.current_mode].draw();
+		light_modes[configuration.current_mode.value.u32].draw();
 
 		// If silence is detected, show a blue debug LED
 		// leds[NUM_LEDS - 1] = add(leds[NUM_LEDS - 1], {0.0, 0.0, silence_level});
 
-		apply_background(configuration.background);
+		apply_background(configuration.background.value.f32);
 
 		//scramble_image( configuration.blur * 50.0 );
 
-		apply_blur( configuration.blur * 12.0 );
+		apply_blur( configuration.blur.value.f32 * 12.0 );
 
 		draw_ui_overlay();  // (ui.h)
 
-		if( EMOTISCOPE_ACTIVE == true && configuration.screensaver == true){
+		if( EMOTISCOPE_ACTIVE == true && configuration.screensaver.value.u32 == true){
 			run_screensaver();
 		}
 
@@ -86,20 +86,20 @@ void run_gpu() {
 		// When I got into all this in 2012, I had a 16MHz single core AVR
 		// 
 		// The DMA and SIMD-style stuff inside the ESP32-S3 is some pretty crazy shit.
-		float lpf_cutoff_frequency = 0.5 + (1.0-(sqrt(configuration.softness)))*14.5;
+		float lpf_cutoff_frequency = 0.5 + (1.0-(sqrt(configuration.softness.value.f32)))*14.5;
 		lpf_cutoff_frequency = lpf_cutoff_frequency * (1.0 - lpf_drag) + 0.5 * lpf_drag;
 		apply_image_lpf(lpf_cutoff_frequency);
 
 		//clip_leds();
 		apply_tonemapping();
 
-		//apply_fractional_blur( leds, NUM_LEDS, configuration.blur * 10.0 );
+		//apply_fractional_blur( leds, NUM_LEDS, configuration.blur.value.f32 * 10.0 );
 
-		//apply_frame_blending( configuration.softness );
-		//apply_phosphor_decay( configuration.softness );
+		//apply_frame_blending( configuration.softness.value.f32 );
+		//apply_phosphor_decay( configuration.softness.value.f32 );
 
 		// Apply an incandescent LUT to reduce harsh blue tones
-		apply_warmth( configuration.warmth );  // (leds.h)
+		apply_warmth( configuration.warmth.value.f32 );  // (leds.h)
 
 		// Apply white balance
 		multiply_CRGBF_array_by_LUT( leds, WHITE_BALANCE, NUM_LEDS );

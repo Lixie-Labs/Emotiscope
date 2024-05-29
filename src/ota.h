@@ -9,7 +9,7 @@ bool update_running = false;
 
 String latest_version;
 
-bool update_firmware(const char* url, update_type type, int16_t client_slot) {
+bool update_firmware(const char* url, update_type type, PsychicWebSocketRequest *request) {
 	http.begin(url);
 
 	int32_t http_code = http.GET();
@@ -26,7 +26,7 @@ bool update_firmware(const char* url, update_type type, int16_t client_slot) {
 
 			if (can_begin) {
 				WiFiClient* stream = http.getStreamPtr();
-				Update.onProgress([type, client_slot](size_t progress, size_t total) {
+				Update.onProgress([type, request](size_t progress, size_t total) {
 					float percent = (progress / (total / 100));
 
 					char update_message[64];
@@ -39,7 +39,7 @@ bool update_firmware(const char* url, update_type type, int16_t client_slot) {
 						snprintf(update_message, 64, "ota_filesystem_progress|%d", (int)percent);
 					}
 
-					transmit_to_client_in_slot(update_message, client_slot);
+					request->client()->sendMessage(update_message);
 				});
 
 				size_t written = 0;
@@ -109,21 +109,21 @@ bool check_update(){
 	}
 }
 
-void perform_update(int16_t client_slot){
+void perform_update(PsychicWebSocketRequest *request){
 	update_running = true;
 
 	// Update firmware
 	String new_firmware = "https://app.emotiscope.rocks/versions/" + latest_version + "/firmware.bin";
 	printf("DOWNLOADING/INSTALLING FIRMWARE UPDATE\n");
-	update_firmware(new_firmware.c_str(), FLASH, client_slot);
+	update_firmware(new_firmware.c_str(), FLASH, request);
 
 	// Update filesystem
 	String new_filesystem = "https://app.emotiscope.rocks/versions/" + latest_version + "/littlefs.bin";
 	printf("DOWNLOADING/INSTALLING FILESYSTEM UPDATE\n");
-	update_firmware(new_filesystem.c_str(), FILESYSTEM, client_slot);
+	update_firmware(new_filesystem.c_str(), FILESYSTEM, request);
 
 	printf("UPDATE COMPLETE\n");
-	delay(1000);
+	delay(100);
 	printf("REBOOTING...\n");
 	delay(100);
 	ESP.restart();

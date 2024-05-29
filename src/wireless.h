@@ -7,51 +7,13 @@
 
 String WEB_VERSION = "";
 
-const IPAddress ap_ip(192, 168, 4, 1); // IP address for the ESP32-S3 in AP mode
-const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32-S3 IP
-const IPAddress ap_subnet(255, 255, 255, 0); // Subnet mask for the WiFi network
 DNSServer dns_server; // DNS server instance
 
 // Define a char array to hold the formatted MAC address string
 char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
 
-// HTTPS not working yet, PsychicHTTP can't initialize the SSL server
-bool app_enable_ssl = false;
-const char server_cert[] = "-----BEGIN CERTIFICATE-----\n"
-	"MIIEIjCCAwqgAwIBAgISBH7YjHKyJu9WiS8x5r5AoQBbMA0GCSqGSIb3DQEBCwUA\n"
-	"MDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD\n"
-	"EwJSMzAeFw0yNDAzMTIyMjI1MTBaFw0yNDA2MTAyMjI1MDlaMBsxGTAXBgNVBAMT\n"
-	"EGVtb3Rpc2NvcGUucm9ja3MwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATQHjaY\n"
-	"I+CdZFEl7b4uLJQvM9wc4PQuP3bwNYT22xgF+vMqZan+dFPQ2aivqTQTmfpZf7P4\n"
-	"i5Zabvke7fLcVgL6o4ICEjCCAg4wDgYDVR0PAQH/BAQDAgeAMB0GA1UdJQQWMBQG\n"
-	"CCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBTKbZV5\n"
-	"T6G16rxt/6U4ceZ47dH38DAfBgNVHSMEGDAWgBQULrMXt1hWy65QCUDmH6+dixTC\n"
-	"xjBVBggrBgEFBQcBAQRJMEcwIQYIKwYBBQUHMAGGFWh0dHA6Ly9yMy5vLmxlbmNy\n"
-	"Lm9yZzAiBggrBgEFBQcwAoYWaHR0cDovL3IzLmkubGVuY3Iub3JnLzAbBgNVHREE\n"
-	"FDASghBlbW90aXNjb3BlLnJvY2tzMBMGA1UdIAQMMAowCAYGZ4EMAQIBMIIBBAYK\n"
-	"KwYBBAHWeQIEAgSB9QSB8gDwAHYASLDja9qmRzQP5WoC+p0w6xxSActW3SyB2bu/\n"
-	"qznYhHMAAAGONPvyqwAABAMARzBFAiByFzLVHoKxCHjMzswH9uorSMDLaRT7R0Qd\n"
-	"p7GS/wRmxAIhAO+vULdM8/l57nfNbHTO7ZDaPNaHdXtnpB2iPZl1VV+RAHYA7s3Q\n"
-	"ZNXbGs7FXLedtM0TojKHRny87N7DUUhZRnEftZsAAAGONPvyZQAABAMARzBFAiEA\n"
-	"0N6+Jcg5MIQSY8npJf+z6Sos+YvL6oAgBct8ho45J5kCIF4W1k1QmJSDDbT7UvI5\n"
-	"6vM3mNME7+FDsv7Dx+SxXJpHMA0GCSqGSIb3DQEBCwUAA4IBAQAWNeX3A+1elo4H\n"
-	"HclveVrcw1vbJfJWIfN+GYr6EXzWlUtDWHQNzpwNZWy5KhizypJV2nKEMEaZrkMp\n"
-	"hg0nVfU1EIlT7gDmLrxLneZMig5G1HFuikf5iS28qasG+WWwlR6lOPKWmnGb+Eyg\n"
-	"N7KpKPOolfggrmt1n1PjR3CEI9b31ISNW1WiedFZf0WKfva8yhjH+vqM8H179z+H\n"
-	"j3Ly0aEo80dX4CtPhsvuS//Zp8ICeac6Bp7hiy45hOMJVba7e+khdXQOjA5NIf1w\n"
-	"Fg0zi3hBsQ1OuoKirhAXYgMvjhIqVR6hZQCl0Qo04OeGib12o1oIryun9XjElM7A\n"
-	"IAEFbV9H\n"
-	"-----END CERTIFICATE-----\n";
-
-const char server_key[] = "-----BEGIN PRIVATE KEY-----\n"
-	"MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgQhojjmRxKkBrJ2J+\n"
-	"N0xPI/w2QqYFwegoEvwHt2pNF/OhRANCAARM1A650C1wbnD3LDFeYEnBYJU9UG8x\n"
-	"4fFbE06zxFwt04nZJ9RLHu5uwKffSkZzhOAUAB+EjvA+9x4h4vbAM+nd\n"
-	"----------END PRIVATE KEY----------\n";
-
 PsychicHttpServer server;
 PsychicWebSocketHandler websocket_handler;
-websocket_client websocket_clients[MAX_WEBSOCKET_CLIENTS];
 
 volatile bool web_server_ready = false;
 int16_t connection_status = -1;
@@ -120,123 +82,184 @@ void discovery_check_in() {
 	}
 }
 
-int16_t get_slot_of_client(PsychicWebSocketClient client) {
-	for (uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++) {
-		if (websocket_clients[i].socket == client.socket()) {
-			return i;
+bool load_section_at( char* section_buffer, char* command, int16_t* byte_index ){
+	memset(section_buffer, 0, 128);
+
+	int16_t output_index = 0;
+	bool solved = false;
+	bool hit_end_of_chunk = false;
+
+	while(solved == false){
+		char current_byte = command[*byte_index];
+
+		if(current_byte == '~' || current_byte == '\0'){ // 0 is EOF
+			hit_end_of_chunk = true;
+			solved = true;
 		}
-	}
-
-	return -1;
-}
-
-PsychicWebSocketClient *get_client_in_slot(uint8_t slot) {
-	PsychicWebSocketClient *client = websocket_handler.getClient(websocket_clients[slot].socket);
-	if (client != NULL) {
-		return client;
-	}
-
-	return NULL;
-}
-
-void init_websocket_clients() {
-	for (uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++) {
-		websocket_clients[i] = {
-			-1,	 // int socket;
-			0,	 // uint32_t last_ping;
-		};
-	}
-}
-
-bool welcome_websocket_client(PsychicWebSocketClient client) {
-	bool client_welcome_status = true;
-	//uint32_t t_now_ms = millis();
-
-	uint16_t current_client_count = 0;
-	int16_t first_open_slot = -1;
-	for (uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++) {
-		if (websocket_clients[i].socket != -1) {
-			current_client_count += 1;
+		else if(current_byte == '|'){
+			hit_end_of_chunk = false;
+			solved = true;
 		}
-		else {
-			if (first_open_slot == -1) {
-				first_open_slot = i;
+		else{
+			// read data
+			section_buffer[output_index] = current_byte;
+			output_index++;
+		}
+
+		(*byte_index)++;
+	}
+
+	return hit_end_of_chunk;
+}
+
+void parse_config_data(char* config_name, char* config_type, char* config_value, char* config_ui_type, char* config_preset_enabled){
+	printf("CONFIG DATA: %s|%s|%s|%s|%s\n", config_name, config_type, config_value, config_ui_type, config_preset_enabled);
+
+	if(fastcmp(config_type, "float")){
+		float value = atof(config_value);
+		printf("FLOAT VALUE: %f\n", value);
+		//place_float_in_config_by_key( TBD );
+	}
+	else if(fastcmp(config_type, "int")){
+		int value = atoi(config_value);
+		printf("INT VALUE: %i\n", value);
+	}
+	else if(fastcmp(config_type, "bool")){
+		bool value = fastcmp(config_value, "true");
+		printf("BOOL VALUE: %i\n", value);
+	}
+	else if(fastcmp(config_type, "string")){
+		printf("STRING VALUE: %s\n", config_value);
+	}
+	else{
+		printf("UNKNOWN CONFIG TYPE: %s\n", config_type);
+	}
+}
+
+void broadcast_emotiscope_state(){
+	char output_string[2048];
+	memset(output_string, 0, 2048);
+
+	// Packet Header
+	strcat(output_string, "EMO~");
+}
+
+void parse_emotiscope_state(char* command, PsychicWebSocketRequest *request){
+	printf("Parsing Emotiscope State...\n");
+	int16_t num_bytes = strlen(command);
+	int16_t byte_index = 0;
+
+	char section_buffer[128];
+	memset(section_buffer, 0, 128);
+
+	char chunk_type[32];
+	memset(chunk_type, 0, 32);
+
+	static int16_t config_data_index = 0;
+
+	while(byte_index <= num_bytes){
+		bool chunk_ended = load_section_at(section_buffer, command, &byte_index);
+		printf("LOADED SECTION: %s\n", section_buffer);
+		if(fastcmp(chunk_type, "config")){
+			static char config_name[32];
+			static char config_type[32];
+			static char config_value[32];
+			static char config_ui_type[32];
+			static char config_preset_enabled[32];
+
+			if(config_data_index == 0){
+				memcpy(config_name, section_buffer, 32);
+				config_data_index = 1;
+			}
+			else if(config_data_index == 1){
+				memcpy(config_type, section_buffer, 32);
+				config_data_index = 2;
+			}
+			else if(config_data_index == 2){
+				memcpy(config_value, section_buffer, 32);
+				config_data_index = 3;
+			}
+			else if(config_data_index == 3){
+				memcpy(config_ui_type, section_buffer, 32);
+				config_data_index = 4;
+			}
+			else if(config_data_index == 4){
+				memcpy(config_preset_enabled, section_buffer, 32);
+				config_data_index = 0;
+
+				parse_config_data(config_name, config_type, config_value, config_ui_type, config_preset_enabled);
 			}
 		}
-	}
-
-	// If no room left for new clients
-	if (current_client_count >= MAX_WEBSOCKET_CLIENTS || first_open_slot == -1) {
-		client_welcome_status = false;
-	}
-
-	// If there is room in the party, client is welcome and should be initialized
-	if (client_welcome_status == true) {
-		websocket_clients[first_open_slot] = {
-			client.socket(),  // int socket;
-			t_now_ms,		  // uint32_t last_ping;
-		};
-		printf("PLAYER WELCOMED INTO OPEN SLOT #%i\n", first_open_slot);
-	}
-
-	return client_welcome_status;
-}
-
-void websocket_client_left(uint16_t client_index) {
-	printf("PLAYER #%i LEFT\n", client_index);
-	PsychicWebSocketClient *client = get_client_in_slot(client_index);
-	if (client != NULL) {
-		client->close();
-	}
-
-	websocket_clients[client_index].socket = -1;
-}
-
-void websocket_client_left(PsychicWebSocketClient client) {
-	int socket = client.socket();
-	for (uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++) {
-		if (websocket_clients[i].socket == socket) {
-			websocket_client_left((uint16_t)i);
-			break;
+		else{
+			printf("UNKNOWN CHUNK TYPE: %s\n", chunk_type);
 		}
-	}
-}
 
-void check_if_websocket_client_still_present(uint16_t client_slot) {
-	if (websocket_clients[client_slot].socket != -1) {
-		// make sure our client is still connected.
-		PsychicWebSocketClient *client = get_client_in_slot(client_slot);
-		if (client == NULL) {
-			websocket_client_left(client_slot);
+		if(chunk_ended == true){
+			printf("Chunk ended.\n");
+
+			if(byte_index < num_bytes){
+				// Prepare for new chunk type
+				memset(chunk_type, 0, 32);
+				load_section_at(section_buffer, command, &byte_index);
+				memcpy(chunk_type, section_buffer, 32);
+				printf("NEW CHUNK TYPE: %s\n");
+
+				config_data_index = 0;
+			}
+			else{
+				printf("EOF\n");
+			}
 		}
-	}
-}
-
-void transmit_to_client_in_slot(const char *message, uint8_t client_slot) {
-	PsychicWebSocketClient *client = get_client_in_slot(client_slot);
-	if (client != NULL) {
-		printf("TX: %s\n", message);
-		client->sendMessage(message);
 	}
 }
 
 void init_web_server() {
-	server.config.max_uri_handlers = 20;  // maximum number of .on() calls
+	const char *local_hostname = "emotiscope";
+	if (MDNS.begin(local_hostname) == true) {
+		MDNS.addService("http", "tcp", 80);
+	}
+	else{
+		Serial.println("Error starting mDNS");
+	}
+
+	server.config.max_uri_handlers = 40;  // maximum number of .on() calls
 
 	server.listen(80);
 
 	//WEB_VERSION = "?v=" + String(SOFTWARE_VERSION_MAJOR) + "." + String(SOFTWARE_VERSION_MINOR) + "." + String(SOFTWARE_VERSION_PATCH);
 
-	//server.serveStatic("/", LittleFS, "/");
+	websocket_handler.onOpen([](PsychicWebSocketClient *client) {
+		printf("[socket] connection #%i connected from %s\n", client->socket(), client->remoteIP().toString().c_str());
+	});
+
+	websocket_handler.onFrame([](PsychicWebSocketRequest *request, httpd_ws_frame *frame) {
+		// printf("[socket] #%d sent: %s\n", request->client()->socket(), (char*)frame->payload);
+		httpd_ws_type_t frame_type = frame->type;
+
+		// If it's text, it might be a command
+		if (frame_type == HTTPD_WS_TYPE_TEXT) {
+			char* command = (char*)frame->payload;
+			printf("RX: %s\n", command);
+
+			if(command[0] == 'E' && command[1] == 'M' && command[2] == 'O'){
+				parse_emotiscope_state(command, request);
+			}
+			else{
+				parse_command(command, request);
+			}
+		}
+		else {
+			printf("UNSUPPORTED WS FRAME TYPE: %d\n", (uint8_t)frame->type);
+		}
+
+		return ESP_OK;
+	});
+
+	websocket_handler.onClose([](PsychicWebSocketClient *client) {
+		printf("[socket] connection #%i closed from %s\n", client->socket(), client->remoteIP().toString().c_str());
+	});
 
 	server.on("/ws", &websocket_handler);
-
-	server.on("/audio", [](PsychicRequest *request) {
-		String filename = "/audio.bin";
-		PsychicFileResponse response(request, LittleFS, filename);
-
-		return response.send();
-	});
 
 	server.on("/mac", HTTP_GET, [](PsychicRequest *request) {
    		return request->reply(mac_str);
@@ -310,63 +333,10 @@ void init_web_server() {
 		}
 		else {
 			result = request->reply(404);
+			printf("404: %s\n", path.c_str());
 		}
 		return result;
 	});
-
-	const char *local_hostname = "emotiscope";
-	if (MDNS.begin(local_hostname) == true) {
-		MDNS.addService("http", "tcp", 80);
-	}
-	else{
-		Serial.println("Error starting mDNS");
-	}
-
-	websocket_handler.onOpen([](PsychicWebSocketClient *client) {
-		printf("[socket] connection #%i connected from %s\n", client->socket(), client->remoteIP().toString().c_str());
-
-		/*
-		if (welcome_websocket_client(client) == true) {
-			client->sendMessage("welcome");
-		}
-		else {
-			// Room is full, client not welcome
-			printf("PLAYER WAS DENIED ENTRY (ROOM FULL)\n");
-			client->close();
-		}
-		*/
-	});
-
-	websocket_handler.onFrame([](PsychicWebSocketRequest *request, httpd_ws_frame *frame) {
-		// printf("[socket] #%d sent: %s\n", request->client()->socket(), (char*)frame->payload);
-		httpd_ws_type_t frame_type = frame->type;
-
-		// If it's text, it might be a command
-		if (frame_type == HTTPD_WS_TYPE_TEXT) {
-			char* command = (char*)frame->payload;
-			printf("RX: %s\n", command);
-
-			if(command[0] == 'E' && command[1] == 'M' && command[2] == 'O'){
-				printf("Parsing Emotiscope State...\n");
-				//parse_emotiscope_state(command, request);
-			}
-			else{
-				parse_command(command, request);
-			}
-		}
-		else {
-			printf("UNSUPPORTED WS FRAME TYPE: %d\n", (uint8_t)frame->type);
-		}
-
-		return ESP_OK;
-	});
-
-	websocket_handler.onClose([](PsychicWebSocketClient *client) {
-		printf("[socket] connection #%i closed from %s\n", client->socket(), client->remoteIP().toString().c_str());
-		websocket_client_left(client);
-	});
-
-	init_websocket_clients();
 
 	web_server_ready = true;
 }
@@ -388,16 +358,18 @@ void get_mac(){
 }
 
 void init_wifi() {
+	esp_wifi_set_ps(WIFI_PS_NONE);
+
 	if(wifi_config_mode == true){
 		WiFi.begin("testnet", "testpass");
 		get_mac();
 
 		WiFi.softAP("Emotiscope Setup");
-		dns_server.start(53, "*", WiFi.softAPIP());
 
 		printf("Entered AP Mode: %s\n", WiFi.softAPIP().toString().c_str());
 
 		if (web_server_ready == false) {
+			dns_server.start(53, "*", WiFi.softAPIP());
 			init_web_server();
 		}
 	}
@@ -408,8 +380,6 @@ void init_wifi() {
 
 		get_mac();
 	}
-
-	esp_wifi_set_ps(WIFI_PS_NONE);
 }
 
 void handle_wifi() {
@@ -482,7 +452,7 @@ void handle_wifi() {
 			}
 		}
 		else{
-			//printf("WIFI CONFIG MODE ACTIVE, NOT RECONNECTING\n");
+			printf("WIFI CONFIG MODE ACTIVE, NOT RECONNECTING\n");
 		}
 	}
 

@@ -1,24 +1,14 @@
-#define NOISE_SPECTRUM_FILENAME "/noise_spectrum.bin"
 #define NETWORK_CONFIG_FILENAME "/secrets/network.txt"
-#define AUDIO_DEBUG_RECORDING_FILENAME "/audio.bin"
 #define MIN_SAVE_WAIT_MS (3 * 1000)	 // Values must stabilize for this many seconds to be written to NVS
 
-#define MAX_AUDIO_RECORDING_SAMPLES ( 12800 * 3 ) // 3 seconds at [SAMPLE_RATE]
-
 Preferences preferences; // NVS storage for configuration
+
+config configuration; // configuration struct to be filled by NVS or defaults on boot
 
 extern light_mode light_modes[];
 extern PsychicWebSocketHandler websocket_handler;
 
 volatile bool wifi_config_mode = false;
-
-config configuration; // configuration struct to be filled by NVS or defaults on boot
-
-float noise_spectrum[NUM_FREQS] = {0.0};
-
-int16_t audio_debug_recording[MAX_AUDIO_RECORDING_SAMPLES];
-uint32_t audio_recording_index = 0;
-volatile bool audio_recording_live = false;
 
 volatile uint32_t last_save_request_ms = 0;
 volatile bool save_request_open = false;
@@ -28,213 +18,108 @@ volatile bool filesystem_ready = true;
 void load_config(){
 	// Load configuration from NVS
 
+	memset(&configuration, 0, sizeof(config)); // Clear the configuration struct
+
 	// Brightness
-	configuration.brightness = preferences.getFloat("brightness", 1.00);
+	strcpy(configuration.brightness.name, "brightness");
+	strcpy(configuration.brightness.pretty_name, "Brightness");	
+	configuration.brightness.value.f32 = preferences.getFloat(configuration.brightness.name, 1.00);
 
 	// Softness
-	configuration.softness = preferences.getFloat("softness", 0.25);
+	strcpy(configuration.softness.name, "softness");
+	strcpy(configuration.softness.pretty_name, "Softness");
+	configuration.softness.value.f32   = preferences.getFloat(configuration.softness.name, 0.25);
 
 	// Color
-	configuration.color = preferences.getFloat("color", 0.33);
+	strcpy(configuration.color.name, "color");
+	strcpy(configuration.color.pretty_name, "Color");
+	configuration.color.value.f32   = preferences.getFloat(configuration.color.name, 0.33);
 
 	// Color Range
-	configuration.color_range = preferences.getFloat("color_range", 0.00);
+	strcpy(configuration.color_range.name, "color_range");
+	strcpy(configuration.color_range.pretty_name, "Color Range");
+	configuration.color_range.value.f32   = preferences.getFloat(configuration.color_range.name, 0.0);
 
 	// Warmth
-	configuration.warmth = preferences.getFloat("warmth", 0.00);
+	strcpy(configuration.warmth.name, "warmth");
+	strcpy(configuration.warmth.pretty_name, "Warmth");
+	configuration.warmth.value.f32   = preferences.getFloat(configuration.warmth.name, 0.50);
 
 	// Speed
-	configuration.speed = preferences.getFloat("speed", 0.50);
+	strcpy(configuration.speed.name, "speed");
+	strcpy(configuration.speed.pretty_name, "Speed");
+	configuration.speed.value.f32   = preferences.getFloat(configuration.speed.name, 0.50);
 
 	// Saturation
-	configuration.saturation = preferences.getFloat("saturation", 0.75);
+	strcpy(configuration.saturation.name, "saturation");
+	strcpy(configuration.saturation.pretty_name, "Saturation");
+	configuration.saturation.value.f32   = preferences.getFloat(configuration.saturation.name, 0.85);
 
 	// Background
-	configuration.background = preferences.getFloat("background", 0.25);
+	strcpy(configuration.background.name, "background");
+	strcpy(configuration.background.pretty_name, "Background");
+	configuration.background.value.f32   = preferences.getFloat(configuration.background.name, 0.25);
 
 	// Current Mode
-	configuration.current_mode = preferences.getInt("current_mode", 1);
+	strcpy(configuration.current_mode.name, "current_mode");
+	strcpy(configuration.current_mode.pretty_name, "Current Mode");
+	configuration.current_mode.value.u32   = (uint32_t)preferences.getInt(configuration.current_mode.name, 1);
 
 	// Mirror Mode
-	configuration.mirror_mode = preferences.getBool("mirror_mode", true);
+	strcpy(configuration.mirror_mode.name, "mirror_mode");
+	strcpy(configuration.mirror_mode.pretty_name, "Mirror Mode");
+	configuration.mirror_mode.value.u32   = (uint32_t)preferences.getBool(configuration.mirror_mode.name, true);
 
 	// Screensaver
-	configuration.screensaver = preferences.getBool("screensaver", true);
+	strcpy(configuration.screensaver.name, "screensaver");
+	strcpy(configuration.screensaver.pretty_name, "Screensaver");
+	configuration.screensaver.value.u32   = (uint32_t)preferences.getBool(configuration.screensaver.name, true);
 
 	// Temporal Dithering
-	configuration.temporal_dithering = preferences.getBool("dithering", true);
-
+	strcpy(configuration.temporal_dithering.name, "dithering");
+	strcpy(configuration.temporal_dithering.pretty_name, "Temporal Dithering");
+	configuration.temporal_dithering.value.u32   = (uint32_t)preferences.getBool(configuration.temporal_dithering.name, true);
+	
 	// Reverse Color
-	configuration.reverse_color_range = preferences.getBool("reverse_color", false);
+	strcpy(configuration.reverse_color_range.name, "reverse_color");
+	strcpy(configuration.reverse_color_range.pretty_name, "Reverse Color Range");
+	configuration.reverse_color_range.value.u32   = (uint32_t)preferences.getBool(configuration.reverse_color_range.name, false);
 
 	// Auto Color Cycling
-	configuration.auto_color_cycle = preferences.getBool("auto_color", false);
+	strcpy(configuration.auto_color_cycle.name, "auto_color");
+	strcpy(configuration.auto_color_cycle.pretty_name, "Auto Color Cycle");
+	configuration.auto_color_cycle.value.u32   = (uint32_t)preferences.getBool(configuration.auto_color_cycle.name, false);
 
 	// Blur
-	configuration.blur = preferences.getFloat("blur", 0.00);
+	strcpy(configuration.blur.name, "blur");
+	strcpy(configuration.blur.pretty_name, "Blur");	
+	configuration.blur.value.f32 = preferences.getFloat(configuration.blur.name, 0.00);
 
 	// Show Interface
-	configuration.show_interface = preferences.getBool("show_interface", true);
-}
-
-void sync_configuration_to_client() {
-	char config_item_buffer[120];
-
-	websocket_handler.sendAll("clear_config");
-
-	// brightness
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|brightness|float|%.3f", configuration.brightness);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// softness
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|softness|float|%.3f", configuration.softness);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// speed
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|speed|float|%.3f", configuration.speed);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// color
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|color|float|%.3f", configuration.color);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// current_mode
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|current_mode|int|%li", configuration.current_mode);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// mirror_mode
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|mirror_mode|int|%d", configuration.mirror_mode);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// warmth
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|warmth|float|%.3f", configuration.warmth);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// color_range
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|color_range|float|%.3f", configuration.color_range);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// saturation
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|saturation|float|%.3f", configuration.saturation);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// background
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|background|float|%.3f", configuration.background);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// screensaver
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|screensaver|int|%d", configuration.screensaver);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// temporal_dithering
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|temporal_dithering|int|%d", configuration.temporal_dithering);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// reverse_color_range
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|reverse_color_range|int|%d", configuration.reverse_color_range);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// auto_color_cycle
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|auto_color_cycle|int|%d", configuration.auto_color_cycle);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// blur
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|blur|float|%.3f", configuration.blur);
-	websocket_handler.sendAll(config_item_buffer);
-
-	// show_interface
-	memset(config_item_buffer, 0, 120);
-	snprintf(config_item_buffer, 120, "new_config|show_interface|int|%d", configuration.show_interface);
-	websocket_handler.sendAll(config_item_buffer);
-
-	websocket_handler.sendAll("config_ready");
+	strcpy(configuration.show_ui.name, "show_ui");
+	strcpy(configuration.show_ui.pretty_name, "Show Interface");
+	configuration.show_ui.value.u32   = (uint32_t)preferences.getBool(configuration.show_ui.name, true);
 }
 
 // Save configuration to LittleFS
 bool save_config() {
-	preferences.putFloat("brightness", configuration.brightness);
-	preferences.putFloat("softness",   configuration.softness);
-	preferences.putFloat("color", configuration.color);
-	preferences.putFloat("color_range", configuration.color_range);
-	preferences.putFloat("warmth", configuration.warmth);
-	preferences.putFloat("speed", configuration.speed);
-	preferences.putFloat("saturation", configuration.saturation);
-	preferences.putFloat("background", configuration.background);
-	preferences.putInt("current_mode", configuration.current_mode);
-	preferences.putBool("mirror_mode", configuration.mirror_mode);
-	preferences.putBool("screensaver", configuration.screensaver);
-	preferences.putBool("dithering", configuration.temporal_dithering);
-	preferences.putBool("reverse_color", configuration.reverse_color_range);
-	preferences.putBool("auto_color", configuration.auto_color_cycle);
-	preferences.putFloat("blur", configuration.blur);
-	preferences.putBool("show_interface", configuration.show_interface);
+	preferences.putFloat(configuration.brightness.name,         configuration.brightness.value.f32);
+	preferences.putFloat(configuration.softness.name,           configuration.softness.value.f32);
+	preferences.putFloat(configuration.color.name,              configuration.color.value.f32);
+	preferences.putFloat(configuration.color_range.name,        configuration.color_range.value.f32);
+	preferences.putFloat(configuration.warmth.name,             configuration.warmth.value.f32);
+	preferences.putFloat(configuration.speed.name,              configuration.speed.value.f32);
+	preferences.putFloat(configuration.saturation.name,         configuration.saturation.value.f32);
+	preferences.putFloat(configuration.background.name,         configuration.background.value.f32);
+	preferences.putInt(configuration.current_mode.name,         configuration.current_mode.value.u32);
+	preferences.putBool(configuration.mirror_mode.name,         configuration.mirror_mode.value.u32);
+	preferences.putBool(configuration.screensaver.name,         configuration.screensaver.value.u32);
+	preferences.putBool(configuration.temporal_dithering.name,  configuration.temporal_dithering.value.u32);
+	preferences.putBool(configuration.reverse_color_range.name, configuration.reverse_color_range.value.u32);
+	preferences.putBool(configuration.auto_color_cycle.name,    configuration.auto_color_cycle.value.u32);
+	preferences.putFloat(configuration.blur.name,               configuration.blur.value.f32);
+	preferences.putBool(configuration.show_ui.name,             configuration.show_ui.value.u32);
 
-	return true;
-}
-
-// Save noise spectrum to LittleFS
-bool save_noise_spectrum() {
-	File file = LittleFS.open(NOISE_SPECTRUM_FILENAME, FILE_WRITE);
-	if (!file) {
-		printf("Failed to open %s for writing!", NOISE_SPECTRUM_FILENAME);
-		return false;
-	}
-	else {
-		const uint8_t* ptr = (const uint8_t*)&noise_spectrum;
-
-		// Iterate over the size of noise_spectrum and write each byte to the file
-		for (size_t i = 0; i < sizeof(float) * NUM_FREQS; i++) {
-			file.write(ptr[i]);
-		}
-	}
-	file.close();
-	return true;
-}
-
-// Load noise_spectrum from LittleFS
-bool load_noise_spectrum() {
-	// Open the file for reading
-	File file = LittleFS.open(NOISE_SPECTRUM_FILENAME, FILE_READ);
-	if (!file) {
-		printf("Failed to open %s for reading!\n", NOISE_SPECTRUM_FILENAME);
-		return false;
-	}
-	else {
-		// Ensure the noise_spectrum array is sized properly
-		if (file.size() != sizeof(float) * NUM_FREQS) {
-			printf("Noise spectrum size does not match expected size! (%zu != %zu)\n", file.size(), sizeof(float) * NUM_FREQS);
-			file.close();
-			return false;
-		}
-
-		uint8_t* ptr = (uint8_t*)&noise_spectrum;  // Pointer to the noise_spectrum array
-
-		// Read the file content into the noise_spectrum array
-		for (size_t i = 0; i < sizeof(float) * NUM_FREQS; i++) {
-			int byte = file.read();	 // Read a byte
-			if (byte == -1) {		 // Check for read error or end of file
-				printf("Error reading %s!\n", NOISE_SPECTRUM_FILENAME);
-				break;
-			}
-			ptr[i] = (uint8_t)byte;	 // Store the byte in the noise_spectrum array
-		}
-	}
-	file.close();  // Close the file after reading
 	return true;
 }
 
@@ -249,7 +134,6 @@ void sync_configuration_to_file_system() {
 			filesystem_ready = false;
 			printf("SAVING\n");
 			save_config();
-			//save_noise_spectrum();
 			save_request_open = false;
 			filesystem_ready = true;
 		}
@@ -283,7 +167,6 @@ void load_network_credentials(){
 	memset(wifi_ssid, 0, 64);
 	memset(wifi_pass, 0, 64);
 
-	// Load network credentials from NVS with Preferences library, just like the config struct using getBytes on the char arrays:
 	// SSID
 	preferences.getBytes("wifi_ssid", wifi_ssid, 64);
 	// Password
@@ -303,44 +186,8 @@ void init_configuration() {
 	// Attempt to load config from flash
 	printf("LOADING CONFIG...");
 	load_config();
-	printf("PASS\n");
-
-	// Attempt to load noise_spectrum from flash
-	printf("LOADING NOISE SPECTRUM...");
-	bool load_success = load_noise_spectrum();
-
-	// If we couldn't load the file, save a fresh copy
-	if (load_success == false) {
-		printf("FAIL\n");
-		save_noise_spectrum();
-	}
-	else {
-		printf("PASS\n");
-	}
 
 	// Attempt to load wifi creds from flash
 	printf("LOADING NETWORK...");
 	load_network_credentials();
-	printf("PASS\n");
-}
-
-// Save debug audio recording to LittleFS
-bool save_audio_debug_recording() {
-	File file = LittleFS.open(AUDIO_DEBUG_RECORDING_FILENAME, FILE_WRITE);
-	if (!file) {
-		printf("Failed to open %s for writing!", AUDIO_DEBUG_RECORDING_FILENAME);
-		return false;
-	}
-	else {
-		const uint8_t* ptr = (const uint8_t*)&audio_debug_recording;
-
-		// Iterate over the size of noise_spectrum and write each byte to the file
-		for (size_t i = 0; i < sizeof(int16_t) * MAX_AUDIO_RECORDING_SAMPLES; i++) {
-			file.write(ptr[i]);
-		}
-
-		printf("Audio debug recording saved!\n");
-	}
-	file.close();
-	return true;
 }

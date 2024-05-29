@@ -290,7 +290,7 @@ IRAM_ATTR void transmit_leds() {
 		// The contents of the floating point CRGBF "leds" array are downsampled into pseudo-random 8-bit
 		// dither patterns hundreds of times per second. Your eyes see these patterns as a smooth, higher
 		// dynamic range image with deeper color reproduction.
-		quantize_color_error( configuration.temporal_dithering );
+		quantize_color_error( configuration.temporal_dithering.value.u32 );
 
 		// Get to safety, THE PHOTONS ARE COMING!!!
 		if( filesystem_ready == true ){

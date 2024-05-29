@@ -30,8 +30,6 @@ void init_serial(uint32_t baud_rate) {
 }
 
 void check_serial() {
-	extern bool queue_command(const char* command, uint16_t length, uint8_t client_slot);
-	
 	if(Serial.available() > 0){
 		char c = Serial.read();
 
@@ -39,7 +37,6 @@ void check_serial() {
 
 		if(c == '\n'){
 			printf("Serial command received: %s\n", serial_buffer);
-			queue_command(serial_buffer, serial_buffer_index, 255);
 			memset(serial_buffer, 0, 256);
 			serial_buffer_index = 0;
 		}
@@ -110,8 +107,8 @@ void init_system() {
 	init_vu();                          // (vu.h)
 
 	// Load sliders 
-	load_sliders_relevant_to_mode(configuration.current_mode);
+	load_sliders_relevant_to_mode(configuration.current_mode.value.u32);
 
 	// Load toggles
-	load_toggles_relevant_to_mode(configuration.current_mode);
+	load_toggles_relevant_to_mode(configuration.current_mode.value.u32);
 }

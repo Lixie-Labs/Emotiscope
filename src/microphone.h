@@ -107,25 +107,6 @@ void acquire_sample_chunk() {
 		// Add new chunk to audio history
 		waveform_locked = true;
 		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE);
-
-		// If debug recording was triggered
-		if(audio_recording_live == true){
-			int16_t out_samples[CHUNK_SIZE];
-			for(uint16_t i = 0; i < CHUNK_SIZE; i += 4){
-				out_samples[i+0] = new_samples[i+0] * 32767;
-				out_samples[i+1] = new_samples[i+1] * 32767;
-				out_samples[i+2] = new_samples[i+2] * 32767;
-				out_samples[i+3] = new_samples[i+3] * 32767;
-			}
-			memcpy(&audio_debug_recording[audio_recording_index], out_samples, sizeof(int16_t)*CHUNK_SIZE);
-			audio_recording_index += CHUNK_SIZE;
-			if(audio_recording_index >= MAX_AUDIO_RECORDING_SAMPLES){
-				audio_recording_index = 0;
-				audio_recording_live = false;
-				broadcast("debug_recording_ready");
-				save_audio_debug_recording();
-			}
-		}
 		
 		// Used to sync GPU to this when needed
 		waveform_locked = false;

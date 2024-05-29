@@ -292,22 +292,6 @@ void calculate_magnitudes() {
 			}
 		}
 
-		if(noise_calibration_wait_frames_remaining > 0){
-			noise_calibration_wait_frames_remaining -= 1;
-		}
-		else if(noise_calibration_active_frames_remaining > 0){
-			// Not done yet? Decrement...
-			noise_calibration_active_frames_remaining -= 1;
-
-			// If background noise calibration just finished
-			if(noise_calibration_active_frames_remaining == 0){
-				// Let the UI know
-				broadcast("noise_cal_ready");
-				save_config();
-				save_noise_spectrum();
-			}
-		}
-
 		// Smooth max_val with different speed limits for increases vs. decreases
 		if (max_val > max_val_smooth) {
 			float delta = max_val - max_val_smooth;
@@ -351,13 +335,6 @@ void calculate_magnitudes() {
 		magnitudes_locked = false;
 	}, __func__ );
 	___();
-}
-
-void start_noise_calibration() {
-	Serial.println("Starting noise cal...");
-	memset(noise_spectrum, 0, sizeof(float) * NUM_FREQS);
-	noise_calibration_wait_frames_remaining = NOISE_CALIBRATION_WAIT_FRAMES;
-	noise_calibration_active_frames_remaining = NOISE_CALIBRATION_ACTIVE_FRAMES;
 }
 
 void get_chromagram(){

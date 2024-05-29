@@ -83,7 +83,7 @@ void draw_plot(){
 		float progress = float(i) / NUM_LEDS;
 		float pixel = clip_float( image[i] * auto_scale );
 		pixel *= pixel;
-		CRGBF pixel_color = hsv(configuration.color + linear_to_tri(progress)*configuration.color_range, configuration.saturation, pixel);
+		CRGBF pixel_color = hsv(configuration.color.value.f32 + linear_to_tri(progress)*configuration.color_range.value.f32, configuration.saturation.value.f32, pixel);
 		leds[i] = pixel_color;
 	}
 }

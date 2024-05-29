@@ -14,8 +14,8 @@ bool inactive = false;
 
 void run_screensaver(){
 	profile_function([&]() {
-		if(configuration.screensaver == false){ return; }
-		if(light_modes[configuration.current_mode].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
+		if(configuration.screensaver.value.u32 == false){ return; }
+		if(light_modes[configuration.current_mode.value.u32].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
 		
 		float mag_sum = 0;
 		for(uint16_t i = 0; i < NUM_FREQS; i++){

@@ -145,22 +145,35 @@ struct touch_pin {
 	float touch_history[50]; // 5 seconds at 10 FPS
 };
 
+// union that stores the value of a config item
+union config_value {
+	uint32_t   u32;
+	int32_t    i32;
+	float      f32;
+};
+
+struct config_item {
+	char name[32];
+	char pretty_name[32];
+	config_value value;
+};
+
 // Stores all of Emotiscope's configurable settings
 struct config {
-	float brightness;
-	float softness; 
-	float color;
-	float warmth;
-	float color_range;
-	float speed;
-	float saturation;
-	float background;
-	int32_t current_mode;
-	bool mirror_mode;
-	bool screensaver;
-	bool temporal_dithering;
-	bool auto_color_cycle;
-	bool reverse_color_range;
-	float blur;
-	bool show_interface;
+	config_item brightness;
+	config_item softness; 
+	config_item color;
+	config_item warmth;
+	config_item color_range;
+	config_item speed;
+	config_item saturation;
+	config_item background;
+	config_item current_mode;
+	config_item mirror_mode;
+	config_item screensaver;
+	config_item temporal_dithering;
+	config_item auto_color_cycle;
+	config_item reverse_color_range;
+	config_item blur;
+	config_item show_ui;
 };

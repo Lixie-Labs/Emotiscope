@@ -10,7 +10,7 @@ void draw_starfield(){
 		float progress = (float)i / (float)(NUM_LEDS>>1);
 		leds[i] = hsv(
 			1.0,
-			configuration.saturation,
+			configuration.saturation.value.f32,
 			progress*1.0
 		);
 	}
@@ -19,7 +19,7 @@ void draw_starfield(){
 		float progress = (float)i / (float)(NUM_LEDS>>1);
 		leds[(NUM_LEDS >> 1) + i] = hsv(
 			1.0,
-			configuration.saturation,
+			configuration.saturation.value.f32,
 			1.0 + (progress*3.0)
 		);
 	}
@@ -43,7 +43,7 @@ void draw_starfield_real(){
 		float progress = (float)i / (float)num_stars;
 		CRGBF dot_color = hsv(
 				get_color_range_hue(progress), 
-				configuration.saturation,
+				configuration.saturation.value.f32,
 				star_brightness[i]*4.0
 			);
 

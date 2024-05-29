@@ -72,7 +72,7 @@ void init_light_mode_list(){
 }
 
 void set_light_mode_by_index(uint16_t mode_index){
-	configuration.current_mode = mode_index;
+	configuration.current_mode.value.u32 = mode_index;
 	lpf_drag = 1.0; // Causes slow fade using low pass filtered image
 	save_config_delayed();
 }
@@ -102,7 +102,7 @@ int16_t set_light_mode_by_name(const char* name){
 }
 
 int16_t increment_mode(){
-	int16_t next_mode_index = (configuration.current_mode + 1) % NUM_LIGHT_MODES;
+	int16_t next_mode_index = (configuration.current_mode.value.u32 + 1) % NUM_LIGHT_MODES;
 	set_light_mode_by_index(next_mode_index);
 
 	return next_mode_index;
@@ -121,7 +121,7 @@ void queue_light_mode_by_index(uint16_t mode_index){
 }
 
 void trigger_self_test(){
-	queue_light_mode_by_index( configuration.current_mode ); // Save current mode to return to
+	queue_light_mode_by_index( configuration.current_mode.value.u32 ); // Save current mode to return to
 	self_test_step = SELF_TEST_STEP_START; // Set the self test to starting state
 	set_light_mode_by_name("Self Test"); // Jump to self test mode
 }

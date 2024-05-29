@@ -189,17 +189,17 @@ void read_touch(){
 	}
 
 	if(touch_pins[TOUCH_LEFT].hold_active == true && touch_pins[TOUCH_RIGHT].touch_active == false){ // Left hold active
-		configuration.color -= 0.0015;
-		if(configuration.color < 0.0){
-			configuration.color += 1.0;
+		configuration.color.value.f32 -= 0.0015;
+		if(configuration.color.value.f32 < 0.0){
+			configuration.color.value.f32 += 1.0;
 		}
 
 		save_config_delayed();
 	}
 	else if(touch_pins[TOUCH_RIGHT].hold_active == true && touch_pins[TOUCH_LEFT].touch_active == false){ // Right hold active
-		configuration.color += 0.0015;
-		if(configuration.color > 1.0){
-			configuration.color -= 1.0;
+		configuration.color.value.f32 += 0.0015;
+		if(configuration.color.value.f32 > 1.0){
+			configuration.color.value.f32 -= 1.0;
 		}
 
 		save_config_delayed();
@@ -209,7 +209,7 @@ void read_touch(){
 
 		if(EMOTISCOPE_ACTIVE){
 			if(t_now_ms - last_mirror_mode_toggle >= 1000){
-				configuration.mirror_mode = !configuration.mirror_mode;
+				configuration.mirror_mode.value.u32 = (bool)!(configuration.mirror_mode.value.u32);
 				save_config_delayed();
 				last_mirror_mode_toggle = t_now_ms;
 			}
@@ -219,7 +219,7 @@ void read_touch(){
 
 void render_touches(){
 	profile_function([&]() {
-		if(light_modes[configuration.current_mode].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+		if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
 
 		if(touch_pins[TOUCH_LEFT].touch_value > 0.001){
 			float glow_hue = 0.870;

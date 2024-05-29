@@ -4,7 +4,6 @@ void run_web() {
 		dns_server.processNextRequest();
 
 		if (web_server_ready == true && wifi_config_mode == false) {
-			process_command_queue();
 			discovery_check_in();
 
 			// Write pending changes to LittleFS

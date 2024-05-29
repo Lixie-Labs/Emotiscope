@@ -14,13 +14,13 @@ void draw_waveform(){
 
 	float auto_scale = 1.0 / max_val;
 
-	if(configuration.mirror_mode == false){
+	if(configuration.mirror_mode.value.u32 == false){
 		for(uint16_t i = 0; i < NUM_LEDS; i++){
 			float progress = float(i) / NUM_LEDS;
 			float sample = clip_float(samples[i]) * auto_scale;
 			CRGBF pixel_color = hsv(
-				configuration.color + (configuration.color_range*progress),
-				configuration.saturation,
+				configuration.color.value.f32 + (configuration.color_range.value.f32*progress),
+				configuration.saturation.value.f32,
 				sample
 			);
 
@@ -32,8 +32,8 @@ void draw_waveform(){
 			float progress = float(i) / (NUM_LEDS>>1);
 			float sample = clip_float(samples[i]) * auto_scale;
 			CRGBF pixel_color = hsv(
-				configuration.color + (configuration.color_range*progress),
-				configuration.saturation,
+				configuration.color.value.f32 + (configuration.color_range.value.f32*progress),
+				configuration.saturation.value.f32,
 				sample
 			);
 
