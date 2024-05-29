@@ -13,6 +13,7 @@
 extern void broadcast(const char *message);
 extern void print_websocket_clients(uint32_t t_now_ms);
 extern char mac_str[18];
+extern float get_cpu_temperature();
 
 uint32_t t_now_ms = 0;
 uint32_t t_now_us = 0;
@@ -27,6 +28,7 @@ float FPS_GPU_SAMPLES[16];
 float CPU_CORE_USAGE = 0.0;
 float FPS_CPU = 0.0;
 float FPS_GPU = 0.0;
+float CPU_TEMP = 0.0;
 
 inline bool fastcmp_func_name(const char* input_a, const char* input_b){
 	// Is first char different? DISQUALIFIED!
@@ -172,6 +174,8 @@ void update_stats() {
 	}
 	FPS_CPU /= 16.0;
 	FPS_GPU /= 16.0;
+
+	CPU_TEMP = get_cpu_temperature();	
 
 	uint32_t free_heap = esp_get_free_heap_size();
 	UBaseType_t free_stack_cpu = uxTaskGetStackHighWaterMark(NULL); // CPU core (this one)

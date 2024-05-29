@@ -157,6 +157,10 @@ void broadcast_emotiscope_state(){
 	strcat(output_string, temp_buffer);
 
 	memset(temp_buffer, 0, 128);
+	sprintf(temp_buffer, "|cpu_temp|%.3f", CPU_TEMP);
+	strcat(output_string, temp_buffer);
+
+	memset(temp_buffer, 0, 128);
 	sprintf(temp_buffer, "|fps_cpu|%.3f", FPS_CPU);
 	strcat(output_string, temp_buffer);
 

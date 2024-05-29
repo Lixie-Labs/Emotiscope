@@ -213,16 +213,17 @@ function parse_emotiscope_packet(packet){
 
 	console.log(system_state);
 	console.log(setting_gallery);
+	console.log("CPU_TEMP: " + system_state.stats.cpu_temp);
 }
 
 function wstx(message){
 	ws.send(message);
-	console.log("TX: " + message);
+	//console.log("TX: " + message);
 	//add_to_log("TX: " + message);
 }
 
 function wsrx(message){
-	console.log("RX: " + message);
+	//console.log("RX: " + message);
 	//add_to_log("RX: " + message);
 
 	var message_items = message.split("|");

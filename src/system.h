@@ -12,12 +12,36 @@
 Foundational functions like UART initialization
 */
 
+#include "driver/temperature_sensor.h"
+
 volatile bool EMOTISCOPE_ACTIVE = true;
 
 char serial_buffer[256];
 uint16_t serial_buffer_index = 0;
 
 uint32_t last_command_time = 0;
+
+temperature_sensor_handle_t temp_handle = NULL;
+
+void init_cpu_temperature() {
+	temperature_sensor_config_t temp_sensor = {
+	    .range_min = 20,
+	    .range_max = 100,
+	};
+	ESP_ERROR_CHECK(temperature_sensor_install(&temp_sensor, &temp_handle));
+
+	// Enable temperature sensor
+	ESP_ERROR_CHECK(temperature_sensor_enable(temp_handle));
+}
+
+float get_cpu_temperature() {
+	// Get converted sensor data
+	float tsens_out;
+	ESP_ERROR_CHECK(temperature_sensor_get_celsius(temp_handle, &tsens_out));
+	//printf("Temperature in %f °C\n", tsens_out);
+
+	return tsens_out;
+}
 
 void init_serial(uint32_t baud_rate) {
 	// Artificial 10-second boot up wait time if needed
@@ -90,6 +114,7 @@ void init_system() {
 
 	init_hardware_version_pins();       // (hardware_version.h)
 	init_serial(921600);				// (system.h)
+	init_cpu_temperature();             // (system.h)
 	init_light_mode_list();             // (light_modes.h)
 	init_filesystem();                  // (filesystem.h)
 	init_configuration();               // (configuration.h)
