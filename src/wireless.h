@@ -109,43 +109,144 @@ bool load_section_at( char* section_buffer, char* command, int16_t* byte_index )
 		(*byte_index)++;
 	}
 
+	//printf("LOADED SECTION: %s\n", section_buffer);
+
 	return hit_end_of_chunk;
 }
 
-void parse_config_data(char* config_name, char* config_type, char* config_value, char* config_ui_type, char* config_preset_enabled){
-	printf("CONFIG DATA: %s|%s|%s|%s|%s\n", config_name, config_type, config_value, config_ui_type, config_preset_enabled);
+void set_config_value_by_pretty_name(char* config_pretty_name, char* new_config_value){
+	config_item* config_location = reinterpret_cast<config_item*>(&configuration);
+	const uint16_t num_config_items = sizeof(configuration) / sizeof(config_item);
 
-	if(fastcmp(config_type, "float")){
-		float value = atof(config_value);
-		printf("FLOAT VALUE: %f\n", value);
-		//place_float_in_config_by_key( TBD );
-	}
-	else if(fastcmp(config_type, "int")){
-		int value = atoi(config_value);
-		printf("INT VALUE: %i\n", value);
-	}
-	else if(fastcmp(config_type, "bool")){
-		bool value = fastcmp(config_value, "true");
-		printf("BOOL VALUE: %i\n", value);
-	}
-	else if(fastcmp(config_type, "string")){
-		printf("STRING VALUE: %s\n", config_value);
-	}
-	else{
-		printf("UNKNOWN CONFIG TYPE: %s\n", config_type);
+	for(uint16_t i = 0; i < num_config_items; i++){
+		config_item* item = config_location + i;
+		type_t type = item->type;
+
+		if(fastcmp(item->pretty_name, config_pretty_name)){
+			if(type == u32){
+				item->value.u32 = atoi(new_config_value);
+				//printf("Setting u32 %s: %d\n", item->name, item->value.u32);
+			} else if(type == i32){
+				item->value.i32 = atoi(new_config_value);
+				//printf("Setting i32 %s: %d\n", item->name, item->value.i32);
+			} else if(type == f32){
+				item->value.f32 = atof(new_config_value);
+				//printf("Setting f32 %s: %f\n", item->name, item->value.f32);
+			} else {
+				printf("ERROR: Unknown type in set_config_value_by_pretty_name\n");
+			}
+
+			break;
+		}
 	}
 }
 
 void broadcast_emotiscope_state(){
 	char output_string[2048];
-	memset(output_string, 0, 2048);
+	char temp_buffer[128];
 
-	// Packet Header
-	strcat(output_string, "EMO~");
+	// Stats
+	memset(output_string, 0, 2048);
+	memset(temp_buffer, 0, 128);
+
+	strcat(output_string, "EMO");
+	strcat(output_string, "~stats");
+
+	memset(temp_buffer, 0, 128);
+	sprintf(temp_buffer, "|cpu_usage|%.3f", CPU_CORE_USAGE);
+	strcat(output_string, temp_buffer);
+
+	memset(temp_buffer, 0, 128);
+	sprintf(temp_buffer, "|fps_cpu|%.3f", FPS_CPU);
+	strcat(output_string, temp_buffer);
+
+	memset(temp_buffer, 0, 128);
+	sprintf(temp_buffer, "|fps_gpu|%.3f", FPS_GPU);
+	strcat(output_string, temp_buffer);
+
+	memset(temp_buffer, 0, 128);
+	sprintf(temp_buffer, "|heap|%lu", esp_get_free_heap_size());
+	strcat(output_string, temp_buffer);
+
+	//printf("TX: %s\n", output_string);
+	websocket_handler.sendAll(output_string);
+
+	// Configuration
+	memset(output_string, 0, 2048);
+	memset(temp_buffer, 0, 128);
+
+	strcat(output_string, "EMO");
+	strcat(output_string, "~config");
+
+	config_item* config_location = reinterpret_cast<config_item*>(&configuration);
+	uint16_t num_config_items = sizeof(configuration) / sizeof(config_item);
+
+	for(uint16_t i = 0; i < num_config_items; i++){
+		config_item item = *(config_location + i);
+		
+		strcat(output_string, "|");
+		strcat(output_string, item.pretty_name);
+		strcat(output_string, "|");
+		strcat(output_string, item.type_string);
+		strcat(output_string, "|");
+		strcat(output_string, item.ui_type_string);
+		strcat(output_string, "|");
+
+		if(item.type == u32){
+			memset(temp_buffer, 0, 128);
+			sprintf(temp_buffer, "%lu", item.value.u32);
+			strcat(output_string, temp_buffer);
+		}
+		else if(item.type == i32){
+			memset(temp_buffer, 0, 128);
+			sprintf(temp_buffer, "%li", item.value.i32);
+			strcat(output_string, temp_buffer);
+		}
+		else if(item.type == f32){
+			memset(temp_buffer, 0, 128);
+			sprintf(temp_buffer, "%.3f", item.value.f32);
+			strcat(output_string, temp_buffer);
+		}
+		else{
+			printf("ERROR: Unknown type in broadcast_emotiscope_state\n");
+		}
+	}
+
+	//printf("TX: %s\n", output_string);
+	websocket_handler.sendAll(output_string);
+
+	// Light Modes
+	memset(output_string, 0, 2048);
+	memset(temp_buffer, 0, 128);
+
+	strcat(output_string, "EMO");
+	strcat(output_string, "~modes");
+
+	for(uint16_t i = 0; i < NUM_LIGHT_MODES; i++){
+		light_mode_type_t type = light_modes[i].type;
+		if(type != LIGHT_MODE_TYPE_SYSTEM){
+			strcat(output_string, "|");
+			strcat(output_string, light_modes[i].name);
+			strcat(output_string, "|");
+
+			if(type == LIGHT_MODE_TYPE_ACTIVE){
+				strcat(output_string, "0");
+			}
+			else if(type == LIGHT_MODE_TYPE_INACTIVE){
+				strcat(output_string, "1");
+			}
+			else{
+				printf("ERROR: Unknown light mode type in broadcast_emotiscope_state\n");
+			}
+		}
+	}
+
+	//printf("TX: %s\n", output_string);
+	websocket_handler.sendAll(output_string);
 }
 
-void parse_emotiscope_state(char* command, PsychicWebSocketRequest *request){
-	printf("Parsing Emotiscope State...\n");
+void parse_emotiscope_packet(char* command, PsychicWebSocketRequest *request){
+	//printf("Parsing Emotiscope Packet...\n");
 	int16_t num_bytes = strlen(command);
 	int16_t byte_index = 0;
 
@@ -155,59 +256,50 @@ void parse_emotiscope_state(char* command, PsychicWebSocketRequest *request){
 	char chunk_type[32];
 	memset(chunk_type, 0, 32);
 
-	static int16_t config_data_index = 0;
+	int16_t config_data_index = 0;
 
 	while(byte_index <= num_bytes){
 		bool chunk_ended = load_section_at(section_buffer, command, &byte_index);
-		printf("LOADED SECTION: %s\n", section_buffer);
-		if(fastcmp(chunk_type, "config")){
-			static char config_name[32];
-			static char config_type[32];
-			static char config_value[32];
-			static char config_ui_type[32];
-			static char config_preset_enabled[32];
+
+		if(fastcmp(chunk_type, "set_config")){
+			static char config_pretty_name[32];
+			static char new_config_value[32];
 
 			if(config_data_index == 0){
-				memcpy(config_name, section_buffer, 32);
+				memcpy(config_pretty_name, section_buffer, 32);
 				config_data_index = 1;
 			}
 			else if(config_data_index == 1){
-				memcpy(config_type, section_buffer, 32);
-				config_data_index = 2;
-			}
-			else if(config_data_index == 2){
-				memcpy(config_value, section_buffer, 32);
-				config_data_index = 3;
-			}
-			else if(config_data_index == 3){
-				memcpy(config_ui_type, section_buffer, 32);
-				config_data_index = 4;
-			}
-			else if(config_data_index == 4){
-				memcpy(config_preset_enabled, section_buffer, 32);
+				memcpy(new_config_value, section_buffer, 32);
 				config_data_index = 0;
 
-				parse_config_data(config_name, config_type, config_value, config_ui_type, config_preset_enabled);
+				set_config_value_by_pretty_name(config_pretty_name, new_config_value);
+				save_config_delayed();
 			}
 		}
 		else{
-			printf("UNKNOWN CHUNK TYPE: %s\n", chunk_type);
+			if(chunk_type[0] == '\0'){
+				//printf("PACKET HEADER: %s\n", section_buffer);	
+			}
+			else{
+				printf("UNKNOWN CHUNK TYPE: %s\n", chunk_type);
+			}
 		}
 
 		if(chunk_ended == true){
-			printf("Chunk ended.\n");
+			//printf("Chunk ended.\n");
 
 			if(byte_index < num_bytes){
 				// Prepare for new chunk type
 				memset(chunk_type, 0, 32);
 				load_section_at(section_buffer, command, &byte_index);
 				memcpy(chunk_type, section_buffer, 32);
-				printf("NEW CHUNK TYPE: %s\n");
+				printf("PACKET CHUNK TYPE: %s\n", chunk_type);
 
 				config_data_index = 0;
 			}
 			else{
-				printf("EOF\n");
+				//printf("EOF\n");
 			}
 		}
 	}
@@ -242,7 +334,7 @@ void init_web_server() {
 			printf("RX: %s\n", command);
 
 			if(command[0] == 'E' && command[1] == 'M' && command[2] == 'O'){
-				parse_emotiscope_state(command, request);
+				parse_emotiscope_packet(command, request);
 			}
 			else{
 				parse_command(command, request);

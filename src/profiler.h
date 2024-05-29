@@ -24,10 +24,9 @@ bool profiler_locked = false;
 float FPS_CPU_SAMPLES[16];
 float FPS_GPU_SAMPLES[16];
 
+float CPU_CORE_USAGE = 0.0;
 float FPS_CPU = 0.0;
 float FPS_GPU = 0.0;
-
-float CPU_CORE_USAGE = 0.0;
 
 inline bool fastcmp_func_name(const char* input_a, const char* input_b){
 	// Is first char different? DISQUALIFIED!
@@ -156,70 +155,54 @@ void watch_gpu_fps() {
 	}, __func__ );
 }
 
-void print_system_info() {
-	static uint32_t next_print_ms = 0;
-	const uint16_t print_interval_ms = 2000;
-	bool printing_enabled = false;
-	
-	if (t_now_ms >= next_print_ms) {
-		next_print_ms += print_interval_ms;
+void update_stats() {
+	const uint16_t update_hz = 10;
+	const uint32_t update_interval = 1000 / update_hz;
+	static uint32_t last_update = 0;
 
-		FPS_CPU = 0.0;
-		FPS_GPU = 0.0;
-		for (uint8_t i = 0; i < 16; i++) {
-			FPS_CPU += FPS_CPU_SAMPLES[i];
-			FPS_GPU += FPS_GPU_SAMPLES[i];
-		}
-		FPS_CPU /= 16.0;
-		FPS_GPU /= 16.0;
+	if (t_now_ms - last_update < update_interval) {
+		return;
+	}
 
-	    uint32_t free_heap = esp_get_free_heap_size();
-		UBaseType_t free_stack_cpu = uxTaskGetStackHighWaterMark(NULL); // CPU core (this one)
-		UBaseType_t free_stack_gpu = uxTaskGetStackHighWaterMark(xTaskGetHandle("loop_gpu")); // GPU core
+	FPS_CPU = 0.0;
+	FPS_GPU = 0.0;
+	for (uint8_t i = 0; i < 16; i++) {
+		FPS_CPU += FPS_CPU_SAMPLES[i];
+		FPS_GPU += FPS_GPU_SAMPLES[i];
+	}
+	FPS_CPU /= 16.0;
+	FPS_GPU /= 16.0;
 
+	uint32_t free_heap = esp_get_free_heap_size();
+	UBaseType_t free_stack_cpu = uxTaskGetStackHighWaterMark(NULL); // CPU core (this one)
+	UBaseType_t free_stack_gpu = uxTaskGetStackHighWaterMark(xTaskGetHandle("loop_gpu")); // GPU core
+
+	/*
 		extern volatile bool web_server_ready;
-		extern PsychicWebSocketClient *get_client_in_slot(uint8_t slot);
-
-		char stat_buffer[64] = { 0 };
-		
-		memset(stat_buffer, 0, 64);
-		snprintf(stat_buffer, 64, "fps_cpu|%d", int16_t(FPS_CPU));
-		broadcast(stat_buffer);
-
-		memset(stat_buffer, 0, 64);
-		snprintf(stat_buffer, 64, "fps_gpu|%d", int16_t(FPS_GPU));
-		broadcast(stat_buffer);
-
-		memset(stat_buffer, 0, 64);
-		snprintf(stat_buffer, 64, "heap|%lu", (uint32_t)free_heap);
-		broadcast(stat_buffer);
-
-		if(printing_enabled == true){
-			printf("# SYSTEM INFO ####################\n");
-			printf("CPU CORE USAGE --- %.2f%%\n", CPU_CORE_USAGE*100);
-			printf("CPU FPS ---------- %.3f\n", FPS_CPU);
-			printf("GPU FPS ---------- %.3f\n", FPS_GPU);
-			printf("Free Heap -------- %lu\n", (uint32_t)free_heap);
-			printf("Free Stack CPU --- %lu\n", (uint32_t)free_stack_cpu);
-			printf("Free Stack GPU --- %lu\n", (uint32_t)free_stack_gpu);
-			//printf("Total PSRAM ------ %lu\n", (uint32_t)ESP.getPsramSize());
-			//printf("Free PSRAM ------- %lu\n", (uint32_t)ESP.getFreePsram());
-			printf("IP Address ------- %s\n", WiFi.localIP().toString().c_str());
-			printf("MAC Address ------ %s\n", mac_str);
-			printf("\n");
-			printf("- WS CLIENTS -----------------\n");
-			if(web_server_ready == true){
-				for(uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++){
-					PsychicWebSocketClient *client = get_client_in_slot(i);
-					if (client != NULL) {
-						printf("%s\n", client->remoteIP().toString().c_str());
-					}
+		printf("# SYSTEM INFO ####################\n");
+		printf("CPU CORE USAGE --- %.2f%%\n", CPU_CORE_USAGE*100);
+		printf("CPU FPS ---------- %.3f\n", FPS_CPU);
+		printf("GPU FPS ---------- %.3f\n", FPS_GPU);
+		printf("Free Heap -------- %lu\n", (uint32_t)free_heap);
+		printf("Free Stack CPU --- %lu\n", (uint32_t)free_stack_cpu);
+		printf("Free Stack GPU --- %lu\n", (uint32_t)free_stack_gpu);
+		//printf("Total PSRAM ------ %lu\n", (uint32_t)ESP.getPsramSize());
+		//printf("Free PSRAM ------- %lu\n", (uint32_t)ESP.getFreePsram());
+		printf("IP Address ------- %s\n", WiFi.localIP().toString().c_str());
+		printf("MAC Address ------ %s\n", mac_str);
+		printf("\n");
+		printf("- WS CLIENTS -----------------\n");
+		if(web_server_ready == true){
+			for(uint16_t i = 0; i < MAX_WEBSOCKET_CLIENTS; i++){
+				PsychicWebSocketClient *client = get_client_in_slot(i);
+				if (client != NULL) {
+					printf("%s\n", client->remoteIP().toString().c_str());
 				}
 			}
-			printf("------------------------------\n");
-
-			print_profiled_function_hits();	
-			printf("##################################\n\n");
 		}
-	}
+		printf("------------------------------\n");
+
+		print_profiled_function_hits();	
+		printf("##################################\n\n");
+	*/
 }

@@ -286,8 +286,8 @@ function connect_to_emotiscope() {
 		attempt_to_reach_emotiscope_interval = setInterval(attempt_to_reach_emotiscope, 250);
 
 		setInterval(function(){
-			wstx("EMO~config|brightness|float|0.991|slider|1|softness|float|1.000|slider|1");
-		}, 500);
+			wstx("EMO~set_config|Softness|0.250");
+		}, 5000);
 	};
 
 	ws.onmessage = function(event) {

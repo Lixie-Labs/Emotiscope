@@ -152,9 +152,33 @@ union config_value {
 	float      f32;
 };
 
+// enum that stores the type of a config item
+enum type_t {
+	u32,
+	i32,
+	f32
+};
+
+// enum that stores the UI type of a config item
+enum ui_type_t {
+	ui_type_none,
+	ui_type_slider,
+	ui_type_toggle,
+	ui_type_menu_toggle
+};
+
 struct config_item {
-	char name[32];
+	// Strings
+	char name[16];
 	char pretty_name[32];
+	char type_string[16];
+	char ui_type_string[16];
+
+	// Enums
+	type_t type;
+	ui_type_t ui_type;
+
+	// Raw Value
 	config_value value;
 };
 

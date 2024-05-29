@@ -40,11 +40,8 @@ void run_cpu() {
 		update_tempo();	 // (tempo.h)
 		//}));
 
-		// Update the FPS_CPU variable
-		watch_cpu_fps();  // (system.h)
-
-		// Occasionally print the average frame rate
-		print_system_info();
+		// Send out stats like FPS and heap
+		update_stats();
 
 		// print_audio_data();
 
@@ -56,21 +53,8 @@ void run_cpu() {
 
 		//neural_network_feed_forward();
 
-		//------------------------------------------------------------------------------------------
-		// WIFI
-		// ------------------------------------------------------------------------------------
-		//run_wireless();	 // (wireless.h)
-
-		//------------------------------------------------------------------------------------------
-		// TESTING AREA, SHOULD BE BLANK IN PRODUCTION
-
-		/*
-		printf("MATCH STRCMP    | microseconds taken = %.4f\n", measure_execution([&]() {
-			(strcmp("test_string_value", "test_string_value") == 0);
-		}));
-		*/
-
-		//------------------------------------------------------------------------------------------	
+		// Update the FPS_CPU variable
+		watch_cpu_fps();  // (system.h)
 
 		//------------------------------------------------------------------------------------------
 		// CPU USAGE CALCULATION
