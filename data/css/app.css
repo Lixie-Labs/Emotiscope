@@ -713,3 +713,42 @@ button{
 	  transform: translate(24px, 0);
 	}
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.setting{
+    display: inline-block;
+    margin: 4px;
+    font-size: 10px;
+    width: calc(28% - 8px);
+    height: calc(100% - 20px);
+}
+
+.slider, .toggle{
+	height: 100%;
+}
+
+.slider{
+	color: var(--accent);
+	background-color: #000;
+}
+
+.toggle{
+	color: var(--primary);
+	background-color: #181818;
+}

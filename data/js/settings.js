@@ -14,6 +14,7 @@ class Setting {
 		if (document.getElementById("setting_"+this.name) == null) {
 			var setting = document.createElement("div");
 			setting.id = "setting_"+this.name;
+			setting.className = "setting";
 			document.getElementById("setting_container").appendChild(setting);
 		}
 

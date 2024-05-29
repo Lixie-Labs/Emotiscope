@@ -212,7 +212,7 @@ function parse_emotiscope_packet(packet){
 	}
 
 	console.log(system_state);
-	console.log(setting_gallery);
+	//console.log(setting_gallery);
 	console.log("CPU_TEMP: " + system_state.stats.cpu_temp);
 }
 
