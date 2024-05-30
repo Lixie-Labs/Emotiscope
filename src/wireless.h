@@ -14,6 +14,7 @@ char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
 
 PsychicHttpServer server;
 PsychicWebSocketHandler websocket_handler;
+PsychicEventSource event_source;
 
 volatile bool web_server_ready = false;
 int16_t connection_status = -1;
@@ -173,7 +174,7 @@ void broadcast_emotiscope_state(){
 	strcat(output_string, temp_buffer);
 
 	//printf("TX: %s\n", output_string);
-	websocket_handler.sendAll(output_string);
+	event_source.send(output_string);
 
 	// Configuration
 	memset(output_string, 0, 2048);
@@ -217,7 +218,7 @@ void broadcast_emotiscope_state(){
 	}
 
 	//printf("TX: %s\n", output_string);
-	websocket_handler.sendAll(output_string);
+	event_source.send(output_string);
 
 	// Light Modes
 	memset(output_string, 0, 2048);
@@ -246,7 +247,7 @@ void broadcast_emotiscope_state(){
 	}
 
 	//printf("TX: %s\n", output_string);
-	websocket_handler.sendAll(output_string);
+	event_source.send(output_string);
 }
 
 void parse_emotiscope_packet(char* command, PsychicWebSocketRequest *request){
@@ -315,7 +316,7 @@ void init_web_server() {
 		MDNS.addService("http", "tcp", 80);
 	}
 	else{
-		Serial.println("Error starting mDNS");
+		println("Error starting mDNS");
 	}
 
 	server.config.max_uri_handlers = 40;  // maximum number of .on() calls
@@ -323,6 +324,17 @@ void init_web_server() {
 	server.listen(80);
 
 	//WEB_VERSION = "?v=" + String(SOFTWARE_VERSION_MAJOR) + "." + String(SOFTWARE_VERSION_MINOR) + "." + String(SOFTWARE_VERSION_PATCH);
+
+	event_source.onOpen([](PsychicEventSourceClient *client) {
+		printf("[eventsource] connection #%u connected from %s\n", client->socket(), client->remoteIP().toString());
+	});
+
+	event_source.onClose([](PsychicEventSourceClient *client) {
+		printf("[eventsource] connection #%u closed from %s\n", client->socket(), client->remoteIP().toString());
+	});
+
+	//attach the handler to /events
+	server.on("/events", &event_source);
 
 	websocket_handler.onOpen([](PsychicWebSocketClient *client) {
 		printf("[socket] connection #%i connected from %s\n", client->socket(), client->remoteIP().toString().c_str());
