@@ -18,7 +18,19 @@ void parse_command(char* command, PsychicWebSocketRequest *request) {
 
 	if (fastcmp(substring, "emotiscope?")){
 		request->client()->sendMessage("emotiscope");
+	} 
+
+	else if(fastcmp(substring, "IND")){
+		show_indicator();
 	}
+
+
+
+
+
+
+
+
 
 	else if (fastcmp(substring, "set")) {
 		// Get setting name

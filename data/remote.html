@@ -14,40 +14,33 @@
 	<script>
 		var scripts = [
 			"js/settings.js",
-			"js/discovery.js",
 			"js/fetch_mac.js",
 			"js/info.js",
-			"js/alerts.js",
 			"js/utilities.js",
-			//"js/sliders.js",
-			//"js/toggles.js",
-			//"js/menu_toggles.js",
-			//"js/render_controls.js",
 			"js/connection.js",
-			"js/pages.js",
 		];
-	
-		var loaded_scripts = 0;
 
 		var url_params = new URLSearchParams(window.location.search);
-	    var url_version_param = url_params.get('v');
+		var url_version_param = url_params.get('v');
+
+		var loaded_scripts = 0;
 
 		for (var i = 0; i < scripts.length; i++) {
 			var script = document.createElement('script');
 			script.src = scripts[i] + "?v=" + url_version_param;
+			script.async = true;
 			script.onload = function() {
+				loaded_scripts++;
+				if (loaded_scripts === scripts.length) {
+					document.dispatchEvent(new Event('APP_LOADED'));
+				}
+			};
+			script.onerror = function() {
+				console.error("Error loading script: " + script.src);
 			};
 			document.head.appendChild(script);
-
-			console.log("Loading script: " + script.src);
 		}
-
-		setInterval(function() {
-			//console.log("Dispatching APP_LOADED event");
-			document.dispatchEvent(new Event('APP_LOADED'));
-		}, 100);
 	</script>
-
 </head>
 
 <body>

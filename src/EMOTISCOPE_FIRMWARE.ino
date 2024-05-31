@@ -110,20 +110,23 @@
 // Development Notes
 //#include "notes.h"
 
-
 // ############################################################################
 // ## CODE ####################################################################
 
 // One core to run audio and web server ---------------------------------------
 void loop() {
 	run_cpu(); // (cpu_core.h)
+	run_web(); // (web_core.h)	
 }
 
 // One core to run graphics ---------------------------------------------------
 void loop_gpu(void *param) {
 	for (;;) {
+		// 4x loop unroll to fight for loop overhead
 		run_gpu(); // (gpu_core.h)
-		run_web(); // (web_core.h)	
+		run_gpu(); 
+		run_gpu(); 
+		run_gpu(); 
 	}
 }
 
@@ -133,5 +136,5 @@ void setup() {
 	init_system();
 
 	// Start the second core as a dedicated webserver
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 0, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 0, NULL, 0);
 }

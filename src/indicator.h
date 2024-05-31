@@ -18,18 +18,14 @@
 float indicator_brightness = 0.0;
 float indicator_brightness_target = 0.0;
 
-extern volatile bool web_server_ready;
 extern int16_t connection_status;
-extern volatile bool touch_active;
 extern float standby_brightness;
 extern float standby_breath;
 
 bool status_blink_state = false;
 uint32_t last_status_blink = 0;
 
-uint8_t hold_blinks_queued = 0;
-bool hold_blink_state = false;
-uint32_t last_hold_blink = 0;
+uint32_t last_indicator_pulse_ms = 0;
 
 void init_indicator_light(){
 	// Prepare and then apply the LEDC PWM timer configuration
@@ -62,25 +58,21 @@ void run_indicator_light(){
 	extern self_test_steps_t self_test_step;
 	
 	profile_function([&]() {
+
 		if(self_test_step == SELF_TEST_INACTIVE){
-			if(app_touch_active == true){
-				indicator_brightness_target = 1.0;
+			if (connection_status == WL_CONNECTED) {
+				indicator_brightness_target = INDICATOR_RESTING_BRIGHTNESS;
+
+				if((device_touch_active == true) || (t_now_ms - last_indicator_pulse_ms <= 100)){
+					indicator_brightness_target = 1.0;
+				}
 			}
 			else{
-				if (connection_status == WL_CONNECTED) {
-					indicator_brightness_target = INDICATOR_RESTING_BRIGHTNESS;
-
-					if(device_touch_active == true){
-						indicator_brightness_target = 1.0;
-					}
-				}
-				else{
-					if(t_now_ms - last_status_blink >= STATUS_BLINK_INTERVAL_MS){
-						status_blink_state = !status_blink_state;
-						indicator_brightness_target = (float)status_blink_state;
-						indicator_brightness = (float)status_blink_state;
-						last_status_blink = t_now_ms;
-					}
+				if(t_now_ms - last_status_blink >= STATUS_BLINK_INTERVAL_MS){
+					status_blink_state = !status_blink_state;
+					indicator_brightness_target = (float)status_blink_state;
+					indicator_brightness = (float)status_blink_state;
+					last_status_blink = t_now_ms;
 				}
 			}
 		}
@@ -96,4 +88,8 @@ void run_indicator_light(){
 		ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_MAX_DUTY * output_brightness);
 		ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
 	}, __func__);
+}
+
+void show_indicator(){
+	last_indicator_pulse_ms = t_now_ms;
 }

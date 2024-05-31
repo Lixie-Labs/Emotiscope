@@ -82,7 +82,10 @@ function parse_emotiscope_packet(packet){
 						// UPDATE SETTING HERE
 						const setting = setting_gallery.find(setting => setting.name === item_name_clean);
 						if(setting){
-							setting.value = item_value;
+							if(setting.value != item_value){
+								setting.value = item_value;
+								setting.draw();
+							}
 						}
 					}
 
@@ -130,6 +133,8 @@ function parse_emotiscope_packet(packet){
 
 							const setting = new Setting(setting_name, setting_pretty_name, setting_type, setting_ui_type, setting_value);
 							setting_gallery.push(setting);
+
+							setting.draw();
 						}
 						catch(e){
 							console.log("ERROR SPAWNING SETTING: "+setting_name+" "+e);
@@ -139,7 +144,7 @@ function parse_emotiscope_packet(packet){
 
 				// Update all settings in the gallery
 				for( let j = 0; j < setting_gallery.length; j++ ){
-					setting_gallery[j].draw();
+					//setting_gallery[j].draw();
 				}
 
 				set_ui_locked_state(false);
@@ -173,11 +178,11 @@ function parse_emotiscope_packet(packet){
 
 	console.log(system_state);
 	//console.log(setting_gallery);
-	console.log("CPU_TEMP: " + system_state.stats.cpu_temp);
+	//console.log("CPU_TEMP: " + system_state.stats.cpu_temp);
 
-	document.getElementById("device_nickname").innerHTML = device_ip;
+	//document.getElementById("device_nickname").innerHTML = device_ip;
 	document.getElementById("device_nickname").innerHTML = "FPS CPU: "+parseInt(system_state.stats.fps_cpu)+" GPU: "+parseInt(system_state.stats.fps_gpu)+" TEMP: "+parseInt(system_state.stats.cpu_temp)+"C";
-	document.getElementById("device_nickname").innerHTML = "WS CLIENTS: "+parseInt(system_state.stats.ws_clients);
+	//document.getElementById("device_nickname").innerHTML = "WS CLIENTS: "+parseInt(system_state.stats.ws_clients);
 }
 
 function parse_event(message){
@@ -370,16 +375,6 @@ function close_websockets_connection(){
 	}
 }
 
-function handle_up_event(event) {
-	//console.log("FINGER UP");
-	wstx("touch_end");
-}
-
-function handle_down_event(event) {
-	//console.log("FINGER DOWN");
-	wstx("touch_start");
-}
-
 function process_command_queue(){
 	console.log("queued packets: "+queued_packets.length);
 	let queue_length = queued_packets.length;
@@ -399,19 +394,13 @@ function process_command_queue(){
 
 			connect_to_emotiscope();
 
-			//setInterval(function(){
-			//	open_websockets_connection();
-			//}, 1000);
-
-			console.log("REGISTERING MOUSE/TAP EVENTS");
-
 			// Add event listeners for mousedown and touchstart events
-			document.addEventListener('mousedown', handle_down_event);
-			document.addEventListener('touchstart', handle_down_event);
-
-			// Add event listeners for mouseup and touchend events
-			document.addEventListener('mouseup', handle_up_event);
-			document.addEventListener('touchend', handle_up_event)
+			document.addEventListener('mousedown', function(){
+				wstx("IND"); // Indicate touch
+			});
+			document.addEventListener('touchstart', function(){
+				wstx("IND"); // Indicate touch
+			});
         }
     });
 })();
