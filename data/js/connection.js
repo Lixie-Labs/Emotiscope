@@ -5,6 +5,7 @@ var device_ip = null;
 var last_event_time = null;
 var websockets_open = false;
 var queued_packets = [];
+var processing_command_queue = false;
 
 var system_state = {
 	"stats": {},
@@ -176,6 +177,7 @@ function parse_emotiscope_packet(packet){
 
 	document.getElementById("device_nickname").innerHTML = device_ip;
 	document.getElementById("device_nickname").innerHTML = "FPS CPU: "+parseInt(system_state.stats.fps_cpu)+" GPU: "+parseInt(system_state.stats.fps_gpu)+" TEMP: "+parseInt(system_state.stats.cpu_temp)+"C";
+	document.getElementById("device_nickname").innerHTML = "WS CLIENTS: "+parseInt(system_state.stats.ws_clients);
 }
 
 function parse_event(message){
@@ -300,30 +302,44 @@ function check_event_timeout(){
 
 function send_queued_packets(){
 	for( let i = 0; i < queued_packets.length; i++ ){
-		console.log("TX: " + queued_packets[i]);
-		ws.send(queued_packets[i]);
+		if(queued_packets[i].sent == false){
+			console.log("TX: " + queued_packets[i].message);
+			try{
+				ws.send(queued_packets[i].message);
+				queued_packets[i].sent = true;
+			}
+			catch(e){
+				console.log("ERROR SENDING QUEUED WEBSOCKETS: "+e);
+			}
+		}
 	}
-	queued_packets = [];
+
+	// Remove all sent packets
+	queued_packets = queued_packets.filter(packet => packet.sent == false);
 }
 
 function wstx(message){
-	if(websockets_open == true){
-		ws.send(message);
-		console.log("TX: " + message);
-	}
-	else{
-		queued_packets.push(message);
-		console.log("TX QUEUED: " + message);
-	}
+	queued_packets.push(
+		{
+			"message":message,
+			"sent":false
+		}
+	);
+	console.log("TX QUEUED: " + message);
+
+	process_command_queue();
 }
 
 function open_websockets_connection(){
-	if(websockets_open == false){
+	if(ws == null || ws.readyState == 3){
+		console.log("OPENING WEBSOCKETS");
+		websockets_open = true;
+
 		ws = new WebSocket("ws://"+device_ip+":80/ws");
 		ws.onopen = function(){
-			websockets_open = true;
-			send_queued_packets();
 			console.log("WEBSOCKETS OPEN");
+			send_queued_packets();
+			
 		};
 		ws.onmessage = function(event){
 			console.log("RX: " + event.data);
@@ -338,33 +354,38 @@ function open_websockets_connection(){
 			websockets_open = false;
 		}
 	}
+	else{
+		console.log("WEBSOCKETS ALREADY OPEN");
+		send_queued_packets();
+	}
 }
 
 function close_websockets_connection(){
-	if(websockets_open == true){
-		try{
-			ws.close();
-		}
-		catch(e){
-			console.log("ERROR CLOSING WEBSOCKETS: "+e);
-		}
-
-		websockets_open = false;
+	websockets_open = false;
+	try{		
+		ws.close();
+	}
+	catch(e){
+		console.log("ERROR CLOSING WEBSOCKETS: "+e);
 	}
 }
 
 function handle_up_event(event) {
-	console.log("FINGER UP");
-
-	setTimeout(function(){
-		close_websockets_connection();
-	}, 250);
+	//console.log("FINGER UP");
+	wstx("touch_end");
 }
 
 function handle_down_event(event) {
-	console.log("FINGER DOWN");
+	//console.log("FINGER DOWN");
+	wstx("touch_start");
+}
 
-	open_websockets_connection();
+function process_command_queue(){
+	console.log("queued packets: "+queued_packets.length);
+	let queue_length = queued_packets.length;
+	if(queue_length > 0){
+		open_websockets_connection();
+	}
 }
 
 (function() {
@@ -377,6 +398,12 @@ function handle_down_event(event) {
             console.log("APP_LOADED connection.js");
 
 			connect_to_emotiscope();
+
+			//setInterval(function(){
+			//	open_websockets_connection();
+			//}, 1000);
+
+			console.log("REGISTERING MOUSE/TAP EVENTS");
 
 			// Add event listeners for mousedown and touchstart events
 			document.addEventListener('mousedown', handle_down_event);

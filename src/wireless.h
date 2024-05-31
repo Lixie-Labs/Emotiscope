@@ -2,6 +2,7 @@
 #define MAX_HTTP_REQUEST_ATTEMPTS (8)								 // Define the maximum number of retry attempts
 #define INITIAL_BACKOFF_MS (1000)									 // Initial backoff delay in milliseconds
 #define MAX_NETWORK_CONNECT_ATTEMPTS (3)
+#define MAX_WEBSOCKETS_CLIENTS (4)
 
 #define DISCOVERY_SERVER_URL "https://app.emotiscope.rocks/discovery/"
 
@@ -20,6 +21,8 @@ volatile bool web_server_ready = false;
 int16_t connection_status = -1;
 
 uint8_t network_connection_attempts = 0;
+
+websocket_client clients[MAX_WEBSOCKETS_CLIENTS];
 
 void reboot_into_wifi_config_mode() {
 	preferences.putBool("CONFIG_TRIG", true);
@@ -173,6 +176,16 @@ void broadcast_emotiscope_state(){
 	sprintf(temp_buffer, "|heap|%lu", esp_get_free_heap_size());
 	strcat(output_string, temp_buffer);
 
+	uint16_t current_ws_clients = 0;
+	for(uint16_t i = 0; i < MAX_WEBSOCKETS_CLIENTS; i++){
+		if(clients[i].last_proof_of_life != 0){
+			current_ws_clients++;
+		}
+	}
+	memset(temp_buffer, 0, 128);
+	sprintf(temp_buffer, "|ws_clients|%lu", current_ws_clients);
+	strcat(output_string, temp_buffer);
+
 	//printf("TX: %s\n", output_string);
 	event_source.send(output_string);
 
@@ -310,16 +323,64 @@ void parse_emotiscope_packet(char* command, PsychicWebSocketRequest *request){
 	}
 }
 
+bool add_client(PsychicWebSocketClient *client){
+	bool found_slot = false;
+	for(uint16_t i = 0; i < MAX_WEBSOCKETS_CLIENTS; i++){
+		if(clients[i].last_proof_of_life == 0){
+			clients[i].socket = client->socket();
+			clients[i].last_proof_of_life = t_now_ms;
+			found_slot = true;
+			break;
+		}
+	}
+
+	return found_slot;
+}
+
+void remove_client(int socket){
+	for(uint16_t i = 0; i < MAX_WEBSOCKETS_CLIENTS; i++){
+		if(clients[i].socket == socket){
+			clients[i].last_proof_of_life = 0;
+			clients[i].socket = 0;
+			break;
+		}
+	}
+}
+
+void test_clients(){
+	for(uint16_t i = 0; i < MAX_WEBSOCKETS_CLIENTS; i++){
+		if(clients[i].last_proof_of_life != 0){
+			if(t_now_ms - clients[i].last_proof_of_life >= 200){
+				printf("Client #%i has not sent proof of life in 200ms, closing.\n", clients[i].socket);
+				PsychicWebSocketClient *client = websocket_handler.getClient(clients[i].socket);
+				if(client != NULL){
+					client->close();
+				}
+				else{
+					printf("ERROR: Client not found in test_clients\n");
+				}
+
+				clients[i].last_proof_of_life = 0;
+				clients[i].socket = 0;
+			}
+		}
+	}
+}
+
 void init_web_server() {
 	const char *local_hostname = "emotiscope";
 	if (MDNS.begin(local_hostname) == true) {
 		MDNS.addService("http", "tcp", 80);
 	}
 	else{
-		println("Error starting mDNS");
+		printf("Error starting mDNS\n");
 	}
 
-	server.config.max_uri_handlers = 40;  // maximum number of .on() calls
+	memset(clients, 0, sizeof(clients));
+
+	server.config.stack_size = 8192;	 // stack size for each thread
+	server.config.max_uri_handlers = 20;  // maximum number of .on() calls
+	server.config.max_open_sockets = 8;   // maximum number of open sockets
 
 	server.listen(80);
 
@@ -338,11 +399,22 @@ void init_web_server() {
 
 	websocket_handler.onOpen([](PsychicWebSocketClient *client) {
 		printf("[socket] connection #%i connected from %s\n", client->socket(), client->remoteIP().toString().c_str());
+
+		if( add_client( client ) == false ){
+			printf( "Client not accepted, too many clients.\n" );
+			client->close();
+		}
 	});
 
 	websocket_handler.onFrame([](PsychicWebSocketRequest *request, httpd_ws_frame *frame) {
 		// printf("[socket] #%d sent: %s\n", request->client()->socket(), (char*)frame->payload);
 		httpd_ws_type_t frame_type = frame->type;
+
+		for(uint16_t i = 0; i < MAX_WEBSOCKETS_CLIENTS; i++){
+			if(clients[i].socket == request->client()->socket()){
+				clients[i].last_proof_of_life = t_now_ms;
+			}
+		}
 
 		// If it's text, it might be a command
 		if (frame_type == HTTPD_WS_TYPE_TEXT) {
@@ -365,9 +437,11 @@ void init_web_server() {
 
 	websocket_handler.onClose([](PsychicWebSocketClient *client) {
 		printf("[socket] connection #%i closed from %s\n", client->socket(), client->remoteIP().toString().c_str());
+		remove_client(client->socket());
 	});
 
 	server.on("/ws", &websocket_handler);
+	//server.on("/ws")->attachHandler(&websocket_handler);
 
 	server.on("/mac", HTTP_GET, [](PsychicRequest *request) {
    		return request->reply(mac_str);

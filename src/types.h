@@ -124,13 +124,6 @@ struct tempo {
 	uint32_t block_size;
 };
 
-// Clients are like Players in the web app. Like a video game console, they
-// are plugged into one of four sockets
-struct websocket_client {
-	int socket;
-	uint32_t last_ping;
-};
-
 // Stores the state of capacitive touch pins
 struct touch_pin {
 	uint8_t pin;
@@ -143,6 +136,11 @@ struct touch_pin {
 	float ambient_threshold;
 	float touch_threshold;
 	float touch_history[50]; // 5 seconds at 10 FPS
+};
+
+struct websocket_client {
+	int socket;
+	uint32_t last_proof_of_life;
 };
 
 // union that stores the value of a config item

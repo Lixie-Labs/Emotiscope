@@ -117,13 +117,13 @@
 // One core to run audio and web server ---------------------------------------
 void loop() {
 	run_cpu(); // (cpu_core.h)
-	run_web(); // (web_core.h)	
 }
 
 // One core to run graphics ---------------------------------------------------
 void loop_gpu(void *param) {
 	for (;;) {
 		run_gpu(); // (gpu_core.h)
+		run_web(); // (web_core.h)	
 	}
 }
 
@@ -133,5 +133,5 @@ void setup() {
 	init_system();
 
 	// Start the second core as a dedicated webserver
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 0, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 0, NULL, 0);
 }
