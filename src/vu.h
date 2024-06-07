@@ -27,10 +27,10 @@ void run_vu(){
 	profile_function([&]() {
 		// CALCULATE AMPLITUDE ------------------------------------------------
 		static float max_amplitude_cap = 0.0000001;
-		float* samples = &sample_history[(SAMPLE_HISTORY_LENGTH-1) - CHUNK_SIZE];
+		float* samples = &sample_history[(SAMPLE_HISTORY_LENGTH-1) - CHUNK_SIZE*2];
 
 		float max_amplitude_now = 0.000001;
-		for(uint16_t i = 0; i < CHUNK_SIZE; i++){
+		for(uint16_t i = 0; i < CHUNK_SIZE; i+=2){
 			float sample = samples[i];
 			float sample_abs = fabs(sample);
 

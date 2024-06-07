@@ -57,12 +57,14 @@ function parse_emotiscope_packet(packet){
 				let config_length = 4;
 				let num_config_items = num_sections / config_length;
 
+				// Iterate through all config items
 				for( let j = 0; j < num_config_items; j++ ){
 					let item_name    = sections[j*config_length+0];
 					let item_type    = sections[j*config_length+1];
 					let item_ui_type = sections[j*config_length+2];
 					let item_value   = sections[j*config_length+3];
-
+					
+					// Convert item value to correct type
 					if(item_type == "i32"){
 						item_value = parseInt(item_value);
 					}
@@ -73,6 +75,7 @@ function parse_emotiscope_packet(packet){
 						item_value = parseFloat(item_value);
 					}
 					
+					// Clean up item name for use as a key
 					let item_name_clean = item_name.replace(/\s+/g, '_').toLowerCase();
 					
 					// if key already exists, update the value
@@ -117,7 +120,7 @@ function parse_emotiscope_packet(packet){
 					"Mirror Mode",
 					"Reverse Color Range",
 					"Auto Color Cycle",
-				]
+				];
 
 				// Spawn all settings not already in the gallery, in the correct order
 				for( let j = 0; j < setting_order.length; j++ ){
@@ -140,11 +143,6 @@ function parse_emotiscope_packet(packet){
 							console.log("ERROR SPAWNING SETTING: "+setting_name+" "+e);
 						}
 					}
-				}
-
-				// Update all settings in the gallery
-				for( let j = 0; j < setting_gallery.length; j++ ){
-					//setting_gallery[j].draw();
 				}
 
 				set_ui_locked_state(false);

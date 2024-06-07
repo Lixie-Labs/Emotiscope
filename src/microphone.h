@@ -21,7 +21,7 @@ Functions for reading and storing data acquired by the I2S microphone
 #define I2S_DIN_PIN   37
 
 #define CHUNK_SIZE 64
-#define SAMPLE_RATE 12800
+#define SAMPLE_RATE 12800*2
 
 #define SAMPLE_HISTORY_LENGTH 4096
 
@@ -42,7 +42,7 @@ void init_i2s_microphone(){
 
 	// Configuration for the I2S standard mode, suitable for the SPH0645 microphone
 	i2s_std_config_t std_cfg = {
-		.clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(12800), // BCLK frequency for a 2kHz sample rate (64 * 2kHz)
+		.clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(SAMPLE_RATE), // BCLK frequency for a 2kHz sample rate (64 * 2kHz)
 		.slot_cfg = {
 			.data_bit_width = I2S_DATA_BIT_WIDTH_32BIT, // Data bit width as 24 bits
 			.slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT, // Slot width as 32 bits to accommodate data
@@ -81,20 +81,20 @@ void init_i2s_microphone(){
 void acquire_sample_chunk() {
 	profile_function([&]() {
 		// Buffer to hold audio samples
-		uint32_t new_samples_raw[CHUNK_SIZE];
-		float new_samples[CHUNK_SIZE];
+		uint32_t new_samples_raw[CHUNK_SIZE*2];
+		float new_samples[CHUNK_SIZE*2];
 
 		// Read audio samples into int32_t buffer, but **only when emotiscope is active**
 		if( EMOTISCOPE_ACTIVE == true ){
 			size_t bytes_read = 0;
-			i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
+			i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*2*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
 		}
 		else{
-			memset(new_samples_raw, 0, sizeof(uint32_t) * CHUNK_SIZE);
+			memset(new_samples_raw, 0, sizeof(uint32_t) * CHUNK_SIZE * 2);
 		}
 
 		// Clip the sample value if it's too large, cast to floats
-		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
+		for (uint16_t i = 0; i < CHUNK_SIZE*2; i+=4) {
 			new_samples[i+0] = min(max((((int32_t)new_samples_raw[i+0]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
 			new_samples[i+1] = min(max((((int32_t)new_samples_raw[i+1]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
 			new_samples[i+2] = min(max((((int32_t)new_samples_raw[i+2]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
@@ -102,11 +102,11 @@ void acquire_sample_chunk() {
 		}
 
 		// Convert audio from "18-bit" float range to -1.0 to 1.0 range
-		dsps_mulc_f32(new_samples, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
+		dsps_mulc_f32(new_samples, new_samples, CHUNK_SIZE*2, recip_scale, 1, 1);
 
 		// Add new chunk to audio history
 		waveform_locked = true;
-		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE);
+		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE*2);
 		
 		// Used to sync GPU to this when needed
 		waveform_locked = false;

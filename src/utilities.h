@@ -149,15 +149,15 @@ float IRAM_ATTR interpolate(float index, float* array, uint16_t array_size) {
 	return (1 - index_f_frac) * left_val + index_f_frac * right_val;
 }
 
-void shift_and_copy_arrays(float history_array[], size_t history_size, const float new_array[], size_t new_size) {
-	profile_function([&]() {
-		// Use memmove to shift the history array
-		memmove(history_array, history_array + new_size,
-				(history_size - new_size) * sizeof(float));
+inline void shift_and_copy_arrays(float history_array[], size_t history_size, const float new_array[], size_t new_size) {
+	//profile_function([&]() {
+	// Use memmove to shift the history array
+	memmove(history_array, history_array + new_size,
+			(history_size - new_size) * sizeof(float));
 
-		// Use memcpy to copy the new array into the vacant space
-		memcpy(history_array + history_size - new_size, new_array, new_size * sizeof(float));
-	}, __func__ );
+	// Use memcpy to copy the new array into the vacant space
+	memcpy(history_array + history_size - new_size, new_array, new_size * sizeof(float));
+	//}, __func__ );
 }
 
 // Function to shift array contents to the left

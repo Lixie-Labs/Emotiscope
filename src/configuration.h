@@ -102,7 +102,8 @@ void load_config(){
 	strcpy(configuration.background.ui_type_string, "s");
 	configuration.background.type = f32;
 	configuration.background.ui_type = ui_type_slider;
-	configuration.background.value.f32   = preferences.getFloat(configuration.background.name, 0.25);
+	configuration.background.value.f32   = 0.0;
+	//configuration.background.value.f32   = preferences.getFloat(configuration.background.name, 0.25);
 
 	// Current Mode
 	strcpy(configuration.current_mode.name, "current_mode");
