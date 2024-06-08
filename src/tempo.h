@@ -146,7 +146,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty);// * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 
@@ -177,7 +177,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 
 		float scale = (0.6 * progress) + 0.4;
 
-		//normalized_magnitude *= scale;
+		normalized_magnitude *= scale;
 	}, __func__ );
 
 	return normalized_magnitude;
@@ -356,15 +356,17 @@ void update_novelty() {
 			static uint32_t iter = 0;
 			iter++;
 
-			float current_novelty = 0.0;
-			for (uint16_t i = 0; i < NUM_FREQS; i++) {
-				float new_mag = spectrogram_smooth[i];
-				frequencies_musical[i].novelty = max(0.0f, new_mag - frequencies_musical[i].magnitude_last);
-				current_novelty += frequencies_musical[i].novelty;
+			static float fft_last[FFT_SIZE>>1];
 
-				frequencies_musical[i].magnitude_last = new_mag;
+			float current_novelty = 0.0;
+			for (uint16_t i = 0; i < (FFT_SIZE>>1); i++) {
+				current_novelty += max(0.0f, fft_max[i] - fft_last[i]);
+
+				fft_last[i] = fft_max[i];
+				fft_max[i] = 0.0;
 			}
-			current_novelty /= float(NUM_FREQS);
+
+			current_novelty /= float(FFT_SIZE>>1);
 
 			check_silence(current_novelty);
 

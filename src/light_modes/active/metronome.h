@@ -10,7 +10,7 @@ void draw_metronome() {
 
 		if(contribution >= 0.00001){
 			float sine = sin( tempi[tempo_bin].phase + (PI*0.5) );
-			//sine *= 2.0;
+			sine *= 2.0;
 
 			if(sine > 1.0){ sine = 1.0; }
 			else if(sine < -1.0){ sine = -1.0; }

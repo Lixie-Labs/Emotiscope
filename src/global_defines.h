@@ -31,11 +31,11 @@
 #define NUM_TEMPI (96)
 
 // BPM range
-#define TEMPO_LOW (48)
+#define TEMPO_LOW (32)
 #define TEMPO_HIGH (TEMPO_LOW + NUM_TEMPI)
 
 // How far forward or back in time the beat phase is shifted
-#define BEAT_SHIFT_PERCENT (0.16)
+#define BEAT_SHIFT_PERCENT (0.00)
 
 // Set later by physical traces on the PCB
 uint8_t HARDWARE_VERSION = 0;

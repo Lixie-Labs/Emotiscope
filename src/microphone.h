@@ -33,6 +33,53 @@ volatile bool waveform_sync_flag = false;
 
 i2s_chan_handle_t rx_handle;
 
+// FFT Stuffs
+const uint16_t FFT_SIZE = 256;
+
+__attribute__((aligned(16)))
+float fft_input[FFT_SIZE];
+
+__attribute__((aligned(16)))
+float fft_window[FFT_SIZE];
+
+__attribute__((aligned(16)))
+float fft_input_complex[FFT_SIZE<<1];
+
+__attribute__((aligned(16)))
+float fft_output[FFT_SIZE];
+
+__attribute__((aligned(16)))
+float fft_max[FFT_SIZE];
+
+void perform_fft(){
+	memset(fft_input_complex, 0, sizeof(float) * (FFT_SIZE << 1));
+
+	const uint8_t step_size = 4;
+	for(uint16_t i = 0; i < FFT_SIZE; i++){
+		fft_input[i] = sample_history[((SAMPLE_HISTORY_LENGTH-1) - (FFT_SIZE*step_size)) + i*step_size ];
+	}
+
+	dsps_mul_f32(fft_input, fft_window, fft_input, FFT_SIZE, 1, 1, 1);
+
+	for(uint16_t i = 0; i < FFT_SIZE; i++){
+		fft_input_complex[i*2+0] = fft_input[i];
+		fft_input_complex[i*2+1] = 0.0;
+	}
+
+	dsps_fft4r_fc32(fft_input_complex, FFT_SIZE);
+	dsps_bit_rev4r_fc32(fft_input_complex, FFT_SIZE);
+	// Convert one complex vector with length N >> 1 to one real spectrum vector with length N >> 1
+    dsps_cplx2real_fc32(fft_input_complex, FFT_SIZE);
+
+	// Calculate the magnitude of the complex numbers and convert to 0.0 to 1.0 range
+	for (uint16_t i = 0 ; i < FFT_SIZE; i++) {
+		float real = fft_input_complex[i << 1];
+		float imag = fft_input_complex[(i << 1) + 1];
+		fft_output[i] = sqrtf(real * real + imag * imag) / (FFT_SIZE >> 1);
+		fft_max[i] = fmaxf(fft_max[i], fft_output[i]);
+	}
+}
+
 void init_i2s_microphone(){
 	// Get the default channel configuration
 	i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
@@ -69,13 +116,14 @@ void init_i2s_microphone(){
 		},
 	};
 
-
-
 	// Initialize the channel
 	i2s_channel_init_std_mode(rx_handle, &std_cfg);
 
 	// Start the RX channel
 	i2s_channel_enable(rx_handle);
+
+	dsps_fft4r_init_fc32(NULL, FFT_SIZE << 1);
+	dsps_wind_blackman_nuttall_f32(fft_window, FFT_SIZE);
 }
 
 void acquire_sample_chunk() {
@@ -107,6 +155,8 @@ void acquire_sample_chunk() {
 		// Add new chunk to audio history
 		waveform_locked = true;
 		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE*2);
+
+		perform_fft();
 		
 		// Used to sync GPU to this when needed
 		waveform_locked = false;

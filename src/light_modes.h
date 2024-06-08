@@ -22,11 +22,12 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 #include "light_modes/active/spectronome.h"
 #include "light_modes/active/hype.h"
 #include "light_modes/active/bloom.h"
-#include "light_modes/active/perlin.h"
+#include "light_modes/active/fft.h"
+// #include "light_modes/active/perlin.h"
 
 // INACTIVE MODES
 #include "light_modes/inactive/neutral.h"
-#include "light_modes/inactive/starfield.h"
+//#include "light_modes/inactive/starfield.h"
 
 // SYSTEM MODES
 #include "light_modes/system/self_test.h"
@@ -43,12 +44,13 @@ light_mode light_modes[] = {
 	{ "Metronome",       LIGHT_MODE_TYPE_ACTIVE,    &draw_metronome     },
 	{ "Spectronome",     LIGHT_MODE_TYPE_ACTIVE,    &draw_spectronome   },
 	{ "Hype",            LIGHT_MODE_TYPE_ACTIVE,    &draw_hype          },
-	{ "Bloom",           LIGHT_MODE_TYPE_ACTIVE,    &draw_bloom         },
-	{ "Perlin",          LIGHT_MODE_TYPE_ACTIVE,    &draw_perlin        },
+	{ "Bloom",           LIGHT_MODE_TYPE_ACTIVE,    &draw_bloom         },	
+	{ "FFT",			 LIGHT_MODE_TYPE_ACTIVE,    &draw_fft           },
+	//{ "Perlin",          LIGHT_MODE_TYPE_ACTIVE,    &draw_perlin        },
 
 	// Inactive Modes
 	{ "Neutral",         LIGHT_MODE_TYPE_INACTIVE,  &draw_neutral       },
-	{ "Starfield",       LIGHT_MODE_TYPE_INACTIVE,  &draw_starfield     },
+	//{ "Starfield",       LIGHT_MODE_TYPE_INACTIVE,  &draw_starfield     },
 
 	// System Modes
 	{ "Self Test",       LIGHT_MODE_TYPE_SYSTEM,    &draw_self_test     },

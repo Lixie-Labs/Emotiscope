@@ -25,6 +25,7 @@
 		"random": "cpp",
 		"list": "cpp",
 		"limits": "cpp",
-		"typeinfo": "cpp"
+		"typeinfo": "cpp",
+		"regex": "cpp"
 	}
 }

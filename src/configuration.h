@@ -48,7 +48,8 @@ void load_config(){
 	strcpy(configuration.softness.ui_type_string, "s");
 	configuration.softness.type = f32;
 	configuration.softness.ui_type = ui_type_slider;
-	configuration.softness.value.f32   = preferences.getFloat(configuration.softness.name, 0.25);
+	configuration.softness.value.f32 = 0.25;
+	//configuration.softness.value.f32   = preferences.getFloat(configuration.softness.name, 0.25);
 
 	// Color
 	strcpy(configuration.color.name, "color");
@@ -57,7 +58,7 @@ void load_config(){
 	strcpy(configuration.color.ui_type_string, "s");
 	configuration.color.type = f32;
 	configuration.color.ui_type = ui_type_slider;
-	configuration.color.value.f32   = preferences.getFloat(configuration.color.name, 0.33);
+	configuration.color.value.f32 = preferences.getFloat(configuration.color.name, 0.33);
 
 	// Color Range
 	strcpy(configuration.color_range.name, "color_range");
@@ -66,7 +67,7 @@ void load_config(){
 	strcpy(configuration.color_range.ui_type_string, "s");
 	configuration.color_range.type = f32;
 	configuration.color_range.ui_type = ui_type_slider;
-	configuration.color_range.value.f32   = preferences.getFloat(configuration.color_range.name, 0.0);
+	configuration.color_range.value.f32 = preferences.getFloat(configuration.color_range.name, 0.0);
 
 	// Warmth
 	strcpy(configuration.warmth.name, "warmth");
@@ -75,7 +76,7 @@ void load_config(){
 	strcpy(configuration.warmth.ui_type_string, "s");
 	configuration.warmth.type = f32;
 	configuration.warmth.ui_type = ui_type_slider;
-	configuration.warmth.value.f32   = preferences.getFloat(configuration.warmth.name, 0.50);
+	configuration.warmth.value.f32 = preferences.getFloat(configuration.warmth.name, 0.50);
 
 	// Speed
 	strcpy(configuration.speed.name, "speed");
@@ -84,7 +85,7 @@ void load_config(){
 	strcpy(configuration.speed.ui_type_string, "s");
 	configuration.speed.type = f32;
 	configuration.speed.ui_type = ui_type_slider;
-	configuration.speed.value.f32   = preferences.getFloat(configuration.speed.name, 0.50);
+	configuration.speed.value.f32 = preferences.getFloat(configuration.speed.name, 0.50);
 
 	// Saturation
 	strcpy(configuration.saturation.name, "saturation");
@@ -93,7 +94,7 @@ void load_config(){
 	strcpy(configuration.saturation.ui_type_string, "s");
 	configuration.saturation.type = f32;
 	configuration.saturation.ui_type = ui_type_slider;
-	configuration.saturation.value.f32   = preferences.getFloat(configuration.saturation.name, 0.85);
+	configuration.saturation.value.f32 = preferences.getFloat(configuration.saturation.name, 0.85);
 
 	// Background
 	strcpy(configuration.background.name, "background");
@@ -102,8 +103,8 @@ void load_config(){
 	strcpy(configuration.background.ui_type_string, "s");
 	configuration.background.type = f32;
 	configuration.background.ui_type = ui_type_slider;
-	configuration.background.value.f32   = 0.0;
-	//configuration.background.value.f32   = preferences.getFloat(configuration.background.name, 0.25);
+	configuration.background.value.f32 = 0.0;
+	//configuration.background.value.f32 = preferences.getFloat(configuration.background.name, 0.25);
 
 	// Current Mode
 	strcpy(configuration.current_mode.name, "current_mode");

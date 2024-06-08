@@ -198,7 +198,7 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 
 		float* sample_ptr = &sample_history[(SAMPLE_HISTORY_LENGTH - 1) - block_size*2];
 
-		for (uint16_t i = 0; i < block_size; i++) {
+		for ( uint16_t i = 0; i < block_size; i++ ) {
 			float windowed_sample = sample_ptr[i*2] * window_lookup[uint32_t(window_pos)];
 			float q0 = coeff * q1 - q2 + windowed_sample;
 			q2 = q1;
