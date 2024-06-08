@@ -202,8 +202,8 @@ void calculate_tempi_magnitudes(int16_t single_bin = -1) {
 			}
 		}
 
-		if (max_val < 0.02) {
-			max_val = 0.02;
+		if (max_val < 0.01) {
+			max_val = 0.01;
 		}
 
 		float autoranger_scale = 1.0 / (max_val);

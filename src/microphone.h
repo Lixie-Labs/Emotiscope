@@ -49,12 +49,12 @@ __attribute__((aligned(16)))
 float fft_output[FFT_SIZE];
 
 __attribute__((aligned(16)))
-float fft_max[FFT_SIZE];+*
+float fft_max[FFT_SIZE];
 
 void perform_fft(){
 	memset(fft_input_complex, 0, sizeof(float) * (FFT_SIZE << 1));
 
-	const uint8_t step_size = 4;
+	const uint8_t step_size = 3;
 	for(uint16_t i = 0; i < FFT_SIZE; i++){
 		fft_input[i] = sample_history[((SAMPLE_HISTORY_LENGTH-1) - (FFT_SIZE*step_size)) + i*step_size ];
 	}
@@ -73,9 +73,12 @@ void perform_fft(){
 
 	// Calculate the magnitude of the complex numbers and convert to 0.0 to 1.0 range
 	for (uint16_t i = 0 ; i < FFT_SIZE; i++) {
+		float progress = (float)i / FFT_SIZE;
 		float real = fft_input_complex[i << 1];
 		float imag = fft_input_complex[(i << 1) + 1];
 		fft_output[i] = sqrtf(real * real + imag * imag) / (FFT_SIZE >> 1);
+		fft_output[i] = fft_output[i]*(0.5+0.5*progress);
+
 		fft_max[i] = fmaxf(fft_max[i], fft_output[i]);
 	}
 }

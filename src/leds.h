@@ -421,9 +421,9 @@ void draw_line(CRGBF* layer, float x1, float x2, CRGBF color, float opacity) {
                 layer[i].b += color.b * mix;
             } else {
                 // Blend mode: Mix color
-                layer[i].r = layer[i].r * (1.0 - mix) + color.r * mix;
-                layer[i].g = layer[i].g * (1.0 - mix) + color.g * mix;
-                layer[i].b = layer[i].b * (1.0 - mix) + color.b * mix;
+                //layer[i].r = layer[i].r * (1.0 - mix) + color.r * mix;
+                //layer[i].g = layer[i].g * (1.0 - mix) + color.g * mix;
+                //layer[i].b = layer[i].b * (1.0 - mix) + color.b * mix;
             }
         }
     }

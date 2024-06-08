@@ -48,7 +48,7 @@ void load_config(){
 	strcpy(configuration.softness.ui_type_string, "s");
 	configuration.softness.type = f32;
 	configuration.softness.ui_type = ui_type_slider;
-	configuration.softness.value.f32 = 0.25;
+	configuration.softness.value.f32 = 0.0;
 	//configuration.softness.value.f32   = preferences.getFloat(configuration.softness.name, 0.25);
 
 	// Color
@@ -103,8 +103,7 @@ void load_config(){
 	strcpy(configuration.background.ui_type_string, "s");
 	configuration.background.type = f32;
 	configuration.background.ui_type = ui_type_slider;
-	configuration.background.value.f32 = 0.2
-	;
+	configuration.background.value.f32 = 0.0;
 	//configuration.background.value.f32 = preferences.getFloat(configuration.background.name, 0.25);
 
 	// Current Mode
