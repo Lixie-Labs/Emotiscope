@@ -49,7 +49,7 @@ __attribute__((aligned(16)))
 float fft_output[FFT_SIZE];
 
 __attribute__((aligned(16)))
-float fft_max[FFT_SIZE];
+float fft_max[FFT_SIZE];+*
 
 void perform_fft(){
 	memset(fft_input_complex, 0, sizeof(float) * (FFT_SIZE << 1));
