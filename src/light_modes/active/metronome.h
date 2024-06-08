@@ -10,7 +10,7 @@ void draw_metronome() {
 
 		if(contribution >= 0.00001){
 			float sine = sin( tempi[tempo_bin].phase + (PI*0.5) );
-			sine *= 2.0;
+			sine *= 1.5;
 
 			if(sine > 1.0){ sine = 1.0; }
 			else if(sine < -1.0){ sine = -1.0; }
@@ -23,9 +23,9 @@ void draw_metronome() {
 				metronome_width = 1.0;
 			}
 
-			float dot_pos = clip_float( sine * (0.5*(sqrt(sqrt((contribution)))) * metronome_width) + 0.5 );
+			float dot_pos = clip_float( sine * (0.5*(sqrt(contribution)) * metronome_width) + 0.5 );
 
-			float opacity = clip_float(contribution*2.0);
+			float opacity = clip_float(contribution*1.0);
 
 			CRGBF dot_color = hsv(
 				get_color_range_hue(progress),

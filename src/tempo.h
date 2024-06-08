@@ -146,7 +146,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 			float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 			float sample = (sample_novelty + sample_vu) / 2.0;
 
-			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty);// * window_lookup[uint32_t(window_pos)]);
+			float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty * window_lookup[uint32_t(window_pos)]);
 			q2 = q1;
 			q1 = q0;
 
@@ -175,7 +175,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float progress = 1.0 - (tempo_bin / float(NUM_TEMPI));
 		progress *= progress;
 
-		float scale = (0.6 * progress) + 0.4;
+		float scale = (0.3 * progress) + 0.7;
 
 		normalized_magnitude *= scale;
 	}, __func__ );
