@@ -51,6 +51,11 @@ float fft_output[FFT_SIZE];
 __attribute__((aligned(16)))
 float fft_max[FFT_SIZE];
 
+__attribute__((aligned(16)))
+const uint8_t num_fft_average_samples = 4;
+float fft_smooth[1 + num_fft_average_samples][FFT_SIZE]; // One slot for output, others for averaging
+uint16_t fft_averaging_index = 1;
+
 void perform_fft(){
 	memset(fft_input_complex, 0, sizeof(float) * (FFT_SIZE << 1));
 
@@ -81,6 +86,19 @@ void perform_fft(){
 
 		fft_max[i] = fmaxf(fft_max[i], fft_output[i]);
 	}
+
+	memcpy(fft_smooth[ fft_averaging_index ], fft_output, sizeof(float) * FFT_SIZE);
+	fft_averaging_index += 1;
+	if(fft_averaging_index >= num_fft_average_samples + 1){
+		fft_averaging_index = 1;
+	}
+
+	memset(fft_smooth[0], 0, sizeof(float) * FFT_SIZE);
+	for(uint8_t i = 1; i < num_fft_average_samples + 1; i++){
+		dsps_add_f32(fft_smooth[0], fft_smooth[i], fft_smooth[0], FFT_SIZE, 1, 1, 1);
+	}
+
+	dsps_mulc_f32_ansi(fft_smooth[0], fft_smooth[0], FFT_SIZE, 1.0 / num_fft_average_samples, 1, 1);
 }
 
 void init_i2s_microphone(){
@@ -159,6 +177,7 @@ void acquire_sample_chunk() {
 		waveform_locked = true;
 		shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE*2);
 
+		// Perform FFT on the new audio data
 		perform_fft();
 		
 		// Used to sync GPU to this when needed

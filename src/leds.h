@@ -61,45 +61,50 @@ const uint8_t hsv_lookup[256][3] = {
 
 extern float novelty_curve_normalized[NOVELTY_HISTORY_LENGTH];
 
+void draw_sprite(CRGBF dest[], CRGBF sprite[], uint16_t dest_length, uint16_t sprite_length, float position, float alpha){
+	int16_t position_whole = floor(position);  // Downcast to integer accuracy
+	float position_fract = fabsf(fabsf(position) - fabsf(position_whole));
+
+	for (int16_t i = 0; i < sprite_length; i++) {
+		int16_t pos_left = i + position_whole;
+		int16_t pos_right = i + position_whole + 1;
+
+		float mix_right = position_fract;
+		float mix_left = 1.0 - mix_right;
+
+		if (pos_left >= 0 && pos_left < dest_length) {
+			dest[pos_left].r += sprite[i].r * mix_left * alpha;
+			dest[pos_left].g += sprite[i].g * mix_left * alpha;
+			dest[pos_left].b += sprite[i].b * mix_left * alpha;
+		}
+
+		if (pos_right >= 0 && pos_right < dest_length) {
+			dest[pos_right].r += sprite[i].r * mix_right * alpha;
+			dest[pos_right].g += sprite[i].g * mix_right * alpha;
+			dest[pos_right].b += sprite[i].b * mix_right * alpha;
+		}
+	}
+}
+
 void draw_sprite(float dest[], float sprite[], uint32_t dest_length, uint32_t sprite_length, float position, float alpha) {
-  int32_t position_whole = position;  // Downcast to integer accuracy
-  float position_fract = position - position_whole;
-  float mix_right = position_fract;
-  float mix_left = 1.0 - mix_right;
+	int16_t position_whole = floor(position);  // Downcast to integer accuracy
+	float position_fract = fabsf(fabsf(position) - fabsf(position_whole));
 
-  for (uint16_t i = 0; i < sprite_length; i++) {
-    int32_t pos_left = i + position_whole;
-    int32_t pos_right = i + position_whole + 1;
+	for (int16_t i = 0; i < sprite_length; i++) {
+		int16_t pos_left = i + position_whole;
+		int16_t pos_right = i + position_whole + 1;
 
-    bool skip_left = false;
-    bool skip_right = false;
+		float mix_right = position_fract;
+		float mix_left = 1.0 - mix_right;
 
-    if (pos_left < 0) {
-      pos_left = 0;
-      skip_left = true;
-    }
-    if (pos_left > dest_length - 1) {
-      pos_left = dest_length - 1;
-      skip_left = true;
-    }
+		if (pos_left >= 0 && pos_left < dest_length) {
+			dest[pos_left] += sprite[i] * mix_left * alpha;
+		}
 
-    if (pos_right < 0) {
-      pos_right = 0;
-      skip_right = true;
-    }
-    if (pos_right > dest_length - 1) {
-      pos_right = dest_length - 1;
-      skip_right = true;
-    }
-
-    if (skip_left == false) {
-      dest[pos_left] += sprite[i] * mix_left * alpha;
-    }
-
-    if (skip_right == false) {
-      dest[pos_right] += sprite[i] * mix_right * alpha;
-    }
-  }
+		if (pos_right >= 0 && pos_right < dest_length) {
+			dest[pos_right] += sprite[i] * mix_right * alpha;
+		}
+	}
 }
 
 void save_leds_to_temp() {
@@ -438,9 +443,8 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
     // Calculate distance moved and adjust brightness of spread accordingly
     float position_difference = fabs(position - prev_position);
     float spread_area = fmaxf( (sqrt(position_difference)) * NUM_LEDS, 1.0f );
-
     // Draw the line representing the motion blur
-    draw_line(layer, prev_position, position, color, (1.0) * opacity);
+    draw_line(layer, prev_position, position, color, (1.0 / spread_area) * opacity);
 }
 
 void update_auto_color(){

@@ -23,6 +23,8 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 #include "light_modes/active/hype.h"
 #include "light_modes/active/bloom.h"
 #include "light_modes/active/fft.h"
+#include "light_modes/active/tempiscope.h"
+#include "light_modes/active/beat_tunnel.h"
 // #include "light_modes/active/perlin.h"
 
 // INACTIVE MODES
@@ -46,6 +48,8 @@ light_mode light_modes[] = {
 	{ "Hype",            LIGHT_MODE_TYPE_ACTIVE,    &draw_hype          },
 	{ "Bloom",           LIGHT_MODE_TYPE_ACTIVE,    &draw_bloom         },	
 	{ "FFT",			 LIGHT_MODE_TYPE_ACTIVE,    &draw_fft           },
+	{ "Tempiscope",		 LIGHT_MODE_TYPE_ACTIVE,    &draw_tempiscope    },
+	{ "Beat Tunnel",	 LIGHT_MODE_TYPE_ACTIVE,    &draw_beat_tunnel   },
 	//{ "Perlin",          LIGHT_MODE_TYPE_ACTIVE,    &draw_perlin        },
 
 	// Inactive Modes

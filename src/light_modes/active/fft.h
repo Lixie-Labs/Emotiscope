@@ -9,7 +9,7 @@ void draw_fft(){
 	float fft_max_mag = 0.0;
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
 		if(i >= 4){
-			fft_mags[i] = fft_output[i];
+			fft_mags[i] = fft_smooth[0][i];
 			fft_max_mag = fmaxf(fft_max_mag, fft_mags[i]);
 		}
 	}

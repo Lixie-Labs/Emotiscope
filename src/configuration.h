@@ -48,7 +48,7 @@ void load_config(){
 	strcpy(configuration.softness.ui_type_string, "s");
 	configuration.softness.type = f32;
 	configuration.softness.ui_type = ui_type_slider;
-	configuration.softness.value.f32 = 0.0;
+	configuration.softness.value.f32 = 0.33;
 	//configuration.softness.value.f32   = preferences.getFloat(configuration.softness.name, 0.25);
 
 	// Color

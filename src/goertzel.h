@@ -225,7 +225,7 @@ void calculate_magnitudes() {
 	profile_function([&]() {
 		magnitudes_locked = true;
 
-		const uint16_t NUM_AVERAGE_SAMPLES = 2;
+		const uint16_t NUM_AVERAGE_SAMPLES = 1;
 
 		static float magnitudes_raw[NUM_FREQS];
 		static float magnitudes_noise_filtered[NUM_FREQS];

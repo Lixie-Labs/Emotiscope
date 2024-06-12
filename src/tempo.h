@@ -270,18 +270,12 @@ void update_tempo() {
 		static uint16_t calc_bin = 0;
 		uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
 
-		if(iter % 2 == 0){
-			calculate_tempi_magnitudes(calc_bin+0);
-		}
-		else{
-			calculate_tempi_magnitudes(calc_bin+1);
-		}
+		calculate_tempi_magnitudes(calc_bin);
+		calc_bin+=1;
 
-		calc_bin+=2;
 		if (calc_bin >= max_bin) {
 			calc_bin = 0;
 		}
-
 	}, __func__ );
 }
 
@@ -422,22 +416,27 @@ void update_tempi_phase(float delta) {
 			// Load the magnitude
 			float tempi_magnitude = tempi[tempo_bin].magnitude;
 
-			// Smooth it
-			tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
-			tempi_power_sum += tempi_smooth[tempo_bin];
+			if(tempi_magnitude > 0.005){
+				// Smooth it
+				tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
+				tempi_power_sum += tempi_smooth[tempo_bin];
 
-			sync_beat_phase(tempo_bin, delta);
+				sync_beat_phase(tempo_bin, delta);
+			}
+			else{
+				tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975;
+			}
 		}
 
 		// Measure contribution factor of each tempi, calculate confidence level
 		float max_contribution = 0.000001;
 		for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-			max_contribution = max(
-				tempi_smooth[tempo_bin] / tempi_power_sum,
+			max_contribution = fmaxf(
+				tempi_smooth[tempo_bin],
 				max_contribution
 			);
 		}
+		tempo_confidence = max_contribution / tempi_power_sum;
 
-		tempo_confidence = max_contribution;
 	}, __func__ );
 }
