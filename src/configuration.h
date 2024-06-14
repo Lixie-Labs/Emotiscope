@@ -48,7 +48,7 @@ void load_config(){
 	strcpy(configuration.softness.ui_type_string, "s");
 	configuration.softness.type = f32;
 	configuration.softness.ui_type = ui_type_slider;
-	configuration.softness.value.f32 = 0.33;
+	configuration.softness.value.f32 = 0.25;
 	//configuration.softness.value.f32   = preferences.getFloat(configuration.softness.name, 0.25);
 
 	// Color
@@ -158,7 +158,8 @@ void load_config(){
 	strcpy(configuration.auto_color_cycle.ui_type_string, "t");
 	configuration.auto_color_cycle.type = u32;
 	configuration.auto_color_cycle.ui_type = ui_type_toggle;
-	configuration.auto_color_cycle.value.u32   = (uint32_t)preferences.getInt(configuration.auto_color_cycle.name, 0);
+	configuration.auto_color_cycle.value.u32   = true;
+	//configuration.auto_color_cycle.value.u32   = (uint32_t)preferences.getInt(configuration.auto_color_cycle.name, 0);
 
 	// Blur
 	strcpy(configuration.blur.name, "blur");
@@ -167,7 +168,8 @@ void load_config(){
 	strcpy(configuration.blur.ui_type_string, "s");
 	configuration.blur.type = f32;
 	configuration.blur.ui_type = ui_type_slider;
-	configuration.blur.value.f32 = preferences.getFloat(configuration.blur.name, 0.00);
+	configuration.blur.value.f32 = 0.00;
+	//configuration.blur.value.f32 = preferences.getFloat(configuration.blur.name, 0.00);
 
 	// Show Interface
 	strcpy(configuration.show_ui.name, "show_ui");

@@ -14,7 +14,7 @@ void draw_fft(){
 		}
 	}
 
-	float auto_scale = 1.0 / fmaxf(fft_max_mag, 0.001f);
+	float auto_scale = 1.0 / fmaxf(fft_max_mag, 0.0001f);
 	auto_scale_smooth = auto_scale_smooth * 0.99 + auto_scale * 0.01;
 
 	dsps_mulc_f32(fft_mags, fft_mags, NUM_LEDS, auto_scale_smooth, 1, 1);

@@ -1,14 +1,18 @@
-CRGBF tunnel_image[NUM_LEDS] = { 0.0 };
-CRGBF tunnel_image_prev[NUM_LEDS] = { 0.0 };
+CRGBF tunnel_image[NUM_LEDS];
+CRGBF tunnel_image_prev[NUM_LEDS];
 float angle = 0.0;
 
 void draw_beat_tunnel(){
+	//draw_spectrum();
+	//scale_CRGBF_array_by_constant(leds, (1.0 - sqrt(sqrt(tempo_confidence)))*0.85 + 0.15, NUM_LEDS);
+	//memcpy(leds_temp, leds, sizeof(CRGBF)*NUM_LEDS);
+
 	memset(tunnel_image, 0, sizeof(CRGBF)*NUM_LEDS);
 
 	angle += 0.001;
 
-	float spread_speed = (0.125 + 0.875*configuration.speed.value.f32)*(sin(angle))*0.5;
-	draw_sprite(tunnel_image, tunnel_image_prev, NUM_LEDS, NUM_LEDS, spread_speed, 0.965);
+	float position = (0.125 + 0.875*configuration.speed.value.f32)*(sin(angle)) * 0.5;
+	draw_sprite(tunnel_image, tunnel_image_prev, NUM_LEDS, NUM_LEDS, position, 0.965);
 
 	for(uint16_t i = 0; i < NUM_TEMPI; i++){
 		float phase = 1.0 - ((tempi[i].phase + PI) / (2.0*PI));
@@ -40,4 +44,6 @@ void draw_beat_tunnel(){
 	}
 
 	memcpy(tunnel_image_prev, tunnel_image, sizeof(CRGBF)*NUM_LEDS);
+
+	//add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
 }

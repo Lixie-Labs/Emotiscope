@@ -107,6 +107,10 @@ void draw_sprite(float dest[], float sprite[], uint32_t dest_length, uint32_t sp
 	}
 }
 
+void clamp_configuration(){
+	configuration.color.value.f32 = fmodf(configuration.color.value.f32, 1.0);
+}
+
 void save_leds_to_temp() {
 	// uint16_t profiler_index = start_function_timing(__func__);
 	memcpy(leds_temp, leds, sizeof(CRGBF) * NUM_LEDS);

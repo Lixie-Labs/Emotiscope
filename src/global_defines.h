@@ -31,7 +31,7 @@
 #define NUM_TEMPI (128)
 
 // BPM range
-#define TEMPO_LOW (40)
+#define TEMPO_LOW (60)
 #define TEMPO_HIGH (TEMPO_LOW + NUM_TEMPI)
 
 // How far forward or back in time the beat phase is shifted

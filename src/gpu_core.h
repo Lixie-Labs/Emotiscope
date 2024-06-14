@@ -39,6 +39,9 @@ void run_gpu() {
 		// Update auto color cycling
 		update_auto_color();  // (leds.h)
 
+		// Clamp configuration items to their min/max values
+		clamp_configuration();  // (leds.h)
+
 		run_indicator_light();
 
 		// RUN THE CURRENT MODE
