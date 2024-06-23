@@ -1,2 +1,2 @@
-idf_component_register(SRCS "ws_echo_server.c"
+idf_component_register(SRCS "Emotiscope.c"
                     INCLUDE_DIRS ".")

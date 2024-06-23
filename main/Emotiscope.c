@@ -21,7 +21,7 @@
 
 /* A simple example that demonstrates using websocket echo server
  */
-static const char *TAG = "ws_echo_server";
+static const char *TAG = "Emotiscope";
 
 static esp_err_t ws_handler(httpd_req_t *req){
     if (req->method == HTTP_GET) {
