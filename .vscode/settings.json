@@ -1,29 +1,9 @@
 {
-    "cmake.configureOnOpen": false,
-    "files.associations": {
-		"cmath": "cpp",
-		"optional": "cpp",
-		"istream": "cpp",
-		"ostream": "cpp",
-		"system_error": "cpp",
-		"array": "cpp",
-		"functional": "cpp",
-		"tuple": "cpp",
-		"type_traits": "cpp",
-		"utility": "cpp",
-		"deque": "cpp",
-		"string": "cpp",
-		"unordered_map": "cpp",
-		"unordered_set": "cpp",
-		"vector": "cpp",
-		"string_view": "cpp",
-		"initializer_list": "cpp",
-		"*.tcc": "cpp",
-		"fstream": "cpp",
-		"compare": "cpp",
-		"span": "cpp",
-		"random": "cpp",
-		"list": "cpp",
-		"limits": "cpp"
-	}
+"C_Cpp.intelliSenseEngine": "default",
+"idf.portWin": "COM69",
+"idf.adapterTargetName": "esp32s3",
+"idf.openOcdConfigs": [
+	"board/esp32s3-builtin.cfg"
+],
+"idf.flashType": "UART"
 }
