@@ -5,5 +5,11 @@
 "idf.openOcdConfigs": [
 	"board/esp32s3-builtin.cfg"
 ],
-"idf.flashType": "UART"
+"idf.flashType": "UART",
+"files.associations": {
+	"protocol_examples_common.h": "c",
+	"nvs_flash.h": "c",
+	"esp_netif.h": "c",
+	"wireless.h": "c"
+}
 }
