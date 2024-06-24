@@ -10,6 +10,7 @@
 	"protocol_examples_common.h": "c",
 	"nvs_flash.h": "c",
 	"esp_netif.h": "c",
-	"wireless.h": "c"
+	"wireless.h": "c",
+	"param.h": "c"
 }
 }
