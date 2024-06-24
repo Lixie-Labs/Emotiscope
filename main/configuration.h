@@ -232,9 +232,7 @@ void init_configuration(){
     err = nvs_open("emotiscope", NVS_READWRITE, &config_handle);
 	if (err != ESP_OK) {
         ESP_LOGI(TAG, "Error (%s) opening NVS handle!", esp_err_to_name(err));
-    } else {
-        ESP_LOGI(TAG, "Done");
-	}
+    }
 
 	// Load config from NVS
 	memset(&configuration, 0, sizeof(configuration)); // Clear the configuration struct

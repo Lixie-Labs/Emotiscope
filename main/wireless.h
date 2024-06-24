@@ -20,54 +20,57 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
 
-static esp_err_t ws_handler(httpd_req_t *req){
+char websocket_packet_buffer[1024];
+
+static esp_err_t wstx(httpd_req_t* req, char* data){
+    httpd_ws_frame_t ws_pkt;
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    
+	ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+	ws_pkt.payload = (uint8_t*)data;
+	ws_pkt.len = strlen(data)+1;
+    
+	ESP_LOGI(TAG, "WSTX: %s", ws_pkt.payload);
+
+	esp_err_t ret = httpd_ws_send_frame(req, &ws_pkt);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
+    }
+
+	return ret;
+}
+
+void parse_packet(httpd_req_t* req){
+	ESP_LOGI(TAG, "Parsing packet: %s", websocket_packet_buffer);
+
+	wstx(req, websocket_packet_buffer);
+}
+
+static esp_err_t wsrx(httpd_req_t* req){
     if (req->method == HTTP_GET) {
         ESP_LOGI(TAG, "Handshake done, the new connection was opened");
         return ESP_OK;
     }
-    httpd_ws_frame_t ws_pkt;
-    uint8_t *buf = NULL;
-    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-    /* Set max_len = 0 to get the frame len */
-    esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, 0);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "httpd_ws_recv_frame failed to get frame len with %d", ret);
-        return ret;
-    }
-    ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
-    if (ws_pkt.len) {
-        /* ws_pkt.len + 1 is for NULL termination as we are expecting a string */
-        buf = calloc(1, ws_pkt.len + 1);
-        if (buf == NULL) {
-            ESP_LOGE(TAG, "Failed to calloc memory for buf");
-            return ESP_ERR_NO_MEM;
-        }
-        ws_pkt.payload = buf;
-        /* Set max_len = ws_pkt.len to get the frame payload */
-        ret = httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "httpd_ws_recv_frame failed with %d", ret);
-            free(buf);
-            return ret;
-        }
-        ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
-    }
-    ESP_LOGI(TAG, "Packet type: %d", ws_pkt.type);
 
-    ws_pkt.payload[0] = 'B';
-    ret = httpd_ws_send_frame(req, &ws_pkt);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
-    }
-    free(buf);
-    return ret;
+    httpd_ws_frame_t ws_pkt;
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+	memset(websocket_packet_buffer, 0, 1024);
+    
+	ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+	ws_pkt.payload = (uint8_t*)websocket_packet_buffer;
+    
+	httpd_ws_recv_frame(req, &ws_pkt, 1024);
+	ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
+
+	parse_packet(req);
+
+    return ESP_OK;
 }
 
 static const httpd_uri_t ws = {
         .uri        = "/ws",
         .method     = HTTP_GET,
-        .handler    = ws_handler,
+        .handler    = wsrx,
         .user_ctx   = NULL,
         .is_websocket = true
 };
@@ -90,41 +93,65 @@ static httpd_handle_t start_websocket_server(void){
 }
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
+	// Starting connection
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        ESP_LOGI(TAG, "Connecting to the AP");
+        ESP_LOGI(TAG, "Connecting to %s", wifi_ssid);
         esp_wifi_connect();
-    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        ESP_LOGI(TAG, "Disconnected from AP");
+    }
+	
+	// Lost connection
+	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        ESP_LOGE(TAG, "Disconnected from %s, attempting to reconnect", wifi_ssid);
         esp_wifi_connect();
         xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+    }
+	
+	// Sucessfully connected
+	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip: " IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
-    }
+
+		ESP_LOGI(TAG, "Starting websocket server");
+		server = start_websocket_server();
+	}
 }
 
-static void wifi_connect_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data){
-    httpd_handle_t* server = (httpd_handle_t*) arg;
-    if (*server == NULL) {
-        ESP_LOGI(TAG, "Starting webserver");
-        *server = start_websocket_server();
-    }
+void save_wifi_credentials(char* w_ssid, char* w_pass){
+	put_string("wifi_ssid", w_ssid);
+	put_string("wifi_pass", w_pass);
+	
+	ESP_LOGI(TAG, "WiFi credentials saved as SSID: %s, PASS: %s", w_ssid, w_pass);
 }
 
-static void wifi_disconnect_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data){
-    httpd_handle_t* server = (httpd_handle_t*) arg;
-    if (*server) {
-        ESP_LOGI(TAG, "Stopping webserver");
-        if (httpd_stop(*server) == ESP_OK) {
-            *server = NULL;
-        } else {
-            ESP_LOGE(TAG, "Failed to stop http server");
-        }
-    }
+bool load_wifi_credentials(){
+	ESP_LOGI(TAG, "load_wifi_credentials()");
+
+	// Clear SSID and PASS ----------------------------------------------------------
+	memset(wifi_ssid, 0, 128);
+	memset(wifi_pass, 0, 128);
+
+	// Load SSID --------------------------------------------------------------------
+	size_t ssid_len = get_string("wifi_ssid", wifi_ssid, 128);
+	if(ssid_len == 0){
+		ESP_LOGE(TAG, "No SSID found in NVS yet!");
+		return false;
+	}
+
+	// Load PASS --------------------------------------------------------------------
+	size_t pass_len = get_string("wifi_pass", wifi_pass, 128);
+	if(pass_len == 0){
+		ESP_LOGE(TAG, "No PASS found in NVS yet!");
+		return false;
+	}
+
+	//ESP_LOGI(TAG, "WiFi credentials loaded as SSID: %s, PASS: %s", wifi_ssid, wifi_pass);
+	return true;
 }
 
-void wifi_init_sta(const char* wifi_ssid, const char* wifi_pass) {
+void connect_to_network(){
+	ESP_LOGI(TAG, "connect_to_network()");
+	
     s_wifi_event_group = xEventGroupCreate();
 
     ESP_ERROR_CHECK(esp_netif_init());
@@ -160,8 +187,6 @@ void wifi_init_sta(const char* wifi_ssid, const char* wifi_pass) {
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    ESP_LOGI(TAG, "wifi_init_sta finished.");
-
     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
@@ -173,112 +198,28 @@ void wifi_init_sta(const char* wifi_ssid, const char* wifi_pass) {
     /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
      * happened. */
     if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "connected to ap SSID:%s", wifi_ssid);
+        ESP_LOGI(TAG, "connected to SSID: %s", wifi_ssid);
     } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed to connect to SSID:%s", wifi_ssid);
+        ESP_LOGI(TAG, "Failed to connect to SSID: %s", wifi_ssid);
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
 }
 
-void save_wifi_credentials(char* w_ssid, char* w_pass){
-	esp_err_t err;
-
-	// SET SSID --------------------------------------------------------------------
-    err = nvs_set_blob(config_handle, "wifi_ssid", w_ssid, strlen(w_ssid) + 1);
-	if (err != ESP_OK) {
-		ESP_LOGE(TAG, "Error (%s) saving wifi_ssid to NVS", esp_err_to_name(err));
-	}
-
-	// SET PASS --------------------------------------------------------------------
-    err = nvs_set_blob(config_handle, "wifi_pass", w_pass, strlen(w_pass) + 1);
-	if (err != ESP_OK) {
-		ESP_LOGE(TAG, "Error (%s) saving wifi_pass to NVS", esp_err_to_name(err));
-	}
-
-    // Commit
-    err = nvs_commit(config_handle);
-    if (err != ESP_OK){
-		ESP_LOGE(TAG, "Error (%s) committing wifi_ssid to NVS", esp_err_to_name(err));
-	}
-
-	ESP_LOGI(TAG, "WiFi credentials saved as SSID: %s, PASS: %s", w_ssid, w_pass);
-}
-
-void load_wifi_credentials(){
-	ESP_LOGI(TAG, "load_wifi_credentials()");
-
-	// READ SSID ----------------------------------------------------------------
-    // Read the size of memory space required for blob
-    size_t ssid_required_size = 0;  // value will default to 0, if not set yet in NVS
-    esp_err_t err = nvs_get_blob(config_handle, "wifi_ssid", NULL, &ssid_required_size);
-    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND){
-		ESP_LOGE(TAG, "Error (%s) reading wifi_ssid size from NVS", esp_err_to_name(err));
-	}
-
-	ESP_LOGI(TAG, "SSID size: %d", ssid_required_size);
-
-    // Read previously saved blob if available
-    char* w_ssid = malloc(ssid_required_size + 1);
-    if (ssid_required_size > 0) {
-        err = nvs_get_blob(config_handle, "wifi_ssid", w_ssid, &ssid_required_size);
-        if (err != ESP_OK) {
-            free(w_ssid);
-            ESP_LOGE(TAG, "Error (%s) reading wifi_ssid from NVS", esp_err_to_name(err));
-        }
-    }
-
-	// READ PASS ----------------------------------------------------------------
-    // Read the size of memory space required for blob
-    size_t pass_required_size = 0;  // value will default to 0, if not set yet in NVS
-    err = nvs_get_blob(config_handle, "wifi_pass", NULL, &pass_required_size);
-    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND){
-		ESP_LOGE(TAG, "Error (%s) reading wifi_pass size from NVS", esp_err_to_name(err));
-	}
-
-    // Read previously saved blob if available
-    char* w_pass = malloc(pass_required_size + 1);
-    if (pass_required_size > 0) {
-        err = nvs_get_blob(config_handle, "wifi_pass", w_pass, &pass_required_size);
-        if (err != ESP_OK) {
-            free(w_pass);
-            ESP_LOGE(TAG, "Error (%s) reading wifi_pass from NVS", esp_err_to_name(err));
-        }
-    }
-
-	memset(wifi_ssid, 0, sizeof(wifi_ssid));
-	memset(wifi_pass, 0, sizeof(wifi_pass));
-	strncpy(wifi_ssid, w_ssid, sizeof(wifi_ssid));
-	strncpy(wifi_pass, w_pass, sizeof(wifi_pass));
-
-	free(w_ssid);
-	free(w_pass);
-
-	ESP_LOGI(TAG, "WiFi credentials loaded as SSID: %s, PASS: %s", wifi_ssid, wifi_pass);
-}
-
 void init_wifi(){
 	ESP_LOGI(TAG, "init_wifi()");
 
-    // Disable power save mode
-    esp_wifi_set_ps(WIFI_PS_NONE);
-
-	// Save wifi credentials
+	// Needed on first run
 	//save_wifi_credentials("testnet", "testpass");
 
-	// Load wifi credentials
-	load_wifi_credentials();
+	if( load_wifi_credentials() == true ){
+		connect_to_network();
+	}
+	else{
+		ESP_LOGE(TAG, "No WiFi credentials found in NVS!");
+	}
 
-	ESP_LOGI(TAG, "WiFi SSID: %s", wifi_ssid);
-
-	ESP_LOGI(TAG, "Attempting connection to %s...", wifi_ssid);
-	// Connect to network
-    wifi_init_sta(wifi_ssid, wifi_pass);
-
-	// Register event handlers
-    ESP_ERROR_PRINT(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_connect_handler, &server));
-    ESP_ERROR_PRINT(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &wifi_disconnect_handler, &server));
-
-	// Start webserver
-    server = start_websocket_server();
+    // Disable power save mode
+	ESP_LOGI(TAG, "Disabling power save mode");
+    esp_wifi_set_ps(WIFI_PS_NONE);
 }

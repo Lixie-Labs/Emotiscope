@@ -11,6 +11,7 @@
 	"nvs_flash.h": "c",
 	"esp_netif.h": "c",
 	"wireless.h": "c",
-	"param.h": "c"
+	"param.h": "c",
+	"esp_event.h": "c"
 }
 }
