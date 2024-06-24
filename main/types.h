@@ -7,9 +7,9 @@ typedef union {
 
 // enum that stores the type of a config item
 typedef enum {
-	u32,
-	i32,
-	f32
+	u32t,
+	i32t,
+	f32t
 } type_t;
 
 // enum that stores the UI type of a config item
@@ -31,8 +31,8 @@ typedef struct {
 	type_t type;
 	ui_type_t ui_type;
 
-	// Raw Value
 	config_value value;
+	config_value default_value;
 } config_item;
 
 // Stores all of Emotiscope's configurable settings
