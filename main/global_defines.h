@@ -31,6 +31,8 @@
 // How far forward or back in time the beat phase is shifted
 #define BEAT_SHIFT_PERCENT (0.00)
 
+#define REFERENCE_FPS 100
+
 // Set later by physical traces on the PCB
 uint8_t HARDWARE_VERSION = 0;
 

@@ -111,6 +111,8 @@ continue to develop and improve the Emotiscope Engine.
 // DSP
 #include "fft.h"
 #include "goertzel.h"
+#include "vu.h"
+#include "tempo.h"
 
 // Comms
 #include "wireless.h"
@@ -118,6 +120,7 @@ continue to develop and improve the Emotiscope Engine.
 
 // Graphics
 #include "leds.h"
+#include "ui.h"
 #include "standby.h"
 #include "screensaver.h"
 #include "light_modes.h"

@@ -1,5 +1,4 @@
 void draw_metronome() {
-	/*
 	static uint32_t iter = 0;
 	iter++;
 
@@ -54,5 +53,4 @@ void draw_metronome() {
 			}
 		}
 	}
-	*/
 }

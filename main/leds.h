@@ -200,7 +200,7 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
     float position_difference = fabs(position - prev_position);
     float spread_area = fmaxf( (sqrt(position_difference)) * NUM_LEDS, 1.0f );
     // Draw the line representing the motion blur
-    draw_line(layer, prev_position, position, color, (1.0 / spread_area) * opacity);
+    draw_line(layer, prev_position, position, color, (1.0) * opacity);
 }
 
 
@@ -418,8 +418,6 @@ CRGBF add(CRGBF color_1, CRGBF color_2) {
 }
 
 
-/*
-
 void draw_sprite(CRGBF dest[], CRGBF sprite[], uint16_t dest_length, uint16_t sprite_length, float position, float alpha){
 	int16_t position_whole = floor(position);  // Downcast to integer accuracy
 	float position_fract = fabsf(fabsf(position) - fabsf(position_whole));
@@ -429,7 +427,7 @@ void draw_sprite(CRGBF dest[], CRGBF sprite[], uint16_t dest_length, uint16_t sp
 		int16_t pos_right = i + position_whole + 1;
 
 		float mix_right = position_fract;
-		float mix_left = 1.0 - mix_right;
+		float mix_left = 1.0 - mix_right; 
 
 		if (pos_left >= 0 && pos_left < dest_length) {
 			dest[pos_left].r += sprite[i].r * mix_left * alpha;
@@ -445,7 +443,7 @@ void draw_sprite(CRGBF dest[], CRGBF sprite[], uint16_t dest_length, uint16_t sp
 	}
 }
 
-void draw_sprite(float dest[], float sprite[], uint32_t dest_length, uint32_t sprite_length, float position, float alpha) {
+void draw_sprite_float(float dest[], float sprite[], uint32_t dest_length, uint32_t sprite_length, float position, float alpha) {
 	int16_t position_whole = floor(position);  // Downcast to integer accuracy
 	float position_fract = fabsf(fabsf(position) - fabsf(position_whole));
 
@@ -466,9 +464,31 @@ void draw_sprite(float dest[], float sprite[], uint32_t dest_length, uint32_t sp
 	}
 }
 
+
+void update_auto_color(){
+	if(light_modes[configuration.current_mode.value.u32].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
+
+	if(configuration.auto_color_cycle.value.u32 == true){
+		float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1] * 0.75;
+		novelty = novelty*novelty*novelty*novelty*novelty*novelty;
+
+		color_momentum *= 0.95;
+		color_momentum = fmaxf(color_momentum, novelty);
+		if(color_momentum > 0.1){
+			color_momentum = 0.1;
+		}
+
+		configuration.color.value.f32 += color_momentum*0.05;
+	}
+}
+
 void clamp_configuration(){
 	configuration.color.value.f32 = fmodf(configuration.color.value.f32, 1.0);
 }
+
+/*
+
+
 
 void save_leds_to_temp() {
 	// uint16_t profiler_index = start_function_timing(__func__);
@@ -621,24 +641,7 @@ inline void ___(){
 
 
 
-void update_auto_color(){
-	profile_function([&]() {
-		if(light_modes[configuration.current_mode.value.u32].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
 
-		if(configuration.auto_color_cycle.value.u32 == true){
-			float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1] * 0.75;
-			novelty = novelty*novelty*novelty*novelty*novelty*novelty;
-
-			color_momentum *= 0.95;
-			color_momentum = fmaxf(color_momentum, novelty);
-			if(color_momentum > 0.1){
-				color_momentum = 0.1;
-			}
-
-			configuration.color.value.f32 += color_momentum*0.05;
-		}
-	}, __func__ );
-}
 
 
 

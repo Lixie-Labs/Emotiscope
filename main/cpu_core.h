@@ -30,6 +30,8 @@ void run_cpu() {
 	calculate_magnitudes();  // (goertzel.h)
 	get_chromagram();        // (goertzel.h)
 
+	run_vu(); // (vu.h)
+
 	read_touch();
 
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------

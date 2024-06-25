@@ -68,6 +68,23 @@ typedef struct {
 	float position_past;
 } fx_dot;
 
+// A tempo-based version of the Goertzel struct above
+typedef struct {
+	float target_tempo_hz; 
+	float coeff;
+	float sine;
+	float cosine;
+	float window_step;
+	float phase;
+	float phase_target;
+	bool  phase_inverted;
+	float phase_radians_per_reference_frame;
+	float beat;
+	float magnitude;
+	float magnitude_full_scale;
+	uint32_t block_size;
+} tempo;
+
 // Stores the state of capacitive touch pins
 typedef struct {
 	uint8_t pin;
@@ -87,6 +104,12 @@ typedef enum touch_position{
 	TOUCH_CENTER = 1,
 	TOUCH_RIGHT = 2
 } touch_position;
+
+typedef enum {
+	UI_SHOW_EVENT,
+    UI_NEEDLE_EVENT,
+    UI_HUE_EVENT,
+} ui_update_event;
 
 // union that stores the value of a config item
 typedef union {

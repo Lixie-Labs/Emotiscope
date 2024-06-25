@@ -3,7 +3,6 @@ CRGBF tunnel_image_prev[NUM_LEDS];
 float angle = 0.0;
 
 void draw_beat_tunnel(){
-	/*
 	memset(tunnel_image, 0, sizeof(CRGBF)*NUM_LEDS);
 
 	angle += 0.001;
@@ -41,6 +40,4 @@ void draw_beat_tunnel(){
 	}
 
 	memcpy(tunnel_image_prev, tunnel_image, sizeof(CRGBF)*NUM_LEDS);
-
-	*/
 }

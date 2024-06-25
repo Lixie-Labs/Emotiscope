@@ -13,6 +13,13 @@
 	"wireless.h": "c",
 	"param.h": "c",
 	"esp_event.h": "c",
-	"limits": "c"
+	"limits": "c",
+	"charconv": "c",
+	"ratio": "c",
+	"array": "c",
+	"functional": "c",
+	"tuple": "c",
+	"type_traits": "c",
+	"utility": "c"
 }
 }

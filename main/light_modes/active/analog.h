@@ -1,7 +1,6 @@
 float vu_level_smooth = 0.000001;
 
 void draw_analog(){
-	/*
 	float mix_speed = 0.005 + 0.145*configuration.speed.value.f32;
 
 	vu_level_smooth = (vu_level) * mix_speed + vu_level_smooth*(1.0-mix_speed);
@@ -21,5 +20,4 @@ void draw_analog(){
 	else{
 		draw_dot(leds, NUM_RESERVED_DOTS+0, dot_color, dot_pos, 1.0);
 	}
-	*/
 }
