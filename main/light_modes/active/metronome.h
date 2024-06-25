@@ -1,9 +1,10 @@
 void draw_metronome() {
+	/*
 	static uint32_t iter = 0;
 	iter++;
 
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		float progress = float(tempo_bin) / NUM_TEMPI;
+		float progress = (float)tempo_bin / NUM_TEMPI;
 		float tempi_magnitude = tempi_smooth[tempo_bin];
 
 		float contribution = (tempi_magnitude / tempi_power_sum) * tempi_magnitude;
@@ -53,4 +54,5 @@ void draw_metronome() {
 			}
 		}
 	}
+	*/
 }

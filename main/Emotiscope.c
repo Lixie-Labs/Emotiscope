@@ -74,7 +74,9 @@ continue to develop and improve the Emotiscope Engine.
 #include <esp_heap_caps.h>
 #include <esp_timer.h>
 #include <esp_task_wdt.h>
-#include <esp_dsp.h>
+#include <esp_random.h>
+#include <esp_check.h>
+
 #include <sys/param.h>
 #include <nvs_flash.h>
 #include <nvs.h>
@@ -83,6 +85,12 @@ continue to develop and improve the Emotiscope Engine.
 #include <driver/temperature_sensor.h>
 #include <driver/i2s_std.h>
 #include <driver/gpio.h>
+#include <driver/ledc.h>
+#include <driver/rmt_tx.h>
+#include <driver/rmt_encoder.h>
+#include <driver/touch_pad.h>
+
+#include <esp_dsp.h>
 
 // Internal dependencies ------------------------------------------------------
 
@@ -96,16 +104,23 @@ continue to develop and improve the Emotiscope Engine.
 
 // Hardware
 #include "microphone.h"
+#include "indicator_light.h"
+#include "led_driver.h"
+#include "touch.h"
 
 // DSP
 #include "fft.h"
+#include "goertzel.h"
 
 // Comms
 #include "wireless.h"
 #include "packets.h"
 
 // Graphics
-//#include "light_modes.h"
+#include "leds.h"
+#include "standby.h"
+#include "screensaver.h"
+#include "light_modes.h"
 
 // Cores
 #include "cpu_core.h" // Audio/Web
@@ -121,7 +136,9 @@ void app_main(void){
 	// Initialize all peripherals (system.h) 
 	init_system();
 
+	configuration.current_mode.value.u32 = 1;
+
 	// Start the main cores (cpu_core.h, gpu_core.h)
-	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 4096, NULL, 0, NULL, 0);
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 0, NULL, 1);
+	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 4096, NULL, 0, NULL, 1);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 0, NULL, 0);
 }

@@ -24,6 +24,70 @@ typedef struct {
 	void (*draw)(); // ........... Function pointer to how it's drawn
 } light_mode;
 
+
+// Used for the Goertzel algorithm to detect frequencies in the audio
+typedef struct {
+	float target_freq; // ............ The frequency to detect
+	float coeff; // .................. The coefficient used in the algorithm
+	float window_step; // ............ The step size of the window
+	float magnitude; // .............. The magnitude of the frequency
+	float magnitude_full_scale; // ... The magnitude of the frequency at full scale
+	float magnitude_last; // ......... The last magnitude of the frequency
+	float novelty; // ................ The novelty of the frequency (spectral flux)
+	uint16_t block_size; // .......... The size of the block
+} freq;
+
+typedef enum {
+	UI_1, UI_2, UI_3, UI_4, UI_5, UI_6, UI_7, UI_8, UI_9, UI_10,
+	UI_NEEDLE,
+	SLEEP_1, SLEEP_2,
+	SCREENSAVER_1, SCREENSAVER_2, SCREENSAVER_3, SCREENSAVER_4,
+    NUM_RESERVED_DOTS
+} reserved_dots_t;
+
+// This is an equivalent to CRGB from FastLED
+typedef struct {
+	uint8_t g;
+	uint8_t r;
+	uint8_t b;
+} CRGB8;
+
+// CRGBFs are like CRGB8s, but with floating point color channels that
+// get quantized to 8 bits with dithering later on in the pipeline
+//
+// They can also contain values higher than 1.0, which are HDR tonemapped before quantization
+typedef struct {	
+	float r;
+	float g;
+	float b;
+} CRGBF;
+
+// Used to draw dots with subpixel precision and motion blur
+typedef struct {
+	float position;
+	float position_past;
+} fx_dot;
+
+// Stores the state of capacitive touch pins
+typedef struct {
+	uint8_t pin;
+	uint32_t touch_start;
+	uint32_t touch_end;
+	bool touch_active;
+	bool hold_active;
+
+	float touch_value;
+	float ambient_threshold;
+	float touch_threshold;
+	float touch_history[50]; // 5 seconds at 10 FPS
+} touch_pin;
+
+typedef enum touch_position{
+	TOUCH_LEFT = 0,
+	TOUCH_CENTER = 1,
+	TOUCH_RIGHT = 2
+} touch_position;
+
 // union that stores the value of a config item
 typedef union {
 	uint32_t   u32;

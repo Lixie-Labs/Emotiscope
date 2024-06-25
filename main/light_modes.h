@@ -70,7 +70,10 @@ void init_light_mode_list(){
 
 void set_light_mode_by_index(uint16_t mode_index){
 	configuration.current_mode.value.u32 = mode_index;
-	lpf_drag = 1.0; // Causes slow fade using low pass filtered image
+
+	extern float forced_frame_blending;
+	forced_frame_blending = 1.0; // Causes slow fade using low pass filtered image
+	
 	save_config_delayed();
 }
 

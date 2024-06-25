@@ -1,4 +1,5 @@
 void draw_hype() {
+	/*
 	float beat_sum_odd  = 0.0;
 	float beat_sum_even = 0.0;
 
@@ -48,4 +49,6 @@ void draw_hype() {
 		draw_dot(leds, NUM_RESERVED_DOTS + 2, dot_color_odd,  beat_sum_odd,  0.1 + 0.8*strength);
 		draw_dot(leds, NUM_RESERVED_DOTS + 3, dot_color_even, beat_sum_even, 0.1 + 0.8*strength);
 	}
+
+	*/
 }

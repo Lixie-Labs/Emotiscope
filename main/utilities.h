@@ -11,16 +11,13 @@ Custom math functions for things like array manipulation
 and system diagnostics like free stack/heap
 */
 
-void shift_and_copy_arrays(float history_array[], size_t history_size, const float new_array[], size_t new_size) {
-	// Use memmove to shift the history array
-	memmove(history_array, history_array + new_size,
-			(history_size - new_size) * sizeof(float));
+#define PI	    3.14159265
+#define TWOPI   6.28318530
+#define FOURPI 12.56637061
+#define SIXPI  18.84955593
 
-	// Use memcpy to copy the new array into the vacant space
-	memcpy(history_array + history_size - new_size, new_array, new_size * sizeof(float));
-}
+#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
 
-/*
 #define TOTAL_NOISE_SAMPLES 666 // and the devil laughs
 uint8_t noise_samples[TOTAL_NOISE_SAMPLES];
 
@@ -30,6 +27,19 @@ float num_tempi_float_lookup[NUM_TEMPI];
 float random_float_lookup[1024];
 
 char substring[128];
+
+void shift_and_copy_arrays(float history_array[], size_t history_size, const float new_array[], size_t new_size) {
+	// Use memmove to shift the history array
+	memmove(history_array, history_array + new_size,
+			(history_size - new_size) * sizeof(float));
+
+	// Use memcpy to copy the new array into the vacant space
+	memcpy(history_array + history_size - new_size, new_array, new_size * sizeof(float));
+}
+
+float clip_float(float input) {
+	return fminf(1.0f, fmaxf(0.0f, input));
+}
 
 void init_num_leds_float_lookup(){
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
@@ -71,7 +81,7 @@ void init_noise_samples(){
 float get_random_float(){
 	static float position = 0.0;
 
-	uint32_t index = uint32_t(position * 1023);
+	uint32_t index = (uint32_t)position * 1023;
 	float push = random_float_lookup[index];
 	if(push > 0.5){
 		push += push*0.1;
@@ -107,28 +117,7 @@ void fetch_substring(char* input_buffer, char delimiter, uint8_t fetch_index){
 	}
 }
 
-void broadcast(const char* message){
-	extern PsychicWebSocketHandler websocket_handler;
-	printf("TX: %s\n", message);
-	websocket_handler.sendAll(message);
-}
-
-float linear_to_tri(float input) {
-    if (input < 0.0f || input > 1.0f) {
-        // Input out of range
-        return -1.0f; // Return an error value (or handle as you see fit)
-    }
-
-    if (input <= 0.5f) {
-        // Scale up the first half
-        return 2.0f * input;
-    } else {
-        // Scale down the second half
-        return 2.0f * (1.0f - input);
-    }
-}
-
-inline bool get_random_bit(){
+bool get_random_bit(){
 	static uint16_t position = 0;
 	position++;
 
@@ -140,7 +129,7 @@ inline bool get_random_bit(){
 }
 
 // Can return a value between two array indices with linear interpolation
-float IRAM_ATTR interpolate(float index, float* array, uint16_t array_size) {
+float interpolate(float index, float* array, uint16_t array_size) {
 	float index_f = index * (array_size - 1);
 	uint16_t index_i = (uint16_t)index_f;
 	float index_f_frac = index_f - index_i;
@@ -171,45 +160,7 @@ void shift_array_left(float* array, uint16_t array_size, uint16_t shift_amount) 
 	}
 }
 
-inline float clip_float(float input) { return min(1.0f, max(0.0f, input)); }
-
-// Fast approximation of the square root using Newton-Raphson method
-float fast_sqrt(float number) {
-	// Initial guess for the square root
-	float x = number / 2.0;
-	// Tolerance for the accuracy of the result
-	const float tolerance = 0.01;
-
-	// Iterate to improve the estimate
-	while (1) {
-		float x_old = x;
-		x = (x + number / x) / 2.0;
-		// Check if the improvement is within the tolerance
-		if (fabs(x - x_old) < tolerance) {
-			break;
-		}
-	}
-
-	return x;
-}
-
-inline bool fastcmp(char* input_a, char* input_b){
-	// Is first char different? DISQUALIFIED!
-	if(input_a[0] != input_b[0]){ return false; }
-
-	// If not, traditional strcmp(), return true for match
-	return (strcmp(input_a, input_b) == 0);
-}
-
-inline bool fastcmp(const char* input_a, const char* input_b){
-	// Is first char different? DISQUALIFIED!
-	if(input_a[0] != input_b[0]){ return false; }
-
-	// If not, traditional strcmp(), return true for match
-	return (strcmp(input_a, input_b) == 0);
-}
-
-inline bool fastcmp(char* input_a, const char* input_b){
+bool fastcmp(const char* input_a, const char* input_b){
 	// Is first char different? DISQUALIFIED!
 	if(input_a[0] != input_b[0]){ return false; }
 
@@ -221,7 +172,7 @@ void print_binary(uint32_t input, uint8_t bit_width, char tail){
 	char output[64];
 	memset(output, 0, 64);
 	for(uint8_t i = 0; i < bit_width; i++){
-		output[i] = char('0' + bitRead(input, (bit_width-1)-i));
+		output[i] = (char)('0' + bitRead(input, (bit_width-1)-i));
 	}
 
 	printf("%s%c", output, tail);
@@ -265,5 +216,3 @@ float fast_tanh(float x) {
     float x2 = x * x;
     return x * (27.0f + x2) / (27.0f + 9.0f * x2);
 }
-
-*/

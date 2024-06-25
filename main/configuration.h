@@ -1,5 +1,13 @@
+#define MIN_SAVE_WAIT_MS (3 * 1000)	 // Values must stabilize for this many seconds to be written to NVS
+
 nvs_handle_t config_handle;
 config configuration; // configuration struct to be filled by NVS or defaults on boot
+
+volatile int64_t last_save_request_ms = 0;
+volatile bool save_request_open = false;
+volatile bool filesystem_ready = true;
+
+extern int64_t t_now_ms;
 
 // Put aritrary bytes/blob into NVS
 size_t put_bytes(const char *key, const void *value, size_t len) {
@@ -325,7 +333,7 @@ void load_configuration_defaults(){
 		"t",
 		u32t,
 		ui_type_menu_toggle,
-		(config_value){.u32 = 0} // <-- Default value
+		(config_value){.u32 = 1} // <-- Default value
 	);
 
 	configuration.mirror_mode = init_config_item(
@@ -423,4 +431,45 @@ void init_configuration(){
 	memset(&configuration, 0, sizeof(configuration)); // Clear the configuration struct
 
 	load_configuration_defaults(); // Load default values into the configuration struct
+}
+
+// Save configuration to LittleFS
+bool save_config() {
+	config_item* config_location = (config_item*)(&configuration);
+	uint16_t num_config_items = sizeof(configuration) / sizeof(config_item);
+
+	for(uint16_t i = 0; i < num_config_items; i++){
+		config_item item = *(config_location + i);
+		type_t type = item.type;
+
+		if(type == u32t){
+			put_ulong(item.name, item.value.u32);
+		} else if(type == i32t){
+			put_long(item.name, item.value.i32);
+		} else if(type == f32t){
+			put_float(item.name, item.value.f32);
+		} else {
+			ESP_LOGE(TAG, "Unknown type in save_config");
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void save_config_delayed() {
+	last_save_request_ms = t_now_ms;
+	save_request_open = true;
+}
+
+void sync_configuration_to_file_system() {
+	if (save_request_open == true) {
+		if ((t_now_ms - last_save_request_ms) >= MIN_SAVE_WAIT_MS) {
+			filesystem_ready = false;
+			ESP_LOGI(TAG, "SAVING NVS");
+			save_config();
+			save_request_open = false;
+			filesystem_ready = true;
+		}
+	}
 }

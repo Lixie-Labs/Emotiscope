@@ -1,6 +1,7 @@
 float novelty_image_prev[NUM_LEDS] = { 0.0 };
 
 void draw_bloom() {
+	/*
 	float novelty_image[NUM_LEDS] = { 0.0 };
 
 	float spread_speed = 0.125 + 0.875*configuration.speed.value.f32;
@@ -36,4 +37,5 @@ void draw_bloom() {
 	}
 
 	memcpy(novelty_image_prev, novelty_image, sizeof(float)*NUM_LEDS);
+	*/
 }

@@ -18,6 +18,8 @@ static EventGroupHandle_t s_wifi_event_group;
 // Buffer for WS packets
 char websocket_packet_buffer[1024];
 
+bool connected_to_wifi = false;
+
 // Transmit a WS packet
 esp_err_t wstx(httpd_req_t* req, char* data){
     httpd_ws_frame_t ws_pkt;
@@ -99,6 +101,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         ESP_LOGE(TAG, "Disconnected from %s, attempting to reconnect", wifi_ssid);
         esp_wifi_connect();
         xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+		connected_to_wifi = false;
     }
 	
 	// Sucessfully connected
@@ -106,6 +109,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip: " IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+		connected_to_wifi = true;
 
 		ESP_LOGI(TAG, "Starting websocket server");
 		server = start_websocket_server();
@@ -209,7 +213,7 @@ void init_wifi(){
 	ESP_LOGI(TAG, "init_wifi()");
 
 	// Needed on first run
-	save_wifi_credentials("testnet", "testpass");
+	//save_wifi_credentials("testnet", "testpass");
 
 	if( load_wifi_credentials() == true ){
 		connect_to_network();
