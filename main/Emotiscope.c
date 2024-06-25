@@ -140,5 +140,5 @@ void app_main(void){
 
 	// Start the main cores (cpu_core.h, gpu_core.h)
 	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 4096, NULL, 0, NULL, 1);
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 0, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 5, NULL, 0);
 }

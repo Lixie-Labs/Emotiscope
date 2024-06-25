@@ -9,7 +9,7 @@
   __/ | | |              ______
  |___/  |_|             |______|
 
-Main loop of the GPU core (Core 0)
+Main loop of the GPU core
 */
 
 #define REFERENCE_FPS 100
@@ -70,7 +70,7 @@ void run_gpu() {
 		//run_standby();
 	}
 
-	//render_touches();  // (touch.h)
+	render_touches();  // (touch.h)
 	
 	apply_softness();
 
@@ -99,6 +99,9 @@ void run_gpu() {
 
 void loop_gpu(void *pvParameters) {
 	while (1) {
+		run_gpu();
+		run_gpu();
+		run_gpu();
 		run_gpu();
 	}
 }

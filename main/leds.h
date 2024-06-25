@@ -400,12 +400,22 @@ void apply_gamma_correction() {
 	}
 
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
-		leds[i].r = gamma_correction_lookup[(uint16_t)(leds[i].r * 2047)];
+		leds[i].r = gamma_correction_lookup[(uint16_t)(leds[i].r * 2047)]; 
 		leds[i].g = gamma_correction_lookup[(uint16_t)(leds[i].g * 2047)];
 		leds[i].b = gamma_correction_lookup[(uint16_t)(leds[i].b * 2047)];
 	}
 }
 
+
+CRGBF add(CRGBF color_1, CRGBF color_2) {
+	CRGBF out_color = {
+		color_1.r + color_2.r,
+		color_1.g + color_2.g,
+		color_1.b + color_2.b,
+	};
+
+	return out_color;
+}
 
 
 /*
@@ -557,15 +567,7 @@ void rough_mirror_screen() {
 	}
 }
 
-CRGBF add(CRGBF color_1, CRGBF color_2, float add_amount = 1.0) {
-	CRGBF out_color = {
-		color_1.r + color_2.r * (add_amount),
-		color_1.g + color_2.g * (add_amount),
-		color_1.b + color_2.b * (add_amount),
-	};
 
-	return out_color;
-}
 
 void apply_video_feedback() {
 	// Work using the last frame

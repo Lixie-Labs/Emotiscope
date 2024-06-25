@@ -9,7 +9,7 @@
        | |              ______
        |_|             |______|
 
-Main loop of the CPU core (Core 0)
+Main loop of the CPU core
 */
 
 void run_cpu() {
@@ -30,6 +30,8 @@ void run_cpu() {
 	calculate_magnitudes();  // (goertzel.h)
 	get_chromagram();        // (goertzel.h)
 
+	read_touch();
+
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------
 
 	//------------------------------------------------------------------------------------
@@ -39,7 +41,7 @@ void run_cpu() {
 	float audio_frame_to_processing_ratio = processing_us_spent / (float)audio_core_us_per_loop;
 	CPU_CORE_USAGE = audio_frame_to_processing_ratio;
 
-
+	update_stats(); // (profiler.h)
 
 
 	/*
@@ -52,6 +54,9 @@ void run_cpu() {
 
 void loop_cpu(void *pvParameters) {
 	while (1) {
+		run_cpu();
+		run_cpu();
+		run_cpu();
 		run_cpu();
 	}
 }

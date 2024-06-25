@@ -11,7 +11,7 @@ float CPU_TEMP = 0.0;
 uint32_t FREE_HEAP = 0;
 
 void watch_cpu_fps() {
-	int64_t us_now = esp_timer_get_time();
+	int64_t us_now = esp_timer_get_time();	
 	static int64_t last_call;
 	static uint8_t average_index = 0;
 	average_index++;
@@ -31,6 +31,16 @@ void watch_gpu_fps() {
 	FPS_GPU_SAMPLES[average_index % 16] = 1000000.0 / (float)elapsed_us;
 
 	last_call = us_now;
+}
+
+void print_profiler_stats() {
+	static int64_t last_print = 0;
+	if (t_now_ms - last_print < 1000) {
+		return;
+	}
+	last_print = t_now_ms;
+
+	ESP_LOGI(TAG, "CPU FPS: %.2f, GPU FPS: %.2f, CPU Temp: %.2f, Free Heap: %lu", FPS_CPU, FPS_GPU, CPU_TEMP, FREE_HEAP);
 }
 
 void update_stats() {
@@ -57,4 +67,6 @@ void update_stats() {
 
 	//UBaseType_t free_stack_cpu = uxTaskGetStackHighWaterMark(NULL); // CPU core (this one)
 	//UBaseType_t free_stack_gpu = uxTaskGetStackHighWaterMark(xTaskGetHandle("loop_gpu")); // GPU core
+
+	print_profiler_stats();
 }
