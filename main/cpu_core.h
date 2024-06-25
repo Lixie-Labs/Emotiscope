@@ -32,7 +32,9 @@ void run_cpu() {
 
 	run_vu(); // (vu.h)
 
-	read_touch();
+	read_touch(); // (touch.h)
+
+	update_tempo();	 // (tempo.h)
 
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------
 

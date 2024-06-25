@@ -29,11 +29,6 @@ void run_gpu() {
 	// Update the FPS_GPU variable
 	watch_gpu_fps();  // (system.h)
 
-
-
-
-
-
 	// Update the novelty curve
 	update_novelty();  // (tempo.h)
 

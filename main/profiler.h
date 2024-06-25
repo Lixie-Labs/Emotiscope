@@ -10,6 +10,8 @@ float FPS_GPU = 0.0;
 float CPU_TEMP = 0.0;
 uint32_t FREE_HEAP = 0;
 
+extern light_mode light_modes[];
+
 void watch_cpu_fps() {
 	int64_t us_now = esp_timer_get_time();	
 	static int64_t last_call;
@@ -40,7 +42,7 @@ void print_profiler_stats() {
 	}
 	last_print = t_now_ms;
 
-	ESP_LOGI(TAG, "CPU FPS: %.2f, GPU FPS: %.2f, CPU Temp: %.2f, Free Heap: %lu", FPS_CPU, FPS_GPU, CPU_TEMP, FREE_HEAP);
+	ESP_LOGI(TAG, "CPU FPS: %.2f, GPU FPS: %.2f, CPU Temp: %.2f, Free Heap: %lu, current_mode: %s", FPS_CPU, FPS_GPU, CPU_TEMP, FREE_HEAP, light_modes[configuration.current_mode.value.u32].name);
 }
 
 void update_stats() {

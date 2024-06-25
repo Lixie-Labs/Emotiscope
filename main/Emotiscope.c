@@ -140,6 +140,8 @@ void app_main(void){
 	init_system();
 
 	configuration.current_mode.value.u32 = 1;
+	configuration.softness.value.f32 = 0.25;
+	configuration.speed.value.f32 = 0.75;
 
 	// Start the main cores (cpu_core.h, gpu_core.h)
 	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 4096, NULL, 0, NULL, 1);

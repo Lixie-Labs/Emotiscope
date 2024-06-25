@@ -75,4 +75,8 @@ void init_system(){
 	// Initialize the touch pins (touch.h)
 	extern void init_touch();
 	init_touch();
+
+	// Initialize tempo goertzel constants (tempo.h)
+	extern void init_tempo_goertzel_constants();
+	init_tempo_goertzel_constants();
 }
