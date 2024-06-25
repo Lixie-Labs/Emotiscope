@@ -22,6 +22,7 @@ static EventGroupHandle_t s_wifi_event_group;
 
 char websocket_packet_buffer[1024];
 
+// Transmit a WS packet
 static esp_err_t wstx(httpd_req_t* req, char* data){
     httpd_ws_frame_t ws_pkt;
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
@@ -40,12 +41,14 @@ static esp_err_t wstx(httpd_req_t* req, char* data){
 	return ret;
 }
 
+// Parse the packet and do something with it
 void parse_packet(httpd_req_t* req){
 	ESP_LOGI(TAG, "Parsing packet: %s", websocket_packet_buffer);
 
 	wstx(req, websocket_packet_buffer);
 }
 
+// Called whenever a WS packet is received
 static esp_err_t wsrx(httpd_req_t* req){
     if (req->method == HTTP_GET) {
         ESP_LOGI(TAG, "Handshake done, the new connection was opened");
@@ -67,6 +70,7 @@ static esp_err_t wsrx(httpd_req_t* req){
     return ESP_OK;
 }
 
+// Websocket handler URI
 static const httpd_uri_t ws = {
         .uri        = "/ws",
         .method     = HTTP_GET,
@@ -75,6 +79,7 @@ static const httpd_uri_t ws = {
         .is_websocket = true
 };
 
+// Start the websocket server
 static httpd_handle_t start_websocket_server(void){
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -92,6 +97,7 @@ static httpd_handle_t start_websocket_server(void){
     return NULL;
 }
 
+// Called whenever a WiFi event occurs, like connecting or disconnecting
 static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
 	// Starting connection
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
@@ -117,6 +123,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 	}
 }
 
+// Save SSID and PASS to NVS
 void save_wifi_credentials(char* w_ssid, char* w_pass){
 	put_string("wifi_ssid", w_ssid);
 	put_string("wifi_pass", w_pass);
@@ -124,6 +131,7 @@ void save_wifi_credentials(char* w_ssid, char* w_pass){
 	ESP_LOGI(TAG, "WiFi credentials saved as SSID: %s, PASS: %s", w_ssid, w_pass);
 }
 
+// Load SSID and PASS from NVS
 bool load_wifi_credentials(){
 	ESP_LOGI(TAG, "load_wifi_credentials()");
 
@@ -149,6 +157,7 @@ bool load_wifi_credentials(){
 	return true;
 }
 
+// Set up WIFI_STA mode and connect to network
 void connect_to_network(){
 	ESP_LOGI(TAG, "connect_to_network()");
 	
@@ -206,6 +215,7 @@ void connect_to_network(){
     }
 }
 
+// WiFi begins here
 void init_wifi(){
 	ESP_LOGI(TAG, "init_wifi()");
 

@@ -89,6 +89,6 @@ continue to develop and improve the Emotiscope Engine.
 
 // EVERYTHING BEGINS HERE ON BOOT ---------------------------------------------
 void app_main(void){
-	// (system.h) Initialize all peripherals
+	// Initialize all peripherals (system.h) 
 	init_system();
 }
