@@ -10,6 +10,6 @@ dependencies:
       path: C:\Users\conno\esp\v5.2.2\esp-idf\examples\common_components\protocol_examples_common
       type: local
     version: '*'
-manifest_hash: 63720c886ec3d8304fdfbcec8c64eca1949599893716ea52acfffba27786ada5
+manifest_hash: 8888de27206fb13453b579cc7b6ba1f550ecbae8538ba7c6a0aabf28cbf067c0
 target: esp32s3
 version: 1.0.0

@@ -1,181 +1,6 @@
 nvs_handle_t config_handle;
 config configuration; // configuration struct to be filled by NVS or defaults on boot
 
-void load_configuration_defaults(){
-	// This is where defaults are stored! Config items must be manually initialized here
-	// before being loaded from NVS. There are three datatypes: u32, i32, and f32.
-	// These correspond to uint32_t, int32_t, and float, respectively. Bools are stored
-	// as u32s.
-	//
-	// To add a new config item, add it to the config struct in types.h, then add a
-	// matching loader to this function. The loader should look like the ones below,
-	// defining the name, pretty_name, type, ui_type, and default value of the config item.
-	// 
-	// The configuration can be accessed in two ways: at compile time by key name
-	// (configuration.brightness) or at runtime by iteration with pointer offsets
-	// (config_item my_config_item = *(config_location + i))
-
-	configuration.brightness = init_config_item(
-		"brightness",
-		"Brightness",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 1.00} // <-- Default value
-	);
-	
-	configuration.softness = init_config_item(
-		"softness",
-		"Softness",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 0.25} // <-- Default value
-	);
-
-	configuration.color = init_config_item(
-		"color",
-		"Color",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 0.33} // <-- Default value
-	);
-
-	configuration.color_range = init_config_item(
-		"color_range",
-		"Color Range",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 0.00} // <-- Default value
-	);
-
-	configuration.warmth = init_config_item(
-		"warmth",
-		"Warmth",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 0.50} // <-- Default value
-	);
-
-	configuration.speed = init_config_item(
-		"speed",
-		"Speed",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 0.50} // <-- Default value
-	);
-
-	configuration.saturation = init_config_item(
-		"saturation",
-		"Saturation",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 0.95} // <-- Default value
-	);
-
-	configuration.background = init_config_item(
-		"background",
-		"Background",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 0.25} // <-- Default value
-	);
-
-	configuration.current_mode = init_config_item(
-		"current_mode",
-		"Current Mode",
-		"u32",
-		"t",
-		u32t,
-		ui_type_menu_toggle,
-		(config_value){.u32 = 0} // <-- Default value
-	);
-
-	configuration.mirror_mode = init_config_item(
-		"mirror_mode",
-		"Mirror Mode",
-		"u32",
-		"t",
-		u32t,
-		ui_type_toggle,
-		(config_value){.u32 = 1} // <-- Default value
-	);
-
-	configuration.screensaver = init_config_item(
-		"screensaver",
-		"Screensaver",
-		"u32",
-		"t",
-		u32t,
-		ui_type_toggle,
-		(config_value){.u32 = 1} // <-- Default value
-	);
-
-	configuration.temporal_dithering = init_config_item(
-		"dithering",
-		"Temporal Dithering",
-		"u32",
-		"t",
-		u32t,
-		ui_type_toggle,
-		(config_value){.u32 = 1} // <-- Default value
-	);
-
-	configuration.reverse_color_range = init_config_item(
-		"reverse_color",
-		"Reverse Color Range",
-		"u32",
-		"t",
-		u32t,
-		ui_type_toggle,
-		(config_value){.u32 = 0} // <-- Default value
-	);
-
-	configuration.auto_color_cycle = init_config_item(
-		"auto_color",
-		"Auto Color Cycle",
-		"u32",
-		"t",
-		u32t,
-		ui_type_toggle,
-		(config_value){.u32 = 0} // <-- Default value
-	);
-
-	configuration.blur = init_config_item(
-		"blur",
-		"Blur",
-		"f32",
-		"s",
-		f32t,
-		ui_type_slider,
-		(config_value){.f32 = 0.00} // <-- Default value
-	);
-
-	configuration.show_ui = init_config_item(
-		"show_ui",
-		"Show UI",
-		"u32",
-		"t",
-		u32t,
-		ui_type_toggle,
-		(config_value){.u32 = 1} // <-- Default value
-	);
-}
-
 // Put aritrary bytes/blob into NVS
 size_t put_bytes(const char *key, const void *value, size_t len) {
 	if ( !key || !value || !len ) {
@@ -397,7 +222,181 @@ config_item init_config_item(char* name, char* pretty_name, char* type_string, c
 	}
 	
 	return item;
+}
+
+void load_configuration_defaults(){
+	// This is where defaults are stored! Config items must be manually initialized here
+	// before being loaded from NVS. There are three datatypes: u32, i32, and f32.
+	// These correspond to uint32_t, int32_t, and float, respectively. Bools are stored
+	// as u32s.
+	//
+	// To add a new config item, add it to the config struct in types.h, then add a
+	// matching loader to this function. The loader should look like the ones below,
+	// defining the name, pretty_name, type, ui_type, and default value of the config item.
+	// 
+	// The configuration can be accessed in two ways: at compile time by key name
+	// (configuration.brightness) or at runtime by iteration with pointer offsets
+	// (config_item my_config_item = *(config_location + i))
+
+	configuration.brightness = init_config_item(
+		"brightness",
+		"Brightness",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 1.00} // <-- Default value
+	);
 	
+	configuration.softness = init_config_item(
+		"softness",
+		"Softness",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 0.25} // <-- Default value
+	);
+
+	configuration.color = init_config_item(
+		"color",
+		"Color",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 0.33} // <-- Default value
+	);
+
+	configuration.color_range = init_config_item(
+		"color_range",
+		"Color Range",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 0.00} // <-- Default value
+	);
+
+	configuration.warmth = init_config_item(
+		"warmth",
+		"Warmth",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 0.50} // <-- Default value
+	);
+
+	configuration.speed = init_config_item(
+		"speed",
+		"Speed",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 0.50} // <-- Default value
+	);
+
+	configuration.saturation = init_config_item(
+		"saturation",
+		"Saturation",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 0.95} // <-- Default value
+	);
+
+	configuration.background = init_config_item(
+		"background",
+		"Background",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 0.25} // <-- Default value
+	);
+
+	configuration.current_mode = init_config_item(
+		"current_mode",
+		"Current Mode",
+		"u32",
+		"t",
+		u32t,
+		ui_type_menu_toggle,
+		(config_value){.u32 = 0} // <-- Default value
+	);
+
+	configuration.mirror_mode = init_config_item(
+		"mirror_mode",
+		"Mirror Mode",
+		"u32",
+		"t",
+		u32t,
+		ui_type_toggle,
+		(config_value){.u32 = 1} // <-- Default value
+	);
+
+	configuration.screensaver = init_config_item(
+		"screensaver",
+		"Screensaver",
+		"u32",
+		"t",
+		u32t,
+		ui_type_toggle,
+		(config_value){.u32 = 1} // <-- Default value
+	);
+
+	configuration.temporal_dithering = init_config_item(
+		"dithering",
+		"Temporal Dithering",
+		"u32",
+		"t",
+		u32t,
+		ui_type_toggle,
+		(config_value){.u32 = 1} // <-- Default value
+	);
+
+	configuration.reverse_color_range = init_config_item(
+		"reverse_color",
+		"Reverse Color Range",
+		"u32",
+		"t",
+		u32t,
+		ui_type_toggle,
+		(config_value){.u32 = 0} // <-- Default value
+	);
+
+	configuration.auto_color_cycle = init_config_item(
+		"auto_color",
+		"Auto Color Cycle",
+		"u32",
+		"t",
+		u32t,
+		ui_type_toggle,
+		(config_value){.u32 = 0} // <-- Default value
+	);
+
+	configuration.blur = init_config_item(
+		"blur",
+		"Blur",
+		"f32",
+		"s",
+		f32t,
+		ui_type_slider,
+		(config_value){.f32 = 0.00} // <-- Default value
+	);
+
+	configuration.show_ui = init_config_item(
+		"show_ui",
+		"Show UI",
+		"u32",
+		"t",
+		u32t,
+		ui_type_toggle,
+		(config_value){.u32 = 1} // <-- Default value
+	);
 }
 
 // Initialize NVS and the configuration struct with all config items

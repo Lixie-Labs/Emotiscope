@@ -1,29 +1,25 @@
-#include <string.h>
-#include "esp_wifi.h"
-#include "esp_log.h"
-#include "esp_event.h"
-#include "esp_http_server.h"
-#include "freertos/event_groups.h"
-
 #define ESP_ERROR_PRINT(x) do {                                         \
     esp_err_t __err_rc = (x);                                           \
     if (__err_rc != ESP_OK) {                                           \
-        ESP_LOGE(TAG, "ESP_ERROR_PRINT failed: esp_err_t 0x%x", __err_rc); \
+        ESP_LOGE(TAG, "ERROR: esp_err_t 0x%x", __err_rc); \
     }                                                                   \
 } while(0)
 
-char wifi_ssid[128];
-char wifi_pass[128];
+extern void parse_packet(httpd_req_t* req);
 
+// Websocket server
 static httpd_handle_t server = NULL;
+
+// Event group for WiFi events
 static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
 
+// Buffer for WS packets
 char websocket_packet_buffer[1024];
 
 // Transmit a WS packet
-static esp_err_t wstx(httpd_req_t* req, char* data){
+esp_err_t wstx(httpd_req_t* req, char* data){
     httpd_ws_frame_t ws_pkt;
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     
@@ -41,15 +37,8 @@ static esp_err_t wstx(httpd_req_t* req, char* data){
 	return ret;
 }
 
-// Parse the packet and do something with it
-void parse_packet(httpd_req_t* req){
-	ESP_LOGI(TAG, "Parsing packet: %s", websocket_packet_buffer);
-
-	wstx(req, websocket_packet_buffer);
-}
-
 // Called whenever a WS packet is received
-static esp_err_t wsrx(httpd_req_t* req){
+esp_err_t wsrx(httpd_req_t* req){
     if (req->method == HTTP_GET) {
         ESP_LOGI(TAG, "Handshake done, the new connection was opened");
         return ESP_OK;
@@ -220,7 +209,7 @@ void init_wifi(){
 	ESP_LOGI(TAG, "init_wifi()");
 
 	// Needed on first run
-	//save_wifi_credentials("testnet", "testpass");
+	save_wifi_credentials("testnet", "testpass");
 
 	if( load_wifi_credentials() == true ){
 		connect_to_network();

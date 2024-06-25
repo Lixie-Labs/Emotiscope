@@ -1,6 +1,6 @@
 {
 "C_Cpp.intelliSenseEngine": "default",
-"idf.portWin": "COM69",
+"idf.portWin": "COM9",
 "idf.adapterTargetName": "esp32s3",
 "idf.openOcdConfigs": [
 	"board/esp32s3-builtin.cfg"
@@ -12,6 +12,7 @@
 	"esp_netif.h": "c",
 	"wireless.h": "c",
 	"param.h": "c",
-	"esp_event.h": "c"
+	"esp_event.h": "c",
+	"limits": "c"
 }
 }

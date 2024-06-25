@@ -1,3 +1,29 @@
+// enum that stores three light mode types: active, neutral, system
+// Active: reacts to sound
+// Inactive: does not react to sound
+// System: used for system animations
+typedef enum {
+	LIGHT_MODE_TYPE_ACTIVE,
+	LIGHT_MODE_TYPE_INACTIVE,
+	LIGHT_MODE_TYPE_SYSTEM
+} light_mode_type_t;
+
+typedef enum {
+	SELF_TEST_INACTIVE,
+	SELF_TEST_STEP_START,
+	SELF_TEST_STEP_LED,
+	SELF_TEST_STEP_AUDIO,
+	SELF_TEST_STEP_TOUCH,
+	SELF_TEST_STEP_COMPLETE
+} self_test_steps_t;
+
+// Light Modes are stored in a struct with a name, type, and draw function
+typedef struct {
+	char name[32]; // ............ What the mode is called
+	light_mode_type_t type; // ... What type of mode it is
+	void (*draw)(); // ........... Function pointer to how it's drawn
+} light_mode;
+
 // union that stores the value of a config item
 typedef union {
 	uint32_t   u32;
