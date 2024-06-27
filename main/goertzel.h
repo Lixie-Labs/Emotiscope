@@ -16,7 +16,7 @@ https://en.wikipedia.org/wiki/Goertzel_algorithm
 #define BOTTOM_NOTE 12	
 #define NOTE_STEP 2
 
-#define NUM_SPECTROGRAM_AVERAGE_SAMPLES 12
+#define NUM_SPECTROGRAM_AVERAGE_SAMPLES 6
 
 // THESE ARE IN QUARTER-STEPS, NOT HALF-STEPS! That's 24 notes to an octave. #define NOTE_STEP 2 causes half steps anyways though.
 const float notes[] = {

@@ -79,4 +79,9 @@ void init_system(){
 	// Initialize tempo goertzel constants (tempo.h)
 	extern void init_tempo_goertzel_constants();
 	init_tempo_goertzel_constants();
+
+	// Initialize VU readings (vu.h)
+	extern void init_vu();
+	init_vu();
+
 }

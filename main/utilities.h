@@ -74,7 +74,7 @@ void init_floating_point_lookups(){
 
 void init_noise_samples(){
 	for(uint16_t i = 0; i < TOTAL_NOISE_SAMPLES; i++){
-		noise_samples[i] = esp_random() & 1;
+		noise_samples[i] = esp_random() / (float)UINT32_MAX;
 	}
 }
 

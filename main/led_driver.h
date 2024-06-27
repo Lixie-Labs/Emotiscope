@@ -251,7 +251,7 @@ void quantize_color_error(bool temporal_dithering){
 			float new_error_g = leds_scaled[i].g - raw_led_data[3*i+0];
 			float new_error_b = leds_scaled[i].b - raw_led_data[3*i+2];
 
-			const float dither_error_threshold = 0.055;
+			const float dither_error_threshold = (0.055)/2.0;
 			if(new_error_r >= dither_error_threshold){ dither_error[i].r += new_error_r; }
 			if(new_error_g >= dither_error_threshold){ dither_error[i].g += new_error_g; }
 			if(new_error_b >= dither_error_threshold){ dither_error[i].b += new_error_b; }

@@ -32,6 +32,8 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 #include "light_modes/system/self_test.h"
 #include "light_modes/system/presets.h"
 
+#include "light_modes/beta/debug.h"
+
 uint16_t NUM_LIGHT_MODES = 0;
 int16_t queued_light_mode_index = 0;
 
@@ -50,10 +52,10 @@ light_mode light_modes[] = {
 	// Inactive Modes
 	{ "Neutral",         LIGHT_MODE_TYPE_INACTIVE,  &draw_neutral       },
 
+	{ "Debug",           LIGHT_MODE_TYPE_ACTIVE,    &draw_debug         },
+
 	// System Modes
 	{ "Self Test",       LIGHT_MODE_TYPE_SYSTEM,    &draw_self_test     },
-
-	//{ "debug",           &draw_debug         }, // 8
 };
 
 void init_light_mode_list(){

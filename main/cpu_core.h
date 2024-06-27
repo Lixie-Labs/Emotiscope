@@ -27,7 +27,19 @@ void run_cpu() {
 	perform_fft();	 // (fft.h)	
 
 	// Calculate the magnitudes of the currently studied frequency set
+	int64_t t_start = esp_timer_get_time();
 	calculate_magnitudes();  // (goertzel.h)
+	int64_t t_end = esp_timer_get_time();
+	
+	static int iter = 0;
+	if(iter == 100){
+		ESP_LOGI(TAG, "calculate_magnitudes(): %lld us", t_end - t_start);
+		iter = 0;
+	}
+	else{
+		iter++;	
+	}
+
 	get_chromagram();        // (goertzel.h)
 
 	run_vu(); // (vu.h)
@@ -35,6 +47,8 @@ void run_cpu() {
 	read_touch(); // (touch.h)
 
 	update_tempo();	 // (tempo.h)
+
+	sync_configuration_to_file_system(); // (configuration.h)
 
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------
 

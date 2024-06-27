@@ -33,8 +33,6 @@ float tempi_power_sum = 0.0;
 
 float last_vu_input = 0.0;
 
-int64_t next_novelty_update = 0.0;
-
 uint16_t find_closest_tempo_bin(float target_bpm) {
 	float target_bpm_hz = target_bpm / 60.0;
 
@@ -148,7 +146,7 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 		float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
 		float sample = (sample_novelty + sample_vu) / 2.0;
 
-		float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty);// * window_lookup[uint32_t(window_pos)]);
+		float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty) * window_lookup[(uint32_t)window_pos];
 		q2 = q1;
 		q1 = q0;
 
@@ -222,10 +220,11 @@ void calculate_tempi_magnitudes(int16_t single_bin) {
 }
 
 void normalize_novelty_curve() {
-	static float max_val = 0.00001;
-	static float max_val_smooth = 0.1;
+	static float max_val = 0.0001;
+	static float max_val_smooth = 0.0001;
 
-	max_val *= 0.99;
+	max_val = fmaxf(max_val * 0.99, 0.0001);
+
 	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
 		max_val = fmaxf(max_val, novelty_curve[i + 0]);
 		max_val = fmaxf(max_val, novelty_curve[i + 1]);
@@ -311,9 +310,11 @@ void check_silence(float current_novelty) {
 
 	silence_level = fmaxf(0.0f, silence_level_raw - 0.5f) * 2.0;
 
+	//float keep_level = 1.0 - silence_level;
+	reduce_tempo_history(silence_level*0.10);
+
 	if (silence_level_raw > 0.5) {
 		silence_detected = true;
-		reduce_tempo_history(silence_level * 0.10);
 	}
 	else {
 		silence_level = 0.0;
@@ -324,10 +325,10 @@ void check_silence(float current_novelty) {
 }
 
 void update_novelty() {
-	next_novelty_update = t_now_us;
+	static int64_t next_novelty_update = 0.0;
 
 	const float update_interval_hz = NOVELTY_LOG_HZ;
-	const uint32_t update_interval_us = 1000000 / update_interval_hz;
+	const int64_t update_interval_us = 1000000 / update_interval_hz;
 
 	if (t_now_us >= next_novelty_update) {
 		next_novelty_update += update_interval_us;

@@ -213,7 +213,7 @@ void init_wifi(){
 	ESP_LOGI(TAG, "init_wifi()");
 
 	// Needed on first run
-	//save_wifi_credentials("testnet", "testpass");
+	save_wifi_credentials("WilsonAve", "Westies1!");
 
 	if( load_wifi_credentials() == true ){
 		connect_to_network();
