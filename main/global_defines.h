@@ -16,10 +16,10 @@
 #define NUM_FREQS ( 64 ) 
 
 // Number of times per second "novelty" is logged
-#define NOVELTY_LOG_HZ (50)
+#define NOVELTY_LOG_HZ (100)
 
 // 50 FPS for 20.48 seconds
-#define NOVELTY_HISTORY_LENGTH (1024)
+#define NOVELTY_HISTORY_LENGTH (2048)
 
 // TEMPO_LOW to TEMPO_HIGH
 #define NUM_TEMPI (128)

@@ -193,7 +193,7 @@ void init_rmt_driver() {
 		.gpio_num = (gpio_num_t)LED_DATA_1_PIN,	// GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
-		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.intr_priority = 99,
 		.flags = {
@@ -208,7 +208,7 @@ void init_rmt_driver() {
 		.gpio_num = (gpio_num_t)LED_DATA_2_PIN, // GPIO number
 		.clk_src = RMT_CLK_SRC_DEFAULT,	 // select source clock
 		.resolution_hz = 10000000,		 // 10 MHz tick resolution, i.e., 1 tick = 0.1 µs
-		.mem_block_symbols = 64,		 // memory block size, 64 * 4 = 256 Bytes
+		.mem_block_symbols = 128,		 // memory block size, 64 * 4 = 256 Bytes
 		.trans_queue_depth = 4,			 // set the number of transactions that can be pending in the background
 		.intr_priority = 99,
 		.flags = {

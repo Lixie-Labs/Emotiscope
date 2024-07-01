@@ -48,6 +48,26 @@ uint8_t spectrogram_average_index = 0;
 
 float a_weighting_lut[NUM_FREQS] = { 0.0 };
 
+
+
+
+
+
+
+
+float q1[NUM_FREQS] = {0};
+float q2[NUM_FREQS] = {0};
+float q0[NUM_FREQS] = {0};
+float coeff[NUM_FREQS];  // Coefficients for each frequency
+
+
+
+
+
+
+
+
+
 float calc_a_weighting( float frequency ) {
   float f2 = frequency*frequency;
 
@@ -84,6 +104,8 @@ void init_goertzel(uint16_t frequency_slot, float frequency, float bandwidth) {
 	float cosine = cos(w);
 	//float sine = sin(w); // Unused since phase info is not needed
 	frequencies_musical[frequency_slot].coeff = 2.0 * cosine;
+
+	coeff[frequency_slot] = frequencies_musical[frequency_slot].coeff;
 }
 
 void init_goertzel_constants_musical() {
@@ -140,6 +162,36 @@ void init_window_lookup() {
     }
 }
 
+/*
+// Tried DSP/SIMD functions fr goertzel, but the fixed block size made it slower than the current implementation
+void calculate_magnitude_of_bins_fast() {
+	const float block_size = SAMPLE_HISTORY_LENGTH/8;
+
+	memset(q1, 0, sizeof(float) * NUM_FREQS);
+	memset(q2, 0, sizeof(float) * NUM_FREQS);
+	memset(q0, 0, sizeof(float) * NUM_FREQS);
+
+	for (uint32_t i = 0; i < block_size; i++) {
+		// Calculate q0 for each filter using DSP library functions
+		dsps_mul_f32 (coeff, q1, q0, NUM_FREQS, 1,1,1); // q0 = coeff * q1
+		dsps_sub_f32 (q0,    q2, q0, NUM_FREQS, 1,1,1); // q0 = q0 - q2
+		dsps_addc_f32(q0,    q0, NUM_FREQS, sample_history[i*2], 1,1); // q0 = q0 + sample_history[i*2]
+
+		// Update q1 and q2 for the next iteration
+		memcpy(q2, q1, sizeof(float) * NUM_FREQS);
+		memcpy(q1, q0, sizeof(float) * NUM_FREQS);
+	}
+
+	float magnitude[NUM_FREQS];
+	for (int j = 0; j < NUM_FREQS; j++) {
+		float q1_sq = q1[j] * q1[j];
+		float q2_sq = q2[j] * q2[j];
+		float q1q2_coeff = coeff[j] * q1[j] * q2[j];
+		magnitude[j] = q1_sq + q2_sq - q1q2_coeff;
+	}
+}
+*/
+
 float calculate_magnitude_of_bin(uint16_t bin_number) {
 	float magnitude;
 	float magnitude_squared;
@@ -179,7 +231,7 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 }
 
 void calculate_magnitudes() {
-	#define NUM_AVERAGE_SAMPLES 1
+	#define NUM_AVERAGE_SAMPLES 2
 
 	static float magnitudes_raw[NUM_FREQS];
 	static float magnitudes_noise_filtered[NUM_FREQS];
@@ -227,9 +279,9 @@ void calculate_magnitudes() {
 
 			noise_floor[i] = noise_floor[i] * 0.99 + avg_val * 0.01;
 
-			noise_floor[i] = 0.0;
+			//noise_floor[i] = 0.0;
 
-			magnitudes_noise_filtered[i] = fmaxf(magnitudes_raw[i] - noise_floor[i], 0.0f);
+			magnitudes_noise_filtered[i] = fmaxf(magnitudes_raw[i] - (noise_floor[i]*0.9), 0.0f);
 			// ----------------------------------------------------------------------------------
 		}
 
@@ -266,8 +318,8 @@ void calculate_magnitudes() {
 	}
 
 	// Set a minimum "floor" to auto-range for, below this we don't auto-range anymore
-	if (max_val_smooth < 0.0000025) {
-		max_val_smooth = 0.0000025;
+	if (max_val_smooth < 0.00001) {
+		max_val_smooth = 0.00001;
 	}
 
 	// Calculate auto-ranging scale

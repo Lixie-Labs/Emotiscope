@@ -24,6 +24,7 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 #include "light_modes/active/bloom.h"
 #include "light_modes/active/fft.h"
 #include "light_modes/active/beat_tunnel.h"
+#include "light_modes/active/pitch.h"
 
 // INACTIVE MODES
 #include "light_modes/inactive/neutral.h"
@@ -48,6 +49,7 @@ light_mode light_modes[] = {
 	{ "Bloom",           LIGHT_MODE_TYPE_ACTIVE,    &draw_bloom         },	
 	{ "FFT",			 LIGHT_MODE_TYPE_ACTIVE,    &draw_fft           },
 	{ "Beat Tunnel",	 LIGHT_MODE_TYPE_ACTIVE,    &draw_beat_tunnel   },
+	{ "Pitch",			 LIGHT_MODE_TYPE_ACTIVE,    &draw_pitch         },
 
 	// Inactive Modes
 	{ "Neutral",         LIGHT_MODE_TYPE_INACTIVE,  &draw_neutral       },

@@ -69,4 +69,6 @@ void perform_fft(){
 	}
 
 	dsps_mulc_f32_ansi(fft_smooth[0], fft_smooth[0], FFT_SIZE, 1.0 / NUM_FFT_AVERAGE_SAMPLES, 1, 1);
+
+	
 }

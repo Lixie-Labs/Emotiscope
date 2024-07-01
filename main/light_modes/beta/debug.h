@@ -5,7 +5,7 @@ void draw_debug(){
 
 		CRGBF dot_color = {
 			0.0,
-			mag_spec,
+			mag_spec*mag_spec,
 			0.0,
 		};
 

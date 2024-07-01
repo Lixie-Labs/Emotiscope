@@ -77,6 +77,10 @@ void scale_CRGBF_array_by_constant(CRGBF* input, float scale_value, uint16_t arr
 }
 
 
+void init_fx_dots(){
+	memset(fx_dots, 0.5, sizeof(fx_dot) * MAX_DOTS);
+}
+
 void clear_display(float keep){
 	if(keep == 0.0){
 		memset(leds, 0, sizeof(CRGBF)*NUM_LEDS);
@@ -197,8 +201,8 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
     fx_dots[fx_dots_slot].position = position;
 
     // Calculate distance moved and adjust brightness of spread accordingly
-    float position_difference = fabs(position - prev_position);
-    float spread_area = fmaxf( (sqrt(position_difference)) * NUM_LEDS, 1.0f );
+    //float position_difference = fabs(position - prev_position);
+    //float spread_area = fmaxf( (sqrt(position_difference)) * NUM_LEDS, 1.0f );
     // Draw the line representing the motion blur
     draw_line(layer, prev_position, position, color, (1.0) * opacity);
 }

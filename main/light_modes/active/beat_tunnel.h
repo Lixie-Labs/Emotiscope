@@ -8,7 +8,7 @@ void draw_beat_tunnel(){
 	angle += 0.001;
 
 	float position = (0.125 + 0.875*configuration.speed.value.f32)*(sin(angle)) * 0.5;
-	draw_sprite(tunnel_image, tunnel_image_prev, NUM_LEDS, NUM_LEDS, position, 0.985);
+	draw_sprite(tunnel_image, tunnel_image_prev, NUM_LEDS, NUM_LEDS, position, 0.95);
 
 	for(uint16_t i = 0; i < NUM_TEMPI; i++){
 		float phase = 1.0 - ((tempi[i].phase + PI) / (2.0*PI));
@@ -17,11 +17,11 @@ void draw_beat_tunnel(){
 		if( fabs(phase - 0.65) < 0.02 ){
 			mag = clip_float(tempi_smooth[i]);
 		}
-
+		
 		CRGBF tempi_color = hsv(
 			get_color_range_hue(num_tempi_float_lookup[i]),
 			configuration.saturation.value.f32,
-			(mag*mag)
+			(mag)
 		);
 
 		tunnel_image[i].r += tempi_color.r;

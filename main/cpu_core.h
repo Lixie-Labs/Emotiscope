@@ -13,6 +13,9 @@ Main loop of the CPU core
 */
 
 void run_cpu() {
+	static uint32_t iter = 0;
+	iter++;
+
 	// Update the FPS_CPU variable
 	watch_cpu_fps();  // (system.h)
 
@@ -23,21 +26,14 @@ void run_cpu() {
 
 	int64_t processing_start_us = esp_timer_get_time(); // -------------------------------
 
-	// Perform FFT on the new audio data
-	perform_fft();	 // (fft.h)	
-
-	// Calculate the magnitudes of the currently studied frequency set
-	int64_t t_start = esp_timer_get_time();
 	calculate_magnitudes();  // (goertzel.h)
-	int64_t t_end = esp_timer_get_time();
-	
-	static int iter = 0;
-	if(iter == 100){
-		ESP_LOGI(TAG, "calculate_magnitudes(): %lld us", t_end - t_start);
-		iter = 0;
+
+	if(iter % 2 == 0){
+		// Perform FFT on the new audio data
+		perform_fft();	 // (fft.h)	
 	}
 	else{
-		iter++;	
+		estimate_pitch(); // (pitch.h)
 	}
 
 	get_chromagram();        // (goertzel.h)
@@ -49,6 +45,12 @@ void run_cpu() {
 	update_tempo();	 // (tempo.h)
 
 	sync_configuration_to_file_system(); // (configuration.h)
+
+	static int64_t last_test_time = 0;
+	if(t_now_ms - last_test_time >= 10000 || last_test_time == 0){
+		last_test_time = t_now_ms;
+		//run_performance_test(); // (testing.h)
+	}
 
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------
 

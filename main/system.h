@@ -52,6 +52,10 @@ void init_system(){
 	extern void init_rmt_driver();
 	init_rmt_driver(); 
 
+	// Initialize the dot rendering structs (leds.h)
+	extern void init_fx_dots();
+	init_fx_dots();
+
 	// Initialize the indicator light (indicator_light.h)
 	extern void init_indicator_light();
 	init_indicator_light();

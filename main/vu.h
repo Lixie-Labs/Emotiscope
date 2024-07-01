@@ -26,7 +26,7 @@ void init_vu(){
 void run_vu(){
 	// CALCULATE AMPLITUDE ------------------------------------------------
 	static float max_amplitude_cap = 0.0000001;
-	float* samples = &sample_history[(SAMPLE_HISTORY_LENGTH-1) - CHUNK_SIZE*2];
+	float* samples = &sample_history[(SAMPLE_HISTORY_LENGTH-1) - CHUNK_SIZE];
 
 	float max_amplitude_now = 0.000001;
 	for(uint16_t i = 0; i < CHUNK_SIZE; i+=2){

@@ -82,6 +82,7 @@ continue to develop and improve the Emotiscope Engine.
 #include <nvs_flash.h>
 #include <nvs.h>
 #include <freertos/event_groups.h>
+#include <perfmon.h>
 
 // Peripherals
 #include <driver/temperature_sensor.h>
@@ -116,6 +117,7 @@ continue to develop and improve the Emotiscope Engine.
 #include "goertzel.h"
 #include "vu.h"
 #include "tempo.h"
+#include "pitch.h"
 
 // Comms
 #include "wireless.h"
@@ -127,6 +129,9 @@ continue to develop and improve the Emotiscope Engine.
 #include "standby.h"
 #include "screensaver.h"
 #include "light_modes.h"
+
+// Testing
+#include "testing.h"
 
 // Cores
 #include "cpu_core.h" // Audio/Web
@@ -142,11 +147,13 @@ void app_main(void){
 	// Initialize all peripherals (system.h) 
 	init_system();
 
+	configuration.current_mode.value.u32 = 9;
 	configuration.saturation.value.f32 = 0.99;
-	configuration.softness.value.f32 = 0.75;
+	configuration.softness.value.f32 = 0.05;
 	configuration.speed.value.f32 = 0.75;
-	configuration.background.value.f32 = 0.125;
+	configuration.background.value.f32 = 0.25;
 	configuration.color_range.value.f32 = 0.25;
+	configuration.reverse_color_range.value.u32 = 1;
 	configuration.auto_color_cycle.value.u32 = 0;
 
 	// Start the main cores (cpu_core.h, gpu_core.h)

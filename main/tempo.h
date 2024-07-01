@@ -220,10 +220,10 @@ void calculate_tempi_magnitudes(int16_t single_bin) {
 }
 
 void normalize_novelty_curve() {
-	static float max_val = 0.0001;
-	static float max_val_smooth = 0.0001;
+	static float max_val = 0.00001;
+	static float max_val_smooth = 0.00001;
 
-	max_val = fmaxf(max_val * 0.99, 0.0001);
+	max_val = fmaxf(max_val * 0.99, 0.00001);
 
 	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
 		max_val = fmaxf(max_val, novelty_curve[i + 0]);
@@ -350,7 +350,10 @@ void update_novelty() {
 
 		check_silence(current_novelty);
 
-		log_novelty(log1p(current_novelty));
+		current_novelty = log1p(current_novelty);
+		//current_novelty *= current_novelty;
+
+		log_novelty(current_novelty);
 
 		log_vu(vu_max);
 		vu_max = 0.000001;
