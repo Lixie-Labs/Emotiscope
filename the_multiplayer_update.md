@@ -42,3 +42,8 @@ Tempo is now derived from a *second, separate* Fourier Transform which is also a
 
 The range of tempi detection has also increased 100% to a new range of 60 BPM to 188 BPM!
 
+## Try It Early At Your Own Risk
+
+Familiar with ESP-IDF? Don't mind a still-very-broken look at the future? Don't need the app to work in conjunction with Emotiscope yet so you have to re-compile to change any setting not changeable through touch controls? You're in luck! 
+
+The 2.0 branch of this repository has the newest Emotiscope Engine with these improvements included, minus the app.
