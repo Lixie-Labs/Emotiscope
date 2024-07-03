@@ -21,6 +21,7 @@
 	"tuple": "c",
 	"type_traits": "c",
 	"utility": "c",
-	"cstdint": "cpp"
+	"cstdint": "cpp",
+	"esp_wifi.h": "c"
 }
 }

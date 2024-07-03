@@ -105,6 +105,7 @@ void acquire_sample_chunk() {
 	// Convert audio from "18-bit" float range to -1.0 to 1.0 range
 	dsps_mulc_f32(new_samples, new_samples, CHUNK_SIZE, recip_scale, 1, 1);
 
+	// Amplify the audio signal 4x
 	dsps_mulc_f32(new_samples, new_samples, CHUNK_SIZE, 4.0, 1, 1);
 
 	float new_samples_downsampled[CHUNK_SIZE>>1];

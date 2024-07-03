@@ -147,12 +147,12 @@ void app_main(void){
 	// Initialize all peripherals (system.h) 
 	init_system();
 
-	configuration.current_mode.value.u32 = 9;
-	configuration.saturation.value.f32 = 0.99;
-	configuration.softness.value.f32 = 0.05;
+	//configuration.current_mode.value.u32 = 9;
+	configuration.saturation.value.f32 = 0.90;
+	configuration.softness.value.f32 = 0.40;
 	configuration.speed.value.f32 = 0.75;
-	configuration.background.value.f32 = 0.25;
-	configuration.color_range.value.f32 = 0.25;
+	configuration.background.value.f32 = 0.00;
+	configuration.color_range.value.f32 = 0.00;
 	configuration.reverse_color_range.value.u32 = 1;
 	configuration.auto_color_cycle.value.u32 = 0;
 

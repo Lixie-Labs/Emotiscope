@@ -68,6 +68,10 @@ void init_system(){
 	extern void init_goertzel_constants_musical();
 	init_goertzel_constants_musical();
 
+	// Init the LPF/HPF for auto correlation (pitch.h)
+	extern void init_pitch_filters();
+	init_pitch_filters();
+
 	// Initialize random RNG data (utilities.h)
 	extern void init_noise_samples();
 	init_noise_samples();
