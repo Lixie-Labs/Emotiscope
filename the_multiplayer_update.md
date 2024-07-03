@@ -24,3 +24,21 @@ In exchange for no longer including the web-app inside of Emotiscope for safe ke
 
 After over ten years of learning it to it's fullest potential, I've officially left the Arduino Framework behind, opting to use the raw ESP-IDF instead. Most of Emotiscope was written with lower-level IDF functions anyways, but now it's 100%. Not only has the FastLED Arduino library left the building, but now PsychicHTTP too!
 
+## Harmonic Mode
+
+Similar to Spectrum Mode, Harmonic Mode instead has a larger range of frequencies visible, showing the many overtones of different musical instruments at once.
+
+## Rhythm Breeze Mode
+
+(These modes are tough to describe without video demos yet.) Imagine: your Emotiscope pulses on time with the beat, but a psychedelic trailing effect is gently smearing the image back and forth in a swinging pattern.
+
+## Wave Mode
+
+Wave Mode uses auto-correlation to show periodicity in the audio signal in a pleasant pattern. This means Wave Mode will hardly react to atonal sounds like cymbals, but strongly react to vocals and melodies.
+
+## Improved Tempo Recognition
+
+Tempo is now derived from a *second, separate* Fourier Transform which is also always running now, and reacts not to the standard music range but from 1Hz to 12,800Hz. This better captures sibilent sounds like drum cymbals, which are a great source for tempo estimation. (This version of the Fourier Transform is the one you see in Harmonic Mode.)
+
+The range of tempi detection has also increased 100% to a new range of 60 BPM to 188 BPM!
+
