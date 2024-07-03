@@ -405,6 +405,16 @@ void load_configuration_defaults(){
 		ui_type_toggle,
 		(config_value){.u32 = 1} // <-- Default value
 	);
+
+	configuration.color_mode = init_config_item(
+		"color_mode",
+		"Color Mode",
+		"u32",
+		"t",
+		u32t,
+		ui_type_toggle,
+		(config_value){.u32 = COLOR_MODE_GRADIENT} // <-- Default value
+	);
 }
 
 // Initialize NVS and the configuration struct with all config items

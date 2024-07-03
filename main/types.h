@@ -119,6 +119,12 @@ typedef enum {
     UI_HUE_EVENT,
 } ui_update_event;
 
+// enum that stores the type of a config item
+typedef enum {
+	COLOR_MODE_GRADIENT,
+	COLOR_MODE_PERLIN
+} color_mode_t;
+
 // union that stores the value of a config item
 typedef union {
 	uint32_t   u32;
@@ -174,4 +180,5 @@ typedef struct{
 	config_item reverse_color_range;
 	config_item blur;
 	config_item show_ui;
+	config_item color_mode;
 } config;

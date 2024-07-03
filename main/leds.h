@@ -123,6 +123,10 @@ CRGBF hsv(float h, float s, float v) {
 
 
 float get_color_range_hue(float progress){
+	if(configuration.color_mode.value.u32 == COLOR_MODE_PERLIN){
+		progress = perlin_noise_array[(uint16_t)(progress * (NUM_LEDS>>2))];
+	}
+
 	float return_val;
 	float color_range = configuration.color_range.value.f32;
 	

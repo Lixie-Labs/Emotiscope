@@ -155,10 +155,11 @@ void app_main(void){
 	configuration.warmth.value.f32 = 0.00;
 	configuration.softness.value.f32 = 0.10;
 	configuration.speed.value.f32 = 0.75;
-	configuration.background.value.f32 = 0.00;
+	configuration.background.value.f32 = 0.25;
 	configuration.color_range.value.f32 = 0.66;
 	configuration.reverse_color_range.value.u32 = 0;
 	configuration.auto_color_cycle.value.u32 = 0;
+	configuration.color_mode.value.u32 = COLOR_MODE_PERLIN;
 
 	// Start the main cores (cpu_core.h, gpu_core.h)
 	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 4096, NULL, 5, NULL, 0);

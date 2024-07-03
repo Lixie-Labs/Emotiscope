@@ -117,7 +117,7 @@ void generate_perlin_noise(float position_x, float position_y, uint32_t seed, fl
 }
 
 void update_perlin_noise(float delta){
-	const static float frequency = 4; // Base frequency
+	const static float frequency = 2; // Base frequency
     const static float persistence = 0.5; // Amplitude factor for each octave
     const static float lacunarity = 2.0; // Frequency factor for each octave
     const static int octave_count = 2; // Reduce the number of octaves for smoother noise
