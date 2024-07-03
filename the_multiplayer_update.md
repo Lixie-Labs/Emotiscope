@@ -16,6 +16,10 @@
 
 Using a game engine might sound strange, but since Godot lets me export to HTML/JS via WASM, I can use Godot's built-in tools for visual UI development and its websockets interface to communicate with an Emotiscope just like before. This means no longer hosting the web-app off of Emotiscope itself, which allows me to grow the web-app to any size required to provide any functionality I can dream of. After the first load to your phone, it stays cached! This should also improve compatibility with non-Chromium browsers, since the Godot devs are always incentivized to make sure their game engine works consistently across browsers and devices.
 
+Here's an early non-functioning peek at the new UI (phones only!)
+
+https://emotiscope.rocks/godot/Emotiscope-App.html
+
 ## The Emotiscope App Is Getting Its Own Repository Soon
 
 In exchange for no longer including the web-app inside of Emotiscope for safe keeping, I'll do everything in my power to ensure that the web-app stays archived and open sourced online, making it simple to find and host offline copies for yourself years from now. 
