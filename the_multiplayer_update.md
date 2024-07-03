@@ -18,7 +18,7 @@ Using a game engine might sound strange, but since Godot lets me export to HTML/
 
 ## The Emotiscope App Is Getting Its Own Repository Soon
 
-In exchange for no longer including the web-app inside of Emotiscope for safe keeping, I'll do everything in my power to ensure that the web-app stays archived and open sourced online, making it simple to host offline copies for yourself years from now. 
+In exchange for no longer including the web-app inside of Emotiscope for safe keeping, I'll do everything in my power to ensure that the web-app stays archived and open sourced online, making it simple to host and find offline copies for yourself years from now. 
 
 ## Farewell, Arduino.
 
