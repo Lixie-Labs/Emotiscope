@@ -68,6 +68,14 @@ typedef struct {
 	float position_past;
 } fx_dot;
 
+typedef struct {
+    float x, y;
+} vec2;
+
+typedef struct {
+    unsigned int x, y;
+} uvec2;
+
 // A tempo-based version of the Goertzel struct above
 typedef struct {
 	float target_tempo_hz; 

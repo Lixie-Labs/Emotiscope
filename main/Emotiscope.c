@@ -151,13 +151,13 @@ void app_main(void){
 	init_system();
 
 	//configuration.current_mode.value.u32 = 9;
-	configuration.saturation.value.f32 = 0.80;
+	configuration.saturation.value.f32 = 0.95;
 	configuration.warmth.value.f32 = 0.00;
 	configuration.softness.value.f32 = 0.10;
 	configuration.speed.value.f32 = 0.75;
 	configuration.background.value.f32 = 0.00;
-	configuration.color_range.value.f32 = 0.00;
-	configuration.reverse_color_range.value.u32 = 1;
+	configuration.color_range.value.f32 = 0.66;
+	configuration.reverse_color_range.value.u32 = 0;
 	configuration.auto_color_cycle.value.u32 = 0;
 
 	// Start the main cores (cpu_core.h, gpu_core.h)

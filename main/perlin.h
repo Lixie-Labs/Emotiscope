@@ -1,10 +1,4 @@
-typedef struct {
-    float x, y;
-} vec2;
-
-typedef struct {
-    unsigned int x, y;
-} uvec2;
+float perlin_noise_array[NUM_LEDS>>2];
 
 unsigned int hash(unsigned int x, unsigned int seed) {
     const unsigned int m = 0x5bd1e995U;
@@ -101,6 +95,7 @@ float perlin_noise_octaves(vec2 position, int frequency, int octave_count, float
     float amplitude = 1.0;
     float current_frequency = (float)frequency;
     unsigned int current_seed = seed;
+
     for (int i = 0; i < octave_count; i++) {
         current_seed = hash(current_seed, 0x0U); // create a new seed for each octave
         value += perlin_noise((vec2){position.x * current_frequency, position.y * current_frequency}, current_seed) * amplitude;
@@ -110,13 +105,28 @@ float perlin_noise_octaves(vec2 position, int frequency, int octave_count, float
     return value;
 }
 
-void generate_perlin_noise(float* noise_array, uint16_t noise_array_length, float position_x, float position_y, uint32_t seed, float frequency, float persistence, float lacunarity, uint16_t octave_count) {
-    for (int i = 0; i < noise_array_length; i++) {
-        vec2 pos = {position_x + (float)i / (float)noise_array_length, position_y};
+void generate_perlin_noise(float position_x, float position_y, uint32_t seed, float frequency, float persistence, float lacunarity, uint16_t octave_count) {
+    for (int i = 0; i < NUM_LEDS>>2; i++) {
+        vec2 pos = {position_x + num_leds_float_lookup[i<<2], position_y};
         float noise_value = perlin_noise_octaves(pos, frequency, octave_count, persistence, lacunarity, seed);
-        noise_array[i] = noise_value;
+        perlin_noise_array[i] = noise_value;
     }
 
-	dsps_addc_f32(noise_array, noise_array, noise_array_length, 1.0, 1, 1);
-	dsps_mulc_f32(noise_array, noise_array, noise_array_length, 0.5, 1, 1);
+	dsps_addc_f32(perlin_noise_array, perlin_noise_array, NUM_LEDS>>2, 1.0, 1, 1);
+	dsps_mulc_f32(perlin_noise_array, perlin_noise_array, NUM_LEDS>>2, 0.5, 1, 1);
+}
+
+void update_perlin_noise(float delta){
+	const static float frequency = 4; // Base frequency
+    const static float persistence = 0.5; // Amplitude factor for each octave
+    const static float lacunarity = 2.0; // Frequency factor for each octave
+    const static int octave_count = 2; // Reduce the number of octaves for smoother noise
+	const static unsigned int seed = 0x578437adU;
+
+	static float position_x = 0.0;
+	static float position_y = 0.0;
+
+	position_y += (0.001 * delta);
+
+    generate_perlin_noise(position_x, position_y, seed, frequency, persistence, lacunarity, octave_count);
 }

@@ -35,6 +35,9 @@ void run_gpu() {
 	// Update the tempi phases
 	update_tempi_phase(delta);	// (tempo.h)
 
+	// Update perlin noise offsets
+	update_perlin_noise(delta); // (perlin.h)
+
 	// Update auto color cycling
 	update_auto_color();  // (leds.h)
 
