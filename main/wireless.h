@@ -23,7 +23,7 @@ bool connected_to_wifi = false;
 // Transmit a WS packet
 esp_err_t wstx(httpd_req_t* req, char* data){
     httpd_ws_frame_t ws_pkt;
-    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    dsps_memset_aes3(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     
 	ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 	ws_pkt.payload = (uint8_t*)data;
@@ -47,8 +47,8 @@ esp_err_t wsrx(httpd_req_t* req){
     }
 
     httpd_ws_frame_t ws_pkt;
-    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-	memset(websocket_packet_buffer, 0, 1024);
+    dsps_memset_aes3(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+	dsps_memset_aes3(websocket_packet_buffer, 0, 1024);
     
 	ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 	ws_pkt.payload = (uint8_t*)websocket_packet_buffer;
@@ -129,8 +129,8 @@ bool load_wifi_credentials(){
 	ESP_LOGI(TAG, "load_wifi_credentials()");
 
 	// Clear SSID and PASS ----------------------------------------------------------
-	memset(wifi_ssid, 0, 128);
-	memset(wifi_pass, 0, 128);
+	dsps_memset_aes3(wifi_ssid, 0, 128);
+	dsps_memset_aes3(wifi_pass, 0, 128);
 
 	// Load SSID --------------------------------------------------------------------
 	size_t ssid_len = get_string("wifi_ssid", wifi_ssid, 128);

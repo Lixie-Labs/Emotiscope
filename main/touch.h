@@ -33,7 +33,7 @@ void init_touch(){
 		touch_pins[i].touch_value = 0.00f;
 		touch_pins[i].ambient_threshold = 10000000.0;
 		touch_pins[i].touch_threshold   = 10000000.0;
-		memset(touch_pins[i].touch_history, 0, sizeof(touch_pins[i].touch_history)); // Zero out the touch history
+		dsps_memset_aes3(touch_pins[i].touch_history, 0, sizeof(touch_pins[i].touch_history)); // Zero out the touch history
 	}
 
 	touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);

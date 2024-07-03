@@ -33,8 +33,8 @@ void shift_and_copy_arrays(float history_array[], size_t history_size, const flo
 	memmove(history_array, history_array + new_size,
 			(history_size - new_size) * sizeof(float));
 
-	// Use memcpy to copy the new array into the vacant space
-	memcpy(history_array + history_size - new_size, new_array, new_size * sizeof(float));
+	// Use dsps_memcpy_aes3 to copy the new array into the vacant space
+	dsps_memcpy_aes3(history_array + history_size - new_size, new_array, new_size * sizeof(float));
 }
 
 float clip_float(float input) {
@@ -97,14 +97,14 @@ float get_random_float(){
 }
 
 void fetch_substring(char* input_buffer, char delimiter, uint8_t fetch_index){
-	memset(substring, 0, 128);
+	dsps_memset_aes3(substring, 0, 128);
 	int16_t input_length = strlen(input_buffer);
 
 	for(uint16_t i = 0; i < input_length; i++){
 		if(fetch_index == 0){
 			for(uint16_t j = i; j <= input_length; j++){
 				if(input_buffer[j] == delimiter || input_buffer[j] == '\0'){
-					memcpy(substring, input_buffer + i, j-i);
+					dsps_memcpy_aes3(substring, input_buffer + i, j-i);
 					return;
 				}
 			}
@@ -149,14 +149,14 @@ void shift_array_left(float* array, uint16_t array_size, uint16_t shift_amount) 
 	// Check if the shift amount is greater than the array size
 	if (shift_amount >= array_size) {
 		// If yes, set the whole array to zero
-		memset(array, 0, array_size * sizeof(float));
+		dsps_memset_aes3(array, 0, array_size * sizeof(float));
 	}
 	else {
 		// Use memmove to shift array contents to the left
 		memmove(array, array + shift_amount, (array_size - shift_amount) * sizeof(float));
 
 		// Set the vacated positions at the end of the array to zero
-		memset(array + array_size - shift_amount, 0, shift_amount * sizeof(float));
+		dsps_memset_aes3(array + array_size - shift_amount, 0, shift_amount * sizeof(float));
 	}
 }
 
@@ -170,7 +170,7 @@ bool fastcmp(const char* input_a, const char* input_b){
 
 void print_binary(uint32_t input, uint8_t bit_width, char tail){
 	char output[64];
-	memset(output, 0, 64);
+	dsps_memset_aes3(output, 0, 64);
 	for(uint8_t i = 0; i < bit_width; i++){
 		output[i] = (char)('0' + bitRead(input, (bit_width-1)-i));
 	}

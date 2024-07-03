@@ -78,12 +78,12 @@ void scale_CRGBF_array_by_constant(CRGBF* input, float scale_value, uint16_t arr
 
 
 void init_fx_dots(){
-	memset(fx_dots, 0.5, sizeof(fx_dot) * MAX_DOTS);
+	dsps_memset_aes3(fx_dots, 0.5, sizeof(fx_dot) * MAX_DOTS);
 }
 
 void clear_display(float keep){
 	if(keep == 0.0){
-		memset(leds, 0, sizeof(CRGBF)*NUM_LEDS);
+		dsps_memset_aes3(leds, 0, sizeof(CRGBF)*NUM_LEDS);
 	}
 	else{
 		scale_CRGBF_array_by_constant(leds, keep, NUM_LEDS);	
@@ -250,7 +250,7 @@ void apply_background(float background_level){
 
 
 void apply_box_blur( CRGBF* pixels, uint16_t num_pixels, int kernel_size ){
-	memcpy( leds_temp, pixels, sizeof(CRGBF) * num_pixels );
+	dsps_memcpy_aes3( leds_temp, pixels, sizeof(CRGBF) * num_pixels );
 
 	for( uint16_t i = 0; i < num_pixels; i++ ){
 		int16_t kernel_far_left  = i - kernel_size;
@@ -317,7 +317,7 @@ void apply_softness(){
 
 	add_CRGBF_arrays(leds, leds_last, NUM_LEDS);
 
-	memcpy(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
+	dsps_memcpy_aes3(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
 }
 
 
@@ -496,13 +496,13 @@ void clamp_configuration(){
 
 void save_leds_to_temp() {
 	// uint16_t profiler_index = start_function_timing(__func__);
-	memcpy(leds_temp, leds, sizeof(CRGBF) * NUM_LEDS);
+	dsps_memcpy_aes3(leds_temp, leds, sizeof(CRGBF) * NUM_LEDS);
 	// end_function_timing(profiler_index);
 }
 
 void load_leds_from_temp() {
 	// uint16_t profiler_index = start_function_timing(__func__);
-	memcpy(leds, leds_temp, sizeof(CRGBF) * NUM_LEDS);
+	dsps_memcpy_aes3(leds, leds_temp, sizeof(CRGBF) * NUM_LEDS);
 	// end_function_timing(profiler_index);
 }
 
@@ -534,7 +534,7 @@ void smooth_led_output(float blend_strength) {
 		}
 	}
 	else {
-		memcpy(leds_smooth, leds, sizeof(CRGBF) * NUM_LEDS);
+		dsps_memcpy_aes3(leds_smooth, leds, sizeof(CRGBF) * NUM_LEDS);
 	}
 }
 
@@ -568,7 +568,7 @@ CRGBF desaturate(struct CRGBF input_color, float amount) {
 
 
 void save_leds_to_last() {
-	memcpy(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
+	dsps_memcpy_aes3(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
 }
 
 CRGBF mix(CRGBF color_1, CRGBF color_2, float amount) {
@@ -655,7 +655,7 @@ void apply_phosphor_decay(float strength){
 
 	if(first_run){
 		first_run = false;
-		memcpy(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
+		dsps_memcpy_aes3(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
 		return;
 	}
 
@@ -682,7 +682,7 @@ void apply_phosphor_decay(float strength){
 		leds[i].b = (phosphor_decay[i].b + change_b);
 	}
 
-	memcpy(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
+	dsps_memcpy_aes3(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
 }
 
 void render_debug_value() {
@@ -716,7 +716,7 @@ void apply_frame_blending(float blend_amount){
 	scale_CRGBF_array_by_constant(previous_frame, blend_amount, NUM_LEDS);
 	add_CRGBF_arrays(leds, previous_frame, NUM_LEDS);
 
-	memcpy(previous_frame, leds, sizeof(CRGBF) * NUM_LEDS);
+	dsps_memcpy_aes3(previous_frame, leds, sizeof(CRGBF) * NUM_LEDS);
 }
 
 void apply_fractional_blur(CRGBF* pixels, uint16_t num_pixels, float kernel_size) {
@@ -730,7 +730,7 @@ void apply_fractional_blur(CRGBF* pixels, uint16_t num_pixels, float kernel_size
 		// Calculate the effective range of influence for the kernel size
 		int range = (int)ceil(kernel_size * 3); // Typically 3 standard deviations are considered
 		CRGBF temp_pixels[num_pixels];
-		memset(temp_pixels, 0, sizeof(temp_pixels));
+		dsps_memset_aes3(temp_pixels, 0, sizeof(temp_pixels));
 
 		for (int i = 0; i < num_pixels; ++i) {
 			float total_weight = 0;
@@ -760,7 +760,7 @@ void apply_fractional_blur(CRGBF* pixels, uint16_t num_pixels, float kernel_size
 		}
 
 		// Copy the blurred values back to the original array
-		memcpy(pixels, temp_pixels, sizeof(CRGBF) * num_pixels);
+		dsps_memcpy_aes3(pixels, temp_pixels, sizeof(CRGBF) * num_pixels);
 	}
 }
 
@@ -795,7 +795,7 @@ void fade_display(){
 
 
 void scramble_image( float distance ){
-	memset(leds_temp, 0, sizeof(CRGBF) * NUM_LEDS);
+	dsps_memset_aes3(leds_temp, 0, sizeof(CRGBF) * NUM_LEDS);
 
 	// Scramble the image
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
@@ -816,7 +816,7 @@ void scramble_image( float distance ){
 		}
 	}
 
-	memcpy(leds, leds_temp, sizeof(CRGBF) * NUM_LEDS);
+	dsps_memcpy_aes3(leds, leds_temp, sizeof(CRGBF) * NUM_LEDS);
 }
 
 

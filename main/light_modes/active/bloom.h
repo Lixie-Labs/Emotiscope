@@ -35,5 +35,5 @@ void draw_bloom() {
 		}
 	}
 
-	memcpy(novelty_image_prev, novelty_image, sizeof(float)*NUM_LEDS);
+	dsps_memcpy_aes3(novelty_image_prev, novelty_image, sizeof(float)*NUM_LEDS);
 }

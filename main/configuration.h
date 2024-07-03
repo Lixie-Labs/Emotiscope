@@ -215,7 +215,7 @@ config_item init_config_item(char* name, char* pretty_name, char* type_string, c
 	item.type = type;
 	item.ui_type = ui_type;
 
-	memcpy(&item.value, &default_value, sizeof(config_value));
+	dsps_memcpy_aes3(&item.value, &default_value, sizeof(config_value));
 
 	if(type == u32t){
 		item.value.u32 = get_ulong(name, default_value.u32);
@@ -428,7 +428,7 @@ void init_configuration(){
     }
 
 	// Load config from NVS
-	memset(&configuration, 0, sizeof(configuration)); // Clear the configuration struct
+	dsps_memset_aes3(&configuration, 0, sizeof(configuration)); // Clear the configuration struct
 
 	load_configuration_defaults(); // Load default values into the configuration struct
 }

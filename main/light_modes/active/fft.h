@@ -4,7 +4,7 @@ void draw_fft(){
 	uint16_t size_diff = (FFT_SIZE>>1) / NUM_LEDS;
 
 	float fft_mags[NUM_LEDS] = { 0.0 };
-	memset(fft_mags, 0, sizeof(float) * NUM_LEDS);
+	dsps_memset_aes3(fft_mags, 0, sizeof(float) * NUM_LEDS);
 
 	float fft_max_mag = 0.0;
 	for(uint16_t i = 0; i < NUM_LEDS; i++){

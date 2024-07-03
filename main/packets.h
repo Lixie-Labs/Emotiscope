@@ -3,41 +3,41 @@ void broadcast_emotiscope_state(){
 	char temp_buffer[128];
 
 	// Stats
-	memset(output_string, 0, 2048);
-	memset(temp_buffer, 0, 128);
+	dsps_memset_aes3(output_string, 0, 2048);
+	dsps_memset_aes3(temp_buffer, 0, 128);
 
 	strcat(output_string, "EMO");
 	strcat(output_string, "~stats");
 
-	memset(temp_buffer, 0, 128);
+	dsps_memset_aes3(temp_buffer, 0, 128);
 	//sprintf(temp_buffer, "|cpu_usage|%.3f", CPU_CORE_USAGE);
 	sprintf(temp_buffer, "|cpu_usage|0.5");
 	strcat(output_string, temp_buffer);
 
-	memset(temp_buffer, 0, 128);
+	dsps_memset_aes3(temp_buffer, 0, 128);
 	//sprintf(temp_buffer, "|cpu_temp|%.3f", CPU_TEMP);
 	sprintf(temp_buffer, "|cpu_temp|69");
 	strcat(output_string, temp_buffer);
 
-	memset(temp_buffer, 0, 128);
+	dsps_memset_aes3(temp_buffer, 0, 128);
 	//sprintf(temp_buffer, "|fps_cpu|%.3f", FPS_CPU);
 	sprintf(temp_buffer, "|fps_cpu|200");
 	strcat(output_string, temp_buffer);
 
-	memset(temp_buffer, 0, 128);
+	dsps_memset_aes3(temp_buffer, 0, 128);
 	//sprintf(temp_buffer, "|fps_gpu|%.3f", FPS_GPU);
 	sprintf(temp_buffer, "|fps_gpu|400");
 	strcat(output_string, temp_buffer);
 
-	memset(temp_buffer, 0, 128);
+	dsps_memset_aes3(temp_buffer, 0, 128);
 	sprintf(temp_buffer, "|heap|%zu", heap_caps_get_largest_free_block(MALLOC_CAP_32BIT));
 	strcat(output_string, temp_buffer);
 
 	ESP_LOGI(TAG, "TX: %s", output_string);
 
 	// Configuration
-	memset(output_string, 0, 2048);
-	memset(temp_buffer, 0, 128);
+	dsps_memset_aes3(output_string, 0, 2048);
+	dsps_memset_aes3(temp_buffer, 0, 128);
 
 	strcat(output_string, "EMO");
 	strcat(output_string, "~config");
@@ -57,17 +57,17 @@ void broadcast_emotiscope_state(){
 		strcat(output_string, "|");
 
 		if(item.type == u32t){
-			memset(temp_buffer, 0, 128);
+			dsps_memset_aes3(temp_buffer, 0, 128);
 			sprintf(temp_buffer, "%lu", item.value.u32);
 			strcat(output_string, temp_buffer);
 		}
 		else if(item.type == i32t){
-			memset(temp_buffer, 0, 128);
+			dsps_memset_aes3(temp_buffer, 0, 128);
 			sprintf(temp_buffer, "%li", item.value.i32);
 			strcat(output_string, temp_buffer);
 		}
 		else if(item.type == f32t){
-			memset(temp_buffer, 0, 128);
+			dsps_memset_aes3(temp_buffer, 0, 128);
 			sprintf(temp_buffer, "%.3f", item.value.f32);
 			strcat(output_string, temp_buffer);
 		}
@@ -79,8 +79,8 @@ void broadcast_emotiscope_state(){
 	ESP_LOGI(TAG, "TX: %s", output_string);
 
 	// Light Modes
-	memset(output_string, 0, 2048);
-	memset(temp_buffer, 0, 128);
+	dsps_memset_aes3(output_string, 0, 2048);
+	dsps_memset_aes3(temp_buffer, 0, 128);
 
 	strcat(output_string, "EMO");
 	strcat(output_string, "~modes");

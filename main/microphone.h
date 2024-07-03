@@ -91,7 +91,7 @@ void acquire_sample_chunk() {
 		i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
 	}
 	else{
-		memset(new_samples_raw, 0, sizeof(uint32_t) * CHUNK_SIZE);
+		dsps_memset_aes3(new_samples_raw, 0, sizeof(uint32_t) * CHUNK_SIZE);
 	}
 
 	// Clip the sample value if it's too large, cast to floats

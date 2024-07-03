@@ -28,6 +28,7 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 
 // INACTIVE MODES
 #include "light_modes/inactive/neutral.h"
+#include "light_modes/inactive/perlin.h"
 
 // SYSTEM MODES
 #include "light_modes/system/self_test.h"
@@ -53,6 +54,7 @@ light_mode light_modes[] = {
 
 	// Inactive Modes
 	{ "Neutral",         LIGHT_MODE_TYPE_INACTIVE,  &draw_neutral       },
+	{ "Perlin",		  	 LIGHT_MODE_TYPE_INACTIVE,  &draw_perlin        },
 
 	{ "Debug",           LIGHT_MODE_TYPE_ACTIVE,    &draw_debug         },
 

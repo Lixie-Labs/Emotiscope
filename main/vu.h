@@ -39,7 +39,7 @@ void run_vu(){
 
 	// LOG AMPLITUDE FOR NOISE REMOVAL ------------------------------------
 	if(t_now_ms < 2000){
-		memset(vu_log, max_amplitude_now, sizeof(float)*NUM_VU_LOG_SAMPLES);
+		dsps_memset_aes3(vu_log, max_amplitude_now, sizeof(float)*NUM_VU_LOG_SAMPLES);
 	}
 	else if(t_now_ms - last_vu_log >= 250){
 		last_vu_log = t_now_ms;

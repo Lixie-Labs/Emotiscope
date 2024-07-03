@@ -37,7 +37,7 @@ void watch_gpu_fps() {
 
 void print_profiler_stats() {
 	static int64_t last_print = 0;
-	if (t_now_ms - last_print < 1000) {
+	if (t_now_ms - last_print < 50) {
 		return;
 	}
 	last_print = t_now_ms;

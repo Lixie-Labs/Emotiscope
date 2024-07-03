@@ -238,7 +238,7 @@ void init_rmt_driver() {
 }
 
 void quantize_color_error(bool temporal_dithering){
-	memcpy(leds_scaled, leds, NUM_LEDS * sizeof(CRGBF));
+	dsps_memcpy_aes3(leds_scaled, leds, NUM_LEDS * sizeof(CRGBF));
 	dsps_mulc_f32_ansi((float*)leds, (float*)leds_scaled, NUM_LEDS*3, 255.0, 1, 1);
 
 	if(temporal_dithering == true){
@@ -276,7 +276,7 @@ IRAM_ATTR void transmit_leds() {
 	rmt_tx_wait_all_done( tx_chan_b, portMAX_DELAY );
 
 	// Clear the 8-bit buffer	
-	memset( raw_led_data, 0, NUM_LEDS*3 );
+	//dsps_memset_aes3( raw_led_data, 0, NUM_LEDS*3 );
 
 	// Quantize the floating point color to 8-bit with temporal dithering
 	//

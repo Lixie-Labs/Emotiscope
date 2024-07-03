@@ -60,7 +60,7 @@ void estimate_pitch(){
 	float* sample_ptr = &downsampled_history_filtered[(SAMPLE_HISTORY_LENGTH - 1) - AUTO_CORR_LENGTH];
 
 	float windowed_pattern[AUTO_CORR_LENGTH>>1];
-	memcpy(windowed_pattern, sample_ptr, sizeof(float) * (AUTO_CORR_LENGTH>>1));
+	dsps_memcpy_aes3(windowed_pattern, sample_ptr, sizeof(float) * (AUTO_CORR_LENGTH>>1));
 
 	const static uint16_t window_scale_ratio = 4096 / (AUTO_CORR_LENGTH>>1);
 	for(uint16_t i = 0; i < AUTO_CORR_LENGTH>>1; i+=4){

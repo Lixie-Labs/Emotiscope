@@ -27,7 +27,7 @@ void init_fft(){
 }
 
 void perform_fft(){
-	memset(fft_input_complex, 0, sizeof(float) * (FFT_SIZE << 1));
+	dsps_memset_aes3(fft_input_complex, 0, sizeof(float) * (FFT_SIZE << 1));
 
 	const uint8_t step_size = 3;
 	for(uint16_t i = 0; i < FFT_SIZE; i++){
@@ -57,13 +57,13 @@ void perform_fft(){
 		fft_max[i] = fmaxf(fft_max[i], fft_output[i]);
 	}
 
-	memcpy(fft_smooth[ fft_averaging_index ], fft_output, sizeof(float) * FFT_SIZE);
+	dsps_memcpy_aes3(fft_smooth[ fft_averaging_index ], fft_output, sizeof(float) * FFT_SIZE);
 	fft_averaging_index += 1;
 	if(fft_averaging_index >= NUM_FFT_AVERAGE_SAMPLES + 1){
 		fft_averaging_index = 1;
 	}
 
-	memset(fft_smooth[0], 0, sizeof(float) * FFT_SIZE);
+	dsps_memset_aes3(fft_smooth[0], 0, sizeof(float) * FFT_SIZE);
 	for(uint8_t i = 1; i < NUM_FFT_AVERAGE_SAMPLES + 1; i++){
 		dsps_add_f32(fft_smooth[0], fft_smooth[i], fft_smooth[0], FFT_SIZE, 1, 1, 1);
 	}

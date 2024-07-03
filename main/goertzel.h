@@ -167,9 +167,9 @@ void init_window_lookup() {
 void calculate_magnitude_of_bins_fast() {
 	const float block_size = SAMPLE_HISTORY_LENGTH/8;
 
-	memset(q1, 0, sizeof(float) * NUM_FREQS);
-	memset(q2, 0, sizeof(float) * NUM_FREQS);
-	memset(q0, 0, sizeof(float) * NUM_FREQS);
+	dsps_memset_aes3(q1, 0, sizeof(float) * NUM_FREQS);
+	dsps_memset_aes3(q2, 0, sizeof(float) * NUM_FREQS);
+	dsps_memset_aes3(q0, 0, sizeof(float) * NUM_FREQS);
 
 	for (uint32_t i = 0; i < block_size; i++) {
 		// Calculate q0 for each filter using DSP library functions
@@ -178,8 +178,8 @@ void calculate_magnitude_of_bins_fast() {
 		dsps_addc_f32(q0,    q0, NUM_FREQS, sample_history[i*2], 1,1); // q0 = q0 + sample_history[i*2]
 
 		// Update q1 and q2 for the next iteration
-		memcpy(q2, q1, sizeof(float) * NUM_FREQS);
-		memcpy(q1, q0, sizeof(float) * NUM_FREQS);
+		dsps_memcpy_aes3(q2, q1, sizeof(float) * NUM_FREQS);
+		dsps_memcpy_aes3(q1, q0, sizeof(float) * NUM_FREQS);
 	}
 
 	float magnitude[NUM_FREQS];
@@ -252,7 +252,7 @@ void calculate_magnitudes() {
 			noise_history_index = 0;
 		}
 
-		memcpy(noise_history[noise_history_index], magnitudes_raw, sizeof(float) * NUM_FREQS);
+		dsps_memcpy_aes3(noise_history[noise_history_index], magnitudes_raw, sizeof(float) * NUM_FREQS);
 	}
 
 	static uint32_t iter = 0;
@@ -351,7 +351,7 @@ void calculate_magnitudes() {
 }
 
 void get_chromagram(){
-	memset(chromagram, 0, sizeof(float) * 12);
+	dsps_memset_aes3(chromagram, 0, sizeof(float) * 12);
 
 	float max_val = 0.2;
 	for(uint16_t i = 0; i < 60; i++){

@@ -22,9 +22,9 @@ void draw_pitch(){
 	}
 
 	// AVERAGE
-	memcpy(auto_corr_image_average[average_index], auto_corr_image, sizeof(float) * NUM_LEDS);
+	dsps_memcpy_aes3(auto_corr_image_average[average_index], auto_corr_image, sizeof(float) * NUM_LEDS);
 	average_index = (average_index + 1) % PITCH_AVERAGE_SAMPLES;
-	memset(auto_corr_image_average[PITCH_AVERAGE_SAMPLES], 0, sizeof(float) * NUM_LEDS);
+	dsps_memset_aes3(auto_corr_image_average[PITCH_AVERAGE_SAMPLES], 0, sizeof(float) * NUM_LEDS);
 	for(uint16_t i = 0; i < PITCH_AVERAGE_SAMPLES; i++){
 		dsps_add_f32(auto_corr_image_average[PITCH_AVERAGE_SAMPLES], auto_corr_image_average[i], auto_corr_image_average[PITCH_AVERAGE_SAMPLES], NUM_LEDS, 1, 1, 1);
 	}
@@ -44,7 +44,7 @@ void draw_pitch(){
 
 	// MIRROR
 	if(configuration.mirror_mode.value.u32 == true){
-		memcpy(leds_temp, leds, sizeof(CRGBF) * NUM_LEDS);
+		dsps_memcpy_aes3(leds_temp, leds, sizeof(CRGBF) * NUM_LEDS);
 		for(uint16_t i = 0; i < (NUM_LEDS>>1); i++){
 			leds[(NUM_LEDS>>1) + i    ] = leds_temp[i*2];
 			leds[(NUM_LEDS>>1) - 1 - i] = leds_temp[i*2];

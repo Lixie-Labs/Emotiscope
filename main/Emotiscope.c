@@ -64,6 +64,7 @@ continue to develop and improve the Emotiscope Engine.
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // Espressif
 #include <esp_wifi.h>
@@ -95,6 +96,7 @@ continue to develop and improve the Emotiscope Engine.
 
 // SIMD
 #include <esp_dsp.h>
+#include <dsps_mem.h>
 
 // Internal dependencies ------------------------------------------------------
 
@@ -124,6 +126,7 @@ continue to develop and improve the Emotiscope Engine.
 #include "packets.h"
 
 // Graphics
+#include "perlin.h"
 #include "leds.h"
 #include "ui.h"
 #include "standby.h"
@@ -148,8 +151,9 @@ void app_main(void){
 	init_system();
 
 	//configuration.current_mode.value.u32 = 9;
-	configuration.saturation.value.f32 = 0.90;
-	configuration.softness.value.f32 = 0.40;
+	configuration.saturation.value.f32 = 0.80;
+	configuration.warmth.value.f32 = 0.00;
+	configuration.softness.value.f32 = 0.10;
 	configuration.speed.value.f32 = 0.75;
 	configuration.background.value.f32 = 0.00;
 	configuration.color_range.value.f32 = 0.00;
