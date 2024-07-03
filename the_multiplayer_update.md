@@ -22,7 +22,7 @@ In exchange for no longer including the web-app inside of Emotiscope for safe ke
 
 ## Farewell, Arduino.
 
-After over ten years of learning it to it's fullest potential, I've officially left the Arduino Framework behind, opting to use the raw ESP-IDF instead. Most of Emotiscope was written with lower-level IDF functions anyways, but now it's 100%. Not only has the FastLED Arduino library left the building, but now PsychicHTTP too!
+After over ten years of learning it to its fullest potential, I've officially left the Arduino Framework behind, opting to use the raw ESP-IDF instead. Most of Emotiscope was written with lower-level IDF functions anyways, but now it's 100%. Not only has the FastLED Arduino library left the building, but now PsychicHTTP too!
 
 ## Harmonic Mode
 
