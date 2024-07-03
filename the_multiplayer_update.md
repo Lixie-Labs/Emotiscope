@@ -7,7 +7,7 @@
 - A re-written Emotiscope web-app, now based on the open-source Godot game engine.
 - Improved networking, allowing multiple simulataneous remote controls at once (Multiplayer!)
 - Harmonic Mode
-- Rhythm Breeze Mode,
+- Rhythm Breeze Mode
 - Wave Mode
 - Improved tempo recognition
 - And million little things
