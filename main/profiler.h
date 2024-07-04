@@ -1,8 +1,8 @@
 int64_t t_now_ms = 0;
 int64_t t_now_us = 0;
 
-float FPS_CPU_SAMPLES[16];
-float FPS_GPU_SAMPLES[16];
+float FPS_CPU_SAMPLES[64];
+float FPS_GPU_SAMPLES[64];
 
 float CPU_CORE_USAGE = 0.0;
 float FPS_CPU = 0.0;
@@ -19,7 +19,7 @@ void watch_cpu_fps() {
 	average_index++;
 
 	int64_t elapsed_us = us_now - last_call;
-	FPS_CPU_SAMPLES[average_index % 16] = 1000000.0 / (float)elapsed_us;
+	FPS_CPU_SAMPLES[average_index % 64] = 1000000.0 / (float)elapsed_us;
 	last_call = us_now;
 }
 
@@ -30,14 +30,14 @@ void watch_gpu_fps() {
 	average_index++;
 
 	int64_t elapsed_us = us_now - last_call;
-	FPS_GPU_SAMPLES[average_index % 16] = 1000000.0 / (float)elapsed_us;
+	FPS_GPU_SAMPLES[average_index % 64] = 1000000.0 / (float)elapsed_us;
 
 	last_call = us_now;
 }
 
 void print_profiler_stats() {
 	static int64_t last_print = 0;
-	if (t_now_ms - last_print < 50) {
+	if (t_now_ms - last_print < 500) {
 		return;
 	}
 	last_print = t_now_ms;
@@ -56,12 +56,12 @@ void update_stats() {
 
 	FPS_CPU = 0.0;
 	FPS_GPU = 0.0;
-	for (uint8_t i = 0; i < 16; i++) {
+	for (uint8_t i = 0; i < 64; i++) {
 		FPS_CPU += FPS_CPU_SAMPLES[i];
 		FPS_GPU += FPS_GPU_SAMPLES[i];
 	}
-	FPS_CPU /= 16.0;
-	FPS_GPU /= 16.0;
+	FPS_CPU /= 64.0;
+	FPS_GPU /= 64.0;
 
 	CPU_TEMP = get_cpu_temperature();
 

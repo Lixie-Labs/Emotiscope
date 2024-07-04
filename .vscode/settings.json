@@ -22,6 +22,9 @@
 	"type_traits": "c",
 	"utility": "c",
 	"cstdint": "cpp",
-	"esp_wifi.h": "c"
+	"esp_wifi.h": "c",
+	"*.tcc": "c",
+	"configuration.h": "c",
+	"global_defines.h": "c"
 }
 }

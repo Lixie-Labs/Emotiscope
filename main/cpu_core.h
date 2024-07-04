@@ -46,34 +46,6 @@ void run_cpu() {
 
 	sync_configuration_to_file_system(); // (configuration.h)
 
-	static int64_t last_test_time = 0;
-	if(t_now_ms - last_test_time >= 10000 || last_test_time == 0){
-		last_test_time = t_now_ms;
-
-		CRGBF leds_testing[NUM_LEDS];
-		int64_t test_start = esp_timer_get_time();
-		memset(leds_testing, 1, sizeof(CRGBF) * NUM_LEDS);
-		memset(leds_testing, 2, sizeof(CRGBF) * NUM_LEDS);
-		memset(leds_testing, 3, sizeof(CRGBF) * NUM_LEDS);
-		memset(leds_testing, 4, sizeof(CRGBF) * NUM_LEDS);
-		memset(leds_testing, 5, sizeof(CRGBF) * NUM_LEDS);
-		int64_t test_end = esp_timer_get_time();
-		ESP_LOGI(TAG, "    memset us: %lld, first_value: %f", test_end - test_start, leds_testing[0].r);
-
-
-
-		test_start = esp_timer_get_time();
-		dsps_memset_aes3(leds_testing, 6, sizeof(CRGBF) * NUM_LEDS);
-		dsps_memset_aes3(leds_testing, 7, sizeof(CRGBF) * NUM_LEDS);
-		dsps_memset_aes3(leds_testing, 8, sizeof(CRGBF) * NUM_LEDS);
-		dsps_memset_aes3(leds_testing, 9, sizeof(CRGBF) * NUM_LEDS);
-		dsps_memset_aes3(leds_testing, 10, sizeof(CRGBF) * NUM_LEDS);
-		test_end = esp_timer_get_time();
-		ESP_LOGI(TAG, "DSP memset us: %lld, first_value: %f", test_end - test_start, leds_testing[0].r);
-
-		//run_performance_test(); // (testing.h)
-	}
-
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------
 
 	//------------------------------------------------------------------------------------

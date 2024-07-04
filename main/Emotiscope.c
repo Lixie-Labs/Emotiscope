@@ -107,6 +107,7 @@ continue to develop and improve the Emotiscope Engine.
 #include "configuration.h"
 #include "profiler.h"
 #include "utilities.h"
+#include "asm.h"
 
 // Hardware
 #include "microphone.h"
@@ -159,7 +160,8 @@ void app_main(void){
 	configuration.color_range.value.f32 = 0.66;
 	configuration.reverse_color_range.value.u32 = 0;
 	configuration.auto_color_cycle.value.u32 = 0;
-	configuration.color_mode.value.u32 = COLOR_MODE_PERLIN;
+	configuration.color_mode.value.u32 = COLOR_MODE_GRADIENT;
+	configuration.blur.value.f32 = 0.0;
 
 	// Start the main cores (cpu_core.h, gpu_core.h)
 	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 4096, NULL, 5, NULL, 0);

@@ -239,7 +239,7 @@ void init_rmt_driver() {
 
 void quantize_color_error(bool temporal_dithering){
 	dsps_memcpy_aes3(leds_scaled, leds, NUM_LEDS * sizeof(CRGBF));
-	dsps_mulc_f32_ansi((float*)leds, (float*)leds_scaled, NUM_LEDS*3, 255.0, 1, 1);
+	dsps_mulc_f32_ae32_fast((float*)leds, (float*)leds_scaled, NUM_LEDS*3, 255.0, 1, 1);
 
 	if(temporal_dithering == true){
 		for (uint16_t i = 0; i < NUM_LEDS; i++) {
