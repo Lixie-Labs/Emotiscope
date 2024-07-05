@@ -15,6 +15,7 @@ Main loop of the GPU core
 int64_t t_last_us = 0;
 
 void run_gpu() {
+	start_profile(__COUNTER__, __func__);
 	t_now_us = esp_timer_get_time();
 	t_now_ms = t_now_us / 1000;
 
@@ -85,6 +86,8 @@ void run_gpu() {
 	// Quantize the image buffer with dithering, 
 	// output to the 8-bit LED strand
 	transmit_leds();
+
+	end_profile();
 }
 
 void loop_gpu(void *pvParameters) {

@@ -27,26 +27,46 @@ void init_profiler(){
 }
 
 void print_function_profile() {
-	ESP_LOGI(TAG, "Function Profile:");
+	ESP_LOGI(TAG, "Function Profile ----------------------");
+	
+	uint16_t num_profiled_functions = 0;
 	for (uint8_t i = 0; i < 128; i++) {
-		if (profiled_functions[i].hits > 0) {
-			ESP_LOGI(TAG, "%s: %lu", profiled_functions[i].name, profiled_functions[i].hits);
+		if (profiled_functions[i].name[0] != 0) {
+			num_profiled_functions++;
+		}
+	}
+	ESP_LOGI(TAG, "Profiled functions: %u", num_profiled_functions);
+
+	ESP_LOGI(TAG, "CPU Core ---------------");
+	for (uint8_t i = 0; i < 128; i++) {
+		if (profiled_functions[i].hits[0] > 0) {
+			ESP_LOGI(TAG, "%s: %lu", profiled_functions[i].name, profiled_functions[i].hits[0]);
+		}
+	}
+
+	ESP_LOGI(TAG, "GPU Core ---------------");
+	for (uint8_t i = 0; i < 128; i++) {
+		if (profiled_functions[i].hits[1] > 0) {
+			ESP_LOGI(TAG, "%s: %lu", profiled_functions[i].name, profiled_functions[i].hits[1]);
 		}
 	}
 
 	for(uint8_t i = 0; i < 128; i++){
-		profiled_functions[i].hits = 0;
+		profiled_functions[i].hits[0] = 0;
+		profiled_functions[i].hits[1] = 0;
 	}
+
+	ESP_LOGI(TAG, "----------------------------------------");
 }
 
 inline void log_function_stack(){
 	for(uint8_t i = 0; i < 32; i++){
-		if(function_stack[0][i] != -1){ profiled_functions[function_stack[0][i]].hits++; }
+		if(function_stack[0][i] != -1){ profiled_functions[function_stack[0][i]].hits[0]++; }
 		else{ break; }
 	}
 
 	for(uint8_t i = 0; i < 32; i++){
-		if(function_stack[1][i] != -1){ profiled_functions[function_stack[1][i]].hits++; }
+		if(function_stack[1][i] != -1){ profiled_functions[function_stack[1][i]].hits[1]++; }
 		else{ break; }
 	}
 }

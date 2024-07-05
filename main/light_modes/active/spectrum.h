@@ -1,4 +1,5 @@
 void draw_spectrum() {
+	start_profile(__COUNTER__, __func__);
 	// Mirror mode
 	if(configuration.mirror_mode.value.u32 == true){
 		for (uint16_t i = 0; i < NUM_LEDS>>1; i++) {
@@ -28,4 +29,6 @@ void draw_spectrum() {
 			leds[i] = color;
 		}
 	}
+
+	end_profile();
 }

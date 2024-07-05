@@ -1,4 +1,5 @@
 void draw_metronome() {
+	start_profile(__COUNTER__, __func__);
 	static uint32_t iter = 0;
 	iter++;
 
@@ -53,4 +54,6 @@ void draw_metronome() {
 			}
 		}
 	}
+
+	end_profile();
 }

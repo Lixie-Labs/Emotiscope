@@ -5,7 +5,8 @@ float breath_pos = PI * 0.75;
 float standby_brightness = 1.0;
 float standby_breath = 0.0;
 
-void run_standby(){		
+void run_standby(){
+	start_profile(__COUNTER__, __func__);
 	static uint32_t led = 0;
 	led++;
 
@@ -29,6 +30,8 @@ void run_standby(){
 		draw_dot(leds, SLEEP_1, dot_color,     dot_pos, sqrtf(dot_brightness));
 		draw_dot(leds, SLEEP_2, dot_color, 1.0-dot_pos, sqrtf(dot_brightness));
 	}
+
+	end_profile();
 }
 
 void toggle_standby(){

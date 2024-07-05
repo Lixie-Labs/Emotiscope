@@ -11,7 +11,11 @@ float ui_needle_position_raw = 0.0;
 float ui_needle_position = 0.0;
 
 void draw_ui_overlay(){
-	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+	start_profile(__COUNTER__, __func__);
+	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){
+		end_profile();
+		return;
+	}
 
 	if(overlay_size >= 0.01){
 		// -----------------------------
@@ -50,6 +54,8 @@ void draw_ui_overlay(){
 	overlay_size = overlay_size_target * 0.05 + overlay_size * 0.95;
 
 	ui_needle_position = ui_needle_position*0.75 + ui_needle_position_raw *0.25;
+
+	end_profile();
 }
 
 void update_ui(ui_update_event update_type, float new_value){

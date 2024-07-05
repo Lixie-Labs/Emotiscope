@@ -13,6 +13,7 @@ uint32_t inactive_start = 0;
 bool inactive = false;
 
 void run_screensaver(){
+	start_profile(__COUNTER__, __func__);
 	extern light_mode light_modes[];
 
 	if(configuration.screensaver.value.u32 == false){ return; }
@@ -73,4 +74,6 @@ void run_screensaver(){
 			draw_dot(leds, SCREENSAVER_1 + i, screensaver_colors[i], sin(sine_positions[i]) * (0.5*screensaver_mix) + 0.5, screensaver_mix*screensaver_mix);
 		}
 	}
+
+	end_profile();
 }

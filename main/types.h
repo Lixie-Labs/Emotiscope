@@ -128,7 +128,7 @@ typedef enum {
 // This is for profiling functions
 typedef struct {
 	char name[16];
-	uint32_t hits;
+	uint32_t hits[2];
 } profiled_function;
 
 // union that stores the value of a config item

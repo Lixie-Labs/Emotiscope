@@ -1,4 +1,5 @@
 void draw_fft(){
+	start_profile(__COUNTER__, __func__);
 	static float auto_scale_smooth = 0.001;
 
 	uint16_t size_diff = (FFT_SIZE>>1) / NUM_LEDS;
@@ -31,4 +32,6 @@ void draw_fft(){
 
 		leds[i] = color;
 	}
+
+	end_profile();
 }

@@ -271,6 +271,7 @@ void quantize_color_error(bool temporal_dithering){
 }
 
 IRAM_ATTR void transmit_leds() {
+	start_profile(__COUNTER__, __func__);
 	// Wait here if previous frame transmission has not yet completed
 	rmt_tx_wait_all_done( tx_chan_a, portMAX_DELAY );
 	rmt_tx_wait_all_done( tx_chan_b, portMAX_DELAY );
@@ -291,4 +292,6 @@ IRAM_ATTR void transmit_leds() {
 		rmt_transmit( tx_chan_a, led_encoder_a, raw_led_data, (sizeof(raw_led_data) >> 1), &tx_config );
 		rmt_transmit( tx_chan_b, led_encoder_b, raw_led_data+((NUM_LEDS>>1)*3), (sizeof(raw_led_data) >> 1), &tx_config );
 	}
+
+	end_profile();
 }

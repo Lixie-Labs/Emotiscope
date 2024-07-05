@@ -1,6 +1,7 @@
 float novelty_image_prev[NUM_LEDS] = { 0.0 };
 
 void draw_bloom() {
+	start_profile(__COUNTER__, __func__);
 	float novelty_image[NUM_LEDS] = { 0.0 };
 
 	float spread_speed = 0.125 + 0.875*configuration.speed.value.f32;
@@ -36,4 +37,6 @@ void draw_bloom() {
 	}
 
 	dsps_memcpy_aes3(novelty_image_prev, novelty_image, sizeof(float)*NUM_LEDS);
+
+	end_profile();
 }

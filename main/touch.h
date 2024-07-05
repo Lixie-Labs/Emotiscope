@@ -211,11 +211,15 @@ void read_touch(){
 }
 
 void render_touches(){
+	start_profile(__COUNTER__, __func__);
 	extern light_mode light_modes[];
 	extern CRGBF hsv(float hue, float sat, float val);
 	extern CRGBF add(CRGBF a, CRGBF b);
 
-	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){
+		end_profile();
+		return;
+	}
 
 	if(touch_pins[TOUCH_LEFT].touch_value > 0.001){
 		float glow_hue = 0.870;
@@ -262,4 +266,6 @@ void render_touches(){
 			leds[i] = add(leds[i], glow_col);
 		}
 	}
+
+	end_profile();
 }

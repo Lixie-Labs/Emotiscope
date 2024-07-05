@@ -328,6 +328,7 @@ void check_silence(float current_novelty) {
 }
 
 void update_novelty() {
+	start_profile(__COUNTER__, __func__);
 	static int64_t next_novelty_update = 0.0;
 
 	const float update_interval_hz = NOVELTY_LOG_HZ;
@@ -361,6 +362,8 @@ void update_novelty() {
 		log_vu(vu_max);
 		vu_max = 0.000001;
 	}
+
+	end_profile();
 }
 
 void sync_beat_phase(uint16_t tempo_bin, float delta) {
@@ -383,6 +386,7 @@ void sync_beat_phase(uint16_t tempo_bin, float delta) {
 }
 
 void update_tempi_phase(float delta) {
+	start_profile(__COUNTER__, __func__);
 	static bool interlacing_field = 0;
 	interlacing_field = !interlacing_field;
 
@@ -414,4 +418,6 @@ void update_tempi_phase(float delta) {
 		);
 	}
 	tempo_confidence = max_contribution / tempi_power_sum;
+
+	end_profile();
 }

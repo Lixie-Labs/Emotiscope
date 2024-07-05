@@ -1,4 +1,6 @@
 void draw_neutral() {
+	start_profile(__COUNTER__, __func__);
+
 	if(configuration.mirror_mode.value.u32 == true){ // Mirror mode
 		for (uint16_t i = 0; i < (NUM_LEDS >> 1); i++) {
 			float progress = num_leds_float_lookup[i<<1];
@@ -24,4 +26,6 @@ void draw_neutral() {
 			leds[i] = color;
 		}
 	}
+
+	end_profile();
 }

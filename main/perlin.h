@@ -117,6 +117,7 @@ void generate_perlin_noise(float position_x, float position_y, uint32_t seed, fl
 }
 
 void update_perlin_noise(float delta){
+	start_profile(__COUNTER__, __func__);
 	const static float frequency = 2; // Base frequency
     const static float persistence = 0.5; // Amplitude factor for each octave
     const static float lacunarity = 2.0; // Frequency factor for each octave
@@ -129,4 +130,6 @@ void update_perlin_noise(float delta){
 	position_y += (0.001 * delta);
 
     generate_perlin_noise(position_x, position_y, seed, frequency, persistence, lacunarity, octave_count);
+
+	end_profile();
 }

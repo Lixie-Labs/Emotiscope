@@ -53,10 +53,12 @@ extern light_mode light_modes[];
 // (64 are musical notes, the other 64 are tempi)
 //
 void multiply_CRGBF_array_by_LUT(CRGBF* input, CRGBF LUT, uint16_t array_length) {
+	start_profile(__COUNTER__, __func__);
 	float* ptr = (float*)input;
 	dsps_mulc_f32_ae32_fast(ptr + 0, ptr + 0, array_length, LUT.r, 3, 3);
 	dsps_mulc_f32_ae32_fast(ptr + 1, ptr + 1, array_length, LUT.g, 3, 3);
 	dsps_mulc_f32_ae32_fast(ptr + 2, ptr + 2, array_length, LUT.b, 3, 3);
+	end_profile();
 }
 
 void add_CRGBF_arrays(CRGBF* a, CRGBF* b, uint16_t array_length) {
@@ -77,12 +79,14 @@ void init_fx_dots(){
 }
 
 void clear_display(float keep){
+	start_profile(__COUNTER__, __func__);
 	if(keep == 0.0){
 		dsps_memset_aes3(leds, 0, sizeof(CRGBF)*NUM_LEDS);
 	}
 	else{
 		scale_CRGBF_array_by_constant(leds, keep, NUM_LEDS);	
 	}
+	end_profile();
 }
 
 
@@ -208,7 +212,13 @@ void draw_dot(CRGBF* layer, uint16_t fx_dots_slot, CRGBF color, float position, 
 
 
 void apply_background(float background_level){
-	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+	start_profile(__COUNTER__, __func__);
+
+	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){
+		end_profile();
+		return;
+	}
+
 	background_level *= 0.25; // Max 25% brightness
 
 	if(background_level > 0.0){
@@ -245,6 +255,8 @@ void apply_background(float background_level){
 		scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
 		add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
 	}
+
+	end_profile();
 }
 
 
@@ -275,17 +287,24 @@ void apply_box_blur( CRGBF* pixels, uint16_t num_pixels, int kernel_size ){
 
 
 void apply_blur( float kernel_size ){
-	if(kernel_size < 0.01){ return; }
+	start_profile(__COUNTER__, __func__);
+	if(kernel_size < 0.01){
+		end_profile();
+		return;
+	}
 	
 	apply_box_blur( leds, NUM_LEDS, kernel_size );
 
 	if(kernel_size >= 2.0){
 		apply_box_blur( leds, NUM_LEDS, kernel_size );
 	}
+
+	end_profile();
 }
 
 
 void apply_softness(){
+	start_profile(__COUNTER__, __func__);
 	extern float screensaver_mix;
 
 	// This value decays itself non linearly toward zero all the time, 
@@ -317,15 +336,23 @@ void apply_softness(){
 	add_CRGBF_arrays(leds, leds_last, NUM_LEDS);
 
 	dsps_memcpy_aes3(leds_last, leds, sizeof(CRGBF) * NUM_LEDS);
+
+	end_profile();
 }
 
 
 void apply_brightness() {
-	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+	start_profile(__COUNTER__, __func__);
+	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){
+		end_profile();
+		return;
+	}
 
 	float brightness_val = 0.3 + (configuration.brightness.value.f32*0.7);
 
 	scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
+
+	end_profile();
 }
 
 
@@ -342,16 +369,22 @@ float soft_clip_hdr(float input) {
 
 
 void apply_tonemapping() {
+	start_profile(__COUNTER__, __func__);
 	for (uint16_t i = 0; i < NUM_LEDS; i++) {
 		leds[i].r = soft_clip_hdr(leds[i].r);
 		leds[i].g = soft_clip_hdr(leds[i].g);
 		leds[i].b = soft_clip_hdr(leds[i].b);
 	}
+	end_profile();
 }
 
 
 void apply_warmth(float mix) {
-	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){ return; }
+	start_profile(__COUNTER__, __func__);
+	if(light_modes[configuration.current_mode.value.u32].type == LIGHT_MODE_TYPE_SYSTEM){
+		end_profile();
+		return;
+	}
 
 	float mix_inv = 1.0 - mix;
 	if(mix > 0.0){
@@ -365,10 +398,13 @@ void apply_warmth(float mix) {
 			NUM_LEDS
 		);
 	}
+
+	end_profile();
 }
 
 
 void apply_master_brightness(){
+	start_profile(__COUNTER__, __func__);
 	static float master_brightness = 0.0;
 	if(t_now_ms >= 1000){
 		if(master_brightness < 1.0){
@@ -377,10 +413,12 @@ void apply_master_brightness(){
 	}
 
 	scale_CRGBF_array_by_constant(leds, clip_float(master_brightness), NUM_LEDS);
+	end_profile();
 }
 
 
 void apply_gamma_correction() {
+	start_profile(__COUNTER__, __func__);
 	static bool first_run = true;
 	if(first_run == true){
 		first_run = false;
@@ -407,6 +445,8 @@ void apply_gamma_correction() {
 		leds[i].g = gamma_correction_lookup[(uint16_t)(leds[i].g * 2047)];
 		leds[i].b = gamma_correction_lookup[(uint16_t)(leds[i].b * 2047)];
 	}
+
+	end_profile();
 }
 
 
@@ -469,7 +509,11 @@ void draw_sprite_float(float dest[], float sprite[], uint32_t dest_length, uint3
 
 
 void update_auto_color(){
-	if(light_modes[configuration.current_mode.value.u32].type != LIGHT_MODE_TYPE_ACTIVE){ return; }
+	start_profile(__COUNTER__, __func__);
+	if(light_modes[configuration.current_mode.value.u32].type != LIGHT_MODE_TYPE_ACTIVE){
+		end_profile();
+		return;
+	}
 
 	if(configuration.auto_color_cycle.value.u32 == true){
 		float novelty = novelty_curve_normalized[NOVELTY_HISTORY_LENGTH - 1] * 0.75;
@@ -483,6 +527,8 @@ void update_auto_color(){
 
 		configuration.color.value.f32 += color_momentum*0.05;
 	}
+
+	end_profile();
 }
 
 void clamp_configuration(){
