@@ -118,6 +118,19 @@ void generate_perlin_noise(float position_x, float position_y, uint32_t seed, fl
 
 void update_perlin_noise(float delta){
 	start_profile(__COUNTER__, __func__);
+
+	if(configuration.color_mode.value.u32 != COLOR_MODE_PERLIN){
+		end_profile();
+		return;
+	}
+
+	const int64_t update_ms_interval = 10;
+	static int64_t last_update_ms = 0;
+	if (t_now_ms - last_update_ms < update_ms_interval) {
+		end_profile();
+		return;
+	}
+	
 	const static float frequency = 2; // Base frequency
     const static float persistence = 0.5; // Amplitude factor for each octave
     const static float lacunarity = 2.0; // Frequency factor for each octave

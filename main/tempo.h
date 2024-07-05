@@ -132,6 +132,7 @@ float unwrap_phase(float phase) {
 }
 
 float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
+	start_profile(__COUNTER__, __func__);
 	float normalized_magnitude;
 
 	uint16_t block_size = tempi[tempo_bin].block_size;
@@ -175,14 +176,16 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 	float progress = 1.0 - (tempo_bin / (float)(NUM_TEMPI));
 	progress *= progress;
 
-	float scale = (0.3 * progress) + 0.7;
+	float scale = (0.7 * progress) + 0.3;
 
 	normalized_magnitude *= scale;
 
+	end_profile();
 	return normalized_magnitude;
 }
 
 void calculate_tempi_magnitudes(int16_t single_bin) {
+	start_profile(__COUNTER__, __func__);
 	float max_val = 0.0;
 	for (uint16_t i = 0; i < NUM_TEMPI; i++) {
 		// Should we update all tempo magnitudes on every frame or just one on all frames?
@@ -217,13 +220,16 @@ void calculate_tempi_magnitudes(int16_t single_bin) {
 
 		tempi[i].magnitude = scaled_magnitude * scaled_magnitude * scaled_magnitude;
 	}
+
+	end_profile();
 }
 
 void normalize_novelty_curve() {
-	static float max_val = 0.00001;
-	static float max_val_smooth = 0.00001;
+	start_profile(__COUNTER__, __func__);
+	static float max_val = 0.000001;
+	static float max_val_smooth = 0.000001;
 
-	max_val = fmaxf(max_val * 0.99, 0.00001);
+	max_val = fmaxf(max_val * 0.99, 0.000001);
 
 	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
 		max_val = fmaxf(max_val, novelty_curve[i + 0]);
@@ -235,13 +241,16 @@ void normalize_novelty_curve() {
 
 	float auto_scale = 1.0 / max_val;
 	dsps_mulc_f32(novelty_curve, novelty_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
+
+	end_profile();
 }
 
 void normalize_vu_curve() {
-	static float max_val = 0.00001;
+	start_profile(__COUNTER__, __func__);
+	static float max_val = 0.000001;
 	static float max_val_smooth = 0.1;
 
-	max_val *= 0.99;
+	max_val *= 0.999;
 	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
 		max_val = fmaxf(max_val, vu_curve[i + 0]);
 		max_val = fmaxf(max_val, vu_curve[i + 1]);
@@ -252,6 +261,8 @@ void normalize_vu_curve() {
 
 	float auto_scale = 1.0 / max_val;
 	dsps_mulc_f32(vu_curve, vu_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
+
+	end_profile();
 }
 
 void update_tempo() {
@@ -275,29 +286,40 @@ void update_tempo() {
 }
 
 void log_novelty(float input) {
+	start_profile(__COUNTER__, __func__);
 	shift_array_left(novelty_curve, NOVELTY_HISTORY_LENGTH, 1);
 	novelty_curve[NOVELTY_HISTORY_LENGTH - 1] = input;
+	end_profile();
 }
 
 void log_vu(float input) {
+	start_profile(__COUNTER__, __func__);
 	last_vu_input = input;
 	float positive_difference = fmaxf(input - last_vu_input, 0.0f);
 	shift_array_left(vu_curve, NOVELTY_HISTORY_LENGTH, 1);
 	vu_curve[NOVELTY_HISTORY_LENGTH - 1] = positive_difference;
 
 	last_vu_input = input;
+	end_profile();
 }
 
 void reduce_tempo_history(float reduction_amount) {
+	start_profile(__COUNTER__, __func__);
 	float reduction_amount_inv = 1.0 - reduction_amount;
 
-	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i++) {
-		novelty_curve[i] = fmaxf(novelty_curve[i] * reduction_amount_inv, 0.00001f);	// never go full zero
-		vu_curve[i]      = fmaxf(     vu_curve[i] * reduction_amount_inv, 0.00001f);
+	dsps_mulc_f32_ae32(novelty_curve, novelty_curve, NOVELTY_HISTORY_LENGTH, reduction_amount_inv, 1, 1);
+	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i+=4) {
+		novelty_curve[i+0] = fmaxf(novelty_curve[i+0], 0.0000001f);	// never go full zero
+		novelty_curve[i+1] = fmaxf(novelty_curve[i+1], 0.0000001f);
+		novelty_curve[i+2] = fmaxf(novelty_curve[i+2], 0.0000001f);
+		novelty_curve[i+3] = fmaxf(novelty_curve[i+3], 0.0000001f);
 	}
+
+	end_profile();
 }
 
 void check_silence(float current_novelty) {
+	start_profile(__COUNTER__, __func__);
 	float min_val = 1.0;
 	float max_val = 0.0;
 	for (uint16_t i = 0; i < 128; i++) {
@@ -314,7 +336,7 @@ void check_silence(float current_novelty) {
 	silence_level = fmaxf(0.0f, silence_level_raw - 0.5f) * 2.0;
 
 	//float keep_level = 1.0 - silence_level;
-	reduce_tempo_history(silence_level*0.10);
+	reduce_tempo_history(silence_level*0.0001);
 
 	if (silence_level_raw > 0.5) {
 		silence_detected = true;
@@ -325,6 +347,7 @@ void check_silence(float current_novelty) {
 	}
 
 	// rendered_debug_value = silence_level;
+	end_profile();
 }
 
 void update_novelty() {
@@ -337,25 +360,24 @@ void update_novelty() {
 	if (t_now_us >= next_novelty_update) {
 		next_novelty_update += update_interval_us;
 
-		static uint32_t iter = 0;
-		iter++;
-
 		static float fft_last[FFT_SIZE>>1];
 
 		float current_novelty = 0.0;
-		for (uint16_t i = 0; i < (FFT_SIZE>>1); i++) {
-			current_novelty += fmaxf(0.0f, fft_max[i] - fft_last[i]);
-
-			fft_last[i] = fft_max[i];
-			fft_max[i] = 0.0;
+		for (uint16_t i = 0; i < (FFT_SIZE>>1); i+=4) {
+			current_novelty += fmaxf(0.0f, fft_max[i+0] - fft_last[i+0]);
+			current_novelty += fmaxf(0.0f, fft_max[i+1] - fft_last[i+1]);
+			current_novelty += fmaxf(0.0f, fft_max[i+2] - fft_last[i+2]);
+			current_novelty += fmaxf(0.0f, fft_max[i+3] - fft_last[i+3]);
 		}
+
+		dsps_memcpy_aes3(fft_last, fft_max, (FFT_SIZE>>1) * sizeof(float));
+		dsps_memset_aes3(fft_max, 0.0, (FFT_SIZE>>1) * sizeof(float));
 
 		current_novelty /= (float)(FFT_SIZE>>1);
 
 		check_silence(current_novelty);
 
 		current_novelty = log1p(current_novelty);
-		//current_novelty *= current_novelty;
 
 		log_novelty(current_novelty);
 
@@ -367,6 +389,7 @@ void update_novelty() {
 }
 
 void sync_beat_phase(uint16_t tempo_bin, float delta) {
+	start_profile(__COUNTER__, __func__);
 	float push = (tempi[tempo_bin].phase_radians_per_reference_frame * delta);
 
 	tempi[tempo_bin].phase += push;
@@ -382,7 +405,7 @@ void sync_beat_phase(uint16_t tempo_bin, float delta) {
 		tempi[tempo_bin].phase_inverted = !tempi[tempo_bin].phase_inverted;
 	}
 
-	tempi[tempo_bin].beat = sin(tempi[tempo_bin].phase);
+	end_profile();
 }
 
 void update_tempi_phase(float delta) {
@@ -394,19 +417,21 @@ void update_tempi_phase(float delta) {
 
 	// Iterate over all tempi to smooth them and calculate the power sum
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
-		// Load the magnitude
-		float tempi_magnitude = tempi[tempo_bin].magnitude;
+		//if( (tempo_bin % 2) == interlacing_field){
+			// Load the magnitude
+			float tempi_magnitude = tempi[tempo_bin].magnitude;
 
-		if(tempi_magnitude > 0.005){
-			// Smooth it
-			tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
-			tempi_power_sum += tempi_smooth[tempo_bin];
+			if(tempi_magnitude > 0.005){
+				// Smooth it
+				tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975 + (tempi_magnitude) * 0.025;
+				tempi_power_sum += tempi_smooth[tempo_bin];
 
-			sync_beat_phase(tempo_bin, delta);
-		}
-		else{
-			tempi_smooth[tempo_bin] = tempi_smooth[tempo_bin] * 0.975;
-		}
+				sync_beat_phase(tempo_bin, delta);
+			}
+			else{
+				tempi_smooth[tempo_bin] *= 0.995;
+			}
+		//}
 	}
 
 	// Measure contribution factor of each tempi, calculate confidence level

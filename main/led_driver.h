@@ -273,8 +273,8 @@ void quantize_color_error(bool temporal_dithering){
 IRAM_ATTR void transmit_leds() {
 	start_profile(__COUNTER__, __func__);
 	// Wait here if previous frame transmission has not yet completed
-	rmt_tx_wait_all_done( tx_chan_a, portMAX_DELAY );
-	rmt_tx_wait_all_done( tx_chan_b, portMAX_DELAY );
+	rmt_tx_wait_all_done( tx_chan_a, -1 );
+	rmt_tx_wait_all_done( tx_chan_b, -1 );
 
 	// Clear the 8-bit buffer	
 	//dsps_memset_aes3( raw_led_data, 0, NUM_LEDS*3 );

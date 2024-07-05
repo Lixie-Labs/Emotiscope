@@ -55,9 +55,9 @@ extern light_mode light_modes[];
 void multiply_CRGBF_array_by_LUT(CRGBF* input, CRGBF LUT, uint16_t array_length) {
 	start_profile(__COUNTER__, __func__);
 	float* ptr = (float*)input;
-	dsps_mulc_f32_ae32_fast(ptr + 0, ptr + 0, array_length, LUT.r, 3, 3);
-	dsps_mulc_f32_ae32_fast(ptr + 1, ptr + 1, array_length, LUT.g, 3, 3);
-	dsps_mulc_f32_ae32_fast(ptr + 2, ptr + 2, array_length, LUT.b, 3, 3);
+	dsps_mulc_f32_ae32(ptr + 0, ptr + 0, array_length, LUT.r, 3, 3);
+	dsps_mulc_f32_ae32(ptr + 1, ptr + 1, array_length, LUT.g, 3, 3);
+	dsps_mulc_f32_ae32(ptr + 2, ptr + 2, array_length, LUT.b, 3, 3);
 	end_profile();
 }
 

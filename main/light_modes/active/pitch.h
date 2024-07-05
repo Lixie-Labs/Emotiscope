@@ -20,7 +20,7 @@ void draw_pitch(){
 		float progress = num_leds_float_lookup[i];
 		uint32_t sample_index = progress * (AUTO_CORR_LENGTH>>1);
 		float auto_corr_level = auto_corr[sample_index] * auto_scale;
-		auto_corr_image[i] = clip_float(auto_corr_level);
+		auto_corr_image[i] = sqrtf(clip_float(auto_corr_level));
 	}
 
 	// AVERAGE

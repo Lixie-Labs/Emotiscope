@@ -1,4 +1,4 @@
-#define PROFILER_ENABLED true // Uncomment to enable
+//#define PROFILER_ENABLED true // Uncomment to enable, comment to disable
 
 int64_t t_now_ms = 0;
 int64_t t_now_us = 0;
@@ -35,19 +35,27 @@ void print_function_profile() {
 			num_profiled_functions++;
 		}
 	}
-	ESP_LOGI(TAG, "Profiled functions: %u", num_profiled_functions);
+	ESP_LOGI(TAG, "Profiled functions: %u\n", num_profiled_functions);
 
 	ESP_LOGI(TAG, "CPU Core ---------------");
+	uint32_t max_cpu_hits = 0;
+	for (uint8_t i = 0; i < 128; i++) {
+		max_cpu_hits = MAX(profiled_functions[i].hits[0], max_cpu_hits);
+	}
 	for (uint8_t i = 0; i < 128; i++) {
 		if (profiled_functions[i].hits[0] > 0) {
-			ESP_LOGI(TAG, "%s: %lu", profiled_functions[i].name, profiled_functions[i].hits[0]);
+			ESP_LOGI(TAG, "%s: %.2f%% %lu", profiled_functions[i].name, (profiled_functions[i].hits[0]/(float)max_cpu_hits)*100.0, profiled_functions[i].hits[0]);
 		}
 	}
 
-	ESP_LOGI(TAG, "GPU Core ---------------");
+	ESP_LOGI(TAG, "\nGPU Core ---------------");
+	uint32_t max_gpu_hits = 0;
+	for (uint8_t i = 0; i < 128; i++) {
+		max_gpu_hits = MAX(profiled_functions[i].hits[1], max_gpu_hits);
+	}
 	for (uint8_t i = 0; i < 128; i++) {
 		if (profiled_functions[i].hits[1] > 0) {
-			ESP_LOGI(TAG, "%s: %lu", profiled_functions[i].name, profiled_functions[i].hits[1]);
+			ESP_LOGI(TAG, "%s: %.2f%% %lu", profiled_functions[i].name, (profiled_functions[i].hits[1]/(float)max_gpu_hits)*100.0, profiled_functions[i].hits[1]);
 		}
 	}
 
@@ -124,16 +132,24 @@ void watch_gpu_fps() {
 
 void print_profiler_stats() {
 	start_profile(__COUNTER__, __func__);
-	static int64_t last_print = 0;
-	if (t_now_ms - last_print < 2000) {
-		end_profile();
-		return;
+
+	static int64_t last_stat_print = 0;
+	if (t_now_ms - last_stat_print >= 200) {
+		last_stat_print = t_now_ms;
+
+		ESP_LOGI(TAG, "CPU FPS: %.2f, GPU FPS: %.2f, CPU Temp: %.2f, Free Heap: %lu, current_mode: %s", FPS_CPU, FPS_GPU, CPU_TEMP, FREE_HEAP, light_modes[configuration.current_mode.value.u32].name);
 	}
-	last_print = t_now_ms;
 
-	ESP_LOGI(TAG, "CPU FPS: %.2f, GPU FPS: %.2f, CPU Temp: %.2f, Free Heap: %lu, current_mode: %s", FPS_CPU, FPS_GPU, CPU_TEMP, FREE_HEAP, light_modes[configuration.current_mode.value.u32].name);
+	#ifdef PROFILER_ENABLED
+		if(t_now_ms > 5000){
+			static int64_t last_profile_print = 0;
+			if (t_now_ms - last_profile_print >= 10000) {
+				last_profile_print = t_now_ms;
+				print_function_profile();
+			}
+		}
+	#endif
 
-	print_function_profile();
 	end_profile();
 }
 
