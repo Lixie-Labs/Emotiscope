@@ -24,6 +24,7 @@ void init_vu(){
 }
 
 void run_vu(){
+	start_profile(__COUNTER__, __func__);
 	// CALCULATE AMPLITUDE ------------------------------------------------
 	static float max_amplitude_cap = 0.0000001;
 	float* samples = &sample_history[(SAMPLE_HISTORY_LENGTH-1) - CHUNK_SIZE];
@@ -88,4 +89,6 @@ void run_vu(){
 
 	// MAX VALUE ---------------------------------------------------------
 	vu_max = fmaxf(vu_max, vu_level);
+
+	end_profile();
 }

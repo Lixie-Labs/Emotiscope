@@ -81,6 +81,7 @@ void downsample_chunk(float* chunk, float* output, uint16_t input_chunk_length){
 }
 
 void acquire_sample_chunk() {
+	start_profile(__COUNTER__, __func__);
 	// Buffer to hold audio samples
 	uint32_t new_samples_raw[CHUNK_SIZE];
 	float new_samples[CHUNK_SIZE];
@@ -116,4 +117,6 @@ void acquire_sample_chunk() {
 
 	// Shift and copy downsampled chunk to downsampled history
 	shift_and_copy_arrays(downsampled_history, SAMPLE_HISTORY_LENGTH, new_samples_downsampled, CHUNK_SIZE>>1);
+
+	end_profile();
 }

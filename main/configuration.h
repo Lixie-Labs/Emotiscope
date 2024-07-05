@@ -473,6 +473,7 @@ void save_config_delayed() {
 }
 
 void sync_configuration_to_file_system() {
+	start_profile(__COUNTER__, __func__);
 	if (save_request_open == true) {
 		if ((t_now_ms - last_save_request_ms) >= MIN_SAVE_WAIT_MS) {
 			filesystem_ready = false;
@@ -482,4 +483,5 @@ void sync_configuration_to_file_system() {
 			filesystem_ready = true;
 		}
 	}
+	end_profile();
 }

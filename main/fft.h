@@ -27,6 +27,7 @@ void init_fft(){
 }
 
 void perform_fft(){
+	start_profile(__COUNTER__, __func__);
 	dsps_memset_aes3(fft_input_complex, 0, sizeof(float) * (FFT_SIZE << 1));
 
 	const uint8_t step_size = 3;
@@ -70,5 +71,5 @@ void perform_fft(){
 
 	dsps_mulc_f32_ansi(fft_smooth[0], fft_smooth[0], FFT_SIZE, 1.0 / NUM_FFT_AVERAGE_SAMPLES, 1, 1);
 
-	
+	end_profile();
 }

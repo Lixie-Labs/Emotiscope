@@ -125,6 +125,12 @@ typedef enum {
 	COLOR_MODE_PERLIN
 } color_mode_t;
 
+// This is for profiling functions
+typedef struct {
+	char name[16];
+	uint32_t hits;
+} profiled_function;
+
 // union that stores the value of a config item
 typedef union {
 	uint32_t   u32;

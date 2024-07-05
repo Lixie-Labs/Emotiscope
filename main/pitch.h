@@ -55,6 +55,7 @@ void apply_pitch_filters(){
 }
 
 void estimate_pitch(){
+	start_profile(__COUNTER__, __func__);
 	apply_pitch_filters();
 
 	float* sample_ptr = &downsampled_history_filtered[(SAMPLE_HISTORY_LENGTH - 1) - AUTO_CORR_LENGTH];
@@ -83,4 +84,6 @@ void estimate_pitch(){
 		float progress = i / 8.0;
 		auto_corr[i] *= progress;
 	}
+
+	end_profile();
 }

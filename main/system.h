@@ -28,6 +28,10 @@ void init_system(){
 	// Initialize CPU temperature sensor (system.h)
 	init_cpu_temperature();
 
+	// Initialize the profiler (profiler.h)
+	extern void init_profiler();
+	init_profiler();
+
 	// Initialize list of light modes (light_modes.h)
 	extern void init_light_mode_list();
 	init_light_mode_list();

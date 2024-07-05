@@ -231,6 +231,7 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 }
 
 void calculate_magnitudes() {
+	start_profile(__COUNTER__, __func__);
 	#define NUM_AVERAGE_SAMPLES 2
 
 	static float magnitudes_raw[NUM_FREQS];
@@ -346,11 +347,13 @@ void calculate_magnitudes() {
 		}
 		spectrogram_smooth[i] /= (float)NUM_SPECTROGRAM_AVERAGE_SAMPLES;
 	}
-	
 	//___();
+
+	end_profile();
 }
 
 void get_chromagram(){
+	start_profile(__COUNTER__, __func__);
 	dsps_memset_aes3(chromagram, 0, sizeof(float) * 12);
 
 	float max_val = 0.2;
@@ -365,4 +368,5 @@ void get_chromagram(){
 	for(uint16_t i = 0; i < 12; i++){
 		chromagram[i] *= auto_scale;
 	}
+	end_profile();
 }

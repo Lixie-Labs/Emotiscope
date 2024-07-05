@@ -41,6 +41,7 @@ void init_touch(){
 }
 
 void read_touch(){
+	start_profile(__COUNTER__, __func__);
 	static uint32_t last_touch_read_time = 0;
 	static uint8_t touch_history_index = 0;
 	static bool filling_touch_history = true;
@@ -205,6 +206,8 @@ void read_touch(){
 			}
 		}
 	}
+
+	end_profile();
 }
 
 void render_touches(){

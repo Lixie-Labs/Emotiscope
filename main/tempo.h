@@ -255,6 +255,7 @@ void normalize_vu_curve() {
 }
 
 void update_tempo() {
+	start_profile(__COUNTER__, __func__);
 	static uint32_t iter = 0;
 	iter++;
 
@@ -269,6 +270,8 @@ void update_tempo() {
 	if (calc_bin >= max_bin) {
 		calc_bin = 0;
 	}
+
+	end_profile();
 }
 
 void log_novelty(float input) {

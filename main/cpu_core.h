@@ -13,6 +13,8 @@ Main loop of the CPU core
 */
 
 void run_cpu() {
+	start_profile(__COUNTER__, __func__);
+
 	static uint32_t iter = 0;
 	iter++;
 
@@ -57,13 +59,9 @@ void run_cpu() {
 
 	update_stats(); // (profiler.h)
 
+	//check_boot_button();
 
-	/*
-	run_vu(); // (vu.h)
-	update_tempo();	 // (tempo.h)
-	read_touch();
-	check_boot_button();
-	*/
+	end_profile();
 }
 
 void loop_cpu(void *pvParameters) {

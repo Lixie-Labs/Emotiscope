@@ -104,8 +104,8 @@ continue to develop and improve the Emotiscope Engine.
 #include "global_defines.h"
 #include "types.h"
 #include "system.h"
-#include "configuration.h"
 #include "profiler.h"
+#include "configuration.h"
 #include "utilities.h"
 #include "asm.h"
 
@@ -164,6 +164,13 @@ void app_main(void){
 	configuration.blur.value.f32 = 0.0;
 
 	// Start the main cores (cpu_core.h, gpu_core.h)
-	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 4096, NULL, 5, NULL, 0);
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 5, NULL, 1);
+	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 4096, NULL, 1, NULL, 0);
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 4096, NULL, 1, NULL, 1);
+
+	#ifdef PROFILER_ENABLED
+		while(1){
+			vTaskDelay(1);
+			log_function_stack();
+		}
+	#endif
 }

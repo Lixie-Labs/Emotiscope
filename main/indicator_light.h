@@ -53,6 +53,7 @@ void init_indicator_light(){
 }
 
 void run_indicator_light(){
+	start_profile(__COUNTER__, __func__);
 	extern self_test_steps_t self_test_step;
 	extern bool connected_to_wifi;
 
@@ -84,6 +85,7 @@ void run_indicator_light(){
 
 	ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_MAX_DUTY * output_brightness);
 	ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
+	end_profile();
 }
 
 void show_indicator(){
