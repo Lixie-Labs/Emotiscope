@@ -48,6 +48,8 @@ void run_cpu() {
 
 	sync_configuration_to_file_system(); // (configuration.h)
 
+	broadcast_emotiscope_state(); // (packets.h)
+
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------
 
 	//------------------------------------------------------------------------------------

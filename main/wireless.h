@@ -5,7 +5,7 @@
     }                                                                   \
 } while(0)
 
-extern void parse_packet(httpd_req_t* req);
+extern void parse_emotiscope_packet(httpd_req_t* req);
 
 // Websocket server
 static httpd_handle_t server = NULL;
@@ -56,7 +56,38 @@ esp_err_t wsrx(httpd_req_t* req){
 	httpd_ws_recv_frame(req, &ws_pkt, 1024);
 	ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
 
-	parse_packet(req);
+	parse_emotiscope_packet(req);
+
+    return ESP_OK;
+}
+
+esp_err_t wstx_broadcast(const char *message) {
+	//ESP_LOGI(TAG, "wstx_broadcast(\"%s\")", message);
+    size_t clients;
+    int client_fds[CONFIG_LWIP_MAX_ACTIVE_TCP];
+    
+    esp_err_t ret = httpd_get_client_list(server, &clients, client_fds);
+    if (ret != ESP_OK) {
+		ESP_LOGE(TAG, "httpd_get_client_list failed with %d", ret);
+        return ret;
+    }
+
+	ESP_LOGI(TAG, "Num clients: %zu", clients);
+
+	if (clients == 0) {
+		ESP_LOGI(TAG, "No clients connected");
+		return ESP_OK;
+	}
+	
+    for (size_t i = 0; i < clients; i++) {
+        httpd_ws_frame_t ws_pkt;
+        memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+        ws_pkt.payload = (uint8_t*)message;
+        ws_pkt.len = strlen(message);
+        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+
+        httpd_ws_send_frame_async(server, client_fds[i], &ws_pkt);
+    }
 
     return ESP_OK;
 }
@@ -81,6 +112,7 @@ static httpd_handle_t start_websocket_server(void){
         // Registering the ws handler
         ESP_LOGI(TAG, "Registering URI handlers");
         httpd_register_uri_handler(server, &ws);
+
         return server;
     }
 

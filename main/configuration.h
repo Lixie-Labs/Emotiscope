@@ -485,3 +485,35 @@ void sync_configuration_to_file_system() {
 	}
 	end_profile();
 }
+
+void set_config_value_by_pretty_name(const char* config_pretty_name, const char* new_config_value){
+	config_item* config_location = (config_item*)(&configuration);
+	const uint16_t num_config_items = sizeof(configuration) / sizeof(config_item);
+
+	for(uint16_t i = 0; i < num_config_items; i++){
+		config_item* item = config_location + i;
+		type_t type = item->type;
+
+		// Pretty name
+		const char* pretty_name = item->pretty_name;
+
+		//ESP_LOGI(TAG, "Comparing %s to %s", pretty_name, config_pretty_name);
+
+		if(strcmp(pretty_name, config_pretty_name) == 0){
+			if(type == u32t){
+				item->value.u32 = atoi(new_config_value);
+				ESP_LOGI(TAG, "Setting u32 %s: %lu", item->name, item->value.u32);
+			} else if(type == i32t){
+				item->value.i32 = atoi(new_config_value);
+				ESP_LOGI(TAG, "Setting i32 %s: %li", item->name, item->value.i32);
+			} else if(type == f32t){
+				item->value.f32 = atof(new_config_value);
+				ESP_LOGI(TAG, "Setting f32 %s: %.3f", item->name, item->value.f32);
+			} else {
+				ESP_LOGE(TAG, "Unknown type in set_config_value_by_pretty_name: %d", type);
+			}
+
+			break;
+		}
+	}
+}
