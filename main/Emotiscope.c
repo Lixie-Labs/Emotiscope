@@ -125,6 +125,7 @@ continue to develop and improve the Emotiscope Engine.
 // Comms
 #include "wireless.h"
 #include "packets.h"
+#include "serial.h"
 
 // Graphics
 #include "perlin.h"
