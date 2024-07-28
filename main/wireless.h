@@ -64,6 +64,7 @@ esp_err_t wsrx(httpd_req_t* req){
 esp_err_t wstx_broadcast(const char *message) {
 	//ESP_LOGI(TAG, "wstx_broadcast(\"%s\")", message);
     size_t clients;
+
     int client_fds[CONFIG_LWIP_MAX_ACTIVE_TCP];
     
     esp_err_t ret = httpd_get_client_list(server, &clients, client_fds);
@@ -78,7 +79,7 @@ esp_err_t wstx_broadcast(const char *message) {
 		ESP_LOGI(TAG, "No clients connected");
 		return ESP_OK;
 	}
-	
+
     for (size_t i = 0; i < clients; i++) {
         httpd_ws_frame_t ws_pkt;
         memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
@@ -86,7 +87,7 @@ esp_err_t wstx_broadcast(const char *message) {
         ws_pkt.len = strlen(message);
         ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 
-        httpd_ws_send_frame_async(server, client_fds[i], &ws_pkt);
+        httpd_ws_send_frame(server, &ws_pkt);
     }
 
     return ESP_OK;

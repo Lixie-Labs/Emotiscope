@@ -1,13 +1,12 @@
 void draw_debug(){
 	start_profile(__COUNTER__, __func__);
 
-	for(uint16_t i = 0; i < 128; i++){
-		int32_t index = ((NOVELTY_HISTORY_LENGTH-1)-128)+i;
-		float mag_spec = novelty_curve_normalized[index];
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		float mag = novelty_curve[((NOVELTY_HISTORY_LENGTH-1)-NUM_LEDS)+i];
 
 		CRGBF dot_color = {
 			0.0,
-			mag_spec*mag_spec,
+			(mag),
 			0.0,
 		};
 

@@ -16,20 +16,20 @@
 #define NUM_FREQS ( 64 ) 
 
 // Number of times per second "novelty" is logged
-#define NOVELTY_LOG_HZ (100)
+#define NOVELTY_LOG_HZ (50)
 
 // 50 FPS for 20.48 seconds
-#define NOVELTY_HISTORY_LENGTH (2048)
+#define NOVELTY_HISTORY_LENGTH (1024)
 
 // TEMPO_LOW to TEMPO_HIGH
-#define NUM_TEMPI (128)
+#define NUM_TEMPI (96)
 
 // BPM range
 #define TEMPO_LOW (60)
 #define TEMPO_HIGH (TEMPO_LOW + NUM_TEMPI)
 
 // How far forward or back in time the beat phase is shifted
-#define BEAT_SHIFT_PERCENT (0.00)
+#define BEAT_SHIFT_PERCENT (0.0)
 
 #define REFERENCE_FPS 100
 

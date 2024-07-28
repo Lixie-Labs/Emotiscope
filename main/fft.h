@@ -23,7 +23,7 @@ uint16_t fft_averaging_index = 1;
 
 void init_fft(){
 	dsps_fft4r_init_fc32(NULL, FFT_SIZE << 1);
-	dsps_wind_blackman_nuttall_f32(fft_window, FFT_SIZE);
+	dsps_wind_hann_f32(fft_window, FFT_SIZE);
 }
 
 void perform_fft(){
@@ -54,8 +54,6 @@ void perform_fft(){
 		float imag = fft_input_complex[(i << 1) + 1];
 		fft_output[i] = sqrtf(real * real + imag * imag) / (FFT_SIZE >> 1);
 		fft_output[i] = fft_output[i]*(0.5+0.5*progress);
-
-		fft_max[i] = fmaxf(fft_max[i], fft_output[i]);
 	}
 
 	dsps_memcpy_aes3(fft_smooth[ fft_averaging_index ], fft_output, sizeof(float) * FFT_SIZE);
@@ -69,11 +67,28 @@ void perform_fft(){
 		dsps_add_f32(fft_smooth[0], fft_smooth[i], fft_smooth[0], FFT_SIZE, 1, 1, 1);
 	}
 
-	dsps_mulc_f32_ansi(fft_smooth[0], fft_smooth[0], FFT_SIZE, 1.0 / NUM_FFT_AVERAGE_SAMPLES, 1, 1);
-
 	for(uint16_t i = 0; i < 16; i++){
 		float progress = (float)i / 16.0;
-		fft_smooth[0][i] = fft_smooth[0][i] * progress;
+		fft_smooth[0][i] *= progress;
+		fft_smooth[0][i] *= progress;
+	}
+
+	float max_val = 0.001;
+	for(uint16_t i = 0; i < FFT_SIZE>>1; i++){
+		max_val = fmaxf(max_val, fft_smooth[0][i]);
+	}
+	float auto_scale = 1.0 / max_val;
+	static float auto_scale_smooth = 1.0;
+
+	auto_scale_smooth = auto_scale_smooth * 0.9 + auto_scale * 0.1;
+
+	dsps_mulc_f32_ansi(fft_smooth[0], fft_smooth[0], FFT_SIZE>>1, auto_scale_smooth, 1, 1);
+
+	// square it
+	dsps_mul_f32_ansi(fft_smooth[0], fft_smooth[0], fft_smooth[0], FFT_SIZE>>1, 1, 1, 1);
+
+	for(uint16_t i = 0; i < FFT_SIZE>>1; i++){
+		fft_max[i] = fmaxf(fft_max[i], fft_smooth[0][i]);
 	}
 
 	end_profile();

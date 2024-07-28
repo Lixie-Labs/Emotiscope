@@ -21,11 +21,9 @@ float MAX_TEMPO_RANGE = 1.0;
 
 float tempi_bpm_values_hz[NUM_TEMPI];
 
+float novelty_scale_factor = 1.0;
 float novelty_curve[NOVELTY_HISTORY_LENGTH];
 float novelty_curve_normalized[NOVELTY_HISTORY_LENGTH];
-
-float vu_curve[NOVELTY_HISTORY_LENGTH];
-float vu_curve_normalized[NOVELTY_HISTORY_LENGTH];
 
 tempo tempi[NUM_TEMPI];
 float tempi_smooth[NUM_TEMPI];
@@ -131,8 +129,29 @@ float unwrap_phase(float phase) {
 	return phase;
 }
 
-float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
+
+
+void calculate_novelty_scale_factor() {
 	start_profile(__COUNTER__, __func__);
+	
+	// Get novelty curve max value for auto-scaling later
+	float max_val = 0.0;
+	for(uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i+=4){
+		max_val = fmaxf(max_val, novelty_curve[i+0]);
+		max_val = fmaxf(max_val, novelty_curve[i+1]);
+		max_val = fmaxf(max_val, novelty_curve[i+2]);
+		max_val = fmaxf(max_val, novelty_curve[i+3]);
+	}
+	max_val = fmaxf(0.00000001, max_val);
+	float scale_factor_raw = 1.0 / max_val;
+	novelty_scale_factor = novelty_scale_factor * 0.9 + scale_factor_raw * 0.1;
+
+	end_profile();
+}
+
+void calculate_magnitude_of_tempo(int16_t tempo_bin) {
+	start_profile(__COUNTER__, __func__);
+
 	float normalized_magnitude;
 
 	uint16_t block_size = tempi[tempo_bin].block_size;
@@ -143,11 +162,16 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 	float window_pos = 0.0;
 
 	for (uint16_t i = 0; i < block_size; i++) {
-		float sample_novelty = novelty_curve_normalized[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
-		float sample_vu      =                 vu_curve[((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i];
-		float sample = (sample_novelty + sample_vu) / 2.0;
+		uint16_t index = ((NOVELTY_HISTORY_LENGTH - 1) - block_size) + i;
 
-		float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample_novelty) * window_lookup[(uint32_t)window_pos];
+		float sample = novelty_curve[index];
+		sample *= novelty_scale_factor;
+
+		// convert to AC
+		sample -= 0.5;
+		sample *= 2.0;
+
+		float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample) * window_lookup[(uint32_t)window_pos];
 		q2 = q1;
 		q1 = q0;
 
@@ -180,34 +204,35 @@ float calculate_magnitude_of_tempo(uint16_t tempo_bin) {
 
 	normalized_magnitude *= scale;
 
+	tempi[tempo_bin].magnitude_full_scale = normalized_magnitude;
+
 	end_profile();
-	return normalized_magnitude;
 }
 
-void calculate_tempi_magnitudes(int16_t single_bin) {
+void update_tempo() {
 	start_profile(__COUNTER__, __func__);
+	static uint32_t iter = 0;
+	iter++;
+
+	if (iter % 10 == 0) {
+		calculate_novelty_scale_factor();
+	}
+
+	static uint16_t calc_bin = 0;
+	uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
+
+	calculate_magnitude_of_tempo(calc_bin);
+	calc_bin+=1;
+
+	if (calc_bin >= max_bin) {
+		calc_bin = 0;
+	}
+
 	float max_val = 0.0;
 	for (uint16_t i = 0; i < NUM_TEMPI; i++) {
-		// Should we update all tempo magnitudes on every frame or just one on all frames?
-		if (single_bin != -1) {
-			if (i == single_bin) {
-				tempi[i].magnitude_full_scale = calculate_magnitude_of_tempo(single_bin);
-			}
-		}
-		else {
-			tempi[i].magnitude_full_scale = calculate_magnitude_of_tempo(i);
-		}
-
-		if (tempi[i].magnitude_full_scale > max_val) {
-			max_val = tempi[i].magnitude_full_scale;
-		}
+		max_val = fmaxf(max_val, tempi[i].magnitude_full_scale);
 	}
-
-	if (max_val < 0.01) {
-		max_val = 0.01;
-	}
-
-	float autoranger_scale = 1.0 / (max_val);
+	float autoranger_scale = 1.0 / max_val;
 
 	for (uint16_t i = 0; i < NUM_TEMPI; i++) {
 		float scaled_magnitude = (tempi[i].magnitude_full_scale * autoranger_scale);
@@ -218,68 +243,7 @@ void calculate_tempi_magnitudes(int16_t single_bin) {
 			scaled_magnitude = 1.0;
 		}
 
-		tempi[i].magnitude = scaled_magnitude * scaled_magnitude * scaled_magnitude;
-	}
-
-	end_profile();
-}
-
-void normalize_novelty_curve() {
-	start_profile(__COUNTER__, __func__);
-	static float max_val = 0.000001;
-	static float max_val_smooth = 0.000001;
-
-	max_val = fmaxf(max_val * 0.99, 0.000001);
-
-	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
-		max_val = fmaxf(max_val, novelty_curve[i + 0]);
-		max_val = fmaxf(max_val, novelty_curve[i + 1]);
-		max_val = fmaxf(max_val, novelty_curve[i + 2]);
-		max_val = fmaxf(max_val, novelty_curve[i + 3]);
-	}
-	max_val_smooth = fmaxf(0.1f, max_val_smooth * 0.95f + max_val * 0.05f);
-
-	float auto_scale = 1.0 / max_val;
-	dsps_mulc_f32(novelty_curve, novelty_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
-
-	end_profile();
-}
-
-void normalize_vu_curve() {
-	start_profile(__COUNTER__, __func__);
-	static float max_val = 0.000001;
-	static float max_val_smooth = 0.1;
-
-	max_val *= 0.999;
-	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i += 4) {
-		max_val = fmaxf(max_val, vu_curve[i + 0]);
-		max_val = fmaxf(max_val, vu_curve[i + 1]);
-		max_val = fmaxf(max_val, vu_curve[i + 2]);
-		max_val = fmaxf(max_val, vu_curve[i + 3]);
-	}
-	max_val_smooth = fmaxf(0.1f, max_val_smooth * 0.99f + max_val * 0.01f);
-
-	float auto_scale = 1.0 / max_val;
-	dsps_mulc_f32(vu_curve, vu_curve_normalized, NOVELTY_HISTORY_LENGTH, auto_scale, 1, 1);
-
-	end_profile();
-}
-
-void update_tempo() {
-	start_profile(__COUNTER__, __func__);
-	static uint32_t iter = 0;
-	iter++;
-
-	normalize_novelty_curve();
-
-	static uint16_t calc_bin = 0;
-	uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
-
-	calculate_tempi_magnitudes(calc_bin);
-	calc_bin+=1;
-
-	if (calc_bin >= max_bin) {
-		calc_bin = 0;
+		tempi[i].magnitude = scaled_magnitude * scaled_magnitude;
 	}
 
 	end_profile();
@@ -288,18 +252,8 @@ void update_tempo() {
 void log_novelty(float input) {
 	start_profile(__COUNTER__, __func__);
 	shift_array_left(novelty_curve, NOVELTY_HISTORY_LENGTH, 1);
+	dsps_mulc_f32_ae32(novelty_curve, novelty_curve, NOVELTY_HISTORY_LENGTH, 0.999, 1, 1);
 	novelty_curve[NOVELTY_HISTORY_LENGTH - 1] = input;
-	end_profile();
-}
-
-void log_vu(float input) {
-	start_profile(__COUNTER__, __func__);
-	last_vu_input = input;
-	float positive_difference = fmaxf(input - last_vu_input, 0.0f);
-	shift_array_left(vu_curve, NOVELTY_HISTORY_LENGTH, 1);
-	vu_curve[NOVELTY_HISTORY_LENGTH - 1] = positive_difference;
-
-	last_vu_input = input;
 	end_profile();
 }
 
@@ -323,7 +277,7 @@ void check_silence(float current_novelty) {
 	float min_val = 1.0;
 	float max_val = 0.0;
 	for (uint16_t i = 0; i < 128; i++) {
-		float recent_novelty = novelty_curve_normalized[(NOVELTY_HISTORY_LENGTH - 1 - 128) + i];
+		float recent_novelty = novelty_curve[(NOVELTY_HISTORY_LENGTH - 1 - 128) + i] * novelty_scale_factor;
 		recent_novelty = fminf(0.5f, recent_novelty) * 2.0;
 
 		float scaled_value = sqrt(recent_novelty);
@@ -336,7 +290,7 @@ void check_silence(float current_novelty) {
 	silence_level = fmaxf(0.0f, silence_level_raw - 0.5f) * 2.0;
 
 	//float keep_level = 1.0 - silence_level;
-	reduce_tempo_history(silence_level*0.0001);
+	//reduce_tempo_history(silence_level*0.0001);
 
 	if (silence_level_raw > 0.5) {
 		silence_detected = true;
@@ -377,11 +331,10 @@ void update_novelty() {
 
 		check_silence(current_novelty);
 
-		current_novelty = log1p(current_novelty);
+		//current_novelty = log1p(current_novelty);
 
 		log_novelty(current_novelty);
 
-		log_vu(vu_max);
 		vu_max = 0.000001;
 	}
 
@@ -435,7 +388,7 @@ void update_tempi_phase(float delta) {
 	}
 
 	// Measure contribution factor of each tempi, calculate confidence level
-	float max_contribution = 0.000001;
+	float max_contribution = 0.0000001;
 	for (uint16_t tempo_bin = 0; tempo_bin < NUM_TEMPI; tempo_bin++) {
 		max_contribution = fmaxf(
 			tempi_smooth[tempo_bin],
