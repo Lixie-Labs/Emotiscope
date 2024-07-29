@@ -25,6 +25,10 @@
 	"esp_wifi.h": "c",
 	"*.tcc": "c",
 	"configuration.h": "c",
-	"global_defines.h": "c"
+	"global_defines.h": "c",
+	"string": "c",
+	"string_view": "c",
+	"span": "c",
+	"standby.h": "c"
 }
 }

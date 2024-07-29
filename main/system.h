@@ -26,8 +26,8 @@ void init_system(){
 	ESP_LOGI(TAG, "init_system()");
 
 	// Init USB Serial
-	//extern void init_serial();
-	//init_serial();
+	extern void init_serial();
+	init_serial();
 
 	// Initialize CPU temperature sensor (system.h)
 	init_cpu_temperature();

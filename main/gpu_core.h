@@ -12,10 +12,9 @@
 Main loop of the GPU core
 */
 
-int64_t t_last_us = 0;
-
 void run_gpu() {
 	start_profile(__COUNTER__, __func__);
+	static int64_t t_last_us = 0;
 	t_now_us = esp_timer_get_time();
 	t_now_ms = t_now_us / 1000;
 

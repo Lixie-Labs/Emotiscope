@@ -48,6 +48,8 @@ void run_cpu() {
 
 	sync_configuration_to_file_system(); // (configuration.h)
 
+	check_serial();
+
 	//broadcast_emotiscope_state(); // (packets.h)
 
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------
@@ -67,6 +69,24 @@ void run_cpu() {
 }
 
 void loop_cpu(void *pvParameters) {
+	// Initialize all peripherals (system.h) 
+	init_system();
+
+	//configuration.current_mode.value.u32 = 9;
+	configuration.saturation.value.f32 = 0.99;
+	configuration.warmth.value.f32 = 0.0;
+	configuration.softness.value.f32 = 0.0;
+	configuration.speed.value.f32 = 0.75;
+	configuration.background.value.f32 = 0.15;
+	configuration.color_range.value.f32 = 0.66;
+	configuration.reverse_color_range.value.u32 = 0;
+	configuration.auto_color_cycle.value.u32 = 0;
+	configuration.color_mode.value.u32 = COLOR_MODE_GRADIENT;
+	configuration.blur.value.f32 = 0.0;
+
+	// Start GPU core
+	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 1, NULL, 0);
+
 	while (1) {
 		run_cpu();
 		run_cpu();

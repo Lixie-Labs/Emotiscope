@@ -134,7 +134,7 @@ void print_profiler_stats() {
 	start_profile(__COUNTER__, __func__);
 
 	static int64_t last_stat_print = 0;
-	if (t_now_ms - last_stat_print >= 200) {
+	if (t_now_ms - last_stat_print >= 1000) {
 		last_stat_print = t_now_ms;
 
 		ESP_LOGI(TAG, "CPU FPS: %.2f, GPU FPS: %.2f, CPU Temp: %.2f, Free Heap: %lu, current_mode: %s", FPS_CPU, FPS_GPU, CPU_TEMP, FREE_HEAP, light_modes[configuration.current_mode.value.u32].name);

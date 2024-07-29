@@ -93,6 +93,8 @@ continue to develop and improve the Emotiscope Engine.
 #include <driver/rmt_tx.h>
 #include <driver/rmt_encoder.h>
 #include <driver/touch_pad.h>
+#include <driver/uart.h>
+#include <driver/usb_serial_jtag.h>
 
 // SIMD
 #include <esp_dsp.h>
@@ -139,8 +141,8 @@ continue to develop and improve the Emotiscope Engine.
 #include "testing.h"
 
 // Cores
-#include "cpu_core.h" // Audio/Web
 #include "gpu_core.h" // Video
+#include "cpu_core.h" // Audio/Web
 
 // Development Notes
 //#include "notes.h"
@@ -149,24 +151,8 @@ continue to develop and improve the Emotiscope Engine.
 
 // EVERYTHING BEGINS HERE ON BOOT ---------------------------------------------
 void app_main(void){
-	// Initialize all peripherals (system.h) 
-	init_system();
-
-	//configuration.current_mode.value.u32 = 9;
-	configuration.saturation.value.f32 = 0.99;
-	configuration.warmth.value.f32 = 0.0;
-	configuration.softness.value.f32 = 0.0;
-	configuration.speed.value.f32 = 0.75;
-	configuration.background.value.f32 = 0.15;
-	configuration.color_range.value.f32 = 0.66;
-	configuration.reverse_color_range.value.u32 = 0;
-	configuration.auto_color_cycle.value.u32 = 0;
-	configuration.color_mode.value.u32 = COLOR_MODE_GRADIENT;
-	configuration.blur.value.f32 = 0.0;
-
-	// Start the main cores (cpu_core.h, gpu_core.h)
-	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 8192, NULL, 1, NULL, 0);
-	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 1, NULL, 1);
+	// Start the main core (cpu_core.h, gpu is started later)
+	(void)xTaskCreatePinnedToCore(loop_cpu, "loop_cpu", 8192, NULL, 1, NULL, 1);
 
 	#ifdef PROFILER_ENABLED
 		while(1){
