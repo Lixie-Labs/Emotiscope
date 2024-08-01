@@ -232,7 +232,7 @@ float calculate_magnitude_of_bin(uint16_t bin_number) {
 
 void calculate_magnitudes() {
 	start_profile(__COUNTER__, __func__);
-	#define NUM_AVERAGE_SAMPLES 2
+	#define NUM_AVERAGE_SAMPLES 1
 
 	static float magnitudes_raw[NUM_FREQS];
 	static float magnitudes_noise_filtered[NUM_FREQS];

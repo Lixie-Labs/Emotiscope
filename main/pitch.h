@@ -19,7 +19,7 @@ void init_low_filter(){
     
     ret = dsps_biquad_gen_lpf_f32(low_coeffs_lpf, (low_frequency / (SAMPLE_RATE>>1)), low_q_factor);
     if (ret  != ESP_OK) {
-        ESP_LOGE(TAG, "Operation error = %i", ret);
+        //ESP_LOGE(TAG, "Operation error = %i", ret);
         return;
     }
 }
@@ -29,7 +29,7 @@ void init_high_filter(){
     
     ret = dsps_biquad_gen_lpf_f32(high_coeffs_lpf, (high_frequency / (SAMPLE_RATE>>1)), high_q_factor);
     if (ret  != ESP_OK) {
-        ESP_LOGE(TAG, "Operation error = %i", ret);
+        //ESP_LOGE(TAG, "Operation error = %i", ret);
         return;
     }
 }

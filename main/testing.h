@@ -1,7 +1,7 @@
 #define RUN_COUNT 1000
 
 void run_performance_test(){
-	ESP_LOGI(TAG, "-- PERFORMANCE --------------------------------------\n");
+	//ESP_LOGI(TAG, "-- PERFORMANCE --------------------------------------\n");
 	int64_t us_start = 0;
 	int64_t us_end = 0;
 	float us_taken = 0;
@@ -19,7 +19,7 @@ void run_performance_test(){
 	us_end = esp_timer_get_time();
 	us_taken = (us_end - us_start) / (float)RUN_COUNT;
 
-	ESP_LOGI(TAG, "                HSV: %.3f us", us_taken);
+	//ESP_LOGI(TAG, "                HSV: %.3f us", us_taken);
 
 
 	// apply_background performance test -------------------
@@ -32,7 +32,7 @@ void run_performance_test(){
 	us_end = esp_timer_get_time();
 	us_taken = (us_end - us_start) / (float)RUN_COUNT;
 
-	ESP_LOGI(TAG, "   apply_background: %.3f us", us_taken);
+	//ESP_LOGI(TAG, "   apply_background: %.3f us", us_taken);
 
 
 	// get_color_range_hue performance test ----------------
@@ -45,7 +45,7 @@ void run_performance_test(){
 	us_end = esp_timer_get_time();
 	us_taken = (us_end - us_start) / (float)RUN_COUNT;
 
-	ESP_LOGI(TAG, "get_color_range_hue: %.3f us", us_taken);
+	//ESP_LOGI(TAG, "get_color_range_hue: %.3f us", us_taken);
 
 }
 

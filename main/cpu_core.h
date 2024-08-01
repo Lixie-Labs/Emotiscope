@@ -69,9 +69,6 @@ void run_cpu() {
 }
 
 void loop_cpu(void *pvParameters) {
-	// Initialize all peripherals (system.h) 
-	init_system();
-
 	//configuration.current_mode.value.u32 = 9;
 	configuration.saturation.value.f32 = 0.99;
 	configuration.warmth.value.f32 = 0.0;
@@ -83,6 +80,9 @@ void loop_cpu(void *pvParameters) {
 	configuration.auto_color_cycle.value.u32 = 0;
 	configuration.color_mode.value.u32 = COLOR_MODE_GRADIENT;
 	configuration.blur.value.f32 = 0.0;
+
+	// Initialize all peripherals (system.h) 
+	init_system();
 
 	// Start GPU core
 	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 1, NULL, 0);

@@ -17,7 +17,7 @@ Functions for reading and storing data acquired by the I2S microphone
 #define I2S_BCLK_PIN  36
 #define I2S_DIN_PIN   37
 
-#define CHUNK_SIZE 128
+#define CHUNK_SIZE 256
 #define SAMPLE_RATE 25600
 
 #define SAMPLE_HISTORY_LENGTH 4096

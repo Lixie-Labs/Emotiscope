@@ -223,7 +223,7 @@ void init_rmt_driver() {
 	ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_a_config, &tx_chan_a));
 	ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_b_config, &tx_chan_b));
 
-	ESP_LOGI(TAG, "Install led strip encoder");
+	//ESP_LOGI(TAG, "Install led strip encoder");
     led_strip_encoder_config_t encoder_config = {
         .resolution = 10000000,
     };

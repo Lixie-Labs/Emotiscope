@@ -81,7 +81,7 @@ void broadcast_emotiscope_state(){
 					strcat(output_string, temp_buffer);
 				}
 				else{
-					ESP_LOGE(TAG, "ERROR: Unknown type in broadcast_emotiscope_state");
+					//ESP_LOGE(TAG, "ERROR: Unknown type in broadcast_emotiscope_state");
 				}
 			}
 
@@ -153,7 +153,7 @@ bool load_section_at( char* section_buffer, char* command, int16_t* byte_index )
 }
 
 void parse_emotiscope_packet(httpd_req_t* req){
-	//ESP_LOGI(TAG, "Parsing Emotiscope Packet...");
+	////ESP_LOGI(TAG, "Parsing Emotiscope Packet...");
 	int16_t num_bytes = strlen(websocket_packet_buffer);
 	int16_t byte_index = 0;
 
@@ -186,10 +186,10 @@ void parse_emotiscope_packet(httpd_req_t* req){
 		}
 		else{
 			if(chunk_type[0] == '\0'){
-				//ESP_LOGI(TAG, "PACKET HEADER: %s", section_buffer);
+				////ESP_LOGI(TAG, "PACKET HEADER: %s", section_buffer);
 			}
 			else{
-				//ESP_LOGE(TAG, "UNKNOWN CHUNK TYPE: %s", chunk_type);
+				////ESP_LOGE(TAG, "UNKNOWN CHUNK TYPE: %s", chunk_type);
 			}
 		}
 
@@ -201,12 +201,12 @@ void parse_emotiscope_packet(httpd_req_t* req){
 				memset(chunk_type, 0, 32);
 				load_section_at(section_buffer, websocket_packet_buffer, &byte_index);
 				memcpy(chunk_type, section_buffer, 32);
-				//ESP_LOGI(TAG, "PACKET CHUNK TYPE: %s", chunk_type);
+				////ESP_LOGI(TAG, "PACKET CHUNK TYPE: %s", chunk_type);
 
 				config_data_index = 0;
 			}
 			else{
-				//ESP_LOGI(TAG, "PACKET EOF");
+				////ESP_LOGI(TAG, "PACKET EOF");
 			}
 		}
 	}

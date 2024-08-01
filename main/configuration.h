@@ -17,13 +17,13 @@ size_t put_bytes(const char *key, const void *value, size_t len) {
 
 	esp_err_t err = nvs_set_blob(config_handle, key, value, len);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_set_blob fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_set_blob fail: %s %d", key, err);
 		return 0;
 	}
 
 	err = nvs_commit(config_handle);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_commit fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_commit fail: %s %d", key, err);
 		return 0;
 	}
 
@@ -39,7 +39,7 @@ size_t get_bytes_length(const char *key) {
 
 	esp_err_t err = nvs_get_blob(config_handle, key, NULL, &len);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_get_blob len fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_get_blob len fail: %s %d", key, err);
 		return 0;
 	}
 
@@ -54,13 +54,13 @@ size_t get_bytes(const char *key, void *buf, size_t max_len) {
 	}
 
 	if (len > max_len) {
-		ESP_LOGE(TAG, "not enough space in buffer: %u < %u", max_len, len);
+		//ESP_LOGE(TAG, "not enough space in buffer: %u < %u", max_len, len);
 		return 0;
 	}
 	
 	esp_err_t err = nvs_get_blob(config_handle, key, buf, &len);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_get_blob fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_get_blob fail: %s %d", key, err);
 		return 0;
 	}
 	
@@ -91,13 +91,13 @@ size_t put_long(const char *key, int32_t value) {
 	
 	esp_err_t err = nvs_set_i32(config_handle, key, value);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_set_i32 fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_set_i32 fail: %s %d", key, err);
 		return 0;
 	}
 	
 	err = nvs_commit(config_handle);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_commit fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_commit fail: %s %d", key, err);
 		return 0;
 	}
 	
@@ -113,7 +113,7 @@ int32_t get_long(const char *key, const int32_t default_value) {
 
 	esp_err_t err = nvs_get_i32(config_handle, key, &value);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_get_i32 fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_get_i32 fail: %s %d", key, err);
 		put_long(key, default_value);
 	}
 
@@ -128,13 +128,13 @@ size_t put_ulong(const char *key, uint32_t value) {
 
 	esp_err_t err = nvs_set_u32(config_handle, key, value);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_set_u32 fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_set_u32 fail: %s %d", key, err);
 		return 0;
 	}
 
 	err = nvs_commit(config_handle);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_commit fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_commit fail: %s %d", key, err);
 		return 0;
 	}
 	
@@ -150,7 +150,7 @@ uint32_t get_ulong(const char *key, const uint32_t default_value) {
 
 	esp_err_t err = nvs_get_u32(config_handle, key, &value);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_get_u32 fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_get_u32 fail: %s %d", key, err);
 		put_ulong(key, default_value);
 	}
 
@@ -166,18 +166,18 @@ size_t get_string(const char *key, char *value, const size_t max_len) {
 	
 	esp_err_t err = nvs_get_str(config_handle, key, NULL, &len);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_get_str len fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_get_str len fail: %s %d", key, err);
 		return 0;
 	}
 	
 	if (len > max_len) {
-		ESP_LOGE(TAG, "not enough space in value: %u < %u", max_len, len);
+		//ESP_LOGE(TAG, "not enough space in value: %u < %u", max_len, len);
 		return 0;
 	}
 	
 	err = nvs_get_str(config_handle, key, value, &len);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_get_str fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_get_str fail: %s %d", key, err);
 		return 0;
 	}
 	
@@ -192,13 +192,13 @@ size_t put_string(const char *key, const char *value) {
 
 	esp_err_t err = nvs_set_str(config_handle, key, value);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_set_str fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_set_str fail: %s %d", key, err);
 		return 0;
 	}
 	
 	err = nvs_commit(config_handle);
 	if (err) {
-		ESP_LOGE(TAG, "nvs_commit fail: %s %d", key, err);
+		//ESP_LOGE(TAG, "nvs_commit fail: %s %d", key, err);
 		return 0;
 	}
 	
@@ -219,14 +219,14 @@ config_item init_config_item(char* name, char* pretty_name, char* type_string, c
 
 	if(type == u32t){
 		item.value.u32 = get_ulong(name, default_value.u32);
-		ESP_LOGI(TAG, "Loaded %s from NVS as u32: %lu", name, item.value.u32);
+		//ESP_LOGI(TAG, "Loaded %s from NVS as u32: %lu", name, item.value.u32);
 		
 	} else if(type == i32t){
 		item.value.i32 = get_long(name, default_value.i32);
-		ESP_LOGI(TAG, "Loaded %s from NVS as i32: %li", name, item.value.i32);
+		//ESP_LOGI(TAG, "Loaded %s from NVS as i32: %li", name, item.value.i32);
 	} else if(type == f32t){
 		item.value.f32 = get_float(name, default_value.f32);
-		ESP_LOGI(TAG, "Loaded %s from NVS as f32: %.3f", name, item.value.f32);
+		//ESP_LOGI(TAG, "Loaded %s from NVS as f32: %.3f", name, item.value.f32);
 	}
 	
 	return item;
@@ -419,7 +419,7 @@ void load_configuration_defaults(){
 
 // Initialize NVS and the configuration struct with all config items
 void init_configuration(){
-	ESP_LOGI(TAG, "init_configuration()");
+	//ESP_LOGI(TAG, "init_configuration()");
 
 	// Initialize NVS
     esp_err_t err = nvs_flash_init();
@@ -431,10 +431,10 @@ void init_configuration(){
     }
     ESP_ERROR_CHECK( err );
 
-	ESP_LOGI(TAG, "Opening Non-Volatile Storage (NVS) handle... ");
+	//ESP_LOGI(TAG, "Opening Non-Volatile Storage (NVS) handle... ");
     err = nvs_open("emotiscope", NVS_READWRITE, &config_handle);
 	if (err != ESP_OK) {
-        ESP_LOGI(TAG, "Error (%s) opening NVS handle!", esp_err_to_name(err));
+        //ESP_LOGI(TAG, "Error (%s) opening NVS handle!", esp_err_to_name(err));
     }
 
 	// Load config from NVS
@@ -459,7 +459,7 @@ bool save_config() {
 		} else if(type == f32t){
 			put_float(item.name, item.value.f32);
 		} else {
-			ESP_LOGE(TAG, "Unknown type in save_config");
+			//ESP_LOGE(TAG, "Unknown type in save_config");
 			return false;
 		}
 	}
@@ -477,7 +477,7 @@ void sync_configuration_to_file_system() {
 	if (save_request_open == true) {
 		if ((t_now_ms - last_save_request_ms) >= MIN_SAVE_WAIT_MS) {
 			filesystem_ready = false;
-			ESP_LOGI(TAG, "SAVING NVS");
+			//ESP_LOGI(TAG, "SAVING NVS");
 			save_config();
 			save_request_open = false;
 			filesystem_ready = true;
@@ -497,20 +497,20 @@ void set_config_value_by_pretty_name(const char* config_pretty_name, const char*
 		// Pretty name
 		const char* pretty_name = item->pretty_name;
 
-		//ESP_LOGI(TAG, "Comparing %s to %s", pretty_name, config_pretty_name);
+		////ESP_LOGI(TAG, "Comparing %s to %s", pretty_name, config_pretty_name);
 
 		if(strcmp(pretty_name, config_pretty_name) == 0){
 			if(type == u32t){
 				item->value.u32 = atoi(new_config_value);
-				ESP_LOGI(TAG, "Setting u32 %s: %lu", item->name, item->value.u32);
+				//ESP_LOGI(TAG, "Setting u32 %s: %lu", item->name, item->value.u32);
 			} else if(type == i32t){
 				item->value.i32 = atoi(new_config_value);
-				ESP_LOGI(TAG, "Setting i32 %s: %li", item->name, item->value.i32);
+				//ESP_LOGI(TAG, "Setting i32 %s: %li", item->name, item->value.i32);
 			} else if(type == f32t){
 				item->value.f32 = atof(new_config_value);
-				ESP_LOGI(TAG, "Setting f32 %s: %.3f", item->name, item->value.f32);
+				//ESP_LOGI(TAG, "Setting f32 %s: %.3f", item->name, item->value.f32);
 			} else {
-				ESP_LOGE(TAG, "Unknown type in set_config_value_by_pretty_name: %d", type);
+				//ESP_LOGE(TAG, "Unknown type in set_config_value_by_pretty_name: %d", type);
 			}
 
 			break;

@@ -5,12 +5,12 @@ esp_err_t dsps_add_f32_ae32_fast(const float *input1, const float *input2, float
 esp_err_t dsps_mul_f32_ae32_fast(const float *input1, const float *input2, float *output, int len, int step);
 
 void test_asm(bool new_version){
-	ESP_LOGI(TAG, "########################################################");
+	//ESP_LOGI(TAG, "########################################################");
 	if(new_version == true){
-		ESP_LOGI(TAG, "NEW ASM TEST");
+		//ESP_LOGI(TAG, "NEW ASM TEST");
 	}
 	else{
-		ESP_LOGI(TAG, "OLD ASM TEST");
+		//ESP_LOGI(TAG, "OLD ASM TEST");
 	}
 
 	__attribute__((aligned(16)))
@@ -36,7 +36,7 @@ void test_asm(bool new_version){
 	}
 	int64_t t_end = esp_timer_get_time();
 
-	ESP_LOGI(TAG, "Microseconds to run 1,000 times: %lli", (t_end - t_start));
-	ESP_LOGI(TAG, "Output: %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f...", output[0], output[1], output[2], output[3], output[4], output[5], output[6], output[7], output[8], output[9]);
-	ESP_LOGI(TAG, "########################################################");
+	//ESP_LOGI(TAG, "Microseconds to run 1,000 times: %lli", (t_end - t_start));
+	//ESP_LOGI(TAG, "Output: %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f...", output[0], output[1], output[2], output[3], output[4], output[5], output[6], output[7], output[8], output[9]);
+	//ESP_LOGI(TAG, "########################################################");
 }

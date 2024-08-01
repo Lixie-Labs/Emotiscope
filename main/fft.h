@@ -1,5 +1,5 @@
 #define FFT_SIZE 256
-#define NUM_FFT_AVERAGE_SAMPLES 4
+#define NUM_FFT_AVERAGE_SAMPLES 2
 
 // FFT Stuffs
 __attribute__((aligned(16)))

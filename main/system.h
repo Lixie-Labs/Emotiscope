@@ -23,9 +23,9 @@ float get_cpu_temperature() {
 
 // Initialize the entire system before starting the main loops
 void init_system(){
-	ESP_LOGI(TAG, "init_system()");
+	////ESP_LOGI(TAG, "init_system()");
 
-	// Init USB Serial
+	// Init USB/Serial
 	extern void init_serial();
 	init_serial();
 

@@ -105,6 +105,7 @@ continue to develop and improve the Emotiscope Engine.
 // System
 #include "global_defines.h"
 #include "types.h"
+#include "serial.h"
 #include "system.h"
 #include "profiler.h"
 #include "configuration.h"
@@ -127,7 +128,6 @@ continue to develop and improve the Emotiscope Engine.
 // Comms
 #include "wireless.h"
 #include "packets.h"
-#include "serial.h"
 
 // Graphics
 #include "perlin.h"
