@@ -1,7 +1,7 @@
 void draw_pitch(){
 	start_profile(__COUNTER__, __func__);
 	
-	static const uint16_t PITCH_AVERAGE_SAMPLES = 4;
+	static const uint16_t PITCH_AVERAGE_SAMPLES = 8;
 	static const uint32_t led_to_sample_ratio = (AUTO_CORR_LENGTH>>1) / NUM_LEDS;
 	float auto_corr_image_average[PITCH_AVERAGE_SAMPLES+1][NUM_LEDS];
 	uint16_t average_index = 0;

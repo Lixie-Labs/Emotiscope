@@ -15,13 +15,16 @@ Main loop of the CPU core
 void run_cpu() {
 	start_profile(__COUNTER__, __func__);
 
-	static uint32_t iter = 0;
-	iter++;
-
 	// Update the FPS_CPU variable
 	watch_cpu_fps();  // (system.h)
 
-	run_indicator_light();
+	static uint8_t iter = 0;
+	iter++;
+	if(iter == 10){
+		iter = 0;
+		run_indicator_light();
+		sync_configuration_to_file_system(); // (configuration.h)
+	}
 
 	// Get new audio chunk from the I2S microphone
 	acquire_sample_chunk();	 // (microphone.h)
@@ -30,13 +33,9 @@ void run_cpu() {
 
 	calculate_magnitudes();  // (goertzel.h)
 
-	if(iter % 2 == 0){
-		// Perform FFT on the new audio data
-		perform_fft();	 // (fft.h)	
-	}
-	else{
-		estimate_pitch(); // (pitch.h)
-	}
+	perform_fft();	 // (fft.h)	
+	
+	estimate_pitch(); // (pitch.h)
 
 	get_chromagram();        // (goertzel.h)
 
@@ -46,11 +45,7 @@ void run_cpu() {
 
 	update_tempo();	 // (tempo.h)
 
-	sync_configuration_to_file_system(); // (configuration.h)
-
-	check_serial();
-
-	//broadcast_emotiscope_state(); // (packets.h)
+	//check_serial();
 
 	uint32_t processing_end_us = esp_timer_get_time(); // --------------------------------
 
@@ -69,20 +64,20 @@ void run_cpu() {
 }
 
 void loop_cpu(void *pvParameters) {
-	//configuration.current_mode.value.u32 = 9;
-	configuration.saturation.value.f32 = 0.99;
-	configuration.warmth.value.f32 = 0.0;
-	configuration.softness.value.f32 = 0.0;
-	configuration.speed.value.f32 = 0.75;
-	configuration.background.value.f32 = 0.15;
-	configuration.color_range.value.f32 = 0.66;
-	configuration.reverse_color_range.value.u32 = 0;
-	configuration.auto_color_cycle.value.u32 = 0;
-	configuration.color_mode.value.u32 = COLOR_MODE_GRADIENT;
-	configuration.blur.value.f32 = 0.0;
-
 	// Initialize all peripherals (system.h) 
 	init_system();
+
+	//configuration.current_mode.value.u32 = 9;
+	configuration.saturation.value.f32 = 0.99;
+	configuration.warmth.value.f32 = 0.4;
+	configuration.softness.value.f32 = 0.0;
+	configuration.speed.value.f32 = 0.75;
+	configuration.background.value.f32 = 0.00;
+	configuration.color_range.value.f32 = 0.50;
+	configuration.reverse_color_range.value.u32 = 0;
+	configuration.auto_color_cycle.value.u32 = 0;
+	configuration.color_mode.value.u32 = COLOR_MODE_PERLIN;
+	configuration.blur.value.f32 = 0.0;
 
 	// Start GPU core
 	(void)xTaskCreatePinnedToCore(loop_gpu, "loop_gpu", 8192, NULL, 1, NULL, 0);

@@ -1,7 +1,7 @@
 extern void parse_emotiscope_packet(httpd_req_t* req);
 
 // Websocket server
-static httpd_handle_t server = NULL;
+httpd_handle_t server = NULL;
 
 // Event group for WiFi events
 static EventGroupHandle_t s_wifi_event_group;
@@ -12,6 +12,11 @@ static EventGroupHandle_t s_wifi_event_group;
 char websocket_packet_buffer[1024];
 
 bool connected_to_wifi = false;
+
+struct async_resp_arg {
+    httpd_handle_t hd;
+    int fd;
+};
 
 // Transmit a WS packet
 esp_err_t wstx(httpd_req_t* req, char* data){
@@ -35,7 +40,7 @@ esp_err_t wstx(httpd_req_t* req, char* data){
 // Called whenever a WS packet is received
 esp_err_t wsrx(httpd_req_t* req){
     if (req->method == HTTP_GET) {
-        //ESP_LOGI(TAG, "Handshake done, the new connection was opened");
+        ESP_LOGI(TAG, "Handshake done, the new connection was opened");
         return ESP_OK;
     }
 
@@ -47,26 +52,35 @@ esp_err_t wsrx(httpd_req_t* req){
 	ws_pkt.payload = (uint8_t*)websocket_packet_buffer;
     
 	httpd_ws_recv_frame(req, &ws_pkt, 1024);
-	//ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
+	ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
 
 	parse_emotiscope_packet(req);
+
+	// Echo back
+	/*
+	esp_err_t ret = httpd_ws_send_frame(req, &ws_pkt);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
+    }
+	*/
 
     return ESP_OK;
 }
 
 esp_err_t wstx_broadcast(const char *message) {
-	////ESP_LOGI(TAG, "wstx_broadcast(\"%s\")", message);
+	/*
+	//ESP_LOGI(TAG, "wstx_broadcast(\"%s\")", message);
     size_t clients;
 
     int client_fds[CONFIG_LWIP_MAX_ACTIVE_TCP];
     
-    esp_err_t ret = httpd_get_client_list(server, &clients, client_fds);
+    esp_err_t ret = httpd_get_client_list(server, &clients, &client_fds);
     if (ret != ESP_OK) {
-		//ESP_LOGE(TAG, "httpd_get_client_list failed with %d", ret);
+		//ESP_LOGE(TAG, "httpd_get_client_list failed with %x", ret);
         return ret;
     }
 
-	//ESP_LOGI(TAG, "Num clients: %zu", clients);
+	ESP_LOGI(TAG, "Num clients: %zu", clients);
 
 	if (clients == 0) {
 		//ESP_LOGI(TAG, "No clients connected");
@@ -80,8 +94,12 @@ esp_err_t wstx_broadcast(const char *message) {
         ws_pkt.len = strlen(message);
         ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 
-        httpd_ws_send_frame(server, &ws_pkt);
+		ret = httpd_ws_send_frame_async(server, client_fds[i], &ws_pkt);
+		if (ret != ESP_OK) {
+			ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
+		}
     }
+	*/
 
     return ESP_OK;
 }
@@ -96,22 +114,31 @@ static const httpd_uri_t ws = {
 };
 
 // Start the websocket server
-static httpd_handle_t start_websocket_server(void){
-    httpd_handle_t server = NULL;
+void start_websocket_server(void){
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
     // Start the httpd server
-    //ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
+    ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
     if (httpd_start(&server, &config) == ESP_OK) {
+		ESP_LOGI(TAG, "Server started");
+
         // Registering the ws handler
-        //ESP_LOGI(TAG, "Registering URI handlers");
-        httpd_register_uri_handler(server, &ws);
-
-        return server;
+        ESP_LOGI(TAG, "Registering URI handlers");
+        if(httpd_register_uri_handler(server, &ws) == ESP_OK){
+			ESP_LOGI(TAG, "URI handler registered");
+		}
+		else{
+			ESP_LOGE(TAG, "Error registering URI handler");
+		}
+		
     }
+	else{
+		ESP_LOGE(TAG, "Error starting server!");
+	}
+}
 
-    //ESP_LOGI(TAG, "Error starting server!");
-    return NULL;
+void stop_websocket_server(void){
+	httpd_stop(server);
 }
 
 // Save SSID and PASS to NVS
@@ -184,17 +211,21 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 			esp_wifi_connect();  // Reconnect on disconnect
 			connection_attempts++;
 		}
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+    }
+	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         uart_print("GOT IP ADDRESS\n");
+		//usb_print("GOT IP ADDRESS\n");
+
+		char ip_address[16];
+		// convert IP to string
 
 		improv_current_state = IMPROV_CURRENT_STATE_PROVISIONED;
 		send_current_state();
 		
-
 		connected_to_wifi = true;
 
-		//ESP_LOGI(TAG, "Starting websocket server");
-		//server = start_websocket_server();
+		ESP_LOGI(TAG, "Starting websocket server");
+		start_websocket_server();
 
 		connection_attempts = 1;
     }

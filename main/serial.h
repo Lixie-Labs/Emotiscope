@@ -1,3 +1,9 @@
+#define USB_DEBUG_MODE (true) // Uncomment during development, comment out for production so that Improv WiFi works as intended
+
+#ifdef USB_DEBUG_MODE
+	#warning "LIXIE LABS --- USB_DEBUG_MODE is enabled, Improv WiFi will not work as intended! Disable this for production."
+#endif
+
 #define USB_BUF_SIZE (1024)
 #define USB_HISTORY_LENGTH 256
 
@@ -51,25 +57,35 @@ QueueHandle_t uart_queue;
 improv_current_state_t improv_current_state = IMPROV_CURRENT_STATE_READY;
 
 void uart_print(const char* str) {
-	uart_write_bytes(UART_NUM_0, str, strlen(str));
+	#ifndef USB_DEBUG_MODE
+		uart_write_bytes(UART_NUM_0, str, strlen(str));
+	#endif
 }
 
 void uart_printc(char c) {
-	uart_write_bytes(UART_NUM_0, &c, 1);
+	#ifndef USB_DEBUG_MODE
+		uart_write_bytes(UART_NUM_0, &c, 1);
+	#endif
 }
 
 void uart_printd(uint32_t num) {
-	char str[16];
-	sprintf(str, "%lu", num);
-	uart_write_bytes(UART_NUM_0, str, strlen(str));
+	#ifndef USB_DEBUG_MODE
+		char str[16];
+		sprintf(str, "%lu", num);
+		uart_write_bytes(UART_NUM_0, str, strlen(str));
+	#endif
 }
 
 void usb_print(const char* str) {
-	usb_serial_jtag_write_bytes(str, strlen(str), 20);
+	#ifndef USB_DEBUG_MODE
+		usb_serial_jtag_write_bytes(str, strlen(str), 20);
+	#endif
 }
 
 void usb_printc(char c) {
-	usb_serial_jtag_write_bytes(&c, 1, 20);
+	#ifndef USB_DEBUG_MODE
+		usb_serial_jtag_write_bytes(&c, 1, 20);
+	#endif
 }
 
 void reset_usb_history(){
@@ -83,14 +99,16 @@ void shift_history_left(uint8_t* array, uint16_t array_size, uint16_t shift_amou
 }
 
 void transmit_packet(uint8_t* packet, uint8_t packet_length) {
-	usb_serial_jtag_write_bytes(packet, packet_length, 20);
+	#ifndef USB_DEBUG_MODE
+		usb_serial_jtag_write_bytes(packet, packet_length, 20);
 
-	uart_print("TRANSMIT PACKET: ");
-	for(uint16_t i = 0; i < packet_length; i++){
-		uart_printd(packet[i]);
-		uart_printc(' ');
-	}
-	uart_printc('\n');
+		uart_print("TRANSMIT PACKET: ");
+		for(uint16_t i = 0; i < packet_length; i++){
+			uart_printd(packet[i]);
+			uart_printc(' ');
+		}
+		uart_printc('\n');
+	#endif
 }
 
 void calc_checksum(uint8_t* packet, uint8_t packet_length) {
@@ -111,7 +129,7 @@ void send_error_state(improv_error_state_t error_state) {
 		1, // Length
 		error_state,
 		0,  // Checksum
-		10, // Padding
+		10, // Padding (Thank you Julie!)
 	};
 
 	calc_checksum(error_state_packet, sizeof(error_state_packet));
@@ -483,56 +501,60 @@ void store_usb_data(char c) {
 }
 
 void init_serial(){
-	const uart_port_t uart_num = UART_NUM_0;
-	uart_config_t uart_config = {
-		.baud_rate = 115200,
-		.data_bits = UART_DATA_8_BITS,
-		.parity = UART_PARITY_DISABLE,
-		.stop_bits = UART_STOP_BITS_1,
-		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE
-	};
-	// Configure UART parameters
-	ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
-	ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, uart_buffer_size, uart_buffer_size, 10, &uart_queue, 0));
+	#ifndef USB_DEBUG_MODE
+		const uart_port_t uart_num = UART_NUM_0;
+		uart_config_t uart_config = {
+			.baud_rate = 115200,
+			.data_bits = UART_DATA_8_BITS,
+			.parity = UART_PARITY_DISABLE,
+			.stop_bits = UART_STOP_BITS_1,
+			.flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+		};
+		// Configure UART parameters
+		ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
+		ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, uart_buffer_size, uart_buffer_size, 10, &uart_queue, 0));
 
-    // Configure USB SERIAL JTAG
-    usb_serial_jtag_driver_config_t usb_serial_jtag_config = {
-        .rx_buffer_size = USB_BUF_SIZE,
-        .tx_buffer_size = USB_BUF_SIZE,
-    };
+		// Configure USB SERIAL JTAG
+		usb_serial_jtag_driver_config_t usb_serial_jtag_config = {
+			.rx_buffer_size = USB_BUF_SIZE,
+			.tx_buffer_size = USB_BUF_SIZE,
+		};
 
-    ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&usb_serial_jtag_config));
-	//fsync(fileno(stdout)); // flush stdout
+		ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&usb_serial_jtag_config));
+		//fsync(fileno(stdout)); // flush stdout
 
-	reset_usb_history();
+		reset_usb_history();
+	#endif
 }
 
 void check_serial(){
-	static int64_t last_state_send = 0;
-	int64_t t_now_serial = esp_timer_get_time();
-	if(t_now_serial - last_state_send > 3000000){
-		send_current_state();
-		last_state_send = t_now_serial;
-	}
-
-	// Read data from USB
-	memset(usb_rx_buffer, 0, USB_BUF_SIZE);
-	volatile int len = usb_serial_jtag_read_bytes(usb_rx_buffer, USB_BUF_SIZE-1, 1);
-
-	if (len) {
-		for(uint16_t i = 0; i < len; i++){
-			// Convert rx bytes into decimal and print
-			uint8_t decimal = usb_rx_buffer[i];
-			char str[5];
-			sprintf(str, "%d ", decimal);
-			//uart_write_bytes(UART_NUM_0, str, strlen(str));
+	#ifndef USB_DEBUG_MODE
+		static int64_t last_state_send = 0;
+		int64_t t_now_serial = esp_timer_get_time();
+		if(t_now_serial - last_state_send > 3000000){
+			send_current_state();
+			last_state_send = t_now_serial;
 		}
 
-		for(uint16_t i = 0; i < len; i++){
-			store_usb_data(usb_rx_buffer[i]);
+		// Read data from USB
+		memset(usb_rx_buffer, 0, USB_BUF_SIZE);
+		volatile int len = usb_serial_jtag_read_bytes(usb_rx_buffer, USB_BUF_SIZE-1, 1);
+
+		if (len) {
+			for(uint16_t i = 0; i < len; i++){
+				// Convert rx bytes into decimal and print
+				uint8_t decimal = usb_rx_buffer[i];
+				char str[5];
+				sprintf(str, "%d ", decimal);
+				//uart_write_bytes(UART_NUM_0, str, strlen(str));
+			}
+
+			for(uint16_t i = 0; i < len; i++){
+				store_usb_data(usb_rx_buffer[i]);
+			}
+
+			search_for_improv_packet();
+
 		}
-
-		search_for_improv_packet();
-
-	}
+	#endif
 }

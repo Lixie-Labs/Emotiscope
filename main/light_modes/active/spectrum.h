@@ -8,7 +8,7 @@ void draw_spectrum() {
 			CRGBF color = hsv(
 				get_color_range_hue(progress),
 				configuration.saturation.value.f32,
-				mag
+				sqrtf(mag)
 			);
 
 			leds[ (NUM_LEDS>>1)    + i] = color;
@@ -23,7 +23,7 @@ void draw_spectrum() {
 			CRGBF color = hsv(
 				get_color_range_hue(progress),
 				configuration.saturation.value.f32,
-				mag
+				sqrtf(mag)
 			);
 
 			leds[i] = color;

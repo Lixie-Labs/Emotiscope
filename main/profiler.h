@@ -1,5 +1,11 @@
 //#define PROFILER_ENABLED true // Uncomment to enable, comment to disable
 
+#ifdef __OPTIMIZE__
+    #define OPT_LEVEL 2
+#else
+    #define OPT_LEVEL 0
+#endif
+
 int64_t t_now_ms = 0;
 int64_t t_now_us = 0;
 
@@ -21,9 +27,18 @@ uint8_t function_stack_pointer[2] = { 0, 0 };
 
 profiled_function profiled_functions[128];
 
+void check_optimization_level() {
+	ESP_LOGI(TAG, "Optimization level: %u", OPT_LEVEL);
+	if (OPT_LEVEL == 0) {
+		ESP_LOGE(TAG, "!--- WARNING: Optimization level is set to 0, Emotiscope running slower than normal!");
+	}
+}
+
 void init_profiler(){
 	memset(function_stack, -1, sizeof(function_stack));
 	memset(profiled_functions, 0, sizeof(profiled_function)*128);
+
+	check_optimization_level();
 }
 
 void print_function_profile() {
