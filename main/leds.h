@@ -92,6 +92,9 @@ void clear_display(float keep){
 
 CRGBF hsv(float h, float s, float v) {
 	CRGBF return_val;
+
+	s *= s; // Square the saturation to make it more visually linear
+
 	// Normalize hue to range [0, 1]
 	h = fmodf(h, 1.0f);
 	if (h < 0.0f) h += 1.0f;
@@ -348,7 +351,7 @@ void apply_brightness() {
 		return;
 	}
 
-	float brightness_val = 0.3 + (configuration.brightness.value.f32*0.7);
+	float brightness_val = 0.1 + (configuration.brightness.value.f32*0.9);
 
 	scale_CRGBF_array_by_constant(leds, brightness_val, NUM_LEDS);
 
@@ -532,7 +535,12 @@ void update_auto_color(){
 }
 
 void clamp_configuration(){
-	configuration.color.value.f32 = fmodf(configuration.color.value.f32, 1.0);
+	if(configuration.color.value.f32 < 0.0){
+		configuration.color.value.f32 += 1.0;
+	}
+	else if(configuration.color.value.f32 > 1.0){
+		configuration.color.value.f32 -= 1.0;
+	}
 }
 
 /*

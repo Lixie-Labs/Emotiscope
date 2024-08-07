@@ -319,8 +319,8 @@ void calculate_magnitudes() {
 	}
 
 	// Set a minimum "floor" to auto-range for, below this we don't auto-range anymore
-	if (max_val_smooth < 0.00001) {
-		max_val_smooth = 0.00001;
+	if (max_val_smooth < 0.000001) {
+		max_val_smooth = 0.000001;
 	}
 
 	// Calculate auto-ranging scale

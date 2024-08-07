@@ -150,7 +150,8 @@ typedef enum {
 	ui_type_none,
 	ui_type_slider,
 	ui_type_toggle,
-	ui_type_menu_toggle
+	ui_type_menu_toggle,
+	ui_type_mode,
 } ui_type_t;
 
 typedef struct {
@@ -170,21 +171,30 @@ typedef struct {
 
 // Stores all of Emotiscope's configurable settings
 typedef struct{
+	// Sliders
 	config_item brightness;
 	config_item softness; 
 	config_item color;
-	config_item warmth;
-	config_item color_range;
-	config_item speed;
 	config_item saturation;
+	config_item color_range;
+	config_item warmth;
 	config_item background;
-	config_item current_mode;
+	config_item blur;
+
+	// Toggles
 	config_item mirror_mode;
+	config_item color_mode;
+	config_item auto_color_cycle;
+	config_item reverse_color_range;	
+
+	// Mode
+	config_item current_mode;
+
+	// Menu Toggles
 	config_item screensaver;
 	config_item temporal_dithering;
-	config_item auto_color_cycle;
-	config_item reverse_color_range;
-	config_item blur;
 	config_item show_ui;
-	config_item color_mode;
+
+	// Deprecated
+	config_item speed;
 } config;

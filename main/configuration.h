@@ -330,9 +330,9 @@ void load_configuration_defaults(){
 		"current_mode",
 		"Current Mode",
 		"u32",
-		"t",
+		"m",
 		u32t,
-		ui_type_menu_toggle,
+		ui_type_mode,
 		(config_value){.u32 = 1} // <-- Default value
 	);
 
@@ -350,9 +350,9 @@ void load_configuration_defaults(){
 		"screensaver",
 		"Screensaver",
 		"u32",
-		"t",
+		"mt",
 		u32t,
-		ui_type_toggle,
+		ui_type_menu_toggle,
 		(config_value){.u32 = 1} // <-- Default value
 	);
 
@@ -360,9 +360,9 @@ void load_configuration_defaults(){
 		"dithering",
 		"Temporal Dithering",
 		"u32",
-		"t",
+		"mt",
 		u32t,
-		ui_type_toggle,
+		ui_type_menu_toggle,
 		(config_value){.u32 = 1} // <-- Default value
 	);
 
@@ -400,9 +400,9 @@ void load_configuration_defaults(){
 		"show_ui",
 		"Show UI",
 		"u32",
-		"t",
+		"mt",
 		u32t,
-		ui_type_toggle,
+		ui_type_menu_toggle,
 		(config_value){.u32 = 1} // <-- Default value
 	);
 
