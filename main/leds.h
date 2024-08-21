@@ -93,7 +93,7 @@ void clear_display(float keep){
 CRGBF hsv(float h, float s, float v) {
 	CRGBF return_val;
 
-	s *= s; // Square the saturation to make it more visually linear
+	//s *= s; // Square the saturation to make it more visually linear
 
 	// Normalize hue to range [0, 1]
 	h = fmodf(h, 1.0f);

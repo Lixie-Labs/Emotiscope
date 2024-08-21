@@ -137,14 +137,14 @@ void calculate_novelty_scale_factor() {
 	// Get novelty curve max value for auto-scaling later
 	float max_val = 0.0;
 	for(uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i+=4){
-		max_val = fmaxf(max_val, novelty_curve[i+0]);
-		max_val = fmaxf(max_val, novelty_curve[i+1]);
-		max_val = fmaxf(max_val, novelty_curve[i+2]);
-		max_val = fmaxf(max_val, novelty_curve[i+3]);
+		max_val = fmaxf(max_val, novelty_curve[ i + 0 ]);
+		max_val = fmaxf(max_val, novelty_curve[ i + 1 ]);
+		max_val = fmaxf(max_val, novelty_curve[ i + 2 ]);
+		max_val = fmaxf(max_val, novelty_curve[ i + 3 ]);
 	}
-	max_val = fmaxf(0.00000001, max_val);
-	float scale_factor_raw = 1.0 / max_val;
-	novelty_scale_factor = novelty_scale_factor * 0.9 + scale_factor_raw * 0.1;
+	max_val = fmaxf(0.0000000001, max_val);
+	float scale_factor_raw = 1.0 / (max_val * 0.5);
+	novelty_scale_factor = novelty_scale_factor * 0.7 + scale_factor_raw * 0.3;
 
 	end_profile();
 }
@@ -166,10 +166,15 @@ void calculate_magnitude_of_tempo(int16_t tempo_bin) {
 
 		float sample = novelty_curve[index];
 		sample *= novelty_scale_factor;
+		clip_float(sample);
+
+		float fade = index / (float)NOVELTY_HISTORY_LENGTH;
+		sample *= fade;
 
 		// convert to AC
-		sample -= 0.5;
-		sample *= 2.0;
+		//sample -= 0.5;
+		//sample *= 2.0;
+		//sample = clip_float(sample);
 
 		float q0 = tempi[tempo_bin].coeff * q1 - q2 + (sample) * window_lookup[(uint32_t)window_pos];
 		q2 = q1;
@@ -202,7 +207,7 @@ void calculate_magnitude_of_tempo(int16_t tempo_bin) {
 
 	float scale = (0.7 * progress) + 0.3;
 
-	normalized_magnitude *= scale;
+	//normalized_magnitude *= scale;
 
 	tempi[tempo_bin].magnitude_full_scale = normalized_magnitude;
 
@@ -243,6 +248,8 @@ void update_tempo() {
 			scaled_magnitude = 1.0;
 		}
 
+		scaled_magnitude = scaled_magnitude * scaled_magnitude;
+
 		tempi[i].magnitude = scaled_magnitude * scaled_magnitude;
 	}
 
@@ -263,10 +270,10 @@ void reduce_tempo_history(float reduction_amount) {
 
 	dsps_mulc_f32_ae32(novelty_curve, novelty_curve, NOVELTY_HISTORY_LENGTH, reduction_amount_inv, 1, 1);
 	for (uint16_t i = 0; i < NOVELTY_HISTORY_LENGTH; i+=4) {
-		novelty_curve[i+0] = fmaxf(novelty_curve[i+0], 0.0000001f);	// never go full zero
-		novelty_curve[i+1] = fmaxf(novelty_curve[i+1], 0.0000001f);
-		novelty_curve[i+2] = fmaxf(novelty_curve[i+2], 0.0000001f);
-		novelty_curve[i+3] = fmaxf(novelty_curve[i+3], 0.0000001f);
+		novelty_curve[i+0] = fmaxf(novelty_curve[i+0], 0.00000001f);	// never go full zero
+		novelty_curve[i+1] = fmaxf(novelty_curve[i+1], 0.00000001f);
+		novelty_curve[i+2] = fmaxf(novelty_curve[i+2], 0.00000001f);
+		novelty_curve[i+3] = fmaxf(novelty_curve[i+3], 0.00000001f);
 	}
 
 	end_profile();
@@ -317,17 +324,19 @@ void update_novelty() {
 		static float fft_last[FFT_SIZE>>1];
 
 		float current_novelty = 0.0;
-		for (uint16_t i = 0; i < (FFT_SIZE>>1); i+=4) {
-			current_novelty += fmaxf(0.0f, fft_max[i+0] - fft_last[i+0]);
-			current_novelty += fmaxf(0.0f, fft_max[i+1] - fft_last[i+1]);
-			current_novelty += fmaxf(0.0f, fft_max[i+2] - fft_last[i+2]);
-			current_novelty += fmaxf(0.0f, fft_max[i+3] - fft_last[i+3]);
+		for (uint16_t i = 0; i < (FFT_SIZE>>1); i+=1) {
+			if(i < 16 || i >= 96){
+				current_novelty += fmaxf(0.0f, fft_max[i] - fft_last[i]);
+			}
+			else{
+				current_novelty += fmaxf(0.0f, fft_max[i]*0.5 - fft_last[i]);
+			}
 		}
 
 		dsps_memcpy_aes3(fft_last, fft_max, (FFT_SIZE>>1) * sizeof(float));
 		dsps_memset_aes3(fft_max, 0.0, (FFT_SIZE>>1) * sizeof(float));
 
-		current_novelty /= (float)(FFT_SIZE>>1);
+		current_novelty /= 30;
 
 		check_silence(current_novelty);
 

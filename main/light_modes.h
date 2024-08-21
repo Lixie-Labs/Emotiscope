@@ -34,6 +34,7 @@ Functions for outputting computed data in beautiful fashion to the LEDs based on
 #include "light_modes/system/self_test.h"
 #include "light_modes/system/presets.h"
 
+#include "light_modes/beta/temp.h"
 #include "light_modes/beta/debug.h"
 #include "light_modes/beta/tempiscope.h"
 
@@ -58,6 +59,7 @@ light_mode light_modes[] = {
 	{ "Perlin",		  	 LIGHT_MODE_TYPE_INACTIVE,  &draw_perlin        },
 
 	{ "Debug",           LIGHT_MODE_TYPE_ACTIVE,    &draw_debug         },
+	{ "TEMP",            LIGHT_MODE_TYPE_ACTIVE,    &draw_temp          },
 	{ "Tempiscope",      LIGHT_MODE_TYPE_ACTIVE,    &draw_tempiscope    },
 
 	// System Modes

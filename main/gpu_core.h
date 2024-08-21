@@ -47,9 +47,9 @@ void run_gpu() {
 
 	// DRAWING ---------------------------------------------------
 
-
 	clear_display(0.0);
 	light_modes[configuration.current_mode.value.u32].draw();
+	//draw_debug();  // (debug.h)
 
 	apply_background(configuration.background.value.f32);
 	apply_blur( configuration.blur.value.f32 * 12.0 );

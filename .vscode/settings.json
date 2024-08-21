@@ -29,6 +29,7 @@
 	"string": "c",
 	"string_view": "c",
 	"span": "c",
-	"standby.h": "c"
+	"standby.h": "c",
+	"debug.h": "c"
 }
 }

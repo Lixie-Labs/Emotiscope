@@ -41,7 +41,7 @@ void run_cpu() {
 
 	run_vu(); // (vu.h)
 
-	read_touch(); // (touch.h)
+	//read_touch(); // (touch.h)
 
 	update_tempo();	 // (tempo.h)
 
