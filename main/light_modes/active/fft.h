@@ -19,6 +19,7 @@ void draw_fft(){
 			leds[i] = color;
 		}
 	}
+	
 	else if(configuration.mirror_mode.value.u32 == true){
 		for(uint16_t i = 0; i < NUM_LEDS>>1; i++){
 			float progress = num_leds_float_lookup[i<<1];
@@ -33,6 +34,7 @@ void draw_fft(){
 			leds[((NUM_LEDS>>1) - 1) - i] = color;
 		}
 	}
+	
 
 	end_profile();
 }

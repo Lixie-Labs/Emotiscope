@@ -1,4 +1,6 @@
-//#define PROFILER_ENABLED true // Uncomment to enable, comment to disable
+#define PROFILER_ENABLED true // Uncomment to enable, comment to disable
+
+#define MAX_GRAPH_SIZE 128
 
 #ifdef __OPTIMIZE__
     #define OPT_LEVEL 2
@@ -42,7 +44,9 @@ void init_profiler(){
 }
 
 void print_function_profile() {
-	//ESP_LOGI(TAG, "Function Profile ----------------------");
+	ESP_LOGI(TAG, "System Info ---------------------------");
+	ESP_LOGI(TAG, "IP Address: %s", ip_str);
+	ESP_LOGI(TAG, "Function Profile ----------------------");
 	
 	uint16_t num_profiled_functions = 0;
 	for (uint8_t i = 0; i < 128; i++) {
@@ -50,27 +54,27 @@ void print_function_profile() {
 			num_profiled_functions++;
 		}
 	}
-	//ESP_LOGI(TAG, "Profiled functions: %u\n", num_profiled_functions);
+	ESP_LOGI(TAG, "Profiled functions: %u\n", num_profiled_functions);
 
-	//ESP_LOGI(TAG, "CPU Core ---------------");
+	ESP_LOGI(TAG, "CPU Core ############################");
 	uint32_t max_cpu_hits = 0;
 	for (uint8_t i = 0; i < 128; i++) {
-		max_cpu_hits = MAX(profiled_functions[i].hits[0], max_cpu_hits);
-	}
-	for (uint8_t i = 0; i < 128; i++) {
-		if (profiled_functions[i].hits[0] > 0) {
-			//ESP_LOGI(TAG, "%s: %.2f%% %lu", profiled_functions[i].name, (profiled_functions[i].hits[0]/(float)max_cpu_hits)*100.0, profiled_functions[i].hits[0]);
-		}
-	}
-
-	//ESP_LOGI(TAG, "\nGPU Core ---------------");
-	uint32_t max_gpu_hits = 0;
-	for (uint8_t i = 0; i < 128; i++) {
-		max_gpu_hits = MAX(profiled_functions[i].hits[1], max_gpu_hits);
+		max_cpu_hits = MAX(profiled_functions[i].hits[1], max_cpu_hits);
 	}
 	for (uint8_t i = 0; i < 128; i++) {
 		if (profiled_functions[i].hits[1] > 0) {
-			//ESP_LOGI(TAG, "%s: %.2f%% %lu", profiled_functions[i].name, (profiled_functions[i].hits[1]/(float)max_gpu_hits)*100.0, profiled_functions[i].hits[1]);
+			ESP_LOGI(TAG, "%s: %.2f%% %lu", profiled_functions[i].name, (profiled_functions[i].hits[1]/(float)max_cpu_hits)*100.0, profiled_functions[i].hits[1]);
+		}
+	}
+
+	ESP_LOGI(TAG, "GPU Core ############################");
+	uint32_t max_gpu_hits = 0;
+	for (uint8_t i = 0; i < 128; i++) {
+		max_gpu_hits = MAX(profiled_functions[i].hits[0], max_gpu_hits);
+	}
+	for (uint8_t i = 0; i < 128; i++) {
+		if (profiled_functions[i].hits[0] > 0) {
+			ESP_LOGI(TAG, "%s: %.2f%% %lu", profiled_functions[i].name, (profiled_functions[i].hits[0]/(float)max_gpu_hits)*100.0, profiled_functions[i].hits[0]);
 		}
 	}
 
@@ -79,7 +83,7 @@ void print_function_profile() {
 		profiled_functions[i].hits[1] = 0;
 	}
 
-	//ESP_LOGI(TAG, "----------------------------------------");
+	ESP_LOGI(TAG, "----------------------------------------");
 }
 
 inline void log_function_stack(){

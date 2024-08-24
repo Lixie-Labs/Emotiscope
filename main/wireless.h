@@ -52,17 +52,9 @@ esp_err_t wsrx(httpd_req_t* req){
 	ws_pkt.payload = (uint8_t*)websocket_packet_buffer;
     
 	httpd_ws_recv_frame(req, &ws_pkt, 1024);
-	ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
+	//ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
 
 	parse_emotiscope_packet(req);
-
-	// Echo back
-	/*
-	esp_err_t ret = httpd_ws_send_frame(req, &ws_pkt);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
-    }
-	*/
 
     return ESP_OK;
 }
@@ -214,10 +206,12 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
     }
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         uart_print("GOT IP ADDRESS\n");
-		//usb_print("GOT IP ADDRESS\n");
 
-		char ip_address[16];
-		// convert IP to string
+		ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+		snprintf(ip_str, sizeof(ip_str), IPSTR, IP2STR(&event->ip_info.ip));
+		ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+
+		ESP_LOGI(TAG, "IP Address: %s", ip_str);
 
 		improv_current_state = IMPROV_CURRENT_STATE_PROVISIONED;
 		send_current_state();

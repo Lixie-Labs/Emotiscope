@@ -31,7 +31,18 @@ void run_cpu() {
 
 	int64_t processing_start_us = esp_timer_get_time(); // -------------------------------
 
+	int64_t start_time;
+	int64_t end_time;
+	int64_t duration;
+
+	static uint8_t step = 0;
+	step++;
+	
+	start_time = esp_timer_get_time();
 	calculate_magnitudes();  // (goertzel.h)
+	end_time = esp_timer_get_time();
+	duration = end_time - start_time;
+	if(step == 0){ ESP_LOGI(TAG, "GOR: %lld us", duration); }
 
 	perform_fft();	 // (fft.h)	
 	
@@ -41,7 +52,7 @@ void run_cpu() {
 
 	run_vu(); // (vu.h)
 
-	//read_touch(); // (touch.h)
+	read_touch(); // (touch.h)
 
 	update_tempo();	 // (tempo.h)
 
@@ -57,6 +68,8 @@ void run_cpu() {
 	CPU_CORE_USAGE = audio_frame_to_processing_ratio;
 
 	update_stats(); // (profiler.h)
+
+	run_debug_graph(); // (graph.h)
 
 	//check_boot_button();
 

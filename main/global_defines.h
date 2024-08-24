@@ -9,6 +9,10 @@
 -----------------------------------------------------------------------------
 */
 
+// CORE ID for each core
+#define GPU_CORE ( 0 )
+#define CPU_CORE ( 1 )
+
 // It won't void any kind of stupid warranty, but things *may* break at this point if you change this number.
 #define NUM_LEDS ( 128 ) // MUST be divisible by 2
 
@@ -16,22 +20,23 @@
 #define NUM_FREQS ( 64 ) 
 
 // Number of times per second "novelty" is logged
-#define NOVELTY_LOG_HZ (50)
+#define NOVELTY_LOG_HZ ( 50 )
 
 // 50 FPS for 10.24 seconds
-#define NOVELTY_HISTORY_LENGTH (512)
+#define NOVELTY_HISTORY_LENGTH ( 512 )
 
 // TEMPO_LOW to TEMPO_HIGH
-#define NUM_TEMPI (96)
+#define NUM_TEMPI ( 96 )
 
 // BPM range
-#define TEMPO_LOW (60)
-#define TEMPO_HIGH (TEMPO_LOW + NUM_TEMPI)
+#define TEMPO_LOW ( 60 )
+#define TEMPO_HIGH ( TEMPO_LOW + NUM_TEMPI )
 
 // How far forward or back in time the beat phase is shifted
-#define BEAT_SHIFT_PERCENT (0.0)
+#define BEAT_SHIFT_PERCENT ( 0.0 )
 
-#define REFERENCE_FPS 100
+// Used to calculate per frame "delta" similar to a game engine
+#define REFERENCE_FPS ( 100 )
 
 // Set later by physical traces on the PCB
 uint8_t HARDWARE_VERSION = 0;
@@ -39,6 +44,7 @@ uint8_t HARDWARE_VERSION = 0;
 // WiFi credentials
 char wifi_ssid[128] = { 0 };
 char wifi_pass[128] = { 0 };
+char ip_str[20] = "";
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

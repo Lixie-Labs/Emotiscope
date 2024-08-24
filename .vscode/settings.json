@@ -1,6 +1,6 @@
 {
 "C_Cpp.intelliSenseEngine": "default",
-"idf.portWin": "COM9",
+"idf.portWin": "COM36",
 "idf.adapterTargetName": "esp32s3",
 "idf.openOcdConfigs": [
 	"board/esp32s3-builtin.cfg"
@@ -30,6 +30,7 @@
 	"string_view": "c",
 	"span": "c",
 	"standby.h": "c",
-	"debug.h": "c"
+	"debug.h": "c",
+	"leds.h": "c"
 }
 }

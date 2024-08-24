@@ -501,7 +501,9 @@ void store_usb_data(char c) {
 }
 
 void init_serial(){
-	#ifndef USB_DEBUG_MODE
+	#ifdef USB_DEBUG_MODE
+		esp_log_level_set("*", ESP_LOG_INFO);
+	#else
 		const uart_port_t uart_num = UART_NUM_0;
 		uart_config_t uart_config = {
 			.baud_rate = 115200,

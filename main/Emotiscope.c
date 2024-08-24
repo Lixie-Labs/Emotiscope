@@ -84,6 +84,8 @@ continue to develop and improve the Emotiscope Engine.
 #include <nvs.h>
 #include <freertos/event_groups.h>
 #include <perfmon.h>
+#include <esp_netif.h>
+#include <lwip/inet.h>
 
 // Peripherals
 #include <driver/temperature_sensor.h>
@@ -136,6 +138,9 @@ continue to develop and improve the Emotiscope Engine.
 #include "standby.h"
 #include "screensaver.h"
 #include "light_modes.h"
+
+// Debug Graphing
+#include "graph.h"
 
 // Testing
 #include "testing.h"
