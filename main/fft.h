@@ -6,6 +6,9 @@ __attribute__((aligned(16)))
 float fft_input[FFT_SIZE];
 
 __attribute__((aligned(16)))
+float fft_input_filtered[FFT_SIZE];
+
+__attribute__((aligned(16)))
 float fft_window[FFT_SIZE];
 
 __attribute__((aligned(16)))
@@ -18,7 +21,23 @@ __attribute__((aligned(16)))
 float fft_smooth[1 + NUM_FFT_AVERAGE_SAMPLES][FFT_SIZE>>1]; // One slot [0] for output, others as input for averaging
 uint16_t fft_averaging_index = 1;
 
+//const float fft_high_frequency = 1000.0; 
+const float fft_high_q_factor = 0.7;
+float fft_high_coeffs_lpf[5];
+float fft_high_w_lpf[5] = {0, 0};
+
+void init_fft_high_filter(){
+	esp_err_t ret = ESP_OK;
+    
+    ret = dsps_biquad_gen_lpf_f32(fft_high_coeffs_lpf, 0.25, fft_high_q_factor);
+    if (ret  != ESP_OK) {
+        //ESP_LOGE(TAG, "Operation error = %i", ret);
+        return;
+    }
+}
+
 void init_fft(){
+	init_fft_high_filter();
 	dsps_fft4r_init_fc32(NULL, FFT_SIZE << 1);
 	dsps_wind_hann_f32(fft_window, FFT_SIZE);
 }
@@ -27,18 +46,27 @@ void perform_fft(){
 	start_profile(__COUNTER__, __func__);
 	dsps_memset_aes3(fft_input_complex, 0, sizeof(float) * (FFT_SIZE << 1));
 
-	const uint8_t step_size = 3;
 	for(uint16_t i = 0; i < FFT_SIZE; i++){
-		fft_input[i] = sample_history[((SAMPLE_HISTORY_LENGTH-1) - (FFT_SIZE*step_size)) + i*step_size ];
+		fft_input[i] = sample_history_half_rate[
+			(
+				((SAMPLE_HISTORY_LENGTH)-1) - (FFT_SIZE)
+			)
+			+
+			i
+		];
 	}
+
+	// LPF
+	//dsps_biquad_f32(fft_input, fft_input_filtered, FFT_SIZE, fft_high_coeffs_lpf, fft_high_w_lpf);
+	dsps_memcpy_aes3(fft_input_filtered, fft_input, sizeof(float)*FFT_SIZE);
 
 	static uint8_t step = 0;
 	step++;
 	int64_t start_time = esp_timer_get_time();
-	dsps_mul_f32_ae32_fast(fft_input, fft_window, fft_input, FFT_SIZE, 1);
+	dsps_mul_f32_ae32_fast(fft_input_filtered, fft_window, fft_input_filtered, FFT_SIZE, 1);
 
 	for(uint16_t i = 0; i < FFT_SIZE; i+=1){
-		fft_input_complex[ (i<<1) + 0 ] = fft_input[i+0];
+		fft_input_complex[ (i<<1) + 0 ] = fft_input_filtered[i+0];
 	}
 
 	dsps_fft4r_fc32(fft_input_complex, FFT_SIZE);

@@ -17,13 +17,13 @@ Functions for reading and storing data acquired by the I2S microphone
 #define I2S_BCLK_PIN  36
 #define I2S_DIN_PIN   37
 
-#define CHUNK_SIZE 256
-#define SAMPLE_RATE 25600
+#define SAMPLE_RATE 12800
+#define CHUNK_SIZE (SAMPLE_RATE / 100) // 128
 
 #define SAMPLE_HISTORY_LENGTH 4096
 
 float sample_history[SAMPLE_HISTORY_LENGTH];
-float downsampled_history[SAMPLE_HISTORY_LENGTH];
+float sample_history_half_rate[SAMPLE_HISTORY_LENGTH];
 const float recip_scale = 1.0 / 131072.0; // max 18 bit signed value
 
 i2s_chan_handle_t rx_handle;
@@ -71,13 +71,17 @@ void init_microphone(){
 	i2s_channel_enable(rx_handle);
 }
 
-void downsample_chunk(float* chunk, float* output, uint16_t input_chunk_length){
-	for(uint16_t i = 0; i < input_chunk_length>>1; i+=4){
-		output[i+0] = chunk[(i+0) << 1];
-		output[i+1] = chunk[(i+1) << 1];
-		output[i+2] = chunk[(i+2) << 1];
-		output[i+3] = chunk[(i+3) << 1];
+void downsample_chunk(float* input, float* output, uint32_t input_length){
+	for(uint32_t i = 0; i < input_length>>1; i++){
+		output[i] = (
+			input[(i<<1) + 0]
+			+
+			input[(i<<1) + 1]
+		);
 	}
+
+	// Divide by two
+	dsps_mulc_f32_ae32_fast(output, output, input_length>>1, 0.5, 1, 1);
 }
 
 void acquire_sample_chunk() {
@@ -116,7 +120,7 @@ void acquire_sample_chunk() {
 	shift_and_copy_arrays(sample_history, SAMPLE_HISTORY_LENGTH, new_samples, CHUNK_SIZE);
 
 	// Shift and copy downsampled chunk to downsampled history
-	shift_and_copy_arrays(downsampled_history, SAMPLE_HISTORY_LENGTH, new_samples_downsampled, CHUNK_SIZE>>1);
+	shift_and_copy_arrays(sample_history_half_rate, SAMPLE_HISTORY_LENGTH, new_samples_downsampled, CHUNK_SIZE>>1);
 
 	end_profile();
 }

@@ -41,8 +41,9 @@ void init_pitch_filters(){
 
 void apply_pitch_filters(){
 	// HPF
-	dsps_biquad_f32(downsampled_history, downsampled_history_filtered, SAMPLE_HISTORY_LENGTH, low_coeffs_lpf, low_w_lpf);
-	for(uint16_t i = 0; i < SAMPLE_HISTORY_LENGTH; i+=4){ // LPF to HPF
+	/*
+	dsps_biquad_f32(downsampled_history, downsampled_history_filtered, SAMPLE_HISTORY_LENGTH>>1, low_coeffs_lpf, low_w_lpf);
+	for(uint16_t i = 0; i < SAMPLE_HISTORY_LENGTH>>1; i+=4){ // LPF to HPF
 		downsampled_history_filtered[i+0] = downsampled_history[i+0] - downsampled_history_filtered[i+0];
 		downsampled_history_filtered[i+1] = downsampled_history[i+1] - downsampled_history_filtered[i+1];
 		downsampled_history_filtered[i+2] = downsampled_history[i+2] - downsampled_history_filtered[i+2];
@@ -50,11 +51,12 @@ void apply_pitch_filters(){
 	}
 
 	// LPF
-	dsps_biquad_f32(downsampled_history_filtered, downsampled_history_filtered, SAMPLE_HISTORY_LENGTH, high_coeffs_lpf, high_w_lpf);
-
+	dsps_biquad_f32(downsampled_history_filtered, downsampled_history_filtered, SAMPLE_HISTORY_LENGTH>>1, high_coeffs_lpf, high_w_lpf);
+	*/
 }
 
 void estimate_pitch(){
+	/*
 	start_profile(__COUNTER__, __func__);
 	apply_pitch_filters();
 
@@ -86,4 +88,5 @@ void estimate_pitch(){
 	}
 
 	end_profile();
+	*/
 }

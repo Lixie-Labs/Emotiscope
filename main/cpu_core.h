@@ -46,7 +46,7 @@ void run_cpu() {
 
 	perform_fft();	 // (fft.h)	
 	
-	estimate_pitch(); // (pitch.h)
+	//estimate_pitch(); // (pitch.h)
 
 	get_chromagram();        // (goertzel.h)
 
