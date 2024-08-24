@@ -98,7 +98,7 @@ void perform_fft(){
 	float auto_scale = 1.0 / max_val;
 	static float auto_scale_smooth = 1.0;
 
-	auto_scale_smooth = auto_scale_smooth * 0.9 + auto_scale * 0.1;
+	auto_scale_smooth = auto_scale_smooth * 0.6 + auto_scale * 0.4;
 
 	dsps_mulc_f32_ae32_fast(fft_smooth[0], fft_smooth[0], FFT_SIZE>>1, auto_scale_smooth, 1, 1);
 
