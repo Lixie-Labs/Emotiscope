@@ -8,7 +8,7 @@ void draw_tempiscope(){
 		leds[i] = hsv(
 			get_color_range_hue(num_tempi_float_lookup[i]),
 			configuration.saturation.value.f32,
-			(mag * mag * phase)*2.0
+			mag*mag
 		);
 	}
 

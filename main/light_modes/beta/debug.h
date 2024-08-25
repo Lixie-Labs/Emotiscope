@@ -1,15 +1,8 @@
 void draw_debug(){
 	start_profile(__COUNTER__, __func__);
 
-	int16_t scale_ratio = NOVELTY_HISTORY_LENGTH / NUM_LEDS;
-
 	for(uint16_t i = 0; i < NUM_LEDS; i++){
-		// Get the average of the novelty curve for this LED
-		float sum = 0.0;
-		for(uint16_t j = 0; j < scale_ratio; j++){
-			sum += novelty_curve[(i*scale_ratio)+j];
-		}
-		float novelty = sum / scale_ratio;
+		float novelty = novelty_curve[(NOVELTY_HISTORY_LENGTH-1) - NUM_LEDS + i] * novelty_scale_factor;
 
 		CRGBF dot_color = {
 			0.0,

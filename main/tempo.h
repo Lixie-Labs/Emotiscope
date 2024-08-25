@@ -169,7 +169,7 @@ void calculate_magnitude_of_tempo(int16_t tempo_bin) {
 		clip_float(sample);
 
 		float fade = index / (float)NOVELTY_HISTORY_LENGTH;
-		sample *= fade;
+		//sample *= fade;
 
 		// convert to AC
 		//sample -= 0.5;
@@ -226,8 +226,10 @@ void update_tempo() {
 	static uint16_t calc_bin = 0;
 	uint16_t max_bin = (NUM_TEMPI - 1) * MAX_TEMPO_RANGE;
 
-	calculate_magnitude_of_tempo(calc_bin);
-	calc_bin+=1;
+	calculate_magnitude_of_tempo((calc_bin + 0) % max_bin);
+	calculate_magnitude_of_tempo((calc_bin + 1) % max_bin);
+
+	calc_bin+=2;
 
 	if (calc_bin >= max_bin) {
 		calc_bin = 0;
@@ -325,18 +327,14 @@ void update_novelty() {
 
 		float current_novelty = 0.0;
 		for (uint16_t i = 0; i < (FFT_SIZE>>1); i+=1) {
-			if(i < 16 || i >= 96){
-				current_novelty += fmaxf(0.0f, fft_max[i] - fft_last[i]);
-			}
-			else{
-				current_novelty += fmaxf(0.0f, fft_max[i]*0.5 - fft_last[i]);
-			}
+			current_novelty += fmaxf(0.0f, fft_smooth[0][i] - fft_last[i]);
 		}
+		current_novelty *= current_novelty;
 
-		dsps_memcpy_aes3(fft_last, fft_max, (FFT_SIZE>>1) * sizeof(float));
-		dsps_memset_aes3(fft_max, 0.0, (FFT_SIZE>>1) * sizeof(float));
+		dsps_memcpy_aes3(fft_last, fft_smooth[0], (FFT_SIZE>>1) * sizeof(float));
+		//dsps_memset(fft_max, 0, sizeof(float) * (FFT_SIZE>>1));
 
-		current_novelty /= 30;
+		//current_novelty /= 30;
 
 		check_silence(current_novelty);
 
