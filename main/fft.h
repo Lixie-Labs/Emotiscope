@@ -95,7 +95,7 @@ void perform_fft(){
 	float step_size_f = 1.0 / (FFT_SIZE>>1);
 	float step_pos = 0.0;
 	for (uint16_t i = 0 ; i < (FFT_SIZE >> 1); i++) {
-		fft_smooth[fft_averaging_index][i] = fft_smooth[fft_averaging_index][i] * (0.5 + 0.5*step_pos);
+		fft_smooth[fft_averaging_index][i] = fft_smooth[fft_averaging_index][i] * (0.2 + 0.8*step_pos);
 		step_pos += step_size_f;
 	}
 
@@ -113,22 +113,27 @@ void perform_fft(){
 		dsps_add_f32(fft_smooth[0], fft_smooth[i], fft_smooth[0], FFT_SIZE>>1, 1, 1, 1);
 	}
 
-	for(uint16_t i = 0; i < 16; i++){
-		float progress = (float)i / 16.0;
-		fft_smooth[0][i] *= progress;
+	for(uint16_t i = 0; i < 32; i++){
+		float progress = (float)i / 32.0;
 		fft_smooth[0][i] *= progress;
 	}
 
+	static float max_val_falling = 0.001;
 	float max_val = 0.001;
 	for(uint16_t i = 0; i < FFT_SIZE>>1; i++){
 		max_val = fmaxf(max_val, fft_smooth[0][i]);
 	}
-	float auto_scale = 1.0 / max_val;
-	static float auto_scale_smooth = 1.0;
 
-	auto_scale_smooth = auto_scale_smooth * 0.6 + auto_scale * 0.4;
+	max_val_falling *= 0.99;
+	
+	if(max_val > max_val_falling){
+		float difference = max_val - max_val_falling;
+		max_val_falling += difference * 0.25;
+	}
 
-	dsps_mulc_f32_ae32_fast(fft_smooth[0], fft_smooth[0], FFT_SIZE>>1, auto_scale_smooth, 1, 1);
+	float auto_scale = 1.0 / max_val_falling;
+
+	dsps_mulc_f32_ae32_fast(fft_smooth[0], fft_smooth[0], FFT_SIZE>>1, auto_scale, 1, 1);
 
 	for(uint16_t i = 0; i < FFT_SIZE>>1; i+=4){
 		fft_smooth[0][i+0] = clip_float(fft_smooth[0][i+0]);
@@ -138,7 +143,7 @@ void perform_fft(){
 	}
 
 	// square it
-	dsps_mul_f32_ae32_fast(fft_smooth[0], fft_smooth[0], fft_smooth[0], FFT_SIZE>>1, 1);
+	//dsps_mul_f32_ae32_fast(fft_smooth[0], fft_smooth[0], fft_smooth[0], FFT_SIZE>>1, 1);
 
 	for(uint16_t i = 0; i < FFT_SIZE>>1; i++){
 		fft_max[i] = fmaxf(fft_max[i], fft_smooth[0][i]);
