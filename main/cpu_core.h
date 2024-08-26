@@ -88,5 +88,9 @@ void loop_cpu(void *pvParameters) {
 		run_cpu();
 		run_cpu();
 		run_cpu();
+
+		if(esp_wifi_is_connected() == true){
+			discovery_check_in();
+		}
 	}
 }

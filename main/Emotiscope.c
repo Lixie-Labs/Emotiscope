@@ -85,7 +85,12 @@ continue to develop and improve the Emotiscope Engine.
 #include <freertos/event_groups.h>
 #include <perfmon.h>
 #include <esp_netif.h>
+#include "esp_http_client.h"
 #include <lwip/inet.h>
+#include "lwip/sockets.h"
+#include "lwip/netdb.h"
+#include "esp_tls.h"
+#include "esp_crt_bundle.h"
 
 // Peripherals
 #include <driver/temperature_sensor.h>

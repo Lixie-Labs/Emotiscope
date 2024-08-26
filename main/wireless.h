@@ -1,3 +1,233 @@
+#define DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS (10 * (1000 * 60))	 // "10" is minutes
+#define MAX_HTTP_REQUEST_ATTEMPTS (8)								 // Define the maximum number of retry attempts
+#define INITIAL_BACKOFF_MS (1000)									 // Initial backoff delay in milliseconds
+#define MAX_NETWORK_CONNECT_ATTEMPTS (3)
+
+#define WEB_SERVER "emotiscope.rocks"
+#define WEB_PORT "443"
+#define WEB_URL "https://app.emotiscope.rocks/discovery/"
+
+int64_t next_discovery_check_in_time = 0;
+
+char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
+
+bool esp_wifi_is_connected() {
+    wifi_ap_record_t ap_info;
+    return (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK);
+}
+
+static void https_get_request(esp_tls_cfg_t cfg, const char *WEB_SERVER_URL, const char *REQUEST){
+    static uint8_t attempt_count = 0;  // Keep track of the current attempt count
+
+    char buf[512];
+    int ret, len;
+
+    esp_tls_t *tls = esp_tls_init();
+    if (!tls) {
+        ESP_LOGE(TAG, "Failed to allocate esp_tls handle!");
+        return;
+    }
+
+    if (esp_tls_conn_http_new_sync(WEB_SERVER_URL, &cfg, tls) == 1) {
+        ESP_LOGI(TAG, "Connection established...");
+        attempt_count = 0; // Reset attempt count on success
+    } else {
+        ESP_LOGE(TAG, "Connection failed...");
+        int esp_tls_code = 0, esp_tls_flags = 0;
+        esp_tls_error_handle_t tls_e = NULL;
+        esp_tls_get_error_handle(tls, &tls_e);
+        /* Try to get TLS stack level error and certificate failure flags, if any */
+        ret = esp_tls_get_and_clear_last_error(tls_e, &esp_tls_code, &esp_tls_flags);
+        if (ret == ESP_OK) {
+            ESP_LOGE(TAG, "TLS error = -0x%x, TLS flags = -0x%x", esp_tls_code, esp_tls_flags);
+        }
+
+        if (attempt_count < MAX_HTTP_REQUEST_ATTEMPTS) {
+            uint32_t backoff_delay = INITIAL_BACKOFF_MS * (1 << attempt_count); // Calculate the backoff delay
+            next_discovery_check_in_time = t_now_ms + backoff_delay; // Schedule the next attempt
+            attempt_count++; // Increment the attempt count
+            ESP_LOGE(TAG, "Retrying with backoff delay of %lums.", backoff_delay);
+        } else {
+            ESP_LOGE(TAG, "Couldn't reach server in time, will try again in a few minutes.");
+            next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS; // Reset to regular interval after max attempts
+            attempt_count = 0; // Reset attempt count
+        }
+
+        goto cleanup;
+    }
+
+    size_t written_bytes = 0;
+    while (written_bytes < strlen(REQUEST)) {
+        ret = esp_tls_conn_write(tls, REQUEST + written_bytes, strlen(REQUEST) - written_bytes);
+        if (ret >= 0) {
+            ESP_LOGI(TAG, "%d bytes written", ret);
+            written_bytes += ret;
+        } else if (ret != ESP_TLS_ERR_SSL_WANT_READ  && ret != ESP_TLS_ERR_SSL_WANT_WRITE) {
+            ESP_LOGE(TAG, "esp_tls_conn_write returned: [0x%02X](%s)", ret, esp_err_to_name(ret));
+            goto cleanup;
+        }
+    }
+
+    ESP_LOGI(TAG, "Reading HTTP response...");
+    while (1) {
+        len = sizeof(buf) - 1;
+        memset(buf, 0x00, sizeof(buf));
+        ret = esp_tls_conn_read(tls, (char *)buf, len);
+
+        if (ret == ESP_TLS_ERR_SSL_WANT_WRITE  || ret == ESP_TLS_ERR_SSL_WANT_READ) {
+            continue;
+        } else if (ret < 0) {
+            ESP_LOGE(TAG, "esp_tls_conn_read returned [-0x%02X](%s)", -ret, esp_err_to_name(ret));
+            break;
+        } else if (ret == 0) {
+            ESP_LOGI(TAG, "connection closed");
+            break;
+        }
+
+        len = ret;
+        ESP_LOGD(TAG, "%d bytes read", len);
+
+        const char* check_in_success = "{\"check_in\":true}";
+
+        char* trimmed_response = (buf + len - strlen(check_in_success)); // Get last N chars of buf, where N == strlen() of the response we seek
+        ESP_LOGI(TAG, "TRIMMED RESPONSE: %s", trimmed_response);
+
+        if (strcmp(trimmed_response, check_in_success) == 0) {
+            next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS; // Schedule the next check-in
+            ESP_LOGI(TAG, "Checked in successfully!");
+            break; // Exit the loop since we got a successful response
+        } else {
+            next_discovery_check_in_time = t_now_ms + 5000; // If server didn't respond correctly, try again in 5 seconds
+            ESP_LOGE(TAG, "ERROR: BAD CHECK-IN RESPONSE");
+            break; // Exit the loop to prevent hanging
+        }
+    }
+
+cleanup:
+    esp_tls_conn_destroy(tls);
+}
+
+
+void discovery_check_in(){
+    static uint8_t attempt_count = 0;  // Keep track of the current attempt count
+    int64_t t_now_ms = esp_log_timestamp(); // Get the current time in milliseconds
+
+    if (t_now_ms >= next_discovery_check_in_time) {
+		if(esp_wifi_is_connected() == true){
+			next_discovery_check_in_time = t_now_ms + 3000; 
+
+			esp_tls_cfg_t cfg = {
+				.crt_bundle_attach = esp_crt_bundle_attach,
+			};
+
+			esp_netif_ip_info_t ip_info;
+			esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+			esp_netif_get_ip_info(netif, &ip_info);
+
+			char request_body[128];
+			snprintf(request_body, sizeof(request_body), 
+						"product=emotiscope&version=%d.%d.%d&local_ip=" IPSTR, 
+						SOFTWARE_VERSION_MAJOR, 
+						SOFTWARE_VERSION_MINOR, 
+						SOFTWARE_VERSION_PATCH, 
+						IP2STR(&ip_info.ip));
+
+			char check_in_request[512];
+			snprintf(check_in_request, sizeof(check_in_request),
+					"POST " WEB_URL " HTTP/1.1\r\n"
+					"Host: " WEB_SERVER "\r\n"
+					"User-Agent: esp-idf/1.0 esp32\r\n"
+					"Content-Type: application/x-www-form-urlencoded\r\n"
+					"Content-Length: %d\r\n"
+					"\r\n"
+					"%s",
+					strlen(request_body), request_body);
+
+			https_get_request(cfg, WEB_URL, check_in_request);
+
+		}
+		else{
+			ESP_LOGE(TAG, "WiFi not connected before discovery server POST. Retrying in 5 seconds.");
+			next_discovery_check_in_time = t_now_ms + 5000;	 // Retry in 5 seconds if WiFi is not connected
+		}
+	}
+}
+
+/*
+void discovery_check_in_old() {
+    static uint32_t next_discovery_check_in_time = 0;
+    static uint8_t attempt_count = 0;  // Keep track of the current attempt count
+    uint32_t t_now_ms = esp_log_timestamp(); // Get the current time in milliseconds
+
+    if (t_now_ms >= next_discovery_check_in_time) {
+        // Check Wi-Fi connection status
+        if (esp_wifi_is_connected()) {
+            esp_http_client_config_t config = {
+				.url = DISCOVERY_SERVER_URL,
+				.method = HTTP_METHOD_POST,
+				.timeout_ms = 5000,
+				.transport_type = HTTP_TRANSPORT_OVER_SSL,
+				.skip_cert_common_name_check = true,  // Skip certificate common name check
+				.crt_bundle_attach = esp_crt_bundle_attach,  // Use the bundled certs or set it to NULL if you want no verification
+				.use_global_ca_store = false, // Don't use the global CA store
+			};
+            esp_http_client_handle_t http_client = esp_http_client_init(&config);
+
+            esp_netif_ip_info_t ip_info;
+            esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+            esp_netif_get_ip_info(netif, &ip_info);
+
+            char params[120];
+            snprintf(params, sizeof(params), 
+                     "product=emotiscope&version=%d.%d.%d&local_ip=" IPSTR, 
+                     SOFTWARE_VERSION_MAJOR, 
+                     SOFTWARE_VERSION_MINOR, 
+                     SOFTWARE_VERSION_PATCH, 
+                     IP2STR(&ip_info.ip));
+
+            esp_http_client_set_header(http_client, "Content-Type", "application/x-www-form-urlencoded");
+            esp_http_client_set_post_field(http_client, params, strlen(params));
+
+            esp_err_t err = esp_http_client_perform(http_client);
+            int http_response_code = esp_http_client_get_status_code(http_client);
+
+            if (err == ESP_OK && http_response_code == 200) {  // Check for a successful response
+                ESP_LOGI(TAG, "RESPONSE CODE: %d", http_response_code);
+                char response[64];
+                esp_http_client_read(http_client, response, sizeof(response));
+                ESP_LOGI(TAG, "RESPONSE BODY: %s len = %zu", response, sizeof(response));
+
+                if (strcmp(response, "{\"check_in\":true}") == 0) {
+                    next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS;  // Schedule the next check-in
+                    ESP_LOGI(TAG, "Check in successful!");
+                } else {
+                    next_discovery_check_in_time = t_now_ms + 5000;  // If server didn't respond correctly, try again in 5 seconds
+                    ESP_LOGE(TAG, "ERROR: BAD CHECK-IN RESPONSE");
+                }
+                attempt_count = 0;  // Reset attempt count on success
+            } else {
+                ESP_LOGE(TAG, "Error on sending POST: %s (%d)", esp_err_to_name(err), http_response_code);
+                if (attempt_count < MAX_HTTP_REQUEST_ATTEMPTS) {
+                    uint32_t backoff_delay = INITIAL_BACKOFF_MS * (1 << attempt_count);  // Calculate the backoff delay
+                    next_discovery_check_in_time = t_now_ms + backoff_delay;  // Schedule the next attempt
+                    attempt_count++;  // Increment the attempt count
+                    ESP_LOGI(TAG, "Retrying with backoff delay of %lums.", backoff_delay);
+                } else {
+                    ESP_LOGE(TAG, "Couldn't reach server in time, will try again in a few minutes.");
+                    next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS;  // Reset to regular interval after max attempts
+                    attempt_count = 0;  // Reset attempt count
+                }
+            }
+
+            esp_http_client_cleanup(http_client);  // Free resources
+        } else {
+            ESP_LOGW(TAG, "WiFi not connected before discovery server POST. Retrying in 5 seconds.");
+            next_discovery_check_in_time = t_now_ms + 5000;  // Retry in 5 seconds if WiFi is not connected
+        }
+    }
+}
+*/
+
 extern void parse_emotiscope_packet(httpd_req_t* req);
 
 // Websocket server
@@ -212,6 +442,14 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 		ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
 
 		ESP_LOGI(TAG, "IP Address: %s", ip_str);
+
+		esp_netif_ip_info_t ip_info;
+		esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+		esp_netif_get_ip_info(netif, &ip_info);
+
+		//esp_netif_dns_info_t dns_info;
+		//dns_info.ip.u_addr.ip4.addr = inet_addr("8.8.8.8");  // Google's public DNS server
+		//esp_netif_set_dns_info(netif, ESP_NETIF_DNS_MAIN, &dns_info);
 
 		improv_current_state = IMPROV_CURRENT_STATE_PROVISIONED;
 		send_current_state();
