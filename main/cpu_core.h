@@ -90,7 +90,13 @@ void loop_cpu(void *pvParameters) {
 		run_cpu();
 
 		if(esp_wifi_is_connected() == true){
-			discovery_check_in();
+			static uint8_t iter = 0;
+			iter++;
+
+			if(iter == 0){
+				improv_current_state = IMPROV_CURRENT_STATE_PROVISIONED;
+				discovery_check_in();
+			}
 		}
 	}
 }

@@ -11,6 +11,26 @@ int64_t next_discovery_check_in_time = 0;
 
 char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
 
+extern void parse_emotiscope_packet(httpd_req_t* req);
+
+// Websocket server
+httpd_handle_t server = NULL;
+
+// Event group for WiFi events
+static EventGroupHandle_t s_wifi_event_group;
+#define WIFI_CONNECTED_BIT BIT0
+#define WIFI_FAIL_BIT      BIT1
+
+// Buffer for WS packets
+char websocket_packet_buffer[1024];
+
+bool connected_to_wifi = false;
+
+struct async_resp_arg {
+    httpd_handle_t hd;
+    int fd;
+};
+
 bool esp_wifi_is_connected() {
     wifi_ap_record_t ap_info;
     return (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK);
@@ -107,13 +127,13 @@ cleanup:
     esp_tls_conn_destroy(tls);
 }
 
-
 void discovery_check_in(){
     static uint8_t attempt_count = 0;  // Keep track of the current attempt count
     int64_t t_now_ms = esp_log_timestamp(); // Get the current time in milliseconds
 
     if (t_now_ms >= next_discovery_check_in_time) {
 		if(esp_wifi_is_connected() == true){
+			ESP_LOGI(TAG, "checking into server...");
 			next_discovery_check_in_time = t_now_ms + 3000; 
 
 			esp_tls_cfg_t cfg = {
@@ -153,101 +173,6 @@ void discovery_check_in(){
 	}
 }
 
-/*
-void discovery_check_in_old() {
-    static uint32_t next_discovery_check_in_time = 0;
-    static uint8_t attempt_count = 0;  // Keep track of the current attempt count
-    uint32_t t_now_ms = esp_log_timestamp(); // Get the current time in milliseconds
-
-    if (t_now_ms >= next_discovery_check_in_time) {
-        // Check Wi-Fi connection status
-        if (esp_wifi_is_connected()) {
-            esp_http_client_config_t config = {
-				.url = DISCOVERY_SERVER_URL,
-				.method = HTTP_METHOD_POST,
-				.timeout_ms = 5000,
-				.transport_type = HTTP_TRANSPORT_OVER_SSL,
-				.skip_cert_common_name_check = true,  // Skip certificate common name check
-				.crt_bundle_attach = esp_crt_bundle_attach,  // Use the bundled certs or set it to NULL if you want no verification
-				.use_global_ca_store = false, // Don't use the global CA store
-			};
-            esp_http_client_handle_t http_client = esp_http_client_init(&config);
-
-            esp_netif_ip_info_t ip_info;
-            esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-            esp_netif_get_ip_info(netif, &ip_info);
-
-            char params[120];
-            snprintf(params, sizeof(params), 
-                     "product=emotiscope&version=%d.%d.%d&local_ip=" IPSTR, 
-                     SOFTWARE_VERSION_MAJOR, 
-                     SOFTWARE_VERSION_MINOR, 
-                     SOFTWARE_VERSION_PATCH, 
-                     IP2STR(&ip_info.ip));
-
-            esp_http_client_set_header(http_client, "Content-Type", "application/x-www-form-urlencoded");
-            esp_http_client_set_post_field(http_client, params, strlen(params));
-
-            esp_err_t err = esp_http_client_perform(http_client);
-            int http_response_code = esp_http_client_get_status_code(http_client);
-
-            if (err == ESP_OK && http_response_code == 200) {  // Check for a successful response
-                ESP_LOGI(TAG, "RESPONSE CODE: %d", http_response_code);
-                char response[64];
-                esp_http_client_read(http_client, response, sizeof(response));
-                ESP_LOGI(TAG, "RESPONSE BODY: %s len = %zu", response, sizeof(response));
-
-                if (strcmp(response, "{\"check_in\":true}") == 0) {
-                    next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS;  // Schedule the next check-in
-                    ESP_LOGI(TAG, "Check in successful!");
-                } else {
-                    next_discovery_check_in_time = t_now_ms + 5000;  // If server didn't respond correctly, try again in 5 seconds
-                    ESP_LOGE(TAG, "ERROR: BAD CHECK-IN RESPONSE");
-                }
-                attempt_count = 0;  // Reset attempt count on success
-            } else {
-                ESP_LOGE(TAG, "Error on sending POST: %s (%d)", esp_err_to_name(err), http_response_code);
-                if (attempt_count < MAX_HTTP_REQUEST_ATTEMPTS) {
-                    uint32_t backoff_delay = INITIAL_BACKOFF_MS * (1 << attempt_count);  // Calculate the backoff delay
-                    next_discovery_check_in_time = t_now_ms + backoff_delay;  // Schedule the next attempt
-                    attempt_count++;  // Increment the attempt count
-                    ESP_LOGI(TAG, "Retrying with backoff delay of %lums.", backoff_delay);
-                } else {
-                    ESP_LOGE(TAG, "Couldn't reach server in time, will try again in a few minutes.");
-                    next_discovery_check_in_time = t_now_ms + DISCOVERY_CHECK_IN_INTERVAL_MILLISECONDS;  // Reset to regular interval after max attempts
-                    attempt_count = 0;  // Reset attempt count
-                }
-            }
-
-            esp_http_client_cleanup(http_client);  // Free resources
-        } else {
-            ESP_LOGW(TAG, "WiFi not connected before discovery server POST. Retrying in 5 seconds.");
-            next_discovery_check_in_time = t_now_ms + 5000;  // Retry in 5 seconds if WiFi is not connected
-        }
-    }
-}
-*/
-
-extern void parse_emotiscope_packet(httpd_req_t* req);
-
-// Websocket server
-httpd_handle_t server = NULL;
-
-// Event group for WiFi events
-static EventGroupHandle_t s_wifi_event_group;
-#define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT      BIT1
-
-// Buffer for WS packets
-char websocket_packet_buffer[1024];
-
-bool connected_to_wifi = false;
-
-struct async_resp_arg {
-    httpd_handle_t hd;
-    int fd;
-};
-
 // Transmit a WS packet
 esp_err_t wstx(httpd_req_t* req, char* data){
     httpd_ws_frame_t ws_pkt;
@@ -257,11 +182,11 @@ esp_err_t wstx(httpd_req_t* req, char* data){
 	ws_pkt.payload = (uint8_t*)data;
 	ws_pkt.len = strlen(data)+1;
     
-	//ESP_LOGI(TAG, "WSTX: %s", ws_pkt.payload);
+	ESP_LOGI(TAG, "WSTX: %s", ws_pkt.payload);
 
 	esp_err_t ret = httpd_ws_send_frame(req, &ws_pkt);
     if (ret != ESP_OK) {
-        //ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
+        ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
     }
 
 	return ret;
@@ -282,46 +207,9 @@ esp_err_t wsrx(httpd_req_t* req){
 	ws_pkt.payload = (uint8_t*)websocket_packet_buffer;
     
 	httpd_ws_recv_frame(req, &ws_pkt, 1024);
-	//ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
+	ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
 
 	parse_emotiscope_packet(req);
-
-    return ESP_OK;
-}
-
-esp_err_t wstx_broadcast(const char *message) {
-	/*
-	//ESP_LOGI(TAG, "wstx_broadcast(\"%s\")", message);
-    size_t clients;
-
-    int client_fds[CONFIG_LWIP_MAX_ACTIVE_TCP];
-    
-    esp_err_t ret = httpd_get_client_list(server, &clients, &client_fds);
-    if (ret != ESP_OK) {
-		//ESP_LOGE(TAG, "httpd_get_client_list failed with %x", ret);
-        return ret;
-    }
-
-	ESP_LOGI(TAG, "Num clients: %zu", clients);
-
-	if (clients == 0) {
-		//ESP_LOGI(TAG, "No clients connected");
-		return ESP_OK;
-	}
-
-    for (size_t i = 0; i < clients; i++) {
-        httpd_ws_frame_t ws_pkt;
-        memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-        ws_pkt.payload = (uint8_t*)message;
-        ws_pkt.len = strlen(message);
-        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-
-		ret = httpd_ws_send_frame_async(server, client_fds[i], &ws_pkt);
-		if (ret != ESP_OK) {
-			ESP_LOGE(TAG, "httpd_ws_send_frame failed with %d", ret);
-		}
-    }
-	*/
 
     return ESP_OK;
 }
@@ -360,6 +248,7 @@ void start_websocket_server(void){
 }
 
 void stop_websocket_server(void){
+	ESP_LOGI(TAG, "stop_websocket_server()");
 	httpd_stop(server);
 }
 
@@ -425,10 +314,8 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 
 			connected_to_wifi = false;
 
-			send_error_state(IMPROV_ERROR_UNABLE_TO_CONNNECT);
-
+			set_improv_error_state(IMPROV_ERROR_UNABLE_TO_CONNNECT);
 			improv_current_state = IMPROV_CURRENT_STATE_READY;
-			send_current_state();
 
 			esp_wifi_connect();  // Reconnect on disconnect
 			connection_attempts++;
@@ -452,7 +339,9 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 		//esp_netif_set_dns_info(netif, ESP_NETIF_DNS_MAIN, &dns_info);
 
 		improv_current_state = IMPROV_CURRENT_STATE_PROVISIONED;
+		set_improv_error_state(IMPROV_ERROR_NONE);
 		send_current_state();
+		send_redirect_url(0x01);
 		
 		connected_to_wifi = true;
 
@@ -502,7 +391,7 @@ void init_wifi(){
 		connect_wifi();
 	}
 	else{
-		//ESP_LOGE(TAG, "No WiFi credentials found in NVS!");
+		ESP_LOGE(TAG, "No WiFi credentials found in NVS!");
 	}
 
     // Disable power save mode

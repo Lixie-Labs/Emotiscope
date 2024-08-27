@@ -1,4 +1,4 @@
-#define USB_DEBUG_MODE (true) // Uncomment during development, comment out for production so that Improv WiFi works as intended
+//#define USB_DEBUG_MODE (true) // Uncomment during development, comment out for production so that Improv WiFi works as intended
 
 #ifdef USB_DEBUG_MODE
 	#warning "LIXIE LABS --- USB_DEBUG_MODE is enabled, Improv WiFi will not work as intended! Disable this for production."
@@ -55,6 +55,7 @@ QueueHandle_t uart_queue;
 
 // Improv
 improv_current_state_t improv_current_state = IMPROV_CURRENT_STATE_READY;
+improv_error_state_t   improv_error_state = IMPROV_ERROR_NONE;
 
 void uart_print(const char* str) {
 	#ifndef USB_DEBUG_MODE
@@ -98,7 +99,7 @@ void shift_history_left(uint8_t* array, uint16_t array_size, uint16_t shift_amou
 	memmove(array, array + shift_amount, (array_size - shift_amount) * sizeof(uint8_t));
 }
 
-void transmit_packet(uint8_t* packet, uint8_t packet_length) {
+void transmit_packet(uint8_t* packet, uint16_t packet_length) {
 	#ifndef USB_DEBUG_MODE
 		usb_serial_jtag_write_bytes(packet, packet_length, 20);
 
@@ -111,7 +112,7 @@ void transmit_packet(uint8_t* packet, uint8_t packet_length) {
 	#endif
 }
 
-void calc_checksum(uint8_t* packet, uint8_t packet_length) {
+void calc_checksum(uint8_t* packet, uint16_t packet_length) {
 	uint8_t checksum = 0;
 	for(uint16_t i = 0; i < packet_length-2; i++){
 		checksum += packet[i];
@@ -134,6 +135,16 @@ void send_error_state(improv_error_state_t error_state) {
 
 	calc_checksum(error_state_packet, sizeof(error_state_packet));
 	transmit_packet(error_state_packet, sizeof(error_state_packet));
+}
+
+void set_improv_error_state(improv_error_state_t error_state) {
+	if (error_state == improv_error_state){
+		return;
+	}
+	else{
+		improv_error_state = error_state;
+		send_error_state(error_state);
+	}
 }
 
 void send_device_information(uint8_t command_responding_to){
@@ -186,7 +197,7 @@ void send_device_information(uint8_t command_responding_to){
 
 	transmit_packet(device_information_packet, sizeof(device_information_packet));
 
-	send_error_state(IMPROV_ERROR_NONE);
+	set_improv_error_state(IMPROV_ERROR_NONE);
 }
 
 void send_scanned_networks(uint8_t command_responding_to){
@@ -259,8 +270,6 @@ void send_scanned_networks(uint8_t command_responding_to){
 		calc_checksum(network_information_packet, sizeof(network_information_packet));
 
 		transmit_packet(network_information_packet, sizeof(network_information_packet));
-
-		send_error_state(IMPROV_ERROR_NONE);
 	}
 
 	// Send empty packet to signal end of network list
@@ -278,13 +287,11 @@ void send_scanned_networks(uint8_t command_responding_to){
 	network_information_packet[10] = 0; // Data length
 	calc_checksum(network_information_packet, sizeof(network_information_packet));
 	transmit_packet(network_information_packet, sizeof(network_information_packet));
-
-	send_error_state(IMPROV_ERROR_NONE);
 }
 
 void send_redirect_url(uint8_t command_responding_to){
-	// Send empty packet since there's no URL yet
-	uint8_t network_information_packet[38];
+	uint8_t network_information_packet[39];
+
 	network_information_packet[0]  = 'I';
 	network_information_packet[1]  = 'M';
 	network_information_packet[2]  = 'P';
@@ -293,39 +300,38 @@ void send_redirect_url(uint8_t command_responding_to){
 	network_information_packet[5]  = 'V';
 	network_information_packet[6]  = 1;  // Version
 	network_information_packet[7]  = IMPROV_PACKET_TYPE_RPC_RESULT; // Type
-	network_information_packet[8]  = 27; // Length
+	network_information_packet[8]  = 28; // Length
 	network_information_packet[9]  = command_responding_to;
-	network_information_packet[10] = 25; // Data length
-	network_information_packet[11] = 24; // Length of URL
+	network_information_packet[10] = 26; // Data length
+	network_information_packet[11] = 25; // Length of URL
 	network_information_packet[12] = 'h';
 	network_information_packet[13] = 't';
 	network_information_packet[14] = 't';
 	network_information_packet[15] = 'p';
-	network_information_packet[16] = 's';
-	network_information_packet[17] = ':';
+	network_information_packet[16] = ':';
+	network_information_packet[17] = '/';
 	network_information_packet[18] = '/';
-	network_information_packet[19] = '/';
-	network_information_packet[20] = 'e';
-	network_information_packet[21] = 'm';
-	network_information_packet[22] = 'o';
-	network_information_packet[23] = 't';
-	network_information_packet[24] = 'i';
-	network_information_packet[25] = 's';
-	network_information_packet[26] = 'c';
-	network_information_packet[27] = 'o';
-	network_information_packet[28] = 'p';
-	network_information_packet[29] = 'e';
-	network_information_packet[30] = '.';
-	network_information_packet[31] = 'r';
-	network_information_packet[32] = 'o';
-	network_information_packet[33] = 'c';
-	network_information_packet[34] = 'k';
-	network_information_packet[35] = 's';
+	network_information_packet[19] = 'r';
+	network_information_packet[20] = '.';
+	network_information_packet[21] = 'e';
+	network_information_packet[22] = 'm';
+	network_information_packet[23] = 'o';
+	network_information_packet[24] = 't';
+	network_information_packet[25] = 'i';
+	network_information_packet[26] = 's';
+	network_information_packet[27] = 'c';
+	network_information_packet[28] = 'o';
+	network_information_packet[29] = 'p';
+	network_information_packet[30] = 'e';
+	network_information_packet[31] = '.';
+	network_information_packet[32] = 'r';
+	network_information_packet[33] = 'o';
+	network_information_packet[34] = 'c';
+	network_information_packet[35] = 'k';
+	network_information_packet[36] = 's';
 
 	calc_checksum(network_information_packet, sizeof(network_information_packet));
 	transmit_packet(network_information_packet, sizeof(network_information_packet));
-
-	send_error_state(IMPROV_ERROR_NONE);
 }
 
 void send_current_state() {
@@ -341,10 +347,6 @@ void send_current_state() {
 
 	calc_checksum(current_state_packet, sizeof(current_state_packet));
 	transmit_packet(current_state_packet, sizeof(current_state_packet));
-
-	if(improv_current_state == IMPROV_CURRENT_STATE_PROVISIONED){
-		send_redirect_url(IMPROV_RPC_COMMAND_REQUEST_CURRENT_STATE);	
-	}
 }
 
 void parse_wifi_settings(uint8_t* packet, uint8_t packet_data_length){
@@ -411,6 +413,9 @@ void parse_improv_packet(uint8_t* packet, uint8_t packet_length, improv_packet_t
 		else if(rpc_command == IMPROV_RPC_COMMAND_REQUEST_CURRENT_STATE){
 			uart_print("REQUEST CURRENT STATE\n");
 			send_current_state();
+			if(improv_current_state == IMPROV_CURRENT_STATE_PROVISIONED){
+				send_redirect_url(rpc_command);
+			}
 		}
 		else if(rpc_command == IMPROV_RPC_COMMAND_REQUEST_DEVICE_INFORMATION){
 			uart_print("REQUEST DEVICE INFORMATION\n");
@@ -421,7 +426,7 @@ void parse_improv_packet(uint8_t* packet, uint8_t packet_length, improv_packet_t
 			send_scanned_networks(IMPROV_RPC_COMMAND_REQUEST_SCANNED_NETWORKS);
 		}
 		else{
-			send_error_state(IMPROV_ERROR_UNKNOWN_RPC_COMMAND);
+			set_improv_error_state(IMPROV_ERROR_UNKNOWN_RPC_COMMAND);
 		}
 	}
 	else if(packet_type == IMPROV_PACKET_TYPE_RPC_RESULT){
@@ -534,7 +539,7 @@ void check_serial(){
 		static int64_t last_state_send = 0;
 		int64_t t_now_serial = esp_timer_get_time();
 		if(t_now_serial - last_state_send > 3000000){
-			send_current_state();
+			//send_current_state();
 			last_state_send = t_now_serial;
 		}
 

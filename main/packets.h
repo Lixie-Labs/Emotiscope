@@ -233,7 +233,7 @@ void parse_emotiscope_packet(httpd_req_t* req){
 				//ESP_LOGI(TAG, "PACKET HEADER: %s", section_buffer);
 			}
 			else{
-				//ESP_LOGE(TAG, "UNKNOWN CHUNK TYPE: %s", chunk_type);
+				ESP_LOGE(TAG, "UNKNOWN CHUNK TYPE: %s", chunk_type);
 			}
 		}
 
