@@ -182,7 +182,7 @@ esp_err_t wstx(httpd_req_t* req, char* data){
 	ws_pkt.payload = (uint8_t*)data;
 	ws_pkt.len = strlen(data)+1;
     
-	ESP_LOGI(TAG, "WSTX: %s", ws_pkt.payload);
+	//ESP_LOGI(TAG, "WSTX: %s", ws_pkt.payload);
 
 	esp_err_t ret = httpd_ws_send_frame(req, &ws_pkt);
     if (ret != ESP_OK) {
@@ -207,7 +207,7 @@ esp_err_t wsrx(httpd_req_t* req){
 	ws_pkt.payload = (uint8_t*)websocket_packet_buffer;
     
 	httpd_ws_recv_frame(req, &ws_pkt, 1024);
-	ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
+	//ESP_LOGI(TAG, "WSRX: %s", ws_pkt.payload);
 
 	parse_emotiscope_packet(req);
 
