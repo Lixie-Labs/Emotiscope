@@ -222,7 +222,7 @@ void apply_background(float background_level){
 		return;
 	}
 
-	background_level *= 0.25; // Max 25% brightness
+	background_level *= 0.35; // Max 35% brightness
 
 	if(background_level > 0.0){
 		if(configuration.mirror_mode.value.u32 == false){
@@ -255,7 +255,7 @@ void apply_background(float background_level){
 		}
 
 		// Apply background to the main buffer
-		scale_CRGBF_array_by_constant(leds_temp,  background_level, NUM_LEDS);
+		scale_CRGBF_array_by_constant(leds_temp, (background_level*background_level), NUM_LEDS);
 		add_CRGBF_arrays(leds, leds_temp, NUM_LEDS);
 	}
 
