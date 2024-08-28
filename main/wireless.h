@@ -144,15 +144,16 @@ void discovery_check_in(){
 			esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
 			esp_netif_get_ip_info(netif, &ip_info);
 
-			char request_body[128];
+			char request_body[256];
 			snprintf(request_body, sizeof(request_body), 
-						"product=emotiscope&version=%d.%d.%d&local_ip=" IPSTR, 
+						"product=emotiscope&version=%d.%d.%d&nickname=%s&local_ip=" IPSTR,
 						SOFTWARE_VERSION_MAJOR, 
 						SOFTWARE_VERSION_MINOR, 
-						SOFTWARE_VERSION_PATCH, 
+						SOFTWARE_VERSION_PATCH,
+						device_nickname,
 						IP2STR(&ip_info.ip));
 
-			char check_in_request[512];
+			char check_in_request[1024];
 			snprintf(check_in_request, sizeof(check_in_request),
 					"POST " WEB_URL " HTTP/1.1\r\n"
 					"Host: " WEB_SERVER "\r\n"

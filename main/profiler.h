@@ -1,7 +1,5 @@
 #define PROFILER_ENABLED true // Uncomment to enable, comment to disable
 
-#define MAX_GRAPH_SIZE 128
-
 #ifdef __OPTIMIZE__
     #define OPT_LEVEL 2
 #else
@@ -99,7 +97,7 @@ inline void log_function_stack(){
 }
 
 #ifdef PROFILER_ENABLED
-	inline void start_profile(uint32_t id, const char* name) {
+	void start_profile(uint32_t id, const char* name) {
 		int core_number = xPortGetCoreID();
 		function_stack[core_number][function_stack_pointer[core_number]] = id;
 		function_stack_pointer[core_number]++;
@@ -110,7 +108,7 @@ inline void log_function_stack(){
 		}
 	}
 
-	inline void end_profile() {
+	void end_profile() {
 		int core_number = xPortGetCoreID();
 		function_stack_pointer[core_number]--;
 		function_stack_pointer[core_number] = MAX(0, function_stack_pointer[core_number]);

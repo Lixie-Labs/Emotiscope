@@ -144,8 +144,8 @@ continue to develop and improve the Emotiscope Engine.
 #include "screensaver.h"
 #include "light_modes.h"
 
-// Debug Graphing
-#include "graph.h"
+// Screen Streaming
+#include "preview.h"
 
 // Testing
 #include "testing.h"

@@ -38,7 +38,10 @@
 // Used to calculate per frame "delta" similar to a game engine
 #define REFERENCE_FPS ( 100 )
 
-// Set later by physical traces on the PCB
+// Max number of items in the streaming graph
+#define SCREEN_PREVIEW_SIZE ( 64 )
+
+// Set later in execution by physical traces on the PCB
 uint8_t HARDWARE_VERSION = 0;
 
 // WiFi credentials

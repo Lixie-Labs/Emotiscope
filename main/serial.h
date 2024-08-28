@@ -1,4 +1,4 @@
-#define USB_DEBUG_MODE (true) // Uncomment during development, comment out for production so that Improv WiFi works as intended
+//#define USB_DEBUG_MODE (true) // Uncomment during development, comment out for production so that Improv WiFi works as intended
 
 #ifdef USB_DEBUG_MODE
 	#warning "LIXIE LABS --- USB_DEBUG_MODE is enabled, Improv WiFi will not work as intended! Disable this for production."

@@ -116,14 +116,23 @@ void broadcast_emotiscope_state(httpd_req_t* req){
 
 	wstx( req, emotiscope_packet_buffer );
 
+	// Nickname
+	dsps_memset_aes3(emotiscope_packet_buffer, 0, 1024);
+	emotiscope_packet_buffer_index = 0;
+	dsps_memset_aes3(temp_buffer, 0, 128);
+	append_to_packet("EMO~nickname|");
+	append_to_packet(device_nickname);
+	append_to_packet("|");
+
+	wstx( req, emotiscope_packet_buffer );
+
 	end_profile(__COUNTER__, __func__);
 }
 
 void broadcast_debug_graph(httpd_req_t* req){
 	start_profile(__COUNTER__, __func__);
 
-	extern float graph_data[MAX_GRAPH_SIZE];
-	extern uint8_t graph_data_length;
+	extern float screen_preview[SCREEN_PREVIEW_SIZE];
 
 	char temp_buffer[512];
 
@@ -131,21 +140,21 @@ void broadcast_debug_graph(httpd_req_t* req){
 	dsps_memset_aes3(emotiscope_packet_buffer, 0, 1024);
 	emotiscope_packet_buffer_index = 0;
 	dsps_memset_aes3(temp_buffer, 0, 512);
-	append_to_packet("EMO~graph");
+	append_to_packet("EMO~screen");
 
 	dsps_memset_aes3(temp_buffer, 0, 512);
-	sprintf(temp_buffer, "|%d|", graph_data_length);
+	sprintf(temp_buffer, "|%d|", SCREEN_PREVIEW_SIZE);
 	append_to_packet(temp_buffer);
 
-	for(uint16_t i = 0; i < graph_data_length; i+=4){
+	for(uint16_t i = 0; i < SCREEN_PREVIEW_SIZE; i+=4){
 		dsps_memset_aes3(temp_buffer, 0, 512);
 		sprintf(
 			temp_buffer,
 			"%d,%d,%d,%d,",
-			(uint8_t)lroundf(graph_data[i+0] * 255.0f),
-			(uint8_t)lroundf(graph_data[i+1] * 255.0f),
-			(uint8_t)lroundf(graph_data[i+2] * 255.0f),
-			(uint8_t)lroundf(graph_data[i+3] * 255.0f)
+			(uint8_t)lroundf(screen_preview[i+0] * 255.0f),
+			(uint8_t)lroundf(screen_preview[i+1] * 255.0f),
+			(uint8_t)lroundf(screen_preview[i+2] * 255.0f),
+			(uint8_t)lroundf(screen_preview[i+3] * 255.0f)
 		);
 		append_to_packet(temp_buffer);
 	}
@@ -227,6 +236,10 @@ void parse_emotiscope_packet(httpd_req_t* req){
 		else if(fastcmp(chunk_type, "get_graph")){
 			//ESP_LOGI(TAG, "GET STATE: %s", section_buffer);
 			broadcast_debug_graph(req);
+		}
+		else if(fastcmp(chunk_type, "set_nickname")){
+			memset(device_nickname, 0, 64);
+			memcpy(device_nickname, section_buffer, 64);
 		}
 		else{
 			if(chunk_type[0] == '\0'){

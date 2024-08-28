@@ -69,7 +69,7 @@ void run_cpu() {
 
 	update_stats(); // (profiler.h)
 
-	run_debug_graph(); // (graph.h)
+	run_screen_preview(); // (preview.h)
 
 	//check_boot_button();
 
