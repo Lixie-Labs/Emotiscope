@@ -87,6 +87,8 @@ void run_gpu() {
 	// output to the 8-bit LED strand
 	transmit_leds();
 
+	memcpy(led_preview, leds, sizeof(CRGBF) * NUM_LEDS);
+
 	end_profile();
 }
 

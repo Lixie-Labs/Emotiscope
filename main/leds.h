@@ -24,6 +24,7 @@ CRGBF WHITE = {1.0, 1.0, 1.0};
 CRGBF BLACK = {0.0, 0.0, 0.0};
 
 CRGBF leds[NUM_LEDS]; // 32-bit image buffer
+CRGBF led_preview[NUM_LEDS]; // Copy for streaming
 CRGBF leds_scaled[NUM_LEDS]; // scaled up to 8-bit range, but still floating point
 CRGBF leds_temp[NUM_LEDS]; // for temporary copies of the image buffer (scaling)
 CRGBF leds_last[NUM_LEDS];

@@ -135,8 +135,32 @@ void broadcast_screen_preview(httpd_req_t* req){
 	extern uint8_t screen_preview[SCREEN_PREVIEW_SIZE*3];
 
 	char temp_buffer[1024];
+	char charset[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	// Debug Graph
+	dsps_memset_aes3(emotiscope_packet_buffer, 0, 1024);
+	emotiscope_packet_buffer_index = 0;
+	dsps_memset_aes3(temp_buffer, 0, 1024);
+	append_to_packet("EMO~screen");
+
+	dsps_memset_aes3(temp_buffer, 0, 1024);
+	sprintf(temp_buffer, "|%d|", SCREEN_PREVIEW_SIZE);
+	append_to_packet(temp_buffer);
+
+	for(uint16_t i = 0; i < SCREEN_PREVIEW_SIZE; i++){
+		dsps_memset_aes3(temp_buffer, 0, 1024);
+		sprintf(
+			temp_buffer,
+			"%c%c%c",
+			charset[screen_preview[i*3+0] >> 2],
+			charset[screen_preview[i*3+1] >> 2],
+			charset[screen_preview[i*3+2] >> 2]
+		);
+		append_to_packet(temp_buffer);
+	}
+	wstx( req, emotiscope_packet_buffer );
+
+	/*
+	// Screen Preview -------------------------------------------
 	dsps_memset_aes3(emotiscope_packet_buffer, 0, 1024);
 	emotiscope_packet_buffer_index = 0;
 	dsps_memset_aes3(temp_buffer, 0, 1024);
@@ -157,8 +181,9 @@ void broadcast_screen_preview(httpd_req_t* req){
 		);
 		append_to_packet(temp_buffer);
 	}
-
 	wstx( req, emotiscope_packet_buffer );
+	// ---------------------------------------------------------
+	*/
 
 	end_profile(__COUNTER__, __func__);
 }
