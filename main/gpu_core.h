@@ -69,6 +69,7 @@ void run_gpu() {
 	render_touches();  // (touch.h)
 	
 	apply_softness();
+	apply_phosphor_decay(configuration.softness.value.f32);
 
 	apply_tonemapping();
 

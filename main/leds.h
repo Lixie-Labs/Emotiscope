@@ -543,6 +543,42 @@ void clamp_configuration(){
 	}
 }
 
+void apply_phosphor_decay(float strength){
+	static CRGBF phosphor_decay[NUM_LEDS];
+	static bool first_run = true;
+
+	if(first_run){
+		first_run = false;
+		dsps_memcpy_aes3(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
+		return;
+	}
+
+	strength = 1.0-strength;
+	strength *= 0.05;
+
+	strength = fmaxf(strength, 0.001f);
+
+	//float strength_r = strength * incandescent_lookup.r;
+	//float strength_g = strength * incandescent_lookup.g;
+	//float strength_b = strength * incandescent_lookup.b;
+
+	for(uint16_t i = 0; i < NUM_LEDS; i++){
+		float change_r = leds[i].r - phosphor_decay[i].r;
+		float change_g = leds[i].g - phosphor_decay[i].g;
+		float change_b = leds[i].b - phosphor_decay[i].b;
+
+		if(change_r < -strength){ change_r = -strength; }
+		if(change_g < -strength){ change_g = -strength; }
+		if(change_b < -strength){ change_b = -strength; }
+
+		leds[i].r = (phosphor_decay[i].r + change_r);
+		leds[i].g = (phosphor_decay[i].g + change_g);
+		leds[i].b = (phosphor_decay[i].b + change_b);
+	}
+
+	dsps_memcpy_aes3(phosphor_decay, leds, sizeof(CRGBF) * NUM_LEDS);
+}
+
 /*
 
 

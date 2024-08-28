@@ -122,8 +122,8 @@ void perform_fft(){
 		fft_smooth[0][i] = fft_smooth[0][4];
 	}
 
-	static float max_val_falling = 0.0005;
-	float max_val = 0.0005;
+	static float max_val_falling = 0.001;
+	float max_val = 0.001;
 	for(uint16_t i = 0; i < FFT_SIZE>>1; i++){
 		max_val = fmaxf(max_val, fft_smooth[0][i]);
 	}
