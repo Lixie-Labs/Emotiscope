@@ -129,32 +129,31 @@ void broadcast_emotiscope_state(httpd_req_t* req){
 	end_profile(__COUNTER__, __func__);
 }
 
-void broadcast_debug_graph(httpd_req_t* req){
+void broadcast_screen_preview(httpd_req_t* req){
 	start_profile(__COUNTER__, __func__);
 
-	extern float screen_preview[SCREEN_PREVIEW_SIZE];
+	extern uint8_t screen_preview[SCREEN_PREVIEW_SIZE*3];
 
-	char temp_buffer[512];
+	char temp_buffer[1024];
 
 	// Debug Graph
 	dsps_memset_aes3(emotiscope_packet_buffer, 0, 1024);
 	emotiscope_packet_buffer_index = 0;
-	dsps_memset_aes3(temp_buffer, 0, 512);
+	dsps_memset_aes3(temp_buffer, 0, 1024);
 	append_to_packet("EMO~screen");
 
-	dsps_memset_aes3(temp_buffer, 0, 512);
+	dsps_memset_aes3(temp_buffer, 0, 1024);
 	sprintf(temp_buffer, "|%d|", SCREEN_PREVIEW_SIZE);
 	append_to_packet(temp_buffer);
 
-	for(uint16_t i = 0; i < SCREEN_PREVIEW_SIZE; i+=4){
-		dsps_memset_aes3(temp_buffer, 0, 512);
+	for(uint16_t i = 0; i < SCREEN_PREVIEW_SIZE; i++){
+		dsps_memset_aes3(temp_buffer, 0, 1024);
 		sprintf(
 			temp_buffer,
-			"%d,%d,%d,%d,",
-			(uint8_t)lroundf(screen_preview[i+0] * 255.0f),
-			(uint8_t)lroundf(screen_preview[i+1] * 255.0f),
-			(uint8_t)lroundf(screen_preview[i+2] * 255.0f),
-			(uint8_t)lroundf(screen_preview[i+3] * 255.0f)
+			"%d,%d,%d*",
+			screen_preview[i*3+0],
+			screen_preview[i*3+1],
+			screen_preview[i*3+2]
 		);
 		append_to_packet(temp_buffer);
 	}
@@ -230,12 +229,10 @@ void parse_emotiscope_packet(httpd_req_t* req){
 			}
 		}
 		else if(fastcmp(chunk_type, "get_state")){
-			//ESP_LOGI(TAG, "GET STATE: %s", section_buffer);
 			broadcast_emotiscope_state(req);
 		}
 		else if(fastcmp(chunk_type, "get_graph")){
-			//ESP_LOGI(TAG, "GET STATE: %s", section_buffer);
-			broadcast_debug_graph(req);
+			broadcast_screen_preview(req);
 		}
 		else if(fastcmp(chunk_type, "set_nickname")){
 			memset(device_nickname, 0, 64);

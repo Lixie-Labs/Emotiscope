@@ -1,17 +1,14 @@
-float screen_preview[SCREEN_PREVIEW_SIZE];
+uint8_t screen_preview[SCREEN_PREVIEW_SIZE*3];
 
 void run_screen_preview() {
 	start_profile(__COUNTER__, __func__);
 	for(uint8_t i = 0; i < SCREEN_PREVIEW_SIZE; i++){
-		float max_col = 0.0;
-		max_col = fmaxf(max_col, leds_last[i*2+0].r);
-		max_col = fmaxf(max_col, leds_last[i*2+0].g);
-		max_col = fmaxf(max_col, leds_last[i*2+0].b);
-		max_col = fmaxf(max_col, leds_last[i*2+1].r);
-		max_col = fmaxf(max_col, leds_last[i*2+1].g);
-		max_col = fmaxf(max_col, leds_last[i*2+1].b);
+		CRGBF color_a = leds_last[i*2+0];
+		CRGBF color_b = leds_last[i*2+1];
 
-		screen_preview[i] = max_col;
+		screen_preview[i*3+0] = (uint8_t)(color_a.r * 255);
+		screen_preview[i*3+1] = (uint8_t)(color_a.g * 255);
+		screen_preview[i*3+2] = (uint8_t)(color_a.b * 255);
 	}
 	end_profile();
-} 
+}
