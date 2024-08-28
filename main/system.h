@@ -1,8 +1,6 @@
 volatile bool EMOTISCOPE_ACTIVE = true;
 temperature_sensor_handle_t temp_handle = NULL;
 
-char device_nickname[64] = "My Emotiscope Nickname";
-
 // Prepare CPU temperature sensor
 void init_cpu_temperature() {
 	temperature_sensor_config_t temp_sensor = {

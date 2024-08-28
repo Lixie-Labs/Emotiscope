@@ -240,6 +240,11 @@ void parse_emotiscope_packet(httpd_req_t* req){
 		else if(fastcmp(chunk_type, "set_nickname")){
 			memset(device_nickname, 0, 64);
 			memcpy(device_nickname, section_buffer, 64);
+
+			ESP_LOGI(TAG, "NEW NICKNAME: %s", device_nickname);
+
+			save_nickname();
+			next_discovery_check_in_time = 0; // Check in with new name ASAP
 		}
 		else{
 			if(chunk_type[0] == '\0'){

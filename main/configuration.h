@@ -1,5 +1,7 @@
 #define MIN_SAVE_WAIT_MS (3 * 1000)	 // Values must stabilize for this many seconds to be written to NVS
 
+char device_nickname[64] = "emotiscope";
+
 nvs_handle_t config_handle;
 config configuration; // configuration struct to be filled by NVS or defaults on boot
 
@@ -417,6 +419,16 @@ void load_configuration_defaults(){
 	);
 }
 
+// Load the device nickname from NVS
+void load_nickname(){
+	get_string("nickname", device_nickname, sizeof(device_nickname));
+}
+
+// Save the device nickname to NVS
+void save_nickname(){
+	put_string("nickname", device_nickname);
+}
+
 // Initialize NVS and the configuration struct with all config items
 void init_configuration(){
 	//ESP_LOGI(TAG, "init_configuration()");
@@ -441,6 +453,8 @@ void init_configuration(){
 	dsps_memset_aes3(&configuration, 0, sizeof(configuration)); // Clear the configuration struct
 
 	load_configuration_defaults(); // Load default values into the configuration struct
+
+	load_nickname(); // Load the device nickname from NVS
 }
 
 // Save configuration to LittleFS
