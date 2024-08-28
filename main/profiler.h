@@ -1,4 +1,4 @@
-#define PROFILER_ENABLED true // Uncomment to enable, comment to disable
+//#define PROFILER_ENABLED true // Uncomment to enable, comment to disable
 
 #ifdef __OPTIMIZE__
     #define OPT_LEVEL 2
