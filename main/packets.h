@@ -146,8 +146,8 @@ void broadcast_screen_preview(httpd_req_t* req){
 	sprintf(temp_buffer, "|%d|", SCREEN_PREVIEW_SIZE);
 	append_to_packet(temp_buffer);
 
-	for(uint16_t i = 0; i < SCREEN_PREVIEW_SIZE; i++){
-		dsps_memset_aes3(temp_buffer, 0, 1024);
+	dsps_memset_aes3(temp_buffer, 0, 1024);
+	for(uint16_t i = 0; i < SCREEN_PREVIEW_SIZE; i++){	
 		sprintf(
 			temp_buffer,
 			"%c%c%c",
@@ -268,6 +268,13 @@ void parse_emotiscope_packet(httpd_req_t* req){
 			save_nickname();
 			next_discovery_check_in_time = 0; // Check in with new name ASAP
 		}
+		else if(fastcmp(chunk_type, "ping")){
+			dsps_memset_aes3(emotiscope_packet_buffer, 0, 1024);
+			emotiscope_packet_buffer_index = 0;
+			append_to_packet("EMO~pong|0");
+			wstx( req, emotiscope_packet_buffer );
+		}
+
 		else{
 			if(chunk_type[0] == '\0'){
 				//ESP_LOGI(TAG, "PACKET HEADER: %s", section_buffer);

@@ -1,5 +1,5 @@
 #define NUM_VU_LOG_SAMPLES 20
-#define NUM_VU_SMOOTH_SAMPLES 12
+#define NUM_VU_SMOOTH_SAMPLES 4
 
 float vu_log[NUM_VU_LOG_SAMPLES] = { 0 };
 uint16_t vu_log_index = 0;
@@ -30,11 +30,11 @@ void run_vu(){
 	float* samples = &sample_history[(SAMPLE_HISTORY_LENGTH-1) - CHUNK_SIZE];
 
 	float max_amplitude_now = 0.000001;
-	for(uint16_t i = 0; i < CHUNK_SIZE; i+=2){
+	for(uint16_t i = 0; i < CHUNK_SIZE; i+=1){
 		float sample = samples[i];
 		float sample_abs = fabs(sample);
 
-		max_amplitude_now = fmaxf(max_amplitude_now, sample_abs*sample_abs);
+		max_amplitude_now = fmaxf(max_amplitude_now, sample_abs);
 	}
 	max_amplitude_now = clip_float(max_amplitude_now);
 
@@ -47,13 +47,13 @@ void run_vu(){
 		vu_log[vu_log_index] = max_amplitude_now;
 		vu_log_index = (vu_log_index + 1) % NUM_VU_LOG_SAMPLES;
 
-		float vu_sum = 0.0;
+		float vu_min = 100000000.0;
 		for(uint16_t i = 0; i < NUM_VU_LOG_SAMPLES; i++){
-			vu_sum += vu_log[i];
+			vu_min = fminf(vu_log[i], vu_min);
 		}
-		vu_floor = vu_sum / NUM_VU_LOG_SAMPLES;
+		vu_floor = vu_min*1.5;
 
-		vu_floor *= 0.80;
+		//vu_floor *= 0.80;
 	}
 
 	// SCALE OUTPUT -------------------------------------------------------
@@ -65,13 +65,9 @@ void run_vu(){
 	}
 	else if(max_amplitude_cap > max_amplitude_now){
 		float distance = max_amplitude_cap - max_amplitude_now;
-		max_amplitude_cap -= (distance * 0.1);
+		max_amplitude_cap -= (distance * 0.01);
 	}
 	max_amplitude_cap = clip_float(max_amplitude_cap);
-
-	if(max_amplitude_cap < 0.000025){
-		max_amplitude_cap = 0.000025;
-	}
 
 	float auto_scale = 1.0 / fmaxf(max_amplitude_cap, 0.00001f);
 
