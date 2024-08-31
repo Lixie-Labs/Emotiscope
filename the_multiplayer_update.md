@@ -2,15 +2,16 @@
 
 # A Huge Emotiscope Update Is In Active Development
 
-2.0.0, "The Multiplayer Update" is underway, and features:
+2.0.0, "The Big One" is underway, and features:
 
 - A re-written Emotiscope web-app, now based on the open-source Godot game engine.
 - Improved networking, allowing multiple simulataneous remote controls at once (Multiplayer!)
+- Ability to provision WiFi over USB
 - Harmonic Mode
 - Rhythm Breeze Mode
 - Wave Mode
 - Improved tempo recognition
-- And million little things
+- And a million little things
 
 ## Controlling Emotiscope Using A Game Engine
 
