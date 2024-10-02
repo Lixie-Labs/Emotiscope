@@ -1,3 +1,5 @@
+### [Click here to jump to the source code!](https://github.com/Lixie-Labs/Emotiscope/blob/main/src/EMOTISCOPE_FIRMWARE.ino)
+
 # Emotiscope is Different
 
 **This isn't the usual "sound-reactive LEDs" you've seen for years.**
