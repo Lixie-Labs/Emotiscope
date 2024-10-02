@@ -8,5 +8,4 @@
 
  A magic diffuser covers 128 of the world’s smallest addressable LEDs, which are being refreshed at up 450 FPS. Emotiscope doesn’t look like a screen, it looks more like some kind of neon-gas display from the far future or recent past.
 
-LEARN MORE:
-https://emotiscope.rocks/
+## LEARN MORE: https://emotiscope.rocks/
